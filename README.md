@@ -1,11 +1,10 @@
-# witan.ui
+# Witan.UI
 
-FIXME: Write a one-line description of your library/project.
+Styles and Pattern Library for the Witan project.
 
 ## Overview
 
-FIXME: Write a paragraph about the library/project and highlight its goals.
-
+Clojure and ClojureScript are the languages of choice for Witan and so we decided to extend this to our styling as well. This project uses [garden](https://github.com/noprompt/garden) to define CSS styles which are automatically recompiled and presented in an Om application.
 ## Setup
 
 To get an interactive development environment run:
@@ -43,6 +42,6 @@ Auto-mode will watch for changes in the code and recompile on the fly.
 
 ## License
 
-Copyright © 2014 FIXME
+Copyright © 2014 Mastodon C
 
 Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
