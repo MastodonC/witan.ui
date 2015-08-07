@@ -8,7 +8,7 @@
 (def primary (rgb 45 62 80))
 
 ;; - secondary
-(def secondary (color/lighten header 30))
+(def secondary (color/lighten primary 30))
 
 ;; - tertiary
 (def tertiary (rgb 100 100 100))
@@ -17,7 +17,7 @@
 (def header primary)
 
 ;; title (h1) of the page
-(def title header)
+(def title primary)
 
 ;; page subtitle and also h2
 (def subtitle secondary)
