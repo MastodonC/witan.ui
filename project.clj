@@ -80,4 +80,15 @@
                      :compiler {;; Where to save the file:
                                 :output-to "resources/public/css/style.css"
                                 ;; Compress the output?
+                                :pretty-print? false}}
+                    {;; Optional name of the build:
+                     :id "login"
+                     ;; Source paths where the stylesheet source code is
+                     :source-paths ["src/styles"]
+                     ;; The var containing your stylesheet:
+                     :stylesheet witan.ui.styles.login/login
+                     ;; Compiler flags passed to `garden.core/css`:
+                     :compiler {;; Where to save the file:
+                                :output-to "resources/public/css/login.css"
+                                ;; Compress the output?
                                 :pretty-print? false}}]})

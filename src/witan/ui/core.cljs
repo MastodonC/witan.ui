@@ -80,15 +80,32 @@
                                       (dom/pre "(dom/button {:class \"pure-button pure-button-disabled\"} \"Disabled Button\")"))
                              )))))
 
-(om/root
- menu
- app-state
- {:target (. js/document (getElementById "witan-menu"))})
+(if-let [menu-element (. js/document (getElementById "witan-menu"))]
+  (om/root
+   menu
+   app-state
+   {:target menu-element}))
 
-(om/root
- main
- app-state
- {:target (. js/document (getElementById "witan-main"))})
+(if-let [main-element (. js/document (getElementById "witan-main"))]
+  (om/root
+   main
+   app-state
+   {:target main-element}))
+
+;; login
+;; FIXME: this really wants to be in a different js
+
+(defcomponent
+  login
+  [cursor owner]
+  (render [_]
+          (dom/h1 "Hello, Login")))
+
+(if-let [login-element (. js/document (getElementById "witan-login"))]
+  (om/root
+   login
+   {}
+   {:target login-element}))
 
 
 (defn on-js-reload [])
