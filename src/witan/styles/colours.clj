@@ -1,9 +1,12 @@
-(ns witan.ui.styles.colours
+(ns witan.styles.colours
   (:require [garden.color :as color :refer [rgb rgba]]))
 
 ;; some presets
 (def white (rgb 255 255 255))
+(def black (rgb 0 0 0))
 (def gray (rgb 205 205 205))
+(def dark-gray (rgb 100 100 100))
+
 
 ;; page background
 (def bg white)
@@ -41,5 +44,8 @@
 ;; hr tags
 (def hr (rgb 171 211 255))
 
-;; login bb
+;; login b
 (def login-black-bg (rgba 0 0 0 0.75))
+
+;; links
+(def link (rgb 76 174 207))

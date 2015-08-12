@@ -1,4 +1,4 @@
-(ns witan.ui.styles.fonts
+(ns witan.styles.fonts
   (:require [garden.stylesheet :as gs]))
 
 (def font-face-definitions

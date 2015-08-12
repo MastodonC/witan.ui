@@ -1,9 +1,9 @@
-(ns witan.ui.styles.base
+(ns witan.styles.base
   (:require [garden.def :refer [defstylesheet defstyles]]
             [garden.units :refer [px em percent]]
-            [witan.ui.styles.fonts :as f]
-            [witan.ui.styles.colours :as colour]
-            [witan.ui.styles.util :refer [url]]))
+            [witan.styles.fonts :as f]
+            [witan.styles.colours :as colour]
+            [witan.styles.util :refer [url]]))
 
 ;; Change defstylesheet to defstyles.
 (defstyles base

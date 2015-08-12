@@ -21,22 +21,34 @@
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
-    :builds [{:id "dev"
-              :source-paths ["src"]
-
-              :figwheel { :on-jsload "witan.ui.core/on-js-reload" }
-
-              :compiler {:main witan.ui.core
-                         :asset-path "js/compiled/out"
-                         :output-to "resources/public/js/compiled/witan-ui.js"
-                         :output-dir "resources/public/js/compiled/out"
-                         :source-map-timestamp true }}
-             {:id "min"
-              :source-paths ["src"]
-              :compiler {:output-to "resources/public/js/compiled/witan-ui.js"
-                         :main witan.ui.core
-                         :optimizations :advanced
-                         :pretty-print false}}]}
+              :builds [{:id "ui"
+                        :source-paths ["src"]
+                        :figwheel { :on-jsload "witan.ui.core/on-js-reload" }
+                        :compiler {:main witan.ui.core
+                                   :asset-path "js/compiled/out-ui"
+                                   :output-to "resources/public/js/compiled/witan-ui.js"
+                                   :output-dir "resources/public/js/compiled/out-ui"
+                                   :source-map-timestamp true }}
+                       {:id "login"
+                        :source-paths ["src"]
+                        :figwheel true
+                        :compiler {:main witan.login.core
+                                   :asset-path "js/compiled/out-login"
+                                   :output-to "resources/public/js/compiled/witan-login.js"
+                                   :output-dir "resources/public/js/compiled/out-login"
+                                   :source-map-timestamp true }}
+                       {:id "prod-ui"
+                        :source-paths ["src"]
+                        :compiler {:output-to "resources/public/js/compiled/witan-ui.js"
+                                   :main witan.ui.core
+                                   :optimizations :advanced
+                                   :pretty-print false}}
+                       {:id "prod-login"
+                        :source-paths ["src"]
+                        :compiler {:output-to "resources/public/js/compiled/witan-login.js"
+                                   :main witan.login.core
+                                   :optimizations :advanced
+                                   :pretty-print false}}]}
 
   :figwheel {
              ;; :http-server-root "public" ;; default and assumes "resources"
@@ -75,7 +87,7 @@
                      ;; Source paths where the stylesheet source code is
                      :source-paths ["src/styles"]
                      ;; The var containing your stylesheet:
-                     :stylesheet witan.ui.styles.base/base
+                     :stylesheet witan.styles.base/base
                      ;; Compiler flags passed to `garden.core/css`:
                      :compiler {;; Where to save the file:
                                 :output-to "resources/public/css/style.css"
@@ -86,7 +98,7 @@
                      ;; Source paths where the stylesheet source code is
                      :source-paths ["src/styles"]
                      ;; The var containing your stylesheet:
-                     :stylesheet witan.ui.styles.login/login
+                     :stylesheet witan.styles.login/login
                      ;; Compiler flags passed to `garden.core/css`:
                      :compiler {;; Where to save the file:
                                 :output-to "resources/public/css/login.css"

@@ -9,9 +9,9 @@ Clojure and ClojureScript are the languages of choice for Witan and so we decide
 
 To get an interactive development environment run:
 
-    lein figwheel
+    lein figwheel <login|ui>
 
-and open your browser at [localhost:3449](http://localhost:3449/).
+and open your browser at [localhost:3449](http://localhost:3449/) (append `login.html` to see the login screen).
 This will auto compile and send all changes to the browser without the
 need to reload. After the compilation process is complete, you will
 get a Browser Connected REPL. An easy way to try it is:
@@ -33,7 +33,7 @@ get live reloading, nor a REPL.
 
 ## CSS
 
-CSS in this project uses [garden](https://github.com/noprompt/garden).  
+CSS in this project uses [garden](https://github.com/noprompt/garden).
 To build CSS, run:
 
     lein garden <once|auto>

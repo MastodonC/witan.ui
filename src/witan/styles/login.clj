@@ -1,9 +1,9 @@
-(ns witan.ui.styles.login
+(ns witan.styles.login
   (:require [garden.def :refer [defstylesheet defstyles]]
             [garden.units :refer [px em percent]]
-            [witan.ui.styles.fonts :as f]
-            [witan.ui.styles.colours :as colour]
-            [witan.ui.styles.util :refer [url]]))
+            [witan.styles.fonts :as f]
+            [witan.styles.colours :as colour]
+            [witan.styles.util :refer [url]]))
 
 ;; Change defstylesheet to defstyles.
 (defstyles login
@@ -21,7 +21,13 @@
            :height (percent 100)
            :margin (px 0)
            :color colour/white
-           :font-family f/base-fonts}]
+           :font-family f/base-fonts}
+          [:input {:color colour/dark-gray}]]
+
+         [:a
+          {:text-decoration :none}]
+         [:a:hover
+          {:text-decoration :underline}]
 
          ;; classes
          [:.bg
@@ -47,12 +53,13 @@
            {:text-decoration :none
             :color colour/white}]]
 
-         [:.title
+         [:#container
           {:position :absolute
            :top (percent 15)
            :left (percent 5)}]
 
          [:.title
+           {:postion :relative}
           [:h1
            {:font-size (em 5)
             :font-weight 700
@@ -67,5 +74,29 @@
             :margin (px 0)
             :background-color colour/login-black-bg
             :background-clip :padding-box}]]
+
+         [:#witan-login
+          {:margin-top (em 3)
+           :padding "1px 30px 20px 20px"
+           :height (percent 100)
+           :width (px 300)
+           :background-color colour/login-black-bg}
+          [:#loading
+           {:color colour/white
+            :margin "15px auto 0px auto"
+            :display :table}]
+          [:input
+           {:margin-bottom (em 0.5)
+            :width (percent 100)}]
+          [:#forgotten-link
+           {:font-size (px 10)
+            :vertical-align :text-top
+            :text-align :right
+            :float :right
+            :color colour/link
+            :cursor :pointer}]
+          [:#forgotten-div
+           [:#back-button
+            {:float :right}]]]
          ])
       vec))

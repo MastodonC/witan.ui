@@ -92,20 +92,5 @@
    app-state
    {:target main-element}))
 
-;; login
-;; FIXME: this really wants to be in a different js
-
-(defcomponent
-  login
-  [cursor owner]
-  (render [_]
-          (dom/h1 "Hello, Login")))
-
-(if-let [login-element (. js/document (getElementById "witan-login"))]
-  (om/root
-   login
-   {}
-   {:target login-element}))
-
 
 (defn on-js-reload [])
