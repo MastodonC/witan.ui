@@ -2,17 +2,23 @@
   (:require [garden.color :as color :refer [rgb rgba]]))
 
 ;; some presets
-(def white (rgb 255 255 255))
-(def black (rgb 0 0 0))
-(def gray (rgb 205 205 205))
-(def dark-gray (rgb 100 100 100))
+(def white (:white color/color-name->hex))
+(def black (:black color/color-name->hex))
+(def gray (:gray color/color-name->hex))
+(def dark-gray (:darkgray color/color-name->hex))
+
+;;
+(def success "#59cd90")
+(def error "#ee6352")
+(def warning "#fac05e")
+(def primary "#3590f3")
 
 
 ;; page background
 (def bg white)
 
 ;; - primary
-(def primary (rgb 45 62 80))
+(def primary black)
 
 ;; - secondary
 (def secondary (color/lighten primary 30))

@@ -10,7 +10,10 @@
                  [sablono "0.3.4"]
                  [garden "1.2.5"]
                  [org.omcljs/om "0.8.8"]
-                 [prismatic/om-tools "0.3.11"]]
+                 [prismatic/om-tools "0.3.11"]
+                 [inflections "0.9.14"]
+                 [prismatic/schema "0.4.3"]
+                 [secretary "1.2.3"]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]
@@ -58,7 +61,7 @@
              :css-dirs ["resources/public/css"] ;; watch and update CSS
 
              ;; Start an nREPL server into the running figwheel process
-              :nrepl-port 7888
+             :nrepl-port 7888
 
              ;; Server Ring Handler (optional)
              ;; if you want to embed a ring handler into the figwheel http-kit
@@ -83,14 +86,14 @@
              }
 
   :garden {:builds [{;; Optional name of the build:
-                     :id "style"
+                     :id "app"
                      ;; Source paths where the stylesheet source code is
                      :source-paths ["src/styles"]
                      ;; The var containing your stylesheet:
                      :stylesheet witan.styles.base/base
                      ;; Compiler flags passed to `garden.core/css`:
                      :compiler {;; Where to save the file:
-                                :output-to "resources/public/css/style.css"
+                                :output-to "resources/public/css/app.css"
                                 ;; Compress the output?
                                 :pretty-print? false}}
                     {;; Optional name of the build:
@@ -103,4 +106,7 @@
                      :compiler {;; Where to save the file:
                                 :output-to "resources/public/css/login.css"
                                 ;; Compress the output?
-                                :pretty-print? false}}]})
+                                :pretty-print? false}}]}
+  (comment
+    (do (use 'figwheel-sidecar.repl-api)
+        (cljs-repl))))

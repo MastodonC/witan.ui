@@ -1,96 +1,104 @@
 (ns ^:figwheel-always witan.ui.core
-    (:require[om.core :as om :include-macros true]
-             [om-tools.dom :as dom :include-macros true]
-             [om-tools.core :refer-macros [defcomponent]]))
+    (:require [om.core :as om :include-macros true]
+              [goog.events :as events]
+              [goog.history.EventType :as EventType]
+              [om-tools.dom :as dom :include-macros true]
+              [om-tools.core :refer-macros [defcomponent]]
+              [sablono.core :as html :refer-macros [html]]
+              [inflections.core :as i]
+              [schema.core :as s :include-macros true]
+              [secretary.core :as secretary :refer-macros [defroute]]
+              ;;
+              [witan.ui.library :as l]
+              [witan.schema.core :refer [Projection]]
+              [witan.ui.components.dashboard]
+              [witan.ui.components.menu])
+
+    (:import goog.History))
 
 (enable-console-print!)
 
-(defonce app-state (atom {}))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; DEFS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defcomponent
-  menu
-  [cursor owner]
-  (render [_]
-          (dom/div {:class "pure-menu"}
-                   (dom/a {:class "pure-menu-heading" :href "#"} "Witan")
-                   (dom/hr)
-                   (dom/ul {:class "pure-menu-list"}
-                           (dom/li {:class "witan-menu-item pure-menu-item"}
-                                   (dom/a {:href "#headings"} "Headings"))
-                           (dom/li {:class "witan-menu-item pure-menu-item"}
-                                   (dom/a {:href "#buttons"} "Buttons"))))))
+(def strings
+  {:witan-title "Witan for London"
+   :projections "projections"
+   :filter      "Filter"})
 
-(defcomponent
-  title
-  [cursor owner]
-  (render [_]
-          (dom/div {:id "witan-page-title" :class "pure-g"}
-                   (dom/div {:class "pure-u-1"}
-                            (dom/h1 "Witan")
-                            (dom/h2 "Open City Planning")
-                            (dom/h2 "Pattern Library")))))
+(defonce navigation-state
+  (atom [{:name "Dashboard" :path "/" :view witan.ui.components.dashboard}
+         {:name "New Projection" :path "/new-projection" :view nil}]))
 
-(defcomponent
-  main
-  [cursor owner]
-  (render [_]
-          (dom/div
-           (om/build title cursor)
-           (dom/div {:id "witan-main-content"}
-                    ;; headers
-                    (dom/a {:name "headings"})
-                    (dom/div {:class "pure-g witan-pattern-example"}
-                             (dom/div {:class "pure-u-1-2"}
-                                      (dom/h1 "Heading One"))
-                             (dom/div {:class "pure-u-1-2 witan-pattern-example-code"}
-                                      (dom/pre "(dom/h1 \"Heading One\")")))
-                    (dom/div {:class "pure-g witan-pattern-example"}
-                             (dom/div {:class "pure-u-1-2"}
-                                      (dom/h2 "Heading Two"))
-                             (dom/div {:class "pure-u-1-2 witan-pattern-example-code"}
-                                      (dom/pre "(dom/h2 \"Heading Two\")")))
-                    (dom/div {:class "pure-g witan-pattern-example"}
-                             (dom/div {:class "pure-u-1-2"}
-                                      (dom/h3 "Heading Three"))
-                             (dom/div {:class "pure-u-1-2 witan-pattern-example-code"}
-                                      (dom/pre "(dom/h3 \"Heading Three\")")))
-                    (dom/div {:class "pure-g witan-pattern-example"}
-                             (dom/div {:class "pure-u-1-2"}
-                                      (dom/h4 "Heading Four"))
-                             (dom/div {:class "pure-u-1-2 witan-pattern-example-code"}
-                                      (dom/pre "(dom/h4 \"Heading Four\")")))
-                    ;; buttons
-                    (dom/hr)
-                    (dom/a {:name "buttons"})
-                    (dom/div {:class "pure-g witan-pattern-example"}
-                             (dom/div {:class "pure-u-1-2"}
-                                      (dom/button {:class "pure-button"} "Normal Button"))
-                             (dom/div {:class "pure-u-1-2 witan-pattern-example-code"}
-                                      (dom/pre "(dom/button {:class \"pure-button\"} \"Normal Button\")")))
-                    (dom/div {:class "pure-g witan-pattern-example"}
-                             (dom/div {:class "pure-u-1-2"}
-                                      (dom/button {:class "pure-button pure-button-primary"} "Primary Button"))
-                             (dom/div {:class "pure-u-1-2 witan-pattern-example-code"}
-                                      (dom/pre "(dom/button {:class \"pure-button pure-button-primary\"} \"Primary Button\")"))
-                             )
-                    (dom/div {:class "pure-g witan-pattern-example"}
-                             (dom/div {:class "pure-u-1-2"}
-                                      (dom/button {:class "pure-button pure-button-disabled"} "Disabled Button"))
-                             (dom/div {:class "pure-u-1-2 witan-pattern-example-code"}
-                                      (dom/pre "(dom/button {:class \"pure-button pure-button-disabled\"} \"Disabled Button\")"))
-                             )))))
+(defonce app-state (atom {:strings strings
+                          :projections [{:id "1234"
+                                         :name "Population Projection for Camden"
+                                         :type :population
+                                         :owner "Camden"
+                                         :version 3
+                                         :last-modified "Aug 10th, 2015"
+                                         :last-modifier "Neil"}
+                                        {:id 5678
+                                         :name "Population Projection for Bexley"
+                                         :type :population
+                                         :owner "Bexley"
+                                         :version 3
+                                         :last-modified "July 22nd, 2015"
+                                         :last-modifier "Sarah"}]
+                          :selected-projection {}}))
 
-(if-let [menu-element (. js/document (getElementById "witan-menu"))]
+(def app-element
+  (. js/document (getElementById "witan-main")))
+
+(def history (History.))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ROUTING TABLE
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; FIXME: this wants to be done automatically from the nav state above
+
+(defroute "/new-projection" []
   (om/root
-   menu
+   (fn [c o]
+     (om/component (html [:h1 "HELLO NEW PROJECTION"])))
    app-state
-   {:target menu-element}))
+   {:target app-element}))
 
-(if-let [main-element (. js/document (getElementById "witan-main"))]
+(defroute "/"
+  []
   (om/root
-   main
+   witan.ui.components.dashboard/view
    app-state
-   {:target main-element}))
+   {:target app-element}))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; ROUTING FUNCTIONS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn refresh-navigation []
+  (let [token (.getToken history)
+        set-active (fn [nav]
+                     (assoc nav :active (= (:path nav) token)))]
+    (swap! navigation-state #(map set-active %))))
+
+(defn on-navigate [event]
+  (refresh-navigation)
+  (secretary/dispatch! (.-token event)))
+
+(doto history
+  (goog.events/listen EventType/NAVIGATE on-navigate)
+  (.setEnabled true))
 
 (defn on-js-reload [])
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; CONSTANT COMPONENTS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(om/root
+ witan.ui.components.menu/view
+ app-state
+ {:target (. js/document (getElementById "witan-menu"))})

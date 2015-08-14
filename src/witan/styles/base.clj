@@ -15,11 +15,9 @@
         [
          ;; tags
          [:html
-          {:background-color colour/bg
-           :font-family f/base-fonts}]
+          {:background-color colour/bg}]
          [:body
-          {:font-size (px 16)
-           :line-height 1.5}]
+          {}]
          [:body :h1 :h2 :h3 :h4 :h5
           {:font-family f/base-fonts}]
          [:h1
@@ -31,53 +29,75 @@
          [:hr
           {:color colour/hr
            :background-color colour/hr}]
+         [:href
+          {:margin (px 0)
+           :padding (px 0)}]
 
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-         ;; witan
-         [:#witan-layout
-          {:padding-left (px 115)
-           :left (px 0)
-           :position :relative}]
+         ;; overrides
+         [:.pure-menu-heading
+          {:color colour/menu-item
+           :font-size (px 20)}]
+         [:.pure-menu
+          {:position :relative}
+          [:.pure-menu-list
+           {:position :absolute
+            :right (em 0.3)
+            :margin-top (em 0.3)}]]
 
-         [:#witan-layout :#witan-menu, :.witan-menu-link
+         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+         [:.button-success
+          {:background-color colour/success
+           :color colour/white}]
+
+         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+         [:#container
+          {:margin (em 1)}]
+
+         ;; witan
+         [:#witan-menu :.witan-menu-link
           {:transition "all 0.2s ease-out 0s"}]
 
          [:#witan-menu
           {:background-color colour/header
-           :padding (em 0.5)
-           :box-shadow "0px 1px 3px rgba(0, 0, 0, 1)"
-           :left (px 150)
-           :margin-left (px -150)
-           :position :fixed
-           :top (px 0)
-           :bottom (px 0)
-           :text-align :center}]
+           :box-shadow "0px 1px 3px rgba(0, 0, 0, 1)"}]
 
          [:.witan-menu-item
-          {:color colour/menu-item
-           :padding-top (em 1)}
           [:a
            {:text-decoration :none
             :color colour/menu-item
-            :border "medium none"}]
+            }]
           [:a:hover
            {:color colour/menu-item-hover}]]
 
-         [:#witan-page-title
-          {:margin (px 0)
-           :text-align :center
-           :border-bottom "1px solid #aaa"}
+         [:.witan-search-input
+          {:position :relative}
+          [:i
+           {:position :absolute
+            :vertical-align :middle
+            :margin (em 0.5)}]
+          [:#filter-input
+           {:padding-left (px 30)
+            }]]
+
+         [:.witan-dash-heading
+          {:color colour/primary
+           :font-size (px 20)
+           :border-bottom "#ccc 2px solid"}
           [:h1
-           {:font-size (em 4)
-            :font-weight 400
-            :margin (px 0)}]
-          [:h2
-           {:font-weight 300
-            :color colour/subtitle
-            :padding (px 0)
-            :margin-top (px -20)
-            :letter-spacing (px 3)}]]
+           {:margin-bottom (em 0.2)
+            :font-size (em 2)
+            :display :inline-block}]
+          [:.pure-menu-list
+           {:bottom "0.55em"}]
+          [:.pure-form
+           {:display :inline-flex
+            :font-size (px 14)
+            :vertical-align :text-bottom
+            :margin-left (em 1)}]]
 
          [:#witan-main-content
           {:padding-left (px 30)
@@ -92,12 +112,5 @@
 
          [:.witan-pattern-example-code
           {:position :absolute
-           :top (percent 25)}]
-
-         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-         ;; overrides
-         [:.pure-menu-heading
-          {:color colour/menu-item
-           :font-size (px 20)}]])
+           :top (percent 25)}]])
       vec))

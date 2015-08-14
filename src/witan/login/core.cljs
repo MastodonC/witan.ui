@@ -11,8 +11,12 @@
    :forgotten-question    "forgotten your password?"
    :forgotten-password    "Forgotten Password"
    :forgotten-instruction "Please enter your email address. If it matches one in our system we'll send you reset instructions."
+   :reset-submitted       "Thanks. Your password reset request has been received."
    :reset-password        "Reset Password"
-   :back                  "Back"})
+   :back                  "Back"
+   :thanks                "Thanks"})
+
+(enable-console-print!)
 
 (defn goto-state
   "Moves the login screen to a different state"
@@ -31,11 +35,15 @@
           (html
            [:div
             [:h3 (:sign-in ls)]
-            [:form {:class "pure-form"}
-             [:input {:type "email"
-                      :placeholder (:email ls)}]
-             [:input {:type "password"
-                      :placeholder (:password ls)}]
+            [:form {:class "pure-form pure-form-stacked" :action "dashboard.html"}
+             [:input {:ref "email"
+                      :type "email"
+                      :placeholder (:email ls)
+                      :required :required}]
+             [:input {:ref "password"
+                      :type "password"
+                      :placeholder (:password ls)
+                      :require :required}]
              [:button {:type "submit"
                        :class "pure-button pure-button-primary"} (:sign-in ls)]
              [:a {:id "forgotten-link"
@@ -47,20 +55,29 @@
   [cursor owner]
   (render [_]
           (html
-           [:div {:id "forgotten-div"}
+           [:div {:class "forgotten-div"}
             [:h3 (:forgotten-password ls)]
             [:p
-             [:span (:forgotten-instruction ls)]]
-            [:form {:class "pure-form"}
-             [:input {:ref "reset-email"
+             [:span {:id "reset-instructions"} (:forgotten-instruction ls)]]
+            [:form {:class "pure-form"
+                    :on-submit (fn [e]
+                                 (set! (.-innerText (. js/document (getElementById "reset-instructions"))) (:reset-submitted ls))
+                                 (set! (.-innerText (. js/document (getElementById "reset-button"))) (:thanks ls))
+                                 (set! (.-disabled (. js/document (getElementById "reset-button"))) true)
+                                 (set! (.-disabled (. js/document (getElementById "reset-input"))) true)
+                                 (.preventDefault e))}
+             [:input {:id "reset-input"
                       :type "email"
-                      :placeholder (:email ls)}]
+                      :placeholder (:email ls)
+                      :required :required}]
              [:div
-              [:button {:class "pure-button pure-button-primary"
-                        :on-click (fn [_] false)} (:reset-password ls)]
+              [:button {:id "reset-button"
+                        :class "pure-button pure-button-primary"} (:reset-password ls)]
               [:button {:id "back-button"
                         :class "pure-button"
-                        :on-click (fn [_] (goto-state cursor :prompt) false)} (:back ls)]]]])))
+                        :on-click (fn [e]
+                                    (goto-state cursor :prompt))} (:back ls)]]]])))
+
 (om/root
  login-state-view
  app-state
