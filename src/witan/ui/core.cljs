@@ -23,13 +23,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def strings
-  {:witan-title "Witan for London"
-   :projections "projections"
-   :filter      "Filter"})
+  {:witan-title             "Witan for London"
+   :projections             "projections"
+   :filter                  "Filter"
+   :projection-name         "Name"
+   :projection-type         "Type"
+   :projection-owner        "Owner"
+   :projection-version      "Version"
+   :projection-lastmodified "Last Modified"})
 
+;; this is the primary routing table
 (defonce navigation-state
-  (atom [{:name "Dashboard" :path "/" :view witan.ui.components.dashboard}
-         {:name "New Projection" :path "/new-projection" :view nil}]))
+  (atom [{:name "Dashboard"
+          :path "/"
+          :view (fn [] witan.ui.components.dashboard/view)}
+         {:name "New Projection"
+          :path "/new-projection"
+          :view nil}]))
 
 (defonce app-state (atom {:strings strings
                           :projections [{:id "1234"
@@ -38,49 +48,52 @@
                                          :owner "Camden"
                                          :version 3
                                          :last-modified "Aug 10th, 2015"
-                                         :last-modifier "Neil"}
+                                         :last-modifier "Neil"
+                                         :previous-version []}
                                         {:id 5678
                                          :name "Population Projection for Bexley"
                                          :type :population
                                          :owner "Bexley"
-                                         :version 3
+                                         :version 2
                                          :last-modified "July 22nd, 2015"
-                                         :last-modifier "Sarah"}]
+                                         :last-modifier "Sarah"
+                                         :previous-version []}]
                           :selected-projection {}}))
 
-(def app-element
-  (. js/document (getElementById "witan-main")))
+;; VALIDATE - make sure our app-state matches the schema
+(map #(s/validate Projection %) (:projections @app-state))
 
 (def history (History.))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; ROUTING TABLE
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-;; FIXME: this wants to be done automatically from the nav state above
-
-(defroute "/new-projection" []
-  (om/root
-   (fn [c o]
-     (om/component (html [:h1 "HELLO NEW PROJECTION"])))
-   app-state
-   {:target app-element}))
-
-(defroute "/"
-  []
-  (om/root
-   witan.ui.components.dashboard/view
-   app-state
-   {:target app-element}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ROUTING FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn find-app-container
+  []
+  (. js/document (getElementById "witan-main")))
+
+(defn install-om!
+  [view]
+  (om/root
+   (view)
+   app-state
+   {:target (find-app-container)})
+
+  (om/root
+   witan.ui.components.menu/view
+   app-state
+   {:target (. js/document (getElementById "witan-menu"))}))
+
+;; this automatically patches up the routing table that is defined above
+(doseq [{:keys [path view]} @navigation-state]
+  (defroute (str path) []
+    (install-om! view)))
+
 (defn refresh-navigation []
   (let [token (.getToken history)
         set-active (fn [nav]
-                     (assoc nav :active (= (:path nav) token)))]
+                     (assoc nav :active (= (apply str (rest (:path nav))) token)))]
     (swap! navigation-state #(map set-active %))))
 
 (defn on-navigate [event]
@@ -91,14 +104,7 @@
   (goog.events/listen EventType/NAVIGATE on-navigate)
   (.setEnabled true))
 
-(defn on-js-reload [])
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; CONSTANT COMPONENTS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(om/root
- witan.ui.components.menu/view
- app-state
- {:target (. js/document (getElementById "witan-menu"))})
+(defn on-js-reload []
+  (comment
+    (om/detach-root (find-app-container))
+    (install-om! (:view (first (filter :active @navigation-state))))))

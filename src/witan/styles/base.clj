@@ -45,12 +45,19 @@
            {:position :absolute
             :right (em 0.3)
             :margin-top (em 0.3)}]]
+         [:.pure-table
+          [:thead
+           {:background-color :transparent
+            :border (px 0)}]]
 
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
          [:.button-success
           {:background-color colour/success
            :color colour/white}]
+
+         [:.text-center
+          {:text-align :center}]
 
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -103,14 +110,14 @@
           {:padding-left (px 30)
            :padding-right (px 30)}]
 
-         [:.witan-pattern-example
-          {:position :relative
-           :min-height (px 100)}
-          [:pre
-           {:background-color colour/pattern-example-pre
-            :font-size (em 0.8)}]]
+         [:#witan-dash-projection-list
+          {:width (percent 100)
+           :border (px 0)}
+          [:th :td
+           {:border (px 0)}]]
 
-         [:.witan-pattern-example-code
-          {:position :absolute
-           :top (percent 25)}]])
+         [:.witan-projection-table-row
+          [:.modifier
+           {:color colour/gray
+            :margin-left (em 0.5)}]]])
       vec))

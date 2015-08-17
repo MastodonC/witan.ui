@@ -11,9 +11,24 @@
   [placeholder owner]
   (render [_]
           (html
-           [:form {:class "pure-form"}
-            [:div {:class "witan-search-input"}
-             [:i {:class "fa fa-search"}]
+           [:form.pure-form
+            [:div.witan-search-input
+             [:i.fa.fa-search]
              [:input {:id "filter-input"
                       :type "text"
                       :placeholder placeholder}]]])))
+
+(defcomponent
+  projection-tr
+  [projection owner]
+  (render [_]
+          (html
+           [:tr.witan-projection-table-row {:key (:id projection)}
+            [:td [:i.fa.fa-plus-square-o]]
+            [:td (:name projection)]
+            [:td.text-center (name (i/capitalize (:type projection)))]
+            [:td.text-center (:owner projection)]
+            [:td.text-center (:version projection)]
+            [:td.text-center
+             [:span (:last-modified projection)]
+             [:span.modifier (:last-modifier projection)]]])))

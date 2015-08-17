@@ -39,4 +39,15 @@
   (render [_]
           (html
            [:div
-            (om/build dash-header cursor)])))
+            (om/build dash-header cursor)
+            [:table.pure-table.pure-table-horizontal#witan-dash-projection-list
+             [:thead
+              [:th] ;; empty, for the tree icon
+              [:th (get-string cursor :projection-name)]
+              (for [x [:projection-type
+                       :projection-owner
+                       :projection-version
+                       :projection-lastmodified]]
+                [:th.text-center (get-string cursor x)])]
+             [:tbody
+              (om/build-all l/projection-tr (:projections cursor))]]])))

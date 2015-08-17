@@ -36,15 +36,18 @@
            [:div
             [:h3 (:sign-in ls)]
             [:form {:class "pure-form pure-form-stacked" :action "dashboard.html"}
-             [:input {:ref "email"
+             [:input {:tab-index 1
+                      :ref "email"
                       :type "email"
                       :placeholder (:email ls)
                       :required :required}]
-             [:input {:ref "password"
+             [:input {:tab-index 2
+                      :ref "password"
                       :type "password"
                       :placeholder (:password ls)
                       :require :required}]
-             [:button {:type "submit"
+             [:button {:tab-index 3
+                       :type "submit"
                        :class "pure-button pure-button-primary"} (:sign-in ls)]
              [:a {:id "forgotten-link"
                   :on-click #(goto-state cursor :reset)} (str "(" (:forgotten-question ls) ")")]]])))
@@ -66,12 +69,14 @@
                                  (set! (.-disabled (. js/document (getElementById "reset-button"))) true)
                                  (set! (.-disabled (. js/document (getElementById "reset-input"))) true)
                                  (.preventDefault e))}
-             [:input {:id "reset-input"
+             [:input {:tab-index 1
+                      :id "reset-input"
                       :type "email"
                       :placeholder (:email ls)
                       :required :required}]
              [:div
-              [:button {:id "reset-button"
+              [:button {:tab-index 2
+                        :id "reset-button"
                         :class "pure-button pure-button-primary"} (:reset-password ls)]
               [:button {:id "back-button"
                         :class "pure-button"
