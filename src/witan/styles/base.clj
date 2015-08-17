@@ -114,10 +114,18 @@
           {:width (percent 100)
            :border (px 0)}
           [:th :td
-           {:border (px 0)}]]
+           {:border (px 0)}]
+          [:th:first-child
+           {:width (px 1)}]]
 
          [:.witan-projection-table-row
           [:.modifier
            {:color colour/gray
-            :margin-left (em 0.5)}]]])
+            :margin-left (em 0.5)}]
+          [:.tree-control
+           {:background-color colour/white}]]
+
+         [:.witan-projection-table-row:hover
+          {:background-color colour/row-highlight
+           :cursor :pointer}]])
       vec))

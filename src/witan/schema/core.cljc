@@ -8,11 +8,11 @@
 
 (def Projection
   "A schema for a schema"
-  (s/maybe {:id s/Str
-            :name s/Str
-            :type ProjectionTypes
-            :owner s/Str
-            :version s/Int
-            :last-modified s/Str
-            :last-modifier s/Str
-            :previous-versions [(s/recursive #'Projection)]}))
+  {:id s/Str
+     :name s/Str
+     :type ProjectionTypes
+     :owner s/Str
+     :version s/Int
+     :last-modified s/Str
+     :last-modifier s/Str
+     :previous-version (s/maybe (s/recursive #'Projection))})

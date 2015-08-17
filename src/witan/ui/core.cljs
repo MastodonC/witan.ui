@@ -49,19 +49,34 @@
                                          :version 3
                                          :last-modified "Aug 10th, 2015"
                                          :last-modifier "Neil"
-                                         :previous-version []}
-                                        {:id 5678
+                                         :previous-version {:id "1233"
+                                                            :name "Population Projection for Camden"
+                                                            :type :population
+                                                            :owner "Camden"
+                                                            :version 2
+                                                            :last-modified "Aug 8th, 2015"
+                                                            :last-modifier "Simon"
+                                                            :previous-version {:id "1232"
+                                                                               :name "Population Projection for Camden"
+                                                                               :type :population
+                                                                               :owner "Camden"
+                                                                               :version 1
+                                                                               :last-modified "Aug 6th, 2015"
+                                                                               :last-modifier "Frank"
+                                                                               :previous-version nil}}}
+                                        {:id "5678"
                                          :name "Population Projection for Bexley"
                                          :type :population
                                          :owner "Bexley"
                                          :version 2
                                          :last-modified "July 22nd, 2015"
                                          :last-modifier "Sarah"
-                                         :previous-version []}]
+                                         :previous-version nil}]
                           :selected-projection {}}))
 
 ;; VALIDATE - make sure our app-state matches the schema
-(map #(s/validate Projection %) (:projections @app-state))
+(doseq [p (:projections @app-state)]
+  (s/validate Projection p))
 
 (def history (History.))
 

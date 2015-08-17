@@ -13,7 +13,6 @@
 (def warning "#fac05e")
 (def primary "#3590f3")
 
-
 ;; page background
 (def bg white)
 
@@ -44,9 +43,6 @@
 ;; same as above
 (def menu-item-hover secondary)
 
-;; background for the code snippets in pattern library
-(def pattern-example-pre (rgb 243 245 194))
-
 ;; hr tags
 (def hr (rgb 171 211 255))
 
@@ -55,3 +51,6 @@
 
 ;; links
 (def link (rgb 76 174 207))
+
+;; row highlight
+(def row-highlight (rgb 255 252 219))

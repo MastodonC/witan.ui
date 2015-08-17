@@ -24,7 +24,7 @@
   (render [_]
           (html
            [:tr.witan-projection-table-row {:key (:id projection)}
-            [:td [:i.fa.fa-plus-square-o]]
+            [:td.tree-control [:i.fa.fa-plus-square-o]]
             [:td (:name projection)]
             [:td.text-center (name (i/capitalize (:type projection)))]
             [:td.text-center (:owner projection)]
