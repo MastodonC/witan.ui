@@ -86,7 +86,7 @@
              }
 
   :garden {:builds [{;; Optional name of the build:
-                     :id "app"
+                     :id "ui"
                      ;; Source paths where the stylesheet source code is
                      :source-paths ["src/styles"]
                      ;; The var containing your stylesheet:
@@ -106,7 +106,8 @@
                      :compiler {;; Where to save the file:
                                 :output-to "resources/public/css/login.css"
                                 ;; Compress the output?
-                                :pretty-print? false}}]}
-  (comment
-    (do (use 'figwheel-sidecar.repl-api)
-        (cljs-repl))))
+                                :pretty-print? false}}]})
+
+(comment
+  (do (use 'figwheel-sidecar.repl-api)
+      (cljs-repl)))
