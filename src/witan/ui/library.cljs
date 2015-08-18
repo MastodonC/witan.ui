@@ -20,15 +20,19 @@
 
 (defcomponent
   projection-tr
-  [projection owner]
+  [projection owner & opts]
   (render [_]
-          (html
-           [:tr.witan-projection-table-row {:key (:id projection)}
-            [:td.tree-control [:i.fa.fa-plus-square-o]]
-            [:td (:name projection)]
-            [:td.text-center (name (i/capitalize (:type projection)))]
-            [:td.text-center (:owner projection)]
-            [:td.text-center (:version projection)]
-            [:td.text-center
-             [:span (:last-modified projection)]
-             [:span.modifier (:last-modifier projection)]]])))
+          (let [{:keys [on-click]} (first opts)]
+            (html
+             [:tr.witan-projection-table-row {:key (:id projection)
+                                              :on-click (fn [e]
+                                                           (if (fn? on-click) (on-click e owner projection))
+                                                           (.preventDefault e))}
+              [:td.tree-control [:i.fa.fa-plus-square-o]]
+              [:td (:name projection)]
+              [:td.text-center (name (i/capitalize (:type projection)))]
+              [:td.text-center (:owner projection)]
+              [:td.text-center (:version projection)]
+              [:td.text-center
+               [:span (:last-modified projection)]
+               [:span.modifier (:last-modifier projection)]]]))))

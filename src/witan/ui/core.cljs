@@ -1,5 +1,6 @@
 (ns ^:figwheel-always witan.ui.core
-    (:require [om.core :as om :include-macros true]
+    (:require [cljs.core.async :as async :refer [>! <! alts! chan close!]]
+              [om.core :as om :include-macros true]
               [goog.events :as events]
               [goog.history.EventType :as EventType]
               [om-tools.dom :as dom :include-macros true]
@@ -13,6 +14,7 @@
               [witan.schema.core :refer [Projection]]
               [witan.ui.components.dashboard]
               [witan.ui.components.menu])
+    (:require-macros [cljs.core.async.macros :as am :refer [go go-loop alt!]])
 
     (:import goog.History))
 
@@ -21,6 +23,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEFS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def comms
+  {:input (chan)})
 
 (def strings
   {:witan-title             "Witan for London"
@@ -75,12 +80,13 @@
                           :selected-projection {}}))
 
 ;; VALIDATE - make sure our app-state matches the schema
+;; FIXME we should only do this in dev/testing (possibly staging?)
 (doseq [p (:projections @app-state)]
   (s/validate Projection p))
 
 (def history (History.))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ddddddddddddddddd
 ;; ROUTING FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -93,7 +99,8 @@
   (om/root
    (view)
    app-state
-   {:target (find-app-container)})
+   {:target (find-app-container)
+    :shared {:comms comms}})
 
   (om/root
    witan.ui.components.menu/view
@@ -123,3 +130,19 @@
   (comment
     (om/detach-root (find-app-container))
     (install-om! (:view (first (filter :active @navigation-state))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; MESSAGE HANDLING
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn input-handler
+  [data]
+  (println "GOT INPUT = " data))
+
+(go
+  (while true
+    (alt!
+      (:input comms) ([v] (input-handler v))
+      ;; Capture the current history for playback in the absence
+      ;; of a server to store it
+      (async/timeout 10000) (do #_(print "TODO: print out history: ")))))

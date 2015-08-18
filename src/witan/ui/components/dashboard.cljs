@@ -8,7 +8,8 @@
             ;;
             [witan.ui.library :as l]
             [witan.schema.core :refer [Projection]]
-            [witan.ui.util :refer [get-string]]))
+            [witan.ui.util :refer [get-string]]
+            [witan.ui.async :refer [raise!]]))
 
 (defn selected-projection
   [cursor]
@@ -50,4 +51,5 @@
                        :projection-lastmodified]]
                 [:th.text-center (get-string cursor x)])]
              [:tbody
-              (om/build-all l/projection-tr (:projections cursor))]]])))
+              (om/build-all l/projection-tr (:projections cursor) {:key :id
+                                                                   :opts {:on-click #(raise! owner :event/test-event 123)}})]]])))
