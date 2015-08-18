@@ -1,7 +1,13 @@
 (ns witan.schema.core
   (:require [schema.core :as s :include-macros true]))
 
+(def Events
+  "Any control events should be included here"
+  #{:event/test-event} ;; this event is purely for testing
+  )
+
 (def ProjectionTypes
+  "Valid Projection types"
   (s/enum
    :population
    :employment))
