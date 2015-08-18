@@ -26,7 +26,7 @@
   :cljsbuild {
               :builds [{:id "ui"
                         :source-paths ["src"]
-                        :figwheel { :on-jsload "witan.ui.core/on-js-reload" }
+                        :figwheel {:on-jsload "witan.ui.core/on-js-reload" }
                         :compiler {:main witan.ui.core
                                    :asset-path "js/compiled/out-ui"
                                    :output-to "resources/public/js/compiled/witan-ui.js"
