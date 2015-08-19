@@ -53,11 +53,26 @@
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
          [:.button-success
-          {:background-color colour/success
+          {:background-color colour/button-success
+           :color colour/white}]
+
+         [:.button-warning
+          {:background-color colour/button-warning
+           :color colour/white}]
+
+         [:.button-error
+          {:background-color colour/button-error
+           :color colour/white}]
+
+         [:.button-primary
+          {:background-color colour/button-primary
            :color colour/white}]
 
          [:.text-center
           {:text-align :center}]
+
+         [:.text-white
+          {:color colour/white}]
 
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -98,8 +113,10 @@
            {:margin-bottom (em 0.2)
             :font-size (em 2)
             :display :inline-block}]
+          [:button
+           {:margin-left (em 0.5)}]
           [:.pure-menu-list
-           {:bottom "0.55em"}]
+           {:bottom (em 0.55)}]
           [:.pure-form
            {:display :inline-flex
             :font-size (px 14)
@@ -127,5 +144,9 @@
 
          [:.witan-projection-table-row:hover
           {:background-color colour/row-highlight
-           :cursor :pointer}]])
+           :cursor :pointer}]
+
+         [:.witan-projection-table-row-selected
+          :.witan-projection-table-row-selected:hover
+          {:background-color colour/row-selected}]])
       vec))

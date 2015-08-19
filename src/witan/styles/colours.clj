@@ -8,10 +8,10 @@
 (def dark-gray (:darkgray color/color-name->hex))
 
 ;;
-(def success "#59cd90")
-(def error "#ee6352")
-(def warning "#fac05e")
-(def primary "#3590f3")
+(def button-success "#59cd90")
+(def button-error "#ee6352")
+(def button-warning "#fac05e")
+(def button-primary "#3590f3")
 
 ;; page background
 (def bg white)
@@ -54,3 +54,6 @@
 
 ;; row highlight
 (def row-highlight (rgb 255 252 219))
+
+;; row selected
+(def row-selected (color/darken row-highlight 30))

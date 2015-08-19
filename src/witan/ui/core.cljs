@@ -10,10 +10,13 @@
               [schema.core :as s :include-macros true]
               [secretary.core :as secretary :refer-macros [defroute]]
               ;;
-              [witan.ui.library :as l]
               [witan.schema.core :refer [Projection]]
               [witan.ui.components.dashboard]
-              [witan.ui.components.menu])
+              [witan.ui.components.menu]
+              [witan.ui.components.new-projection]
+              [witan.ui.components.projection]
+              [witan.ui.controllers.input]
+              [witan.ui.data :as data])
     (:require-macros [cljs.core.async.macros :as am :refer [go go-loop alt!]])
 
     (:import goog.History))
@@ -27,7 +30,7 @@
 (def comms
   {:input (chan)})
 
-(def strings
+(defonce strings
   {:witan-title             "Witan for London"
    :projections             "projections"
    :filter                  "Filter"
@@ -44,9 +47,14 @@
           :view (fn [] witan.ui.components.dashboard/view)}
          {:name "New Projection"
           :path "/new-projection"
-          :view nil}]))
+          :view (fn [] witan.ui.components.new-projection/view)}
+         {:name "Projection Wizard"
+          :path "/projection/:id"
+          :view (fn [] witan.ui.components.projection/view)}]))
 
-(defonce app-state (atom {:strings strings
+(defonce define-app-state
+  (do
+    (data/set-app-state! {:strings strings
                           :projections [{:id "1234"
                                          :name "Population Projection for Camden"
                                          :type :population
@@ -77,16 +85,16 @@
                                          :last-modified "July 22nd, 2015"
                                          :last-modifier "Sarah"
                                          :previous-version nil}]
-                          :selected-projection {}}))
+                          :selected-projection {}})))
 
 ;; VALIDATE - make sure our app-state matches the schema
 ;; FIXME we should only do this in dev/testing (possibly staging?)
-(doseq [p (:projections @app-state)]
+(doseq [p (:projections @data/app-state)]
   (s/validate Projection p))
 
 (def history (History.))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;ddddddddddddddddd
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ROUTING FUNCTIONS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -98,13 +106,13 @@
   [view]
   (om/root
    (view)
-   app-state
+   data/app-state
    {:target (find-app-container)
     :shared {:comms comms}})
 
   (om/root
    witan.ui.components.menu/view
-   app-state
+   data/app-state
    {:target (. js/document (getElementById "witan-menu"))}))
 
 ;; this automatically patches up the routing table that is defined above
@@ -127,22 +135,18 @@
   (.setEnabled true))
 
 (defn on-js-reload []
-  (comment
-    (om/detach-root (find-app-container))
-    (install-om! (:view (first (filter :active @navigation-state))))))
+  ;; this is required for the figwheel reload
+  (om/detach-root (find-app-container))
+  (install-om! (:view (first (filter :active @navigation-state)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; MESSAGE HANDLING
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn input-handler
-  [data]
-  (println "GOT INPUT = " data))
-
 (go
   (while true
     (alt!
-      (:input comms) ([v] (input-handler v))
+      (:input comms) ([v] (witan.ui.controllers.input/handler v (om/root-cursor data/app-state)))
       ;; Capture the current history for playback in the absence
       ;; of a server to store it
       (async/timeout 10000) (do #_(print "TODO: print out history: ")))))

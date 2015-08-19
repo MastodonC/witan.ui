@@ -68,21 +68,6 @@
              ;; server, this is for simple ring servers, if this
              ;; doesn't work for you just run your own server :)
              ;; :ring-handler hello_world.server/handler
-
-             ;; To be able to open files in your editor from the heads up display
-             ;; you will need to put a script on your path.
-             ;; that script will have to take a file path and a line number
-             ;; ie. in  ~/bin/myfile-opener
-             ;; #! /bin/sh
-             ;; emacsclient -n +$2 $1
-             ;;
-             ;; :open-file-command "myfile-opener"
-
-             ;; if you want to disable the REPL
-             ;; :repl false
-
-             ;; to configure a different figwheel logfile path
-             ;; :server-logfile "tmp/logs/figwheel-logfile.log"
              }
 
   :garden {:builds [{;; Optional name of the build:

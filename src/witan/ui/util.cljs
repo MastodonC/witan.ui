@@ -1,5 +1,6 @@
-(ns ^:figwheel-always witan.ui.util)
+(ns ^:figwheel-always witan.ui.util
+    (:require [witan.ui.data :refer [app-state]]))
 
 (defn get-string
-  [cursor keyword]
-  (-> cursor :strings keyword))
+  [keyword]
+  (-> @app-state :strings keyword))

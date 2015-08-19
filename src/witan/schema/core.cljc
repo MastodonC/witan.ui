@@ -3,7 +3,8 @@
 
 (def Events
   "Any control events should be included here"
-  #{:event/test-event} ;; this event is purely for testing
+  #{:event/test-event            ;; this event is purely for testing
+    :event/select-projection}    ;; indicates that a projection is currently selected
   )
 
 (def ProjectionTypes

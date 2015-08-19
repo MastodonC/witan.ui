@@ -6,7 +6,6 @@
               [inflections.core :as i]
               [schema.core :as s :include-macros true]
               ;;
-              [witan.ui.library :as l]
               [witan.schema.core :refer [Projection]]
               [witan.ui.util :refer [get-string]]))
 
@@ -17,7 +16,7 @@
   (render [_]
           (html
            [:div.pure-menu.pure-menu-horizontal
-            [:a.pure-menu-heading {:href "#"} (get-string cursor :witan-title)]
+            [:a.pure-menu-heading {:href "#"} (get-string :witan-title)]
             [:ul.pure-menu-list
              [:li.witan-menu-item.pure-menu-item
               [:a.pure-menu-link "Ron Burgundy"]]
