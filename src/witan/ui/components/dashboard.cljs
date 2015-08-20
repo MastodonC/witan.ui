@@ -16,7 +16,7 @@
   dash-header
   [cursor owner]
   (render [_]
-          (let [selected (om/observe owner (refs/selected-projection))]
+          (let [selected (:selected (om/observe owner (refs/projections-meta)))]
             (html
              [:div.pure-menu.pure-menu-horizontal.witan-dash-heading
               [:h1
@@ -31,17 +31,17 @@
                ;;
                (if (not (empty? selected))
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (str "#/projection/" (:id selected))}
+                  [:a {:href (str "#/projection/" (second selected))}
                    [:button.pure-button.button-warning
                     [:i.fa.fa-pencil]]]])
                (if (not (empty? selected))
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (str "#/projection/" (:id selected) "/download")}
+                  [:a {:href (str "#/projection/" (second selected) "/download")}
                    [:button.pure-button.button-primary
                     [:i.fa.fa-download]]]])
                (if (not (empty? selected))
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (str "#/share/" (:id selected))}
+                  [:a {:href (str "#/share/" (second selected))}
                    [:button.pure-button.button-primary
                     [:i.fa.fa-share-alt]]]])]]))))
 
@@ -64,4 +64,4 @@
               (om/build-all widgets/projection-tr
                             (:projections cursor)
                             {:key :id
-                             :opts {:on-click #(raise! %2 :event/select-projection %3)}})]]])))
+                             :opts {:on-click #(raise! %1 %2 %3)}})]]])))

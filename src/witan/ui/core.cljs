@@ -56,38 +56,12 @@
 
 (defonce define-app-state
   (do
-    (data/set-app-state! {:strings strings
-                          :projections [{:id "1234"
-                                         :name "Population Projection for Camden"
-                                         :type :population
-                                         :owner "Camden"
-                                         :version 3
-                                         :last-modified "Aug 10th, 2015"
-                                         :last-modifier "Neil"
-                                         :previous-version {:id "1233"
-                                                            :name "Population Projection for Camden"
-                                                            :type :population
-                                                            :owner "Camden"
-                                                            :version 2
-                                                            :last-modified "Aug 8th, 2015"
-                                                            :last-modifier "Simon"
-                                                            :previous-version {:id "1232"
-                                                                               :name "Population Projection for Camden"
-                                                                               :type :population
-                                                                               :owner "Camden"
-                                                                               :version 1
-                                                                               :last-modified "Aug 6th, 2015"
-                                                                               :last-modifier "Frank"
-                                                                               :previous-version nil}}}
-                                        {:id "5678"
-                                         :name "Population Projection for Bexley"
-                                         :type :population
-                                         :owner "Bexley"
-                                         :version 2
-                                         :last-modified "July 22nd, 2015"
-                                         :last-modifier "Sarah"
-                                         :previous-version nil}]
-                          :selected-projection {}})))
+    (reset! data/app-state {:strings strings
+                            :projections []
+                            :projections-meta {:expanded #{}
+                                               :selected []
+                                               :has-ancestors #{}}})
+    (data/load-dummy-data!)))
 
 ;; VALIDATE - make sure our app-state matches the schema
 ;; FIXME we should only do this in dev/testing (possibly staging?)
@@ -120,20 +94,6 @@
 ;; this automatically patches up the routing table that is defined above
 (doseq [{:keys [path view]} (:routes @navigation-state)]
   (defroute (str path)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     {:as params}
     (install-om! view params)))
 

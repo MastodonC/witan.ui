@@ -4,7 +4,8 @@
              [om-tools.core :refer-macros [defcomponent]]
              [sablono.core :as html :refer-macros [html]]
              [inflections.core :as i]
-             [witan.ui.refs :as refs]))
+             [witan.ui.refs :as refs]
+             [witan.ui.util :refer [contains-str]]))
 
 ;; search input
 (defcomponent
@@ -23,20 +24,38 @@
   projection-tr
   [projection owner & opts]
   (render [_]
-          (let [{:keys [on-click selected-projection-id]} (first opts)
-                is-selected-projection? (= (:id projection)
-                                           (-> owner
-                                               (om/observe (refs/selected-projection))
-                                               :id))]
+          (let [{:keys [on-click]} (first opts)
+                projections-meta        (om/observe owner (refs/projections-meta))
+                selected-projection     (:selected projections-meta)
+                ancestor-set            (set (map second (:has-ancestors projections-meta)))
+                expanded-set            (set (map second (:expanded projections-meta)))
+                is-selected-projection? (= (:id projection) (second selected-projection))
+                has-ancestor?           (contains? ancestor-set (:id projection))
+                is-expanded?            (contains? expanded-set (:id projection))
+                has-descendant?         (not (nil? (:descendant-id projection)))
+                classes                 [[is-selected-projection? "witan-projection-table-row-selected"]
+                                         [has-descendant? "witan-projection-table-row-descendant"]]]
             (html
              [:tr.witan-projection-table-row {:key (:id projection)
-                                              :class (if is-selected-projection? "witan-projection-table-row-selected" "")
+                                              :class (->> classes
+                                                          (filter first)
+                                                          (map second)
+                                                          (interpose " ")
+                                                          (apply str))
                                               :on-click (fn [e]
-                                                          (if (fn? on-click) (on-click e owner @projection))
+                                                          (if (fn? on-click)
+                                                            (if (and
+                                                                 has-ancestor?
+                                                                 (contains-str (.. e -target -className) "tree-control"))
+                                                              (on-click owner :event/toggle-tree-view projection e)
+                                                              (on-click owner :event/select-projection projection e)))
                                                           (.preventDefault e))}
-              [:td.tree-control [:i.fa.fa-plus-square-o]]
+
+              [:td.tree-control (cond
+                                  is-expanded? [:i.fa.fa-minus-square-o.tree-control]
+                                  has-ancestor? [:i.fa.fa-plus-square-o.tree-control])]
               [:td (:name projection)]
-              [:td.text-center (name (i/capitalize (:type projection)))]
+              [:td.text-center (-> projection :type name i/capitalize)]
               [:td.text-center (:owner projection)]
               [:td.text-center (:version projection)]
               [:td.text-center

@@ -148,5 +148,8 @@
 
          [:.witan-projection-table-row-selected
           :.witan-projection-table-row-selected:hover
-          {:background-color colour/row-selected}]])
+          {:background-color colour/row-selected}]
+
+
+         ])
       vec))

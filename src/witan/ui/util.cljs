@@ -13,3 +13,7 @@
   [f & args1]
   (fn [& args2]
     (apply f (concat args2 args1))))
+
+(defn contains-str
+  [source match]
+  (not= -1 (.indexOf source match)))

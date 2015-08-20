@@ -2,6 +2,9 @@
     (:require [om.core :as om :include-macros true]
               [witan.ui.data :refer [app-state]]))
 
-(defn selected-projection
+(defn projections-meta
   []
-  (om/ref-cursor (:selected-projection (om/root-cursor app-state))))
+  (-> app-state
+      om/root-cursor
+      :projections-meta
+      om/ref-cursor))
