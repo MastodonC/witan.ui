@@ -45,9 +45,8 @@
                    [:button.pure-button.button-primary
                     [:i.fa.fa-share-alt]]]])]]))))
 
-(defcomponent
-  view
-  [cursor owner]
+(defcomponent view
+  [cursor owner args]
   (render [_]
           (html
            [:div

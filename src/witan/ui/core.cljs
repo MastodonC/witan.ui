@@ -11,6 +11,7 @@
               [secretary.core :as secretary :refer-macros [defroute]]
               ;;
               [witan.schema.core :refer [Projection]]
+              [witan.ui.util :refer [prependtial]]
               [witan.ui.components.dashboard]
               [witan.ui.components.menu]
               [witan.ui.components.new-projection]
@@ -42,15 +43,16 @@
 
 ;; this is the primary routing table
 (defonce navigation-state
-  (atom [{:name "Dashboard"
-          :path "/"
-          :view (fn [] witan.ui.components.dashboard/view)}
-         {:name "New Projection"
-          :path "/new-projection"
-          :view (fn [] witan.ui.components.new-projection/view)}
-         {:name "Projection Wizard"
-          :path "/projection/:id"
-          :view (fn [] witan.ui.components.projection/view)}]))
+  (atom { :routes [{:name "Dashboard"
+           :path "/"
+           :view (fn [] witan.ui.components.dashboard/view)}
+          {:name "New Projection"
+           :path "/new-projection"
+           :view (fn [] witan.ui.components.new-projection/view)}
+          {:name "Projection Wizard"
+           :path "/projection/:id"
+           :view (fn [] witan.ui.components.projection/view)}]
+         :current-route ""}))
 
 (defonce define-app-state
   (do
@@ -103,9 +105,9 @@
   (. js/document (getElementById "witan-main")))
 
 (defn install-om!
-  [view]
+  [view params]
   (om/root
-   (view)
+   (prependtial (view) params)
    data/app-state
    {:target (find-app-container)
     :shared {:comms comms}})
@@ -116,28 +118,39 @@
    {:target (. js/document (getElementById "witan-menu"))}))
 
 ;; this automatically patches up the routing table that is defined above
-(doseq [{:keys [path view]} @navigation-state]
-  (defroute (str path) []
-    (install-om! view)))
+(doseq [{:keys [path view]} (:routes @navigation-state)]
+  (defroute (str path)
 
-(defn refresh-navigation []
-  (let [token (.getToken history)
-        set-active (fn [nav]
-                     (assoc nav :active (= (apply str (rest (:path nav))) token)))]
-    (swap! navigation-state #(map set-active %))))
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {:as params}
+    (install-om! view params)))
 
 (defn on-navigate [event]
-  (refresh-navigation)
-  (secretary/dispatch! (.-token event)))
+  (let [path (.-token event)]
+    (swap! navigation-state assoc :current-route path)
+    (secretary/dispatch! path)))
 
-(doto history
-  (goog.events/listen EventType/NAVIGATE on-navigate)
-  (.setEnabled true))
+(defonce set-up-history!
+  (doto history
+    (goog.events/listen EventType/NAVIGATE on-navigate)
+    (.setEnabled true)))
 
 (defn on-js-reload []
   ;; this is required for the figwheel reload
   (om/detach-root (find-app-container))
-  (install-om! (:view (first (filter :active @navigation-state)))))
+  (secretary/dispatch! (:current-route @navigation-state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; MESSAGE HANDLING

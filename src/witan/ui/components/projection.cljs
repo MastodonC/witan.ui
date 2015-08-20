@@ -12,9 +12,8 @@
               [witan.ui.async :refer [raise!]]
               [witan.ui.refs :as refs]))
 
-(defcomponent
-  view
-  [cursor owner]
+(defcomponent view
+  [cursor owner {:keys [id] :as args}]
   (render [_]
           (html
-           [:h1 "Projection"])))
+           [:h1 (str "Projection: " id)])))

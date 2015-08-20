@@ -28,7 +28,6 @@
                                            (-> owner
                                                (om/observe (refs/selected-projection))
                                                :id))]
-            (println is-selected-projection?)
             (html
              [:tr.witan-projection-table-row {:key (:id projection)
                                               :class (if is-selected-projection? "witan-projection-table-row-selected" "")
