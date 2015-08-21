@@ -18,7 +18,8 @@
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]
-            [lein-garden "0.2.6"]]
+            [lein-garden "0.2.6"]
+            [lein-cljfmt "0.3.0"]]
 
   :source-paths ["src"]
 

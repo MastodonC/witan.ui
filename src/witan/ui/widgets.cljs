@@ -1,11 +1,11 @@
 (ns ^:figwheel-always witan.ui.widgets
-    (:require[om.core :as om :include-macros true]
-             [om-tools.dom :as dom :include-macros true]
-             [om-tools.core :refer-macros [defcomponent]]
-             [sablono.core :as html :refer-macros [html]]
-             [inflections.core :as i]
-             [witan.ui.refs :as refs]
-             [witan.ui.util :refer [contains-str]]))
+  (:require [om.core :as om :include-macros true]
+            [om-tools.dom :as dom :include-macros true]
+            [om-tools.core :refer-macros [defcomponent]]
+            [sablono.core :as html :refer-macros [html]]
+            [inflections.core :as i]
+            [witan.ui.refs :as refs]
+            [witan.ui.util :refer [contains-str]]))
 
 ;; search input
 (defcomponent

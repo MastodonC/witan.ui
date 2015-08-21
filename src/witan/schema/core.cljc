@@ -30,5 +30,4 @@
    (s/optional-key :descendant-id) ProjectionIdType
    ;; added internally
    (s/optional-key :db/id)         s/Int
-   (s/optional-key :has-ancestors) s/Bool
-   })
+   (s/optional-key :has-ancestors) s/Bool})

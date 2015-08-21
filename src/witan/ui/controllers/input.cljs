@@ -1,8 +1,8 @@
 (ns ^:figwheel-always witan.ui.controllers.input
-    (:require [om.core :as om :include-macros true]
-              [schema.core :as s :include-macros true]
-              [witan.schema.core :refer [Projection]]
-              [witan.ui.data :as d]))
+  (:require [om.core :as om :include-macros true]
+            [schema.core :as s :include-macros true]
+            [witan.schema.core :refer [Projection]]
+            [witan.ui.data :as d]))
 
 (defmulti handler
   (fn [[event args] cursor] event))

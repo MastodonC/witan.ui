@@ -1,7 +1,7 @@
 (ns witan.login.core
-  (:require[om.core :as om :include-macros true]
-           [om-tools.core :refer-macros [defcomponentmethod]]
-           [sablono.core :as html :refer-macros [html]]))
+  (:require [om.core :as om :include-macros true]
+            [om-tools.core :refer-macros [defcomponentmethod]]
+            [sablono.core :as html :refer-macros [html]]))
 
 (defonce app-state (atom {:state :prompt}))
 (def ls ;;login-strings

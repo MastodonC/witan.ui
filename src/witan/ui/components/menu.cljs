@@ -1,14 +1,13 @@
 (ns ^:figwheel-always witan.ui.components.menu
-    (:require [om.core :as om :include-macros true]
-              [om-tools.dom :as dom :include-macros true]
-              [om-tools.core :refer-macros [defcomponent]]
-              [sablono.core :as html :refer-macros [html]]
-              [inflections.core :as i]
-              [schema.core :as s :include-macros true]
+  (:require [om.core :as om :include-macros true]
+            [om-tools.dom :as dom :include-macros true]
+            [om-tools.core :refer-macros [defcomponent]]
+            [sablono.core :as html :refer-macros [html]]
+            [inflections.core :as i]
+            [schema.core :as s :include-macros true]
               ;;
-              [witan.schema.core :refer [Projection]]
-              [witan.ui.util :refer [get-string]]))
-
+            [witan.schema.core :refer [Projection]]
+            [witan.ui.util :refer [get-string]]))
 
 (defcomponent
   view

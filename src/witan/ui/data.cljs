@@ -1,5 +1,5 @@
 (ns ^:figwheel-always witan.ui.data
-    (:require [datascript :as d]))
+  (:require [datascript :as d]))
 
 (defonce app-state (atom {}))
 (defonce db-schema {})

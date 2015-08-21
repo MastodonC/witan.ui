@@ -1,26 +1,26 @@
 (ns ^:figwheel-always witan.ui.core
-    (:require [cljs.core.async :as async :refer [>! <! alts! chan close!]]
-              [om.core :as om :include-macros true]
-              [goog.events :as events]
-              [goog.history.EventType :as EventType]
-              [om-tools.dom :as dom :include-macros true]
-              [om-tools.core :refer-macros [defcomponent]]
-              [sablono.core :as html :refer-macros [html]]
-              [inflections.core :as i]
-              [schema.core :as s :include-macros true]
-              [secretary.core :as secretary :refer-macros [defroute]]
+  (:require [cljs.core.async :as async :refer [>! <! alts! chan close!]]
+            [om.core :as om :include-macros true]
+            [goog.events :as events]
+            [goog.history.EventType :as EventType]
+            [om-tools.dom :as dom :include-macros true]
+            [om-tools.core :refer-macros [defcomponent]]
+            [sablono.core :as html :refer-macros [html]]
+            [inflections.core :as i]
+            [schema.core :as s :include-macros true]
+            [secretary.core :as secretary :refer-macros [defroute]]
               ;;
-              [witan.schema.core :refer [Projection]]
-              [witan.ui.util :refer [prependtial]]
-              [witan.ui.components.dashboard]
-              [witan.ui.components.menu]
-              [witan.ui.components.new-projection]
-              [witan.ui.components.projection]
-              [witan.ui.controllers.input]
-              [witan.ui.data :as data])
-    (:require-macros [cljs.core.async.macros :as am :refer [go go-loop alt!]])
+            [witan.schema.core :refer [Projection]]
+            [witan.ui.util :refer [prependtial]]
+            [witan.ui.components.dashboard]
+            [witan.ui.components.menu]
+            [witan.ui.components.new-projection]
+            [witan.ui.components.projection]
+            [witan.ui.controllers.input]
+            [witan.ui.data :as data])
+  (:require-macros [cljs.core.async.macros :as am :refer [go go-loop alt!]])
 
-    (:import goog.History))
+  (:import goog.History))
 
 (enable-console-print!)
 
@@ -43,15 +43,15 @@
 
 ;; this is the primary routing table
 (defonce navigation-state
-  (atom { :routes [{:name "Dashboard"
-           :path "/"
-           :view (fn [] witan.ui.components.dashboard/view)}
-          {:name "New Projection"
-           :path "/new-projection"
-           :view (fn [] witan.ui.components.new-projection/view)}
-          {:name "Projection Wizard"
-           :path "/projection/:id"
-           :view (fn [] witan.ui.components.projection/view)}]
+  (atom {:routes [{:name "Dashboard"
+                   :path "/"
+                   :view (fn [] witan.ui.components.dashboard/view)}
+                  {:name "New Projection"
+                   :path "/new-projection"
+                   :view (fn [] witan.ui.components.new-projection/view)}
+                  {:name "Projection Wizard"
+                   :path "/projection/:id"
+                   :view (fn [] witan.ui.components.projection/view)}]
          :current-route ""}))
 
 (defonce define-app-state

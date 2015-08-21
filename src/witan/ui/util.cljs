@@ -1,5 +1,5 @@
 (ns ^:figwheel-always witan.ui.util
-    (:require [witan.ui.data :refer [app-state]]))
+  (:require [witan.ui.data :refer [app-state]]))
 
 (defn get-string
   "Assumes that strings are always in the :strings keyword"
