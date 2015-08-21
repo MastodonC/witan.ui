@@ -29,7 +29,7 @@
                  [:button.pure-button.button-success
                   [:i.fa.fa-plus]]]]
                ;;
-               (if (not (empty? selected))
+               (if (not-empty selected)
                  [:li.witan-menu-item.pure-menu-item
                   [:a {:href (str "#/projection/" (second selected))}
                    [:button.pure-button.button-warning
