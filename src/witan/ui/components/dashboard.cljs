@@ -26,7 +26,9 @@
              [:div.pure-menu.pure-menu-horizontal.witan-dash-heading
               [:h1
                (i/capitalize (get-string :projections))]
-              (om/build widgets/search-input (str (get-string :filter) " " (get-string :projections)))
+              (om/build widgets/search-input
+                        (str (get-string :filter) " " (get-string :projections))
+                        {:opts {:on-input #(raise! %1 :event/filter-projections %2)}})
               [:ul.pure-menu-list
                [:li.witan-menu-item.pure-menu-item
                 [:a {:href "#/new-projection"}

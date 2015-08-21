@@ -60,7 +60,8 @@
                             :projections []
                             :projections-meta {:expanded #{}
                                                :selected []
-                                               :has-ancestors #{}}})
+                                               :has-ancestors #{}
+                                               :filter ""}})
     (data/load-dummy-data!)))
 
 ;; VALIDATE - make sure our app-state matches the schema

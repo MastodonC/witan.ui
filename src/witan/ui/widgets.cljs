@@ -10,15 +10,20 @@
 ;; search input
 (defcomponent
   search-input
-  [placeholder owner]
+  [placeholder owner & opts]
   (render [_]
+          (let [{:keys [on-input]} (first opts)]
           (html
            [:form.pure-form
             [:div.witan-search-input
              [:i.fa.fa-search]
              [:input {:id "filter-input"
                       :type "text"
-                      :placeholder placeholder}]]])))
+                      :placeholder placeholder
+                      :on-input (fn [e]
+                                  (if (fn? on-input)
+                                    (on-input owner (.. e -target -value)))
+                                  (.preventDefault e))}]]]))))
 
 (defcomponent
   projection-tr

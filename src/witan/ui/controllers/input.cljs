@@ -4,6 +4,12 @@
             [witan.schema.core :refer [Projection]]
             [witan.ui.data :as d]))
 
+(defn fetch-visible-projections
+  [state]
+  (let [all-expanded (-> state :projections-meta :expanded)
+        toggled-on (mapv #(vector :db/id (first %)) all-expanded)]
+    (d/fetch-projections {:expand toggled-on})))
+
 (defmulti handler
   (fn [[event args] cursor] event))
 
@@ -21,7 +27,12 @@
         id           (-> args :id)
         is-toggled   (contains? (-> cursor :projections-meta :expanded) [db-id id])
         fn           (if is-toggled disj conj)
-        new-state    (om/transact! cursor [:projections-meta :expanded] #(fn % [db-id id]))
-        all-expanded (-> @new-state :projections-meta :expanded)
-        toggled-on   (mapv #(vector :db/id (first %)) all-expanded)]
-    (om/update! cursor :projections (d/fetch-projections {:expand toggled-on}))))
+        new-state    (om/transact! cursor [:projections-meta :expanded] #(fn % [db-id id]))]
+    (om/update! cursor :projections (fetch-visible-projections @new-state))))
+
+(defmethod handler
+  :event/filter-projections
+  [[event args] cursor]
+  (s/validate s/Str args)
+  (let [new-state (om/update! cursor [:projections-meta :filter] args)]
+    (om/update! cursor :projections (fetch-visible-projections @new-state))))

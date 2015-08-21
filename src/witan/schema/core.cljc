@@ -6,6 +6,7 @@
   #{:event/test-event            ;; this event is purely for testing
     :event/select-projection     ;; indicates that a projection is currently selected
     :event/toggle-tree-view      ;; indicates that the projection tree should expand at the specified branch
+    :event/filter-projections    ;; filter the projections by name
     })
 
 (def ProjectionTypes
