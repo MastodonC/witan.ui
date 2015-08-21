@@ -54,7 +54,8 @@
               [:td.tree-control (cond
                                   is-expanded? [:i.fa.fa-minus-square-o.tree-control]
                                   has-ancestor? [:i.fa.fa-plus-square-o.tree-control])]
-              [:td (:name projection)]
+              [:td
+               [:span.name (:name projection)]]
               [:td.text-center (-> projection :type name i/capitalize)]
               [:td.text-center (:owner projection)]
               [:td.text-center (:version projection)]

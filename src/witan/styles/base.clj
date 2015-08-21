@@ -145,5 +145,11 @@
 
         [:.witan-projection-table-row-selected
          :.witan-projection-table-row-selected:hover
-         {:background-color colour/row-selected}]])
+         {:background-color colour/row-selected}]
+
+        [:.witan-projection-table-row-descendant
+         {:color colour/darker-gray
+          :font-size (em 0.9)}
+         [:.name
+          {:margin-left (em 1)}]]])
       vec))
