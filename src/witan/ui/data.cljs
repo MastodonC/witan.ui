@@ -21,7 +21,7 @@
          remaining-nodes []]
     (let [new-results (conj results (:db/id node))
           new-remaining (concat remaining-nodes (fetch-ancestor-projection (:id node)))]
-      (if (not (empty? new-remaining))
+      (if (not-empty new-remaining)
         (recur (d/touch (d/entity @db-conn (:db/id (first new-remaining)))) new-results (rest new-remaining))
         new-results))))
 
@@ -36,7 +36,7 @@
       top-level
       (if (vector? expand)
         (mapcat (fn [projection]
-                  (if (first (filter (fn [[ck cv]] (= (ck projection) cv)) expand))
+                  (if (some (fn [[ck cv]] (if (= (ck projection) cv) [ck cv])) expand)
                     (let [db-id (:db/id projection)
                           desc-tree (rest (build-descendant-list db-id))]
                       (apply conj [projection] (mapv #(merge {} (d/pull @db-conn '[*] %)) desc-tree)))
