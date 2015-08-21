@@ -16,7 +16,8 @@
   dash-header
   [cursor owner]
   (render [_]
-          (let [selected (:selected (om/observe owner (refs/projections-meta)))]
+          (let [selected (:selected (om/observe owner (refs/projections-meta)))
+                selected-id (second selected)]
             (html
              [:div.pure-menu.pure-menu-horizontal.witan-dash-heading
               [:h1
@@ -31,17 +32,17 @@
                ;;
                (if (not-empty selected)
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (str "#/projection/" (second selected))}
+                  [:a {:href (str "#/projection/" selected-id)}
                    [:button.pure-button.button-warning
                     [:i.fa.fa-pencil]]]])
                (if (not (empty? selected))
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (str "#/projection/" (second selected) "/download")}
+                  [:a {:href (str "#/projection/" selected-id "/download")}
                    [:button.pure-button.button-primary
                     [:i.fa.fa-download]]]])
                (if (not (empty? selected))
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (str "#/share/" (second selected))}
+                  [:a {:href (str "#/share/" selected-id)}
                    [:button.pure-button.button-primary
                     [:i.fa.fa-share-alt]]]])]]))))
 
