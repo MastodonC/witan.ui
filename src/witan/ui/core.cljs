@@ -55,12 +55,12 @@
 (defonce define-app-state
   (do
     (reset! data/app-state {:strings strings
-                            :current-route ""
+                            :current-route nil
                             :projections []
                             :projections-meta {:expanded #{}
                                                :selected []
                                                :has-ancestors #{}
-                                               :filter ""}})
+                                               :filter nil}})
     (data/load-dummy-data!)))
 
 ;; VALIDATE - make sure our app-state matches the schema

@@ -36,5 +36,6 @@
   :event/filter-projections
   [[event args] cursor]
   (s/validate s/Str args)
-  (let [new-state (om/update! cursor [:projections-meta :filter] args)]
+  (let [new-filter (if (empty? args) nil args)
+        new-state (om/update! cursor [:projections-meta :filter] new-filter)]
     (om/update! cursor :projections (fetch-visible-projections @new-state))))
