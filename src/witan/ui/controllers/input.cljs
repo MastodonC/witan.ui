@@ -27,8 +27,8 @@
   (s/validate Projection args)
   (let [db-id        (-> args :db/id)
         id           (-> args :id)
-        is-toggled   (contains? (-> cursor :projections-meta :expanded) [db-id id])
-        fn           (if is-toggled disj conj)
+        toggled?     (contains? (-> cursor :projections-meta :expanded) [db-id id])
+        fn           (if toggled? disj conj)
         new-state    (om/transact! cursor [:projections-meta :expanded] #(fn % [db-id id]))]
     (om/update! cursor :projections (fetch-visible-projections @new-state))))
 
