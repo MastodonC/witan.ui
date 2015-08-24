@@ -1,6 +1,6 @@
 (ns ^:figwheel-always witan.ui.data
-    (:require [datascript :as d]
-              [witan.ui.util :as util]))
+  (:require [datascript :as d]
+            [witan.ui.util :as util]))
 
 (defonce app-state (atom {}))
 (defonce db-schema {})
@@ -35,8 +35,8 @@
   [{:keys [expand filter] :or {expand false
                                filter nil}}] ;; filter is only applied to top-level projections.
   (let [pred (fn [n] (if (nil? filter)
-                         true
-                         (util/contains-str n filter)))
+                       true
+                       (util/contains-str n filter)))
         top-level (apply concat (d/q '[:find (pull ?e [*])
                                        :in $ ?pred
                                        :where [?e :id _]

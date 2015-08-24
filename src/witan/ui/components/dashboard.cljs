@@ -11,7 +11,8 @@
             [witan.ui.data :refer [get-string]]
             [witan.ui.async :refer [raise!]]
             [witan.ui.refs :as refs]
-            [witan.ui.util :refer [goto-window-location!]]))
+            [witan.ui.util :refer [goto-window-location!]]
+            [witan.ui.nav :as nav]))
 
 (defn get-selected-projection
   [cursor]
@@ -32,17 +33,17 @@
                         {:opts {:on-input #(raise! %1 :event/filter-projections %2)}})
               [:ul.pure-menu-list
                [:li.witan-menu-item.pure-menu-item
-                [:a {:href "#/new-projection"}
+                [:a {:href (nav/new-projection)}
                  [:button.pure-button.button-success
                   [:i.fa.fa-plus]]]]
                (if (and (not-empty selected) is-top-level?)
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (str "#/projection/" selected-id)}
+                  [:a {:href (nav/projection-wizard {:id selected-id :action ""})}
                    [:button.pure-button.button-warning
                     [:i.fa.fa-pencil]]]])
                (if (not (empty? selected))
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (str "#/projection/" selected-id "/download")}
+                  [:a {:href (nav/projection-wizard {:id selected-id :action "download"})}
                    [:button.pure-button.button-primary
                     [:i.fa.fa-download]]]])
                (if (not (empty? selected))
@@ -77,4 +78,5 @@
                             {:key :id
                              :opts {:on-click #(raise! %1 %2 %3)
                                     :on-double-click #(if (nil? (:descendant-id %2))
-                                                        (goto-window-location! (str "#/projection/" (:id %2))))}})]]])))
+                                                        (goto-window-location!
+                                                         (nav/projection-wizard {:id (:id %2) :action ""})))}})]]])))
