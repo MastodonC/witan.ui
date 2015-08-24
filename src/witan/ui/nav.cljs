@@ -8,7 +8,8 @@
 (defonce views (atom {:projection nil
                       :dashboard nil
                       :new-projection nil
-                      :menu nil}))
+                      :menu nil
+                      :share nil}))
 
 (defn find-app-container
   []
@@ -47,3 +48,8 @@
   "/new-projection/"
   {:as params}
   (install-om! (fn [] (:new-projection @views)) params))
+
+(defroute share
+  "/share/:id/"
+  {:as params}
+  (install-om! (fn [] (:share @views)) params))

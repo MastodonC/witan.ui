@@ -38,7 +38,7 @@
                   [:i.fa.fa-plus]]]]
                (if (and (not-empty selected) is-top-level?)
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (nav/projection-wizard {:id selected-id :action ""})}
+                  [:a {:href (nav/projection-wizard {:id selected-id :action "edit"})}
                    [:button.pure-button.button-warning
                     [:i.fa.fa-pencil]]]])
                (if (not (empty? selected))
@@ -48,7 +48,7 @@
                     [:i.fa.fa-download]]]])
                (if (not (empty? selected))
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (str "#/share/" selected-id)}
+                  [:a {:href (nav/share {:id selected-id})}
                    [:button.pure-button.button-primary
                     [:i.fa.fa-share-alt]]]])]]))))
 

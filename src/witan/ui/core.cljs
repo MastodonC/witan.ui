@@ -17,7 +17,8 @@
             [witan.ui.components.projection]
             [witan.ui.components.dashboard]
             [witan.ui.components.menu]
-            [witan.ui.components.new-projection])
+            [witan.ui.components.new-projection]
+            [witan.ui.components.share])
   (:require-macros [cljs.core.async.macros :as am :refer [go go-loop alt!]])
 
   (:import goog.History))
@@ -39,7 +40,8 @@
             {:projection     witan.ui.components.projection/view
              :dashboard      witan.ui.components.dashboard/view
              :new-projection witan.ui.components.new-projection/view
-             :menu           witan.ui.components.menu/view})))
+             :menu           witan.ui.components.menu/view
+             :share          witan.ui.components.share/view})))
 
 (defonce strings
   {:witan-title             "Witan for London"
