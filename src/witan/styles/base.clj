@@ -137,11 +137,12 @@
           {:color colour/gray
            :margin-left (em 0.5)}]
          [:.tree-control
-          {:background-color colour/white}]]
-
-        [:.witan-projection-table-row:hover
-         {:background-color colour/row-highlight
-          :cursor :pointer}]
+          {:background-color colour/white}]
+         [".name::selection"
+          {:background-color :transparent}]
+         [:&:hover
+          {:background-color colour/row-highlight
+           :cursor :pointer}]]
 
         [:.witan-projection-table-row-selected
          :.witan-projection-table-row-selected:hover

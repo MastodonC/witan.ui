@@ -29,7 +29,7 @@
   projection-tr
   [projection owner & opts]
   (render [_]
-          (let [{:keys [on-click]} (first opts)
+          (let [{:keys [on-click on-double-click]} (first opts)
                 projections-meta        (om/observe owner (refs/projections-meta))
                 selected-projection     (:selected projections-meta)
                 ancestor-set            (set (map second (:has-ancestors projections-meta)))
@@ -54,7 +54,11 @@
                                                                  (contains-str (.. e -target -className) "tree-control"))
                                                               (on-click owner :event/toggle-tree-view projection e)
                                                               (on-click owner :event/select-projection projection e)))
-                                                          (.preventDefault e))}
+                                                          (.preventDefault e))
+                                              :on-double-click (fn [e]
+                                                                 (if (fn? on-double-click)
+                                                                   (on-double-click owner projection e))
+                                                                 (.preventDefault e))}
 
               [:td.tree-control (cond
                                   is-expanded? [:i.fa.fa-minus-square-o.tree-control]

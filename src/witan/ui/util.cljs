@@ -17,3 +17,7 @@
   "Performs a case-insensitive regex match"
   [source pattern]
   (boolean (re-find (js/RegExp. pattern "i") source)))
+
+(defn goto-window-location!
+  [location]
+  (set! (.. js/document -location -href) location))

@@ -10,7 +10,8 @@
             [witan.schema.core :refer [Projection]]
             [witan.ui.data :refer [get-string]]
             [witan.ui.async :refer [raise!]]
-            [witan.ui.refs :as refs]))
+            [witan.ui.refs :as refs]
+            [witan.ui.util :refer [goto-window-location!]]))
 
 (defn get-selected-projection
   [cursor]
@@ -74,4 +75,5 @@
               (om/build-all widgets/projection-tr
                             (:projections cursor)
                             {:key :id
-                             :opts {:on-click #(raise! %1 %2 %3)}})]]])))
+                             :opts {:on-click #(raise! %1 %2 %3)
+                                    :on-double-click #(goto-window-location! (str "#/projection/" (:id %2)))}})]]])))
