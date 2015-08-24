@@ -8,7 +8,6 @@
               ;;
             [witan.ui.widgets :as widgets]
             [witan.schema.core :refer [Projection]]
-            [witan.ui.util :refer [get-string]]
             [witan.ui.async :refer [raise!]]
             [witan.ui.refs :as refs]))
 

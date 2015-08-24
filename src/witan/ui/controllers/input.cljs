@@ -7,8 +7,10 @@
 (defn fetch-visible-projections
   [state]
   (let [all-expanded (-> state :projections-meta :expanded)
+        filter (-> state :projections-meta :filter)
         toggled-on (mapv #(vector :db/id (first %)) all-expanded)]
-    (d/fetch-projections {:expand toggled-on})))
+    (d/fetch-projections {:expand toggled-on
+                          :filter filter})))
 
 (defmulti handler
   (fn [[event args] cursor] event))

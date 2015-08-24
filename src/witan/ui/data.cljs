@@ -1,11 +1,17 @@
 (ns ^:figwheel-always witan.ui.data
-  (:require [datascript :as d]))
+    (:require [datascript :as d]
+              [witan.ui.util :as util]))
 
 (defonce app-state (atom {}))
 (defonce db-schema {})
 (defonce db-conn (d/create-conn db-schema))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn get-string
+  "Assumes that strings are always in the :strings keyword"
+  [keyword]
+  (-> @app-state :strings keyword))
 
 (defn fetch-ancestor-projection
   "TODO This currently only handles the FIRST child. No support for branching."
@@ -26,12 +32,20 @@
         new-results))))
 
 (defn fetch-projections
-  [{:keys [expand] :or {expand false}}]
-  (let [top-level (apply concat (d/q '[:find (pull ?e [*])
+  [{:keys [expand filter] :or {expand false
+                               filter nil}}] ;; filter is only applied to top-level projections.
+  (let [pred (fn [n] (if (nil? filter)
+                         true
+                         (util/contains-str n filter)))
+        top-level (apply concat (d/q '[:find (pull ?e [*])
+                                       :in $ ?pred
                                        :where [?e :id _]
+                                       [?e :name ?n]
                                        [(get-else $ ?e :descendant-id nil) ?u]
-                                       [(nil? ?u)]]
-                                     @db-conn))]
+                                       [(nil? ?u)]
+                                       [(?pred ?n)]]
+                                     @db-conn
+                                     pred))]
     (if-not expand
       top-level
       (if (vector? expand)
