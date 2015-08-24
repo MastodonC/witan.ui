@@ -7,7 +7,7 @@
             [schema.core :as s :include-macros true]
               ;;
             [witan.schema.core :refer [Projection]]
-            [witan.ui.util :refer [get-string]]))
+            [witan.ui.data :refer [get-string]]))
 
 (defcomponent
   view
