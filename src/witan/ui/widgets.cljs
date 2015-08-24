@@ -64,10 +64,13 @@
                                   is-expanded? [:i.fa.fa-minus-square-o.tree-control]
                                   has-ancestor? [:i.fa.fa-plus-square-o.tree-control])]
               [:td
-               [:span.name (:name projection)]]
-              [:td.text-center (-> projection :type name i/capitalize)]
-              [:td.text-center (:owner projection)]
-              [:td.text-center (:version projection)]
+               [:span.name.unselectable (:name projection)]]
               [:td.text-center
-               [:span (:last-modified projection)]
-               [:span.modifier (:last-modifier projection)]]]))))
+               [:span.unselectable (-> projection :type name i/capitalize)]]
+              [:td.text-center
+               [:span.unselectable (:owner projection)]]
+              [:td.text-center
+               [:span.unselectable (:version projection)]]
+              [:td.text-center
+               [:span.unselectable (:last-modified projection)]
+               [:span.modifier.unselectable (:last-modifier projection)]]]))))

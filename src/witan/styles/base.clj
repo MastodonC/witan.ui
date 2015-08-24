@@ -73,6 +73,9 @@
         [:.text-white
          {:color colour/white}]
 
+        [".unselectable::selection"
+         {:background-color :transparent}]
+
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
         [:#container
@@ -138,8 +141,6 @@
            :margin-left (em 0.5)}]
          [:.tree-control
           {:background-color colour/white}]
-         [".name::selection"
-          {:background-color :transparent}]
          [:&:hover
           {:background-color colour/row-highlight
            :cursor :pointer}]]

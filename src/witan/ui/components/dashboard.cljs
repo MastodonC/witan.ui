@@ -76,4 +76,5 @@
                             (:projections cursor)
                             {:key :id
                              :opts {:on-click #(raise! %1 %2 %3)
-                                    :on-double-click #(goto-window-location! (str "#/projection/" (:id %2)))}})]]])))
+                                    :on-double-click #(if (nil? (:descendant-id %2))
+                                                        (goto-window-location! (str "#/projection/" (:id %2))))}})]]])))
