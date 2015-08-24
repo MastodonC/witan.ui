@@ -12,8 +12,7 @@
             [witan.ui.async :refer [raise!]]
             [witan.ui.refs :as refs]
             [witan.ui.util :refer [goto-window-location!]]
-            [witan.ui.nav :as nav]
-            ))
+            [witan.ui.nav :as nav]))
 
 (defn get-selected-projection
   [cursor]

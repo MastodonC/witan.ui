@@ -1,10 +1,9 @@
 (ns ^:figwheel-always witan.ui.nav
-    (:require [cljs.core.async :as async :refer [>! <! alts! chan close!]]
-              [secretary.core :as secretary :refer-macros [defroute]]
-              [om.core :as om :include-macros true]
-              [witan.ui.data :as data]
-              [witan.ui.util :refer [prependtial]]
-              ))
+  (:require [cljs.core.async :as async :refer [>! <! alts! chan close!]]
+            [secretary.core :as secretary :refer-macros [defroute]]
+            [om.core :as om :include-macros true]
+            [witan.ui.data :as data]
+            [witan.ui.util :refer [prependtial]]))
 
 (defonce comms (atom {}))
 (defonce views (atom {:projection nil
