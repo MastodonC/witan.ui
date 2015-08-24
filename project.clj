@@ -13,11 +13,13 @@
                  [prismatic/om-tools "0.3.11"]
                  [inflections "0.9.14"]
                  [prismatic/schema "0.4.3"]
-                 [secretary "1.2.3"]]
+                 [secretary "1.2.3"]
+                 [datascript "0.11.6"]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]
-            [lein-garden "0.2.6"]]
+            [lein-garden "0.2.6"]
+            [lein-cljfmt "0.3.0"]]
 
   :source-paths ["src"]
 
@@ -31,7 +33,8 @@
                                    :asset-path "js/compiled/out-ui"
                                    :output-to "resources/public/js/compiled/witan-ui.js"
                                    :output-dir "resources/public/js/compiled/out-ui"
-                                   :source-map-timestamp true }}
+                                   :source-map-timestamp true
+                                   :warnings {:single-segment-namespace false}}}
                        {:id "login"
                         :source-paths ["src"]
                         :figwheel true

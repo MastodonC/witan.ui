@@ -6,6 +6,7 @@
 (def black (:black color/color-name->hex))
 (def gray (:gray color/color-name->hex))
 (def dark-gray (:darkgray color/color-name->hex))
+(def darker-gray (color/darken (:darkgray color/color-name->hex) 20))
 
 ;;
 (def button-success "#59cd90")
