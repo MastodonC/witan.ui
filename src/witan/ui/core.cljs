@@ -11,7 +11,6 @@
             [secretary.core :as secretary :refer-macros [defroute]]
             ;;
             [witan.schema.core :refer [Projection]]
-            [witan.ui.util :refer [prependtial]]
             [witan.ui.controllers.input]
             [witan.ui.data :as data]
             [witan.ui.nav :as nav]

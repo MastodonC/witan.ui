@@ -12,7 +12,7 @@
             [witan.ui.refs :as refs]))
 
 (defcomponent view
-  [cursor owner args]
+  [cursor owner & opts]
   (render [_]
           (html
            [:h1 "New Projection"])))

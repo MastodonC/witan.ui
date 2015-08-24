@@ -11,7 +11,7 @@
 
 (defcomponent
   view
-  [cursor owner]
+  [cursor owner & opts]
   (render [_]
           (html
            [:div.pure-menu.pure-menu-horizontal

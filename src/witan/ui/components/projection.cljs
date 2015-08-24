@@ -12,7 +12,8 @@
             [witan.ui.refs :as refs]))
 
 (defcomponent view
-  [cursor owner {:keys [id] :as args}]
+  [cursor owner & opts]
   (render [_]
-          (html
-           [:h1 (str "Projection: " id)])))
+          (let [{:keys [id action]} (first opts)]
+            (html
+             [:h1 (str "Projection: " id)]))))

@@ -2,8 +2,7 @@
   (:require [cljs.core.async :as async :refer [>! <! alts! chan close!]]
             [secretary.core :as secretary :refer-macros [defroute]]
             [om.core :as om :include-macros true]
-            [witan.ui.data :as data]
-            [witan.ui.util :refer [prependtial]]))
+            [witan.ui.data :as data]))
 
 (defonce comms (atom {}))
 (defonce views (atom {:projection nil
@@ -19,10 +18,11 @@
   [view params]
   ;; main view
   (om/root
-   (prependtial (view) params)
+   (view)
    data/app-state
    {:target (find-app-container)
-    :shared {:comms @comms}})
+    :shared {:comms @comms}
+    :opts params})
   ;; menu
   (om/root
    ((fn [] (:menu @views)))
