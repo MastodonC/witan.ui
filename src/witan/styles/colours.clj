@@ -14,6 +14,11 @@
 (def button-warning "#fac05e")
 (def button-primary "#3590f3")
 
+;;
+(def projection-input "#9fc5f8")
+(def projection-model "#ffd966")
+(def projection-output "#b6d7a8")
+
 ;; page background
 (def bg white)
 

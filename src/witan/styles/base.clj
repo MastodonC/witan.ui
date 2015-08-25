@@ -20,9 +20,11 @@
         [:body :h1 :h2 :h3 :h4 :h5
          {:font-family f/base-fonts}]
         [:h1
-         {:color colour/title}]
+         {:color colour/title
+          :font-size (em 2.5)}]
         [:h2
-         {:color colour/subtitle}]
+         {:color colour/subtitle
+          :font-size (em 1.75)}]
         [:h3
          {:color colour/para-heading}]
         [:hr
@@ -107,11 +109,10 @@
 
         [:.witan-dash-heading
          {:color colour/primary
-          :font-size (px 20)
+          ;;:font-size (px 20)
           :border-bottom "#ccc 2px solid"}
          [:h1
           {:margin-bottom (em 0.2)
-           :font-size (em 2)
            :display :inline-block}]
          [:button
           {:margin-left (em 0.5)}]
@@ -153,5 +154,30 @@
          {:color colour/darker-gray
           :font-size (em 0.9)}
          [:.name
-          {:margin-left (em 1)}]]])
+          {:margin-left (em 1)}]]
+
+        [:.witan-pw-header
+         {:border-bottom "#ccc 2px solid"}
+         [:h1
+          {:margin-bottom (em 0.2)
+           :display :inline-block}]]
+
+        [:.witan-pw-area-header
+         {:text-align :center
+          :width (percent 100)
+          :margin-top (px 20)
+          :margin-bottom (px 15)}
+         [:h2
+          {:color colour/primary
+           :margin "10px"
+           :font-weight 400}]
+         [:.input
+          {:width (percent 100)
+           :background-color colour/projection-input}]
+         [:.model
+          {:width (percent 100)
+           :background-color colour/projection-model}]
+         [:.output
+          {:width (percent 100)
+           :background-color colour/projection-output}]]])
       vec))

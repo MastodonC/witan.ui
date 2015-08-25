@@ -19,7 +19,7 @@
   (some #(if (= (:id %) (-> cursor :projections-meta :selected second)) %) (:projections cursor)))
 
 (defcomponent
-  dash-header
+  header
   [[selected top-level] owner]
   (render [_]
           (let [selected-id (:id selected)
@@ -38,12 +38,12 @@
                   [:i.fa.fa-plus]]]]
                (if (and (not-empty selected) is-top-level?)
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (nav/projection-wizard {:id selected-id :action "edit"})}
+                  [:a {:href (nav/projection-wizard {:id selected-id :action "input"})}
                    [:button.pure-button.button-warning
                     [:i.fa.fa-pencil]]]])
                (if (not (empty? selected))
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (nav/projection-wizard {:id selected-id :action "download"})}
+                  [:a {:href (nav/projection-wizard {:id selected-id :action "output"})}
                    [:button.pure-button.button-primary
                     [:i.fa.fa-download]]]])
                (if (not (empty? selected))
@@ -57,7 +57,7 @@
   (render [_]
           (html
            [:div
-            (om/build dash-header [(get-selected-projection cursor)
+            (om/build header [(get-selected-projection cursor)
                                    (->> :projections
                                         (-> cursor)
                                         (filter (comp nil? :descendant-id))
@@ -79,4 +79,4 @@
                              :opts {:on-click #(raise! %1 %2 %3)
                                     :on-double-click #(if (nil? (:descendant-id %2))
                                                         (goto-window-location!
-                                                         (nav/projection-wizard {:id (:id %2) :action ""})))}})]]])))
+                                                         (nav/projection-wizard {:id (:id %2) :action "input"})))}})]]])))
