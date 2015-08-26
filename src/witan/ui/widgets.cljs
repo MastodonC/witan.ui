@@ -26,22 +26,22 @@
                                     (.preventDefault e))}]]]))))
 
 (defcomponent
-  projection-tr
-  [projection owner & opts]
+  forecast-tr
+  [forecast owner & opts]
   (render [_]
           (let [{:keys [on-click on-double-click]} (first opts)
-                projections-meta        (om/observe owner (refs/projections-meta))
-                selected-projection     (:selected projections-meta)
-                ancestor-set            (set (map second (:has-ancestors projections-meta)))
-                expanded-set            (set (map second (:expanded projections-meta)))
-                is-selected-projection? (= (:id projection) (second selected-projection))
-                has-ancestor?           (contains? ancestor-set (:id projection))
-                is-expanded?            (contains? expanded-set (:id projection))
-                has-descendant?         (not (nil? (:descendant-id projection)))
-                classes                 [[is-selected-projection? "witan-projection-table-row-selected"]
-                                         [has-descendant? "witan-projection-table-row-descendant"]]]
+                forecasts-meta        (om/observe owner (refs/forecasts-meta))
+                selected-forecast     (:selected forecasts-meta)
+                ancestor-set            (set (map second (:has-ancestors forecasts-meta)))
+                expanded-set            (set (map second (:expanded forecasts-meta)))
+                is-selected-forecast? (= (:id forecast) (second selected-forecast))
+                has-ancestor?           (contains? ancestor-set (:id forecast))
+                is-expanded?            (contains? expanded-set (:id forecast))
+                has-descendant?         (not (nil? (:descendant-id forecast)))
+                classes                 [[is-selected-forecast? "witan-forecast-table-row-selected"]
+                                         [has-descendant? "witan-forecast-table-row-descendant"]]]
             (html
-             [:tr.witan-projection-table-row {:key (:id projection)
+             [:tr.witan-forecast-table-row {:key (:id forecast)
                                               :class (->> classes
                                                           (filter first)
                                                           (map second)
@@ -52,25 +52,25 @@
                                                             (if (and
                                                                  has-ancestor?
                                                                  (contains-str (.. e -target -className) "tree-control"))
-                                                              (on-click owner :event/toggle-tree-view projection e)
-                                                              (on-click owner :event/select-projection projection e)))
+                                                              (on-click owner :event/toggle-tree-view forecast e)
+                                                              (on-click owner :event/select-forecast forecast e)))
                                                           (.preventDefault e))
                                               :on-double-click (fn [e]
                                                                  (if (fn? on-double-click)
-                                                                   (on-double-click owner projection e))
+                                                                   (on-double-click owner forecast e))
                                                                  (.preventDefault e))}
 
               [:td.tree-control (cond
                                   is-expanded? [:i.fa.fa-minus-square-o.tree-control]
                                   has-ancestor? [:i.fa.fa-plus-square-o.tree-control])]
               [:td
-               [:span.name.unselectable (:name projection)]]
+               [:span.name.unselectable (:name forecast)]]
               [:td.text-center
-               [:span.unselectable (-> projection :type name i/capitalize)]]
+               [:span.unselectable (-> forecast :type name i/capitalize)]]
               [:td.text-center
-               [:span.unselectable (:owner projection)]]
+               [:span.unselectable (:owner forecast)]]
               [:td.text-center
-               [:span.unselectable (:version projection)]]
+               [:span.unselectable (:version forecast)]]
               [:td.text-center
-               [:span.unselectable (:last-modified projection)]
-               [:span.modifier.unselectable (:last-modifier projection)]]]))))
+               [:span.unselectable (:last-modified forecast)]
+               [:span.modifier.unselectable (:last-modifier forecast)]]]))))

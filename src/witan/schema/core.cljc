@@ -4,30 +4,30 @@
 (def Events
   "Any control events should be included here"
   #{:event/test-event            ;; this event is purely for testing
-    :event/select-projection     ;; indicates that a projection is currently selected
-    :event/toggle-tree-view      ;; indicates that the projection tree should expand at the specified branch
-    :event/filter-projections    ;; filter the projections by name
+    :event/select-forecast     ;; indicates that a forecast is currently selected
+    :event/toggle-tree-view      ;; indicates that the forecast tree should expand at the specified branch
+    :event/filter-forecasts    ;; filter the forecasts by name
     })
 
-(def ProjectionTypes
-  "Valid Projection types"
+(def ForecastTypes
+  "Valid Forecast types"
   (s/enum
    :population
    :employment))
 
-(def ProjectionIdType
+(def ForecastIdType
   "The type of an ID"
   s/Str)
 
-(def Projection
+(def Forecast
   "A schema for a schema"
-  {(s/required-key :id)            ProjectionIdType
+  {(s/required-key :id)            ForecastIdType
    (s/required-key :name)          s/Str
-   (s/required-key :type)          ProjectionTypes
+   (s/required-key :type)          ForecastTypes
    (s/required-key :owner)         s/Str
    (s/required-key :version)       s/Int
    (s/required-key :last-modified) s/Str
    (s/required-key :last-modifier) s/Str
-   (s/optional-key :descendant-id) ProjectionIdType
+   (s/optional-key :descendant-id) ForecastIdType
    ;; added internally
    (s/optional-key :db/id)         s/Int})

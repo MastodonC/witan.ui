@@ -2,9 +2,9 @@
   (:require [om.core :as om :include-macros true]
             [witan.ui.data :refer [app-state]]))
 
-(defn projections-meta
+(defn forecasts-meta
   []
   (-> app-state
       om/root-cursor
-      :projections-meta
+      :forecasts-meta
       om/ref-cursor))

@@ -128,7 +128,7 @@
          {:padding-left (px 30)
           :padding-right (px 30)}]
 
-        [:#witan-dash-projection-list
+        [:#witan-dash-forecast-list
          {:width (percent 100)
           :border (px 0)}
          [:th :td
@@ -136,7 +136,7 @@
          [:th:first-child
           {:width (px 1)}]]
 
-        [:.witan-projection-table-row
+        [:.witan-forecast-table-row
          [:.modifier
           {:color colour/gray
            :margin-left (em 0.5)}]
@@ -146,11 +146,11 @@
           {:background-color colour/row-highlight
            :cursor :pointer}]]
 
-        [:.witan-projection-table-row-selected
-         :.witan-projection-table-row-selected:hover
+        [:.witan-forecast-table-row-selected
+         :.witan-forecast-table-row-selected:hover
          {:background-color colour/row-selected}]
 
-        [:.witan-projection-table-row-descendant
+        [:.witan-forecast-table-row-descendant
          {:color colour/darker-gray
           :font-size (em 0.9)}
          [:.name
@@ -173,11 +173,11 @@
            :font-weight 400}]
          [:.input
           {:width (percent 100)
-           :background-color colour/projection-input}]
+           :background-color colour/forecast-input}]
          [:.model
           {:width (percent 100)
-           :background-color colour/projection-model}]
+           :background-color colour/forecast-model}]
          [:.output
           {:width (percent 100)
-           :background-color colour/projection-output}]]])
+           :background-color colour/forecast-output}]]])
       vec))
