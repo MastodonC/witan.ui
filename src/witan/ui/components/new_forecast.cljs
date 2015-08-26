@@ -1,4 +1,4 @@
-(ns ^:figwheel-always witan.ui.components.new-projection
+(ns ^:figwheel-always witan.ui.components.new-forecast
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -7,7 +7,7 @@
             [schema.core :as s :include-macros true]
               ;;
             [witan.ui.widgets :as widgets]
-            [witan.schema.core :refer [Projection]]
+            [witan.schema.core :refer [Forecast]]
             [witan.ui.async :refer [raise!]]
             [witan.ui.refs :as refs]))
 
@@ -15,4 +15,4 @@
   [cursor owner & opts]
   (render [_]
           (html
-           [:h1 "New Projection"])))
+           [:h1 "New Forecast"])))

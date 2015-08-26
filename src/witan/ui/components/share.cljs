@@ -7,7 +7,7 @@
               [schema.core :as s :include-macros true]
               ;;
               [witan.ui.widgets :as widgets]
-              [witan.schema.core :refer [Projection]]
+              [witan.schema.core :refer [Forecast]]
               [witan.ui.data :refer [get-string]]
               [witan.ui.async :refer [raise!]]
               [witan.ui.refs :as refs]

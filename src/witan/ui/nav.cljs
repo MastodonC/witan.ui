@@ -5,9 +5,9 @@
             [witan.ui.data :as data]))
 
 (defonce comms (atom {}))
-(defonce views (atom {:projection nil
+(defonce views (atom {:forecast nil
                       :dashboard nil
-                      :new-projection nil
+                      :new-forecast nil
                       :menu nil
                       :share nil}))
 
@@ -39,15 +39,15 @@
   {:as params}
   (install-om! (fn [] (:dashboard @views)) params))
 
-(defroute projection-wizard
-  "/projection/:id/*action"
+(defroute forecast-wizard
+  "/forecast/:id/*action"
   {:as params}
-  (install-om! (fn [] (:projection @views)) params))
+  (install-om! (fn [] (:forecast @views)) params))
 
-(defroute new-projection
-  "/new-projection/"
+(defroute new-forecast
+  "/new-forecast/"
   {:as params}
-  (install-om! (fn [] (:new-projection @views)) params))
+  (install-om! (fn [] (:new-forecast @views)) params))
 
 (defroute share
   "/share/:id/"

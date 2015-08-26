@@ -6,7 +6,7 @@
             [inflections.core :as i]
             [schema.core :as s :include-macros true]
               ;;
-            [witan.schema.core :refer [Projection]]
+            [witan.schema.core :refer [Forecast]]
             [witan.ui.data :refer [get-string]]))
 
 (defcomponent

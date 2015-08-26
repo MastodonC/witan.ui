@@ -10,14 +10,14 @@
             [schema.core :as s :include-macros true]
             [secretary.core :as secretary :refer-macros [defroute]]
             ;;
-            [witan.schema.core :refer [Projection]]
+            [witan.schema.core :refer [Forecast]]
             [witan.ui.controllers.input]
             [witan.ui.data :as data]
             [witan.ui.nav :as nav]
-            [witan.ui.components.projection]
+            [witan.ui.components.forecast]
             [witan.ui.components.dashboard]
             [witan.ui.components.menu]
-            [witan.ui.components.new-projection]
+            [witan.ui.components.new-forecast]
             [witan.ui.components.share])
   (:require-macros [cljs.core.async.macros :as am :refer [go go-loop alt!]])
 
@@ -37,28 +37,28 @@
 (defonce define-views
   (do
     (reset! nav/views
-            {:projection     witan.ui.components.projection/view
+            {:forecast     witan.ui.components.forecast/view
              :dashboard      witan.ui.components.dashboard/view
-             :new-projection witan.ui.components.new-projection/view
+             :new-forecast witan.ui.components.new-forecast/view
              :menu           witan.ui.components.menu/view
              :share          witan.ui.components.share/view})))
 
 (defonce strings
   {:witan-title             "Witan for London"
-   :projections             "projections"
+   :forecasts             "forecasts"
    :filter                  "Filter"
-   :projection-name         "Name"
-   :projection-type         "Type"
-   :projection-owner        "Owner"
-   :projection-version      "Version"
-   :projection-lastmodified "Last Modified"})
+   :forecast-name         "Name"
+   :forecast-type         "Type"
+   :forecast-owner        "Owner"
+   :forecast-version      "Version"
+   :forecast-lastmodified "Last Modified"})
 
 (defonce define-app-state
   (do
     (reset! data/app-state {:strings strings
                             :current-route nil
-                            :projections []
-                            :projections-meta {:expanded #{}
+                            :forecasts []
+                            :forecasts-meta {:expanded #{}
                                                :selected []
                                                :has-ancestors #{}
                                                :filter nil}})
@@ -66,8 +66,8 @@
 
 ;; VALIDATE - make sure our app-state matches the schema
 ;; FIXME we should only do this in dev/testing (possibly staging?)
-(doseq [p (:projections @data/app-state)]
-  (s/validate Projection p))
+(doseq [p (:forecasts @data/app-state)]
+  (s/validate Forecast p))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; ROUTING FUNCTIONS
