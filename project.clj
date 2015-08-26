@@ -81,6 +81,7 @@
                      :stylesheet witan.styles.base/base
                      ;; Compiler flags passed to `garden.core/css`:
                      :compiler {;; Where to save the file:
+                                :vendors [:moz :webkit :o]
                                 :output-to "resources/public/css/app.css"
                                 ;; Compress the output?
                                 :pretty-print? false}}
@@ -92,6 +93,7 @@
                      :stylesheet witan.styles.login/login
                      ;; Compiler flags passed to `garden.core/css`:
                      :compiler {;; Where to save the file:
+                                :vendors [:moz :webkit :o]
                                 :output-to "resources/public/css/login.css"
                                 ;; Compress the output?
                                 :pretty-print? false}}]})

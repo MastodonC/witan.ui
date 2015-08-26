@@ -20,7 +20,8 @@
           :height (percent 100)
           :margin (px 0)
           :color colour/white
-          :font-family f/base-fonts}
+          :font-family f/base-fonts
+          :background-color :transparent}
          [:input {:color colour/dark-gray}]]
 
         [:a
@@ -28,58 +29,62 @@
         [:a:hover
          {:text-decoration :underline}]
 
-         ;; classes
+        ;; classes
+        [:.trans-bg
+         {:background "transparent url ('../img/trans75.png')"
+          :background-clip :padding-box}]
+
         [:.bg
-         {:display :table
-          :position :relative
+         {:position :fixed
+          :top (px 0)
+          :left (px 0)
           :width (percent 100)
           :height (percent 100)
-          :background "transparent url(\"../img/login-bg.jpg\") no-repeat scroll center center / cover"}]
+          :background "url ('../img/login-bg.jpg') no-repeat center center fixed"
+          :filter "progid:DXImageTransform.Microsoft.AlphaImageLoader (src='.myBackground.jpg', sizingMethod='scale')"
+          :-ms-filter "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='myBackground.jpg', sizingMethod='scale')"
+          }
+         ^:prefix{:background-size :cover}]
 
         [:.bg-attribution
-         {:position :absolute
-          :background-color colour/login-black-bg
-          :color colour/gray
+         { :color colour/gray
           :font-size (em 0.65)
           :font-family :monospace
-          :padding (em 0.2)
-          :margin (em 0.2)
-          :bottom (px 0)
-          :right (px 2)}]
-
-        [:.bg-attribution
+          :float :right}
          [:a
           {:text-decoration :none
            :color colour/white}]]
 
-        [:#container
-         {:position :absolute
-          :top (percent 15)
-          :left (percent 5)}]
-
         [:.title
-         {:postion :relative}
          [:h1
           {:font-size (em 5)
            :font-weight 700
            :padding "0px 0px 0px 20px"
-           :margin "10px 0px"
-           :background-color colour/login-black-bg
-           :background-clip :padding-box}]
+           :margin "10px 0px"}]
          [:h2
           {:font-size (em 4)
            :font-weight 400
            :padding "0px 20px 10px 20px"
-           :margin (px 0)
-           :background-color colour/login-black-bg
-           :background-clip :padding-box}]]
+           :margin (px 0)}]]
+
+        [:#content-container
+         {:position :absolute
+          :top (px 0)
+          :left (px 0)
+          :width (percent 100)}]
+
+        [:#relative-container
+         {:position :relative
+          :padding (percent 5)
+          :display :table-cell}]
 
         [:#witan-login
          {:margin-top (em 3)
+          :margin-bottom (em 1)
           :padding "1px 30px 20px 20px"
           :height (percent 100)
           :width (px 300)
-          :background-color colour/login-black-bg}
+          }
          [:#loading
           {:color colour/white
            :margin "15px auto 0px auto"
@@ -96,5 +101,8 @@
            :cursor :pointer}]
          [:.forgotten-div
           [:#back-button
-           {:float :right}]]]])
+           {:float :right}]]
+         [:#witan-copy
+          {:margin-top (px 20)
+           :margin-bottom (px 20)}]]])
       vec))
