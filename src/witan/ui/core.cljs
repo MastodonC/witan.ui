@@ -14,6 +14,7 @@
             [witan.ui.controllers.input]
             [witan.ui.data :as data]
             [witan.ui.nav :as nav]
+            [witan.ui.components.login]
             [witan.ui.components.forecast]
             [witan.ui.components.dashboard]
             [witan.ui.components.menu]
@@ -37,25 +38,38 @@
 (defonce define-views
   (do
     (reset! nav/views
-            {:forecast     witan.ui.components.forecast/view
+            {:login          witan.ui.components.login/view
+             :forecast       witan.ui.components.forecast/view
              :dashboard      witan.ui.components.dashboard/view
-             :new-forecast witan.ui.components.new-forecast/view
+             :new-forecast   witan.ui.components.new-forecast/view
              :menu           witan.ui.components.menu/view
              :share          witan.ui.components.share/view})))
 
 (defonce strings
-  {:witan-title             "Witan for London"
+  {:witan-title           "Witan for London"
    :forecasts             "forecasts"
-   :filter                  "Filter"
+   :filter                "Filter"
    :forecast-name         "Name"
    :forecast-type         "Type"
    :forecast-owner        "Owner"
    :forecast-version      "Version"
-   :forecast-lastmodified "Last Modified"})
+   :forecast-lastmodified "Last Modified"
+   :sign-in               "Sign In"
+   :email                 "Email"
+   :password              "Password"
+   :forgotten-question    "forgotten your password?"
+   :forgotten-password    "Forgotten Password"
+   :forgotten-instruction "Please enter your email address. If it matches one in our system we'll send you reset instructions."
+   :reset-submitted       "Thanks. Your password reset request has been received."
+   :reset-password        "Reset Password"
+   :back                  "Back"
+   :thanks                "Thanks"
+   :please-wait           "Please wait..."})
 
 (defonce define-app-state
   (do
     (reset! data/app-state {:strings strings
+                            :login-state {:is-logged-in? false :phase :prompt}
                             :current-route nil
                             :forecasts []
                             :forecasts-meta {:expanded #{}
@@ -84,11 +98,6 @@
   (doto history
     (goog.events/listen EventType/NAVIGATE on-navigate)
     (.setEnabled true)))
-
-(defn on-js-reload []
-  ;; this is required for the figwheel reload
-  (om/detach-root (nav/find-app-container))
-  (secretary/dispatch! (:current-route @data/app-state)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; MESSAGE HANDLING

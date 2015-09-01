@@ -2,7 +2,13 @@
   (:require [om.core :as om :include-macros true]
             [schema.core :as s :include-macros true]
             [witan.schema.core :refer [Forecast]]
-            [witan.ui.data :as d]))
+            [witan.ui.data :as d]
+            [witan.ui.async :as a]
+            [witan.ui.nav :as nav]
+            [cljs.core.async :as async :refer [<!]]
+            )
+  (:require-macros
+   [cljs.core.async.macros :as am :refer [go]]))
 
 (defn fetch-visible-forecasts
   [state]
@@ -10,10 +16,19 @@
         filter (-> state :forecasts-meta :filter)
         toggled-on (mapv #(vector :db/id (first %)) all-expanded)]
     (d/fetch-forecasts {:expand toggled-on
-                          :filter filter})))
+                        :filter filter})))
 
 (defmulti handler
   (fn [[event args] cursor] event))
+
+(defmethod handler
+  :event/attempt-login
+  [[event args] cursor]
+  (om/update! cursor [:login-state :phase] :waiting)
+  (go
+    (<! (a/timeout 1000))
+    (om/update! cursor [:login-state :is-logged-in?] true)
+    (nav/restart-app)))
 
 (defmethod handler
   :event/select-forecast
@@ -39,3 +54,10 @@
   (let [new-filter (not-empty args)
         new-state (om/update! cursor [:forecasts-meta :filter] new-filter)]
     (om/update! cursor :forecasts (fetch-visible-forecasts @new-state))))
+
+(defmethod handler
+  :event/show-password-reset
+  [[event args] cursor]
+  (if (= :prompt (-> @cursor :login-state :phase))
+    (om/update! cursor [:login-state :phase] :reset)
+    (om/update! cursor [:login-state :phase] :prompt)))
