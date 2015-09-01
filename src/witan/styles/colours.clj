@@ -18,6 +18,7 @@
 (def forecast-input "#9fc5f8")
 (def forecast-model "#ffd966")
 (def forecast-output "#b6d7a8")
+(def forecast-group "#c0c5f7")
 
 ;; page background
 (def bg white)

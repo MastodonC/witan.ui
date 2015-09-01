@@ -65,6 +65,8 @@
   (let [forecasts [{:id "1234"
                       :name "Population Forecast for Camden"
                       :type :population
+                      :n-inputs 3
+                      :n-outputs [2 3]
                       :owner "Camden"
                       :version 3
                       :last-modified "Aug 10th, 2015"
@@ -72,6 +74,8 @@
                      {:id "1233"
                       :name "Population Forecast for Camden"
                       :type :population
+                      :n-inputs 3
+                      :n-outputs [2 3]
                       :owner "Camden"
                       :version 2
                       :last-modified "Aug 8th, 2015"
@@ -80,6 +84,8 @@
                      {:id "1232"
                       :name "Population Forecast for Camden"
                       :type :population
+                      :n-inputs 3
+                      :n-outputs [2 3]
                       :owner "Camden"
                       :version 1
                       :last-modified "July 4th, 2015"
@@ -88,6 +94,8 @@
                      {:id "5678"
                       :name "Population Forecast for Bexley"
                       :type :population
+                      :n-inputs 2
+                      :n-outputs [3 1]
                       :owner "Bexley"
                       :version 2
                       :last-modified "July 22nd, 2015"
@@ -95,6 +103,8 @@
                      {:id "5676"
                       :name "Population Forecast for Bexley"
                       :type :population
+                      :n-inputs 2
+                      :n-outputs [3 1]
                       :owner "Bexley"
                       :version 1
                       :last-modified "June 14th, 2015"
@@ -103,6 +113,8 @@
                      {:id "3339"
                       :name "Population Forecast for Hackney"
                       :type :population
+                      :n-inputs 3
+                      :n-outputs [2 2]
                       :owner "Hackney"
                       :version 1
                       :last-modified "Feb 14th, 2015"
