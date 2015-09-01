@@ -45,7 +45,8 @@
       :font-weight 400
       :padding "0px 20px 10px 20px"
       :margin (px 0)
-      :color colour/white}]]
+      :color colour/white
+      }]]
 
    [:#content-container
     {:position :absolute
@@ -56,7 +57,7 @@
    [:#relative-container
     {:position :relative
      :padding (percent 5)
-     :display :table-cell}]
+     :display :inline-block}]
 
    [:#witan-login
     {:margin-top (em 3)
