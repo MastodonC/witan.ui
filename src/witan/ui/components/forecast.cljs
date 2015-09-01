@@ -7,6 +7,7 @@
             [schema.core :as s :include-macros true]
               ;;
             [witan.ui.widgets :as widgets]
+            [witan.ui.components.model-diagram :as model-diagram]
             [witan.schema.core :refer [Forecast]]
             [witan.ui.async :refer [raise!]]
             [witan.ui.refs :as refs]))
@@ -53,10 +54,16 @@
   (render [_]
           (let [{:keys [id action]} (first opts)
                 kaction (keyword action)
-                forecast (some #(if (= (:id %) id) %) (:forecasts cursor))]
+                forecast (some #(if (= (:id %) id) %) (:forecasts cursor))
+                ;; this is directly included in the forecast's data for now. More realistically
+                ;; it would be derived from input and output information in the forecast.
+                model-shape (select-keys forecast [:n-inputs :n-outputs])]
             (html
              [:div
               (om/build header forecast)
+              [:div.pure-g
+               [:div.pure-u-1.witan-model-diagram
+                (om/build model-diagram/diagram model-shape)]]
               (if (not (contains? valid-actions kaction))
                 [:span "Unknown forecast action"]
                 [:div

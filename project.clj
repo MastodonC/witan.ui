@@ -14,7 +14,8 @@
                  [inflections "0.9.14"]
                  [prismatic/schema "0.4.3"]
                  [secretary "1.2.3"]
-                 [datascript "0.11.6"]]
+                 [datascript "0.11.6"]
+                 [thi.ng/geom "0.0.881"]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]

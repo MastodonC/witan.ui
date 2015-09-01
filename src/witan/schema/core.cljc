@@ -24,6 +24,8 @@
   {(s/required-key :id)            ForecastIdType
    (s/required-key :name)          s/Str
    (s/required-key :type)          ForecastTypes
+   (s/required-key :n-inputs)      s/Int
+   (s/required-key :n-outputs)     [s/Int]
    (s/required-key :owner)         s/Str
    (s/required-key :version)       s/Int
    (s/required-key :last-modified) s/Str

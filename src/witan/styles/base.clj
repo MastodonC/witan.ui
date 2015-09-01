@@ -156,6 +156,16 @@
          [:.name
           {:margin-left (em 1)}]]
 
+        [:.witan-model-diagram
+         {:stroke colour/black
+          :stroke-width 3
+          :text-align "center"}
+         [:.input {:fill colour/forecast-input}]
+         [:.output {:fill colour/forecast-output}]
+         [:.model {:fill colour/forecast-model}]
+         [:.group {:fill colour/forecast-group
+                   :stroke "none"}]]
+
         [:.witan-pw-header
          {:border-bottom "#ccc 2px solid"}
          [:h1
