@@ -71,7 +71,7 @@
                        :forecast-owner
                        :forecast-version
                        :forecast-lastmodified]]
-                [:th.text-center (get-string x)])]
+                [:th.text-center {:key (name x)} (get-string x)])]
              [:tbody
               (om/build-all widgets/forecast-tr
                             (:forecasts cursor)
