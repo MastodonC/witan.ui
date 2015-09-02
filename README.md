@@ -10,20 +10,20 @@
 
 This is the frontend application that powers Witan, the open city planning tool, using...
 
-[ClojureScript](https://github.com/clojure/clojurescript)  
-[Om](https://github.com/omcljs/om)  
-[Sablono](https://github.com/r0man/sablono)  
-[Figwheel](https://github.com/bhauman/lein-figwheel)  
-[Secretary](https://github.com/gf3/secretary)  
-[Schema](https://github.com/Prismatic/schema)  
-[Datascript](https://github.com/tonsky/datascript)  
-[Garden](https://github.com/noprompt/garden)  
+[ClojureScript](https://github.com/clojure/clojurescript)
+[Om](https://github.com/omcljs/om)
+[Sablono](https://github.com/r0man/sablono)
+[Figwheel](https://github.com/bhauman/lein-figwheel)
+[Secretary](https://github.com/gf3/secretary)
+[Schema](https://github.com/Prismatic/schema)
+[Datascript](https://github.com/tonsky/datascript)
+[Garden](https://github.com/noprompt/garden)
 
 ## To Develop
 
 To get an interactive development environment run:
 
-    lein figwheel ui login
+    lein figwheel
 
 and open your browser at [localhost:3449](http://localhost:3449/)
 This will auto compile and send all changes to the browser without the
@@ -42,15 +42,20 @@ This will update any chances to CSS styles (in the `styles` directory) and figwh
 
 To clean all compiled files:
 
-    lein clean
+lein clean
+
+## To Build
 
 To create a production build run:
 
-    lein cljsbuild once prod-ui
-    lein cljsbuild once prod-login
+    lein garden once
+    lein cljsbuild once prod
 
-And open your browser in `resources/public/index.html`. You will not
-get live reloading, nor a REPL.
+You can use the in-built ring server which will automatically serve everything out of the `resources/public` directory (and redirect to `index.html`).
+
+    lein ring server
+
+Navigate to `http://localhost:3000` to view the app.
 
 ## License
 
