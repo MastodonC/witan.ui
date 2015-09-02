@@ -64,7 +64,7 @@
               [:div.pure-g
                [:div.pure-u-1.witan-model-diagram
                 (om/build model-diagram/diagram model-shape)]]
-              (if (not (contains? valid-actions kaction))
+              (if-not (contains? valid-actions kaction)
                 [:span "Unknown forecast action"]
                 [:div
                  [:div.pure-g.witan-pw-area-header

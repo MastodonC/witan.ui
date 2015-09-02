@@ -41,12 +41,12 @@
                   [:a {:href (nav/forecast-wizard {:id selected-id :action "input"})}
                    [:button.pure-button.button-warning
                     [:i.fa.fa-pencil]]]])
-               (if (not (empty? selected))
+               (if (seq selected)
                  [:li.witan-menu-item.pure-menu-item
                   [:a {:href (nav/forecast-wizard {:id selected-id :action "output"})}
                    [:button.pure-button.button-primary
                     [:i.fa.fa-download]]]])
-               (if (not (empty? selected))
+               (if (seq selected)
                  [:li.witan-menu-item.pure-menu-item
                   [:a {:href (nav/share {:id selected-id})}
                    [:button.pure-button.button-primary

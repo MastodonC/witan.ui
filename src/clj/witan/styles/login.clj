@@ -20,12 +20,11 @@
      :height (percent 100)
      :background "url ('../img/login-bg.jpg') no-repeat center center fixed"
      :filter "progid:DXImageTransform.Microsoft.AlphaImageLoader (src='.myBackground.jpg', sizingMethod='scale')"
-     :-ms-filter "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='myBackground.jpg', sizingMethod='scale')"
-     }
-    ^:prefix{:background-size :cover}]
+     :-ms-filter "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='myBackground.jpg', sizingMethod='scale')"}
+    ^:prefix {:background-size :cover}]
 
    [:.bg-attribution
-    { :color colour/gray
+    {:color colour/gray
      :font-size (em 0.65)
      :font-family :monospace
      :float :right}
@@ -45,8 +44,7 @@
       :font-weight 400
       :padding "0px 20px 10px 20px"
       :margin (px 0)
-      :color colour/white
-      }]]
+      :color colour/white}]]
 
    [:#content-container
     {:position :absolute
@@ -64,8 +62,7 @@
      :margin-bottom (em 1)
      :padding "1px 30px 20px 20px"
      :height (percent 100)
-     :width (px 300)
-     }
+     :width (px 300)}
     [:#loading
      {:color colour/white
       :margin "15px auto 0px auto"

@@ -1,6 +1,6 @@
 (ns witan.ring.handler
   (:require [ring.middleware.resource :refer [wrap-resource]]
-            [ring.middleware.content-type :refer [wrap-content-type] ]))
+            [ring.middleware.content-type :refer [wrap-content-type]]))
 
 (defn not-found [request]
   {:status 404

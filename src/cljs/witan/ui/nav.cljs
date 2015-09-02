@@ -13,7 +13,7 @@
 
 (defn find-app-container
   []
-  (. js/document (getElementById "witan-main")))
+  (.getElementById js/document "witan-main"))
 
 (defn restart-app []
   ;; restarts the by detaching the root and re-firing the secretary route
@@ -29,7 +29,7 @@
   (if (is-logged-in?)
     (do
       ;; remove witan-login-screen
-      (if-let [login-screen (. js/document (getElementById "witan-login-screen"))]
+      (if-let [login-screen (.getElementById js/document "witan-login-screen")]
         (.removeChild (.-parentNode login-screen) login-screen))
 
       ;; main view

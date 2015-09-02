@@ -40,8 +40,8 @@
   :event/toggle-tree-view
   [[event args] cursor]
   (s/validate Forecast args)
-  (let [db-id        (-> args :db/id)
-        id           (-> args :id)
+  (let [db-id        (:db/id args)
+        id           (:id args)
         toggled?     (contains? (-> cursor :forecasts-meta :expanded) [db-id id])
         fn           (if toggled? disj conj)
         new-state    (om/transact! cursor [:forecasts-meta :expanded] #(fn % [db-id id]))]

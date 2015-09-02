@@ -31,19 +31,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defonce define-comms-channels
-  (do
-    (reset! nav/comms
-            {:input (chan)})))
+  (reset! nav/comms
+          {:input (chan)}))
 
 (defonce define-views
-  (do
-    (reset! nav/views
-            {:login          witan.ui.components.login/view
-             :forecast       witan.ui.components.forecast/view
-             :dashboard      witan.ui.components.dashboard/view
-             :new-forecast   witan.ui.components.new-forecast/view
-             :menu           witan.ui.components.menu/view
-             :share          witan.ui.components.share/view})))
+  (reset! nav/views
+          {:login          witan.ui.components.login/view
+           :forecast       witan.ui.components.forecast/view
+           :dashboard      witan.ui.components.dashboard/view
+           :new-forecast   witan.ui.components.new-forecast/view
+           :menu           witan.ui.components.menu/view
+           :share          witan.ui.components.share/view}))
 
 (defonce strings
   {:witan-title           "Witan for London"
@@ -73,9 +71,9 @@
                             :current-route nil
                             :forecasts []
                             :forecasts-meta {:expanded #{}
-                                               :selected []
-                                               :has-ancestors #{}
-                                               :filter nil}})
+                                             :selected []
+                                             :has-ancestors #{}
+                                             :filter nil}})
     (data/load-dummy-data!)))
 
 ;; VALIDATE - make sure our app-state matches the schema
