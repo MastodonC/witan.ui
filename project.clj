@@ -20,24 +20,25 @@
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]
             [lein-garden "0.2.6"]
-            [lein-cljfmt "0.3.0"]]
+            [lein-cljfmt "0.3.0"]
+            [lein-ring "0.9.6"]]
 
-  :source-paths ["src"]
+  :source-paths ["src/clj" "src/cljc"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
               :builds [{:id "dev"
-                        :source-paths ["src"]
+                        :source-paths ["src/cljs" "src/cljc"]
                         :figwheel {:on-jsload "witan.ui.nav/restart-app" }
                         :compiler {:main witan.ui.core
-                                   :asset-path "js/compiled/out-ui"
+                                   :asset-path "js/compiled/out"
                                    :output-to "resources/public/js/compiled/witan-ui.js"
-                                   :output-dir "resources/public/js/compiled/out-ui"
+                                   :output-dir "resources/public/js/compiled/out"
                                    :source-map-timestamp true
                                    :warnings {:single-segment-namespace false}}}
                        {:id "prod"
-                        :source-paths ["src"]
+                        :source-paths ["src/cljs" "src/cljc"]
                         :compiler {:output-to "resources/public/js/compiled/witan-ui.js"
                                    :main witan.ui.core
                                    :optimizations :advanced
@@ -64,7 +65,7 @@
   :garden {:builds [{;; Optional name of the build:
                      :id "ui"
                      ;; Source paths where the stylesheet source code is
-                     :source-paths ["src/styles"]
+                     :source-paths ["src/clj/styles"]
                      ;; The var containing your stylesheet:
                      :stylesheet witan.styles.base/base
                      ;; Compiler flags passed to `garden.core/css`:
@@ -72,7 +73,9 @@
                                 :vendors [:moz :webkit :o]
                                 :output-to "resources/public/css/style.css"
                                 ;; Compress the output?
-                                :pretty-print? false}}]})
+                                :pretty-print? false}
+                     }]}
+  :ring {:handler witan.ring.handler/app})
 
 (comment
   (do (use 'figwheel-sidecar.repl-api)
