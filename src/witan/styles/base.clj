@@ -3,13 +3,17 @@
             [garden.units :refer [px em percent]]
             [witan.styles.fonts :as f]
             [witan.styles.colours :as colour]
-            [witan.styles.util :refer [url]]))
+            [witan.styles.util :refer [url]]
+            [witan.styles.login :as l]))
 
 ;; Change defstylesheet to defstyles.
 (defstyles base
   (-> (concat
         ;; fonts
        f/font-face-definitions
+
+       ;; login
+       l/login
 
         ;; style
        [;; tags

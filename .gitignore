@@ -11,5 +11,5 @@ pom.xml
 .lein-plugins/
 .repl
 .nrepl-port
-resources/public/css/app.css
-resources/public/css/login.css
+resources/public/css/style.css
+

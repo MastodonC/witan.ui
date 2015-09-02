@@ -3,10 +3,12 @@
 
 (def Events
   "Any control events should be included here"
-  #{:event/test-event            ;; this event is purely for testing
+  #{:event/attempt-login       ;; attempts the login process
     :event/select-forecast     ;; indicates that a forecast is currently selected
-    :event/toggle-tree-view      ;; indicates that the forecast tree should expand at the specified branch
+    :event/toggle-tree-view    ;; indicates that the forecast tree should expand at the specified branch
     :event/filter-forecasts    ;; filter the forecasts by name
+    ;;
+    :event/show-password-reset ;; only works when user not logged in
     })
 
 (def ForecastTypes
