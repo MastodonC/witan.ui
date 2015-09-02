@@ -58,6 +58,7 @@
 (defmethod handler
   :event/show-password-reset
   [[event args] cursor]
-  (if (= :prompt (-> @cursor :login-state :phase))
-    (om/update! cursor [:login-state :phase] :reset)
-    (om/update! cursor [:login-state :phase] :prompt)))
+  (let [path [:login-state :phase]]
+    (if (= :prompt (get-in @cursor path))
+      (om/update! cursor path :reset)
+      (om/update! cursor path :prompt))))
