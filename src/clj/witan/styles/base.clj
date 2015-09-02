@@ -74,6 +74,10 @@
       {:background-color colour/button-primary
        :color colour/white}]
 
+     [:.button-secondary
+      {:background-color colour/button-secondary
+       :color colour/white}]
+
      [:.text-center
       {:text-align :center}]
 

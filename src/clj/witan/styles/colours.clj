@@ -13,6 +13,7 @@
 (def button-error "#ee6352")
 (def button-warning "#fac05e")
 (def button-primary "#3590f3")
+(def button-secondary (color/lighten button-primary 12))
 
 ;;
 (def forecast-input "#9fc5f8")
