@@ -39,12 +39,13 @@
                (if (and (not-empty selected) is-top-level?)
                  [:li.witan-menu-item.pure-menu-item
                   [:a {:href (nav/forecast-wizard {:id selected-id :action "input"})}
-                   [:button.pure-button.button-warning
+                   [:button.pure-button.button-error
                     [:i.fa.fa-pencil]]]])
-               [:li.witan-menu-item.pure-menu-item
-                [:a {:href "#"}
-                 [:button.pure-button.button-secondary
-                  [:i.fa.fa-copy]]]]
+               (if (seq selected)
+                 [:li.witan-menu-item.pure-menu-item
+                  [:a {:href "#"}
+                   [:button.pure-button.button-warning
+                    [:i.fa.fa-copy]]]])
                (if (seq selected)
                  [:li.witan-menu-item.pure-menu-item
                   [:a {:href (nav/forecast-wizard {:id selected-id :action "output"})}
