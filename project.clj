@@ -12,7 +12,7 @@
                  [org.omcljs/om "0.8.8"]
                  [prismatic/om-tools "0.3.11"]
                  [inflections "0.9.14"]
-                 [prismatic/schema "0.4.3"]
+                 [prismatic/schema "1.0.0"]
                  [secretary "1.2.3"]
                  [datascript "0.11.6"]
                  [thi.ng/geom "0.0.881"]]
