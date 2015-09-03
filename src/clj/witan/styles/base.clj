@@ -93,12 +93,9 @@
       {:margin (em 1)}]
 
      ;; witan
-     [:#witan-menu :.witan-menu-link
-      {:transition "all 0.2s ease-out 0s"}]
 
      [:#witan-menu
-      {:background-color colour/header
-       :box-shadow "0px 1px 3px rgba(0, 0, 0, 1)"}]
+      {:background-color colour/header}]
 
      [:.witan-menu-item
       [:a
