@@ -25,10 +25,11 @@
   :event/attempt-login
   [[event args] cursor]
   (om/update! cursor [:login-state :phase] :waiting)
-  (go
-    (<! (a/timeout 1000))
-    (om/update! cursor [:login-state :is-logged-in?] true)
-    (nav/restart-app)))
+  (a/put! (:api @nav/comms) :api/login args)
+  (comment (go
+             (<! (a/timeout 1000))
+             (om/update! cursor [:login-state :is-logged-in?] true)
+             (nav/restart-app))))
 
 (defmethod handler
   :event/select-forecast

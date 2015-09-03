@@ -12,6 +12,7 @@
             ;;
             [witan.schema.core :refer [Forecast]]
             [witan.ui.controllers.input]
+            [witan.ui.controllers.api]
             [witan.ui.data :as data]
             [witan.ui.nav :as nav]
             [witan.ui.components.login]
@@ -32,7 +33,8 @@
 
 (defonce define-comms-channels
   (reset! nav/comms
-          {:input (chan)}))
+          {:input (chan)
+           :api   (chan)}))
 
 (defonce define-views
   (reset! nav/views
@@ -105,6 +107,7 @@
   (while true
     (alt!
       (:input @nav/comms) ([v] (witan.ui.controllers.input/handler v (om/root-cursor data/app-state)))
+      (:api   @nav/comms) ([v] (witan.ui.controllers.api/handler   v (om/root-cursor data/app-state)))
       ;; Capture the current history for playback in the absence
       ;; of a server to store it
       (async/timeout 10000) (do #_(print "TODO: print out history: ")))))
