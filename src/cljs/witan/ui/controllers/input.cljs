@@ -5,8 +5,7 @@
             [witan.ui.data :as d]
             [witan.ui.async :as a]
             [witan.ui.nav :as nav]
-            [cljs.core.async :as async :refer [<!]]
-            )
+            [cljs.core.async :as async :refer [<!]])
   (:require-macros
    [cljs.core.async.macros :as am :refer [go]]))
 
@@ -25,10 +24,7 @@
   :event/attempt-login
   [[event args] cursor]
   (om/update! cursor [:login-state :phase] :waiting)
-  (go
-    (<! (a/timeout 1000))
-    (om/update! cursor [:login-state :is-logged-in?] true)
-    (nav/restart-app)))
+  (a/put! (:api @nav/comms) :api/login args))
 
 (defmethod handler
   :event/select-forecast

@@ -3,12 +3,27 @@
 
 (def Events
   "Any control events should be included here"
-  #{:event/attempt-login       ;; attempts the login process
+  #{
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; INPUT EVENTS
+    ;; These are events that result from user input
+    ;; Handled by: controllers/input.cljs
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    :event/attempt-login       ;; attempts the login process
     :event/select-forecast     ;; indicates that a forecast is currently selected
     :event/toggle-tree-view    ;; indicates that the forecast tree should expand at the specified branch
     :event/filter-forecasts    ;; filter the forecasts by name
-    ;;
-    :event/show-password-reset ;; only works when user not logged in
+    :event/show-password-reset ;; indicates that the 'reset your password' dialog should be shown
+
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    ;; API EVENTS
+    ;; These are events that correspond to an API call. These should only
+    ;; be called by handlers, definitely NOT the views.
+    ;; Handled by: controllers/api.cljs
+    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+    :api/login                 ;; attemps a login
     })
 
 (def ForecastTypes

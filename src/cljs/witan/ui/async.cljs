@@ -10,13 +10,15 @@
     c))
 
 (defn put!
-  [port val]
-  (async/put! port val))
+  ([port val]
+   (async/put! port val))
+  ([port event args]
+   ;; FIXME don't do this check in prod?
+   (if (contains? Events event)
+     (async/put! port [event args])
+     (throw (js/Error. (str "An unregistered event was raised - " event))))))
 
 (defn raise!
   [owner event data]
-  ;; FIXME don't do this check in prod?
-  (if (contains? Events event)
-    (let [c (om/get-shared owner [:comms :input])]
-      (put! c [event data]))
-    (throw (js/Error. (str "An unregistered event was raised - " event)))))
+  (let [c (om/get-shared owner [:comms :input])]
+    (put! c event data)))
