@@ -31,4 +31,4 @@
   [keywd]
   (if (contains? strings keywd)
     (keywd strings)
-    (log/error "Failed to find string " (str keywd))))
+    (log/severe "Failed to find string " (str keywd))))
