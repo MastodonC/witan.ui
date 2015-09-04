@@ -75,7 +75,8 @@
                                 ;; Compress the output?
                                 :pretty-print? false}
                      }]}
-  :ring {:handler witan.ring.handler/app})
+  :ring {:handler witan.ring.handler/app}
+  :jvm-opts ["-Xmx2g"])
 
 (comment
   (do (use 'figwheel-sidecar.repl-api)
