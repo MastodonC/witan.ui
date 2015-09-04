@@ -77,6 +77,7 @@
                      }]}
   :ring {:handler witan.ring.handler/app}
   :profiles {:uberjar {:auto-clean false}}
+  :uberjar-name "witan-ui.jar"
   :jvm-opts ["-Xmx2g"])
 
 (comment
