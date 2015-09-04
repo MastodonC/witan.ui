@@ -29,7 +29,14 @@
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
-              :builds [{:id "dev"
+              :builds [{:id "prod"
+                        :source-paths ["src/cljs" "src/cljc"]
+                        :compiler {:output-to "resources/public/js/compiled/witan-ui.js"
+                                   :main witan.ui.core
+                                   :optimizations :advanced
+                                   :pretty-print false
+                                   :warnings {:single-segment-namespace false}}}
+                       {:id "dev"
                         :source-paths ["src/cljs" "src/cljc"]
                         :figwheel {:on-jsload "witan.ui.nav/restart-app" }
                         :compiler {:main witan.ui.core
@@ -37,13 +44,6 @@
                                    :output-to "resources/public/js/compiled/witan-ui.js"
                                    :output-dir "resources/public/js/compiled/out"
                                    :source-map-timestamp true
-                                   :warnings {:single-segment-namespace false}}}
-                       {:id "prod"
-                        :source-paths ["src/cljs" "src/cljc"]
-                        :compiler {:output-to "resources/public/js/compiled/witan-ui.js"
-                                   :main witan.ui.core
-                                   :optimizations :advanced
-                                   :pretty-print false
                                    :warnings {:single-segment-namespace false}}}]}
 
   :figwheel {
