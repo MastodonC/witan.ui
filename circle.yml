@@ -8,7 +8,7 @@ deployment:
     commands:
       - lein clean
       - lein garden once
-      - lein cljsbuild once prod
+      - lein trampoline cljsbuild once prod
       - lein ring uberjar
       - docker build -t mastodonc/witan.ui .
       - docker tag -f mastodonc/witan.ui mastodonc/witan.ui:latest
