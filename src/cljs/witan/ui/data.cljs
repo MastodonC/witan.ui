@@ -2,7 +2,7 @@
   (:require [datascript :as d]
             [witan.ui.util :as util])
   (:require-macros
-   [cljs-log.core :refer [debug info warn severe]]))
+   [cljs-log.core :as log]))
 
 (defonce app-state (atom {}))
 (defonce db-schema {})
@@ -63,7 +63,7 @@
 
 (defn load-dummy-data!
   []
-  (warn "Loading dummy data...")
+  (log/warn "Loading dummy data...")
   (let [forecasts [{:id "1234"
                       :name "Population Forecast for Camden"
                       :type :population

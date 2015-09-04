@@ -4,7 +4,7 @@
             [witan.ui.nav :as nav]
             [witan.ui.data :refer [get-string]])
   (:require-macros
-   [cljs-log.core :refer [debug info warn severe]]))
+   [cljs-log.core :as log]))
 
 (defn local-endpoint
   [method]
@@ -43,13 +43,13 @@
   (let [token (:token response)]
     (if token
       (do
-        (info "Login success.")
+        (log/info "Login success.")
         (om/transact! cursor :login-state #(assoc % :token token))
         (om/transact! cursor :login-state #(assoc % :is-logged-in? true))
         (nav/restart-app))
       (do
-        (info "Login failed.")
-        (debug "Response:" response)
+        (log/info "Login failed.")
+        (log/debug "Response:" response)
         (om/transact! cursor :login-state #(assoc % :message (get-string :sign-in-failure)))
         (om/transact! cursor :login-state #(assoc % :phase :prompt))))))
 
