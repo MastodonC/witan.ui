@@ -2,7 +2,7 @@
   (:require [ajax.core :as ajax]
             [om.core :as om :include-macros true]
             [witan.ui.nav :as nav]
-            [witan.ui.data :refer [get-string]])
+            [witan.ui.strings :refer [get-string]])
   (:require-macros
    [cljs-log.core :as log]))
 
@@ -18,6 +18,8 @@
 
 (defn- handle-response
   [status event cursor response]
+  (if (= status :failure)
+    (log/severe "An API error occurred: " event))
   (api-response event status cursor (clojure.walk/keywordize-keys response)))
 
 (defn POST

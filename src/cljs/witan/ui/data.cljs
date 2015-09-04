@@ -10,11 +10,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn get-string
-  "Assumes that strings are always in the :strings keyword"
-  [keyword]
-  (-> @app-state :strings keyword))
-
 (defn fetch-ancestor-forecast
   "TODO This currently only handles the FIRST child. No support for branching."
   [id]

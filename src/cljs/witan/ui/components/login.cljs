@@ -3,7 +3,7 @@
             [om-tools.core :refer-macros [defcomponentmethod defcomponent]]
             [sablono.core :as html :refer-macros [html]]
             [witan.ui.async :refer [raise!]]
-            [witan.ui.data :refer [get-string]]))
+            [witan.ui.strings :refer [get-string]]))
 
 (defmulti login-state-view
   "Multimedia for the different login screen states"
