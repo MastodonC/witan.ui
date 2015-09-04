@@ -64,12 +64,18 @@
    :reset-password        "Reset Password"
    :back                  "Back"
    :thanks                "Thanks"
-   :please-wait           "Please wait..."})
+   :signing-in            "Signing in..."
+   :sign-in-failure       "There was a problem with your details. Please try again."
+   :api-failure           "There was a problem with the service. Please try again. If the problem persists, please contact us." ;; TODO add link?
+   })
 
 (defonce define-app-state
   (do
     (reset! data/app-state {:strings strings
-                            :login-state {:is-logged-in? false :phase :prompt}
+                            :login-state {:is-logged-in? false
+                                          :phase :prompt
+                                          :token nil
+                                          :message "This is a test"}
                             :current-route nil
                             :forecasts []
                             :forecasts-meta {:expanded #{}

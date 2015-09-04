@@ -8,12 +8,16 @@
 (def dark-gray (:darkgray color/color-name->hex))
 (def darker-gray (color/darken (:darkgray color/color-name->hex) 20))
 
+
 ;;
 (def button-success "#59cd90")
 (def button-error "#ee6352")
 (def button-warning "#fac05e")
 (def button-primary "#3590f3")
 (def button-secondary (color/lighten button-primary 12))
+
+;; aliases
+(def error button-error)
 
 ;;
 (def forecast-input "#9fc5f8")

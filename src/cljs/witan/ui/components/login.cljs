@@ -15,7 +15,7 @@
   [cursor owner]
   (render [_]
           (html [:div
-                 [:h3 "Signing in..."]
+                 [:h3 (get-string :signing-in)]
                  [:div#loading
                        [:i.fa.fa-refresh.fa-2x.fa-spin]]])))
 
@@ -27,6 +27,7 @@
           (html
            [:div
             [:h3 (get-string :sign-in)]
+            [:span#error-message (:message cursor)]
             [:form {:class "pure-form pure-form-stacked"
                     :on-submit (fn [e]
                                  (raise! owner :event/attempt-login {:email (.-value (om/get-node owner "email"))

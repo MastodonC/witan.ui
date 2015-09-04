@@ -70,6 +70,10 @@
     [:input
      {:margin-bottom (em 0.5)
       :width (percent 100)}]
+    [:#error-message
+     {:color colour/error
+      :display :block
+      :margin-bottom (em 1)}]
     [:#forgotten-link
      {:font-size (px 10)
       :vertical-align :text-top
