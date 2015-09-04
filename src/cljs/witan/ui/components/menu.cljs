@@ -7,7 +7,7 @@
             [schema.core :as s :include-macros true]
               ;;
             [witan.schema.core :refer [Forecast]]
-            [witan.ui.data :refer [get-string]]))
+            [witan.ui.strings :refer [get-string]]))
 
 (defcomponent
   view

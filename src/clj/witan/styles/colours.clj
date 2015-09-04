@@ -8,7 +8,6 @@
 (def dark-gray (:darkgray color/color-name->hex))
 (def darker-gray (color/darken (:darkgray color/color-name->hex) 20))
 
-
 ;;
 (def button-success "#59cd90")
 (def button-error "#ee6352")

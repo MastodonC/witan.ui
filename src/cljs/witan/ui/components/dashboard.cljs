@@ -8,7 +8,7 @@
               ;;
             [witan.ui.widgets :as widgets]
             [witan.schema.core :refer [Forecast]]
-            [witan.ui.data :refer [get-string]]
+            [witan.ui.strings :refer [get-string]]
             [witan.ui.async :refer [raise!]]
             [witan.ui.refs :as refs]
             [witan.ui.util :refer [goto-window-location!]]
