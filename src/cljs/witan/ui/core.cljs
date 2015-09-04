@@ -75,7 +75,7 @@
                             :login-state {:is-logged-in? false
                                           :phase :prompt
                                           :token nil
-                                          :message "This is a test"}
+                                          :message nil}
                             :current-route nil
                             :forecasts []
                             :forecasts-meta {:expanded #{}
