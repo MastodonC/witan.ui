@@ -22,7 +22,6 @@
             [lein-garden "0.2.6"]
             [lein-cljfmt "0.3.0"]
             [lein-ring "0.9.6"]]
-  :hooks [leiningen.cljsbuild]
 
   :source-paths ["src/clj" "src/cljc"]
 
@@ -77,6 +76,7 @@
                                 :pretty-print? false}
                      }]}
   :ring {:handler witan.ring.handler/app}
+  :profiles {:uberjar {:auto-clean false}}
   :jvm-opts ["-Xmx2g"])
 
 (comment
