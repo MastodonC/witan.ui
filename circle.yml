@@ -2,6 +2,10 @@ machine:
   services:
     - docker
 
+test:
+  override:
+    - lein test
+
 deployment:
   staging:
     branch: feature/deployment
