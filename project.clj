@@ -22,6 +22,7 @@
             [lein-garden "0.2.6"]
             [lein-cljfmt "0.3.0"]
             [lein-ring "0.9.6"]]
+  :hooks [leiningen.cljsbuild]
 
   :source-paths ["src/clj" "src/cljc"]
 
