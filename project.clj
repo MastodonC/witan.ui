@@ -16,7 +16,8 @@
                  [secretary "1.2.3"]
                  [datascript "0.11.6"]
                  [thi.ng/geom "0.0.881"]
-                 [cljs-ajax "0.3.14"]]
+                 [cljs-ajax "0.3.14"]
+                 [cljs-log "0.2.1"]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]

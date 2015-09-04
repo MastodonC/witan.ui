@@ -1,10 +1,10 @@
 (ns witan.ui.controllers.api
   (:require [ajax.core :as ajax]
             [om.core :as om :include-macros true]
-            [cognitect.transit :as t]
             [witan.ui.nav :as nav]
-            [witan.ui.util :as util]
-            [witan.ui.data :refer [get-string]]))
+            [witan.ui.data :refer [get-string]])
+  (:require-macros
+   [cljs-log.core :as log]))
 
 (defn local-endpoint
   [method]
@@ -43,12 +43,13 @@
   (let [token (:token response)]
     (if token
       (do
-        (println "Login success.")
+        (log/info "Login success.")
         (om/transact! cursor :login-state #(assoc % :token token))
         (om/transact! cursor :login-state #(assoc % :is-logged-in? true))
         (nav/restart-app))
       (do
-        (println "Login failed.")
+        (log/info "Login failed.")
+        (log/debug "Response:" response)
         (om/transact! cursor :login-state #(assoc % :message (get-string :sign-in-failure)))
         (om/transact! cursor :login-state #(assoc % :phase :prompt))))))
 
