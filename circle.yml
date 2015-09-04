@@ -4,7 +4,7 @@ machine:
 
 deployment:
   staging:
-    branch: feature/deployment
+    branch: master
     commands:
       - lein clean
       - lein garden once
