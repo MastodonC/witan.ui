@@ -1,0 +1,29 @@
+{
+  "acceptedResourceRoles": ["slave_public"],
+  "container": {
+    "type": "DOCKER",
+    "docker": {
+      "image": "mastodonc/witan.ui:@@TAG@@",
+      "network": "BRIDGE",
+      "portMappings": [
+          {
+              "containerPort": 80,
+              "hostPort": 80,
+              "protocol": "tcp"
+          }
+      ]
+    }
+  },
+  "id": "witan-ui",
+  "cpus": 1,
+  "mem": 2048,
+  "healthChecks": [{
+        "path": "/",
+        "protocol": "HTTP",
+        "gracePeriodSeconds": 600,
+        "intervalSeconds": 30,
+        "portIndex": 0,
+        "timeoutSeconds": 10,
+        "maxConsecutiveFailures": 3
+  }]
+}
