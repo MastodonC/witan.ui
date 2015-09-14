@@ -47,8 +47,7 @@
       (do
         (log/info "Login success.")
         (om/transact! cursor :login-state #(assoc % :token token))
-        (om/transact! cursor :login-state #(assoc % :is-logged-in? true))
-        (nav/restart-app))
+        (om/transact! cursor :login-state #(assoc % :is-logged-in? true)))
       (do
         (log/info "Login failed.")
         (log/debug "Response:" response)

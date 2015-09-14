@@ -170,13 +170,20 @@
       [:.output {:fill colour/forecast-output}]
       [:.model {:fill colour/forecast-model}]
       [:.group {:fill colour/forecast-group
-                :stroke "none"}]]
-
+                :stroke "none"}]
+      [:.highlight {:fill "none"
+                    :stroke-width 2
+                    :stroke-dasharray "3,3"}]]
      [:.witan-pw-header
       {:border-bottom "#ccc 2px solid"}
       [:h1
        {:margin-bottom (em 0.2)
         :display :inline-block}]]
+
+     [:.witan-pw-nav-button
+      ;; I really want this to vertically centre, but can't seem to figure it out
+      {:padding-top (em 8)}
+      [:a {:color colour/primary}]]
 
      [:.witan-pw-area-header
       {:text-align :center

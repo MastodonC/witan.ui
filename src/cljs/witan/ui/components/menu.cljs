@@ -14,14 +14,15 @@
   [cursor owner & opts]
   (render [_]
           (html
-           [:div.pure-menu.pure-menu-horizontal
-            [:a.pure-menu-heading {:href "#"} (get-string :witan-title)]
-            [:ul.pure-menu-list
-             [:li.witan-menu-item.pure-menu-item
-              [:a.pure-menu-link "Ron Burgundy"]]
-             [:li.witan-menu-item.pure-menu-item
-              [:a.pure-menu-link
-               [:i.fa.fa-user]]]
-             [:li.witan-menu-item.pure-menu-item
-              [:a.pure-menu-link
-               [:i.fa.fa-users]]]]])))
+            [:div#witan-menu
+             [:div.pure-menu.pure-menu-horizontal
+              [:a.pure-menu-heading {:href "#"} (get-string :witan-title)]
+              [:ul.pure-menu-list
+               [:li.witan-menu-item.pure-menu-item
+                [:a.pure-menu-link "Ron Burgundy"]]
+               [:li.witan-menu-item.pure-menu-item
+                [:a.pure-menu-link
+                 [:i.fa.fa-user]]]
+               [:li.witan-menu-item.pure-menu-item
+                [:a.pure-menu-link
+                 [:i.fa.fa-users]]]]]])))

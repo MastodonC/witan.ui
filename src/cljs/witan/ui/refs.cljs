@@ -6,5 +6,6 @@
   []
   (-> app-state
       om/root-cursor
-      :forecasts-meta
+      :view-state
+      :forecasts
       om/ref-cursor))

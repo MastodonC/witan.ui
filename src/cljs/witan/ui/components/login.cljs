@@ -82,9 +82,3 @@
                         :on-click (fn [e]
                                     (raise! owner :event/show-password-reset false)
                                     (.preventDefault e))} (get-string :back)]]]])))
-
-(defcomponent
-  view
-  [cursor owner args]
-  (render [_]
-          (om/build login-state-view cursor)))
