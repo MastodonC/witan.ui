@@ -77,16 +77,17 @@
       (html
         [:div.pure-g
          (om/build header forecast)
+         [:div.pure-u-1#witan-pw-top-spacer]
          [:div.pure-u-1-12 {:key "forecast-left"}
           [:div.witan-pw-nav-button
            [:a {:href (nav/forecast-wizard {:id id :action (previous-action action)})}
-            [:i.fa.fa-chevron-left.fa-lg]]]]
+            [:i.fa.fa-chevron-left.fa-3x]]]]
          [:div.pure-u-5-6.witan-model-diagram {:key "forecast-centre"}
           (om/build model-diagram/diagram model-conf)]
          [:div.pure-u-1-12 {:key "forecast-right"}
           [:div.witan-pw-nav-button
            [:a {:href (nav/forecast-wizard {:id id :action (next-action action)})}
-            [:i.fa.fa-chevron-right.fa-lg]]]]
+            [:i.fa.fa-chevron-right.fa-3x]]]]
          (if-not (contains? valid-actions kaction)
            [:div.pure-u-1 [:span "Unknown forecast action"]]
            [:div.pure-u-1 {:key "forecast-header"}

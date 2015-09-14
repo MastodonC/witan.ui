@@ -162,6 +162,9 @@
       [:.name
        {:margin-left (em 1)}]]
 
+     [:#witan-pw-top-spacer
+      {:height (em 2)}]
+
      [:.witan-model-diagram
       {:stroke colour/black
        :stroke-width 3
@@ -170,10 +173,20 @@
       [:.output {:fill colour/forecast-output}]
       [:.model {:fill colour/forecast-model}]
       [:.group {:fill colour/forecast-group
-                :stroke "none"}]
-      [:.highlight {:fill "none"
-                    :stroke-width 2
-                    :stroke-dasharray "3,3"}]]
+                :stroke "grey"
+                :stroke-width (px 2)
+                ;;:stroke-dasharray "3,3"
+                }]
+      [:.highlight {:transition "fill 0.5s"
+                    :stroke "none"}]
+      [:.forecast-label-circle {:stroke-weight (px 2)
+                                :fill :none
+                                :transition "stroke 0.5s"}]
+      [:.forecast-label-text {:font-family f/base-fonts
+                              :font-weight :bold
+                              :stroke :none
+                              :transition "fill 0.5s"}]]
+
      [:.witan-pw-header
       {:border-bottom "#ccc 2px solid"}
       [:h1
@@ -182,7 +195,8 @@
 
      [:.witan-pw-nav-button
       ;; I really want this to vertically centre, but can't seem to figure it out
-      {:padding-top (em 8)}
+      {:padding-top (em 8)
+       :text-align :center}
       [:a {:color colour/primary}]]
 
      [:.witan-pw-area-header
@@ -196,10 +210,13 @@
         :font-weight 400}]
       [:.input
        {:width (percent 100)
-        :background-color colour/forecast-input}]
+        :background-color colour/forecast-input
+        :transition "background-color 0.5s"}]
       [:.model
        {:width (percent 100)
-        :background-color colour/forecast-model}]
+        :background-color colour/forecast-model
+        :transition "background-color 0.5s"}]
       [:.output
        {:width (percent 100)
-        :background-color colour/forecast-output}]]])))
+        :background-color colour/forecast-output
+        :transition "background-color 0.5s"}]]])))
