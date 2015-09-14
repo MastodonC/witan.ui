@@ -39,7 +39,7 @@
                                    :warnings {:single-segment-namespace false}}}
                        {:id "dev"
                         :source-paths ["src/cljs" "src/cljc"]
-                        :figwheel {:on-jsload "witan.ui.nav/restart-app" }
+                        :figwheel {:on-jsload "witan.ui.core/start-app!" }
                         :compiler {:main witan.ui.core
                                    :asset-path "js/compiled/out"
                                    :output-to "resources/public/js/compiled/witan-ui.js"

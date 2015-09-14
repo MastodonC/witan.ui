@@ -17,6 +17,6 @@
 (defcomponent view
   [cursor owner & opts]
   (render [_]
-          (let [{:keys [id]} (first opts)]
+          (let [id (-> cursor :view-state :share :id)]
             (html
              [:h1 (str "Sharing: " id)]))))

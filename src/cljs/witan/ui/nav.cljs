@@ -4,77 +4,29 @@
             [om.core :as om :include-macros true]
             [witan.ui.data :as data]))
 
-(defonce comms (atom {}))
-(defonce views (atom {:forecast nil
-                      :dashboard nil
-                      :new-forecast nil
-                      :menu nil
-                      :share nil}))
-
-(defn find-app-container
-  []
-  (.getElementById js/document "witan-main"))
-
-(defn restart-app []
-  ;; restarts the by detaching the root and re-firing the secretary route
-  (om/detach-root (find-app-container))
-  (secretary/dispatch! (:current-route @data/app-state)))
-
-(defn is-logged-in?
-  []
-  (-> @data/app-state :login-state :is-logged-in?))
-
-(defn install-om!
-  [view params]
-  (if (is-logged-in?)
-    (do
-      ;; remove witan-login-screen
-      (if-let [login-screen (.getElementById js/document "witan-login-screen")]
-        (.removeChild (.-parentNode login-screen) login-screen))
-
-      ;; main view
-      (om/root
-       (view)
-       data/app-state
-       {:target (find-app-container)
-        :shared {:comms @comms}
-        :opts params})
-      ;; menu
-      (om/root
-       ((fn [] (:menu @views)))
-       data/app-state
-       {:target (. js/document (getElementById "witan-menu"))
-        :shared {:comms @comms}}))
-
-    ;; redir to login screen
-    (om/root
-     ((fn [] (:login @views)))
-     data/app-state
-     {:target (. js/document (getElementById "witan-login"))
-      :shared {:comms @comms}
-      :path [:login-state]})
-    ))
-
-;;;;;;;;;;;;;
-
 (secretary/set-config! :prefix "#")
 
+(defn- update-app-state [ks v] (swap! data/app-state assoc-in ks v))
+
 (defroute dashboard
-  "/"
-  {:as params}
-  (install-om! (fn [] (:dashboard @views)) params))
+          "/"
+          {:as params}
+          (swap! data/app-state assoc-in [:view-state :current-view] :dashboard))
 
 (defroute forecast-wizard
-  "/forecast/:id/*action"
-  {:as params}
-  (install-om! (fn [] (:forecast @views)) params))
+          "/forecast/:id/*action"
+          {:as params}
+          (update-app-state [:view-state :forecast-wizard :action] (:action params))
+          (update-app-state [:view-state :forecast-wizard :id] (:id params))
+          (update-app-state [:view-state :current-view] :forecast))
 
 (defroute new-forecast
-  "/new-forecast/"
-  {:as params}
-  (install-om! (fn [] (:new-forecast @views)) params))
+          "/new-forecast/"
+          {:as params}
+          (update-app-state [:view-state :current-view] :new-forecast))
 
 (defroute share
-  "/share/:id/"
-  {:as params}
-  (install-om! (fn [] (:share @views)) params))
+          "/share/:id/"
+          {:as params}
+          (update-app-state [:view-state :share :id] (:id params))
+          (update-app-state [:view-state :current-view] :share))

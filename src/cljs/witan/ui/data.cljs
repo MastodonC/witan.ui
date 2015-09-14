@@ -123,4 +123,4 @@
                   (map #(vector (:db/id %) (:id %)))
                   set)]
     (swap! app-state assoc :forecasts db-forecasts)
-    (swap! app-state assoc-in [:forecasts-meta :has-ancestors] has-ancs)))
+    (swap! app-state assoc-in [:view-state :forecasts :has-ancestors] has-ancs)))
