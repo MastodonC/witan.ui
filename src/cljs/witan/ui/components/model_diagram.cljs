@@ -115,7 +115,7 @@
         y-start (* -1 highlight-padding)
         x-size (+ box-width (* 2 highlight-padding))
         y-size (+ (* row-height max-n) (* 2 highlight-padding) (* -1 box-h-spacing) top-offset)
-        fill-colour (if highlighted "#cccccc" "#f8f8f8")]
+        fill-colour (if highlighted "#dddddd" "white")]
     (svg/rect [x-start y-start] x-size y-size
               {:class "highlight"
                :key   (str "highlight-box-" stage-index)
