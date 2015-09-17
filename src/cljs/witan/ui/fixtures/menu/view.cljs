@@ -1,4 +1,4 @@
-(ns ^:figwheel-always witan.ui.components.menu
+(ns ^:figwheel-always witan.ui.fixtures.menu.view
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]

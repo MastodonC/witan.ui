@@ -3,7 +3,9 @@
    [cljs-log.core :as log]))
 
 (defonce strings
-  {:witan-title           "Witan for London"
+  {:witan                 "Witan"
+   :witan-tagline         "Make more sense of your city"
+   :witan-title           "Witan for London"
    :forecasts             "forecasts"
    :filter                "Filter"
    :forecast-name         "Name"

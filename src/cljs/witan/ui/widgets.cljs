@@ -4,8 +4,8 @@
             [om-tools.core :refer-macros [defcomponent]]
             [sablono.core :as html :refer-macros [html]]
             [inflections.core :as i]
-            [witan.ui.refs :as refs]
-            [witan.ui.util :refer [contains-str]]))
+            [witan.ui.util :refer [contains-str]])
+  (:require-macros [cljs-log.core :as log]))
 
 ;; search input
 (defcomponent
@@ -30,16 +30,12 @@
   [forecast owner & opts]
   (render [_]
           (let [{:keys [on-click on-double-click]} (first opts)
-                forecasts-meta        (om/observe owner (refs/forecasts-meta))
-                selected-forecast     (:selected forecasts-meta)
-                ancestor-set            (set (map second (:has-ancestors forecasts-meta)))
-                expanded-set            (set (map second (:expanded forecasts-meta)))
-                is-selected-forecast? (= (:id forecast) (second selected-forecast))
-                has-ancestor?           (contains? ancestor-set (:id forecast))
-                is-expanded?            (contains? expanded-set (:id forecast))
-                has-descendant?         (not (nil? (:descendant-id forecast)))
-                classes                 [[is-selected-forecast? "witan-forecast-table-row-selected"]
-                                         [has-descendant? "witan-forecast-table-row-descendant"]]]
+                {:keys [is-selected-forecast?
+                        has-ancestor?
+                        is-expanded?
+                        has-descendant?]} forecast
+                classes [[is-selected-forecast? "witan-forecast-table-row-selected"]
+                         [has-descendant? "witan-forecast-table-row-descendant"]]]
             (html
              [:tr.witan-forecast-table-row {:key (:id forecast)
                                               :class (->> classes
