@@ -96,11 +96,11 @@
           (html
            (if-not (:logged-in? cursor)
              [:div
-              [:div.login-bg]
-              [:div#content-container
+              [:div#login-bg {:key "login-bg"}]
+              [:div#content-container {:key "login-content"}
                [:div#relative-container
-                [:div.login-title.trans-bg
-                 [:h1 (get-string :witan)]
-                 [:h2 (get-string :witan-tagline)]]
-                [:div#witan-login.trans-bg
+                [:div.login-title.trans-bg {:key "login-title"}
+                 [:h1 {:key "login-title-main"} (get-string :witan) ]
+                 [:h2 {:key "login-title-sub"} (get-string :witan-tagline)]]
+                [:div#witan-login.trans-bg {:key "login-state"}
                  (om/build login-state-view cursor)]]]]))))
