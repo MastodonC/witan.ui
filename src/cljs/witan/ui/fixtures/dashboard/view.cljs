@@ -79,7 +79,7 @@
             [:div#forecasts-view
              (om/build header [(get-selected-forecast cursor)
                                (->> :forecasts
-                                    (-> cursor)
+                                    cursor
                                     (filter (comp nil? :descendant-id))
                                     (map :id)
                                     set)])
