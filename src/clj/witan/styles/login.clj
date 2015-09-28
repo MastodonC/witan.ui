@@ -12,7 +12,7 @@
     {:background "transparent url ('../img/trans75.png')"
      :background-clip :padding-box}]
 
-   [:.login-bg
+   [:#login-bg
     {:position :fixed
      :top (px 0)
      :left (px 0)
