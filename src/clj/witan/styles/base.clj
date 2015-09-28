@@ -58,6 +58,9 @@
 
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+     [:#app
+      {:padding "0 1em"}]
+
      [:.button-success
       {:background-color colour/button-success
        :color colour/white}]
@@ -219,4 +222,15 @@
       [:.output
        {:width (percent 100)
         :background-color colour/forecast-output
-        :transition "background-color 0.5s"}]]])))
+        :transition "background-color 0.5s"}]]
+
+     [:.view-overlay
+      {:width (percent 100)
+       :height (percent 100)
+       :position :absolute
+       :top (px 0)
+       :left (px 0)
+       :text-align :center}
+      [:#loading
+       {:color colour/white
+        :margin-top (percent 20)}]]])))

@@ -9,15 +9,12 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [sablono "0.3.4"]
                  [garden "1.2.5"]
-                 [org.omcljs/om "0.9.0"]
-                 [prismatic/om-tools "0.3.11"]
                  [inflections "0.9.14"]
-                 [prismatic/schema "1.0.0"]
-                 [secretary "1.2.3"]
                  [datascript "0.11.6"]
                  [thi.ng/geom "0.0.881"]
                  [cljs-ajax "0.3.14"]
-                 [cljs-log "0.2.1"]]
+                 [cljs-log "0.2.1"]
+                 [venue "0.1.4"]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]
@@ -39,7 +36,7 @@
                                    :warnings {:single-segment-namespace false}}}
                        {:id "dev"
                         :source-paths ["src/cljs" "src/cljc"]
-                        :figwheel {:on-jsload "witan.ui.core/start-app!" }
+                        :figwheel {:on-jsload "witan.ui.core/on-js-reload" }
                         :compiler {:main witan.ui.core
                                    :asset-path "js/compiled/out"
                                    :output-to "resources/public/js/compiled/witan-ui.js"

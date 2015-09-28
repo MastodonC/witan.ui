@@ -1,4 +1,4 @@
-(ns ^:figwheel-always witan.ui.components.share
+(ns ^:figwheel-always witan.ui.fixtures.share.view
     (:require [om.core :as om :include-macros true]
               [om-tools.dom :as dom :include-macros true]
               [om-tools.core :refer-macros [defcomponent]]
@@ -9,10 +9,7 @@
               [witan.ui.widgets :as widgets]
               [witan.schema.core :refer [Forecast]]
               [witan.ui.strings :refer [get-string]]
-              [witan.ui.async :refer [raise!]]
-              [witan.ui.refs :as refs]
-              [witan.ui.util :refer [goto-window-location!]]
-              [witan.ui.nav :as nav]))
+              ))
 
 (defcomponent view
   [cursor owner & opts]

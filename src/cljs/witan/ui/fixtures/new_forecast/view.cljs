@@ -1,4 +1,4 @@
-(ns ^:figwheel-always witan.ui.components.new-forecast
+(ns ^:figwheel-always witan.ui.fixtures.new-forecast.view
   (:require [om.core :as om :include-macros true]
             [om-tools.dom :as dom :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
@@ -8,8 +8,7 @@
               ;;
             [witan.ui.widgets :as widgets]
             [witan.schema.core :refer [Forecast]]
-            [witan.ui.async :refer [raise!]]
-            [witan.ui.refs :as refs]))
+            ))
 
 (defcomponent view
   [cursor owner & opts]
