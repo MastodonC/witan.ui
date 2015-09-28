@@ -80,7 +80,7 @@
              (om/build header [(get-selected-forecast cursor)
                                (->> :forecasts
                                     cursor
-                                    (filter (comp nil? :descendant-id))
+                                    (remove :descendant-id)
                                     (map :id)
                                     set)])
              [:table.pure-table.pure-table-horizontal#witan-dash-forecast-list
