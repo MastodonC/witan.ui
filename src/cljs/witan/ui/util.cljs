@@ -43,4 +43,4 @@
 (defn map-add-ns
   "Adjusts an entire map by adding namespace to all the keys"
   [ns m]
-  (map (fn [[k v]] (hash-map (add-ns :forecast k) v)) m))
+  (map (fn [[k v]] (hash-map (add-ns ns k) v)) m))

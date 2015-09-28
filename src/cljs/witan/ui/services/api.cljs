@@ -40,20 +40,23 @@
 
 (defn POST
   [event method params result-ch]
+  (log/debug "POST" method params)
   (ajax/POST (local-endpoint method)
              {:params params
               :handler (partial handle-response :success event result-ch)
               :error-handler (partial handle-response :failure event result-ch)
-              :format :json}))
+              :format :json
+              :headers {"Authorization" (str "Token " @api-token)}}))
 
 (defn GET
   [event method params result-ch]
+  (log/debug "GET" method params)
   (ajax/GET (local-endpoint method)
-   {:params params
-    :handler (partial handle-response :success event result-ch)
-    :error-handler (partial handle-response :failure event result-ch)
-    :format :json
-    :headers {"Authorization" (str "Token " @api-token)}}))
+            {:params params
+             :handler (partial handle-response :success event result-ch)
+             :error-handler (partial handle-response :failure event result-ch)
+             :format :json
+             :headers {"Authorization" (str "Token " @api-token)}}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -94,7 +97,7 @@
 (defmethod service-m
   :get-forecasts
   [event _ result-ch]
-  (GET event "/forecasts" {:user "foobar"} result-ch))
+  (GET event "/forecasts" nil result-ch))
 
 (defmethod service-m
   :get-forecast
@@ -113,6 +116,16 @@
   (save-token! nil)
   (venue/publish! :api/user-logged-out)
   (put! result-ch [:success nil]))
+
+(defmethod service-m
+  :get-models
+  [event id result-ch]
+  (GET event "/models" nil result-ch))
+
+(defmethod service-m
+  :create-forecast
+  [event args result-ch]
+  (POST event "/forecasts" args result-ch))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

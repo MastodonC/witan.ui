@@ -47,6 +47,7 @@
 
 ;; paragraph heading (h3)
 (def para-heading tertiary)
+(def para-heading-light (color/lighten tertiary 30))
 
 ;; menu bar links (assumes that `header` is background)
 (def menu-item white)
@@ -55,7 +56,7 @@
 (def menu-item-hover secondary)
 
 ;; hr tags
-(def hr (rgb 171 211 255))
+(def hr black)
 
 ;; login b
 (def login-black-bg (rgba 0 0 0 0.75))

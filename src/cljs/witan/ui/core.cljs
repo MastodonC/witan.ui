@@ -50,7 +50,11 @@
    :id :views/new-forecast
    :view witan.ui.fixtures.new-forecast.view/view
    :view-model witan.ui.fixtures.new-forecast.view-model/view-model
-   :state {}})
+   :state {:error nil
+           :success? false
+           :models []
+           :selected-model nil
+           :working? false}})
 
 (venue/defview!
   {:target "app"

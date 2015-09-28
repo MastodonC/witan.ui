@@ -10,6 +10,7 @@
 ;; search input
 (defcomponent
   search-input
+  "A search input element that has a magnifying glass."
   [placeholder owner & opts]
   (render [_]
           (let [{:keys [on-input]} (first opts)]
@@ -27,6 +28,7 @@
 
 (defcomponent
   forecast-tr
+  "Table row for displaying a forecast"
   [forecast owner & opts]
   (render [_]
           (let [{:keys [on-click on-double-click]} (first opts)

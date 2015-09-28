@@ -31,10 +31,23 @@
       {:color     colour/subtitle
        :font-size (em 1.75)}]
      [:h3
-      {:color colour/para-heading}]
+      {:color colour/para-heading}
+      [:em
+       {:font-size (em 0.7)
+        :color colour/para-heading-light}]]
      [:hr
-      {:color            colour/hr
-       :background-color colour/hr}]
+      {:background :transparent
+       :border "0"
+       :border-bottom "1px solid #ddd"}
+      [:&.small
+       {:margin-top (px 0)
+        :margin-botom (px 0)}]
+      [:&.medium
+       {:margin-top (px 30)
+        :margin-bottom (px 30)}]
+      [:&.large
+       {:margin-top (px 60)
+        :margin-bottom (px 60)}]]
      [:href
       {:margin  (px 0)
        :padding (px 0)}]

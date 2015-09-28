@@ -28,6 +28,27 @@
         (swap! lookup assoc kid new-id)
         new-id))))
 
+(defn add-descendant-ids [forecasts]
+  (map (fn [item index]
+         (if (and (> index 0)
+                  (== (:forecast/forecast-id (nth forecasts (dec index)))
+                      (:forecast/forecast-id item)))
+           (assoc item :forecast/descendant-id true)
+           item))
+       forecasts (range 0 (count forecasts))))
+
+(defn put-item-into-db!
+  [item ns]
+  (let [id (:version-id item)
+        db-id (find-or-add-lookup ns id id-lookup id-counter)
+        cleaned (->> item
+                     (filter second)
+                     (filter (fn [[k v]] (if (coll? v) (-> v empty? not) true)))
+                     (util/map-add-ns ns)
+                     (into {}))
+        with-db-id (assoc cleaned :db/id db-id)]
+    (d/transact! db-conn [with-db-id])))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn fetch-ancestor-forecast
@@ -74,6 +95,26 @@
                     [forecast])) top-level)
         (throw (js/Error. ":expand must be a vector of [k v] vectors"))))))
 
+(defn fetch-models
+  []
+  (apply concat (d/q '[:find (pull ?e [*])
+                       :where [?e :model/version-id _]]
+                     @db-conn)))
+
+(defn find-model-id-by-name-and-version
+  [name version]
+  (d/q '[:find ?e ?id
+         :in $ ?name ?version
+         :where [?e :model/version-id ?id]
+         [?e :model/version ?version]
+         [?e :model/name ?name]]
+       @db-conn
+       name version))
+
+(defn format-model-prop
+  [[k v]]
+  {:name k :value v})
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti request-handler
@@ -92,27 +133,6 @@
     (handle-response [owner outcome event response context]
       (response-handler owner [event outcome] response context))))
 
-
-(defn add-descendant-ids [forecasts]
-  (map (fn [item index]
-                 (if (and (> index 0)
-                          (== (:forecast/forecast-id (nth forecasts (dec index)))
-                             (:forecast/forecast-id item)))
-                   (assoc item :forecast/descendant-id true)
-                   item))
-               forecasts (range 0 (count forecasts))))
-
-(defn forecasts-in-db
-  [forecast-versions]
-  (doseq [f forecast-versions]
-    (let [id (:version-id f)
-          db-id (find-or-add-lookup :forecast id id-lookup id-counter)
-          cleaned-f (->> f
-                         (filter second)
-                         (util/map-add-ns :forecast)
-                         (into {}))
-          with-db-id (assoc cleaned-f :db/id db-id)]
-      (d/transact! db-conn [with-db-id]))))
 
 (defmethod request-handler
   :filter-forecasts
@@ -158,13 +178,37 @@
                    :service :service/api
                    :request :get-user
                    :context result-ch}))
+(defmethod request-handler
+  :fetch-models
+  [owner event _ ch]
+  (venue/request! {:owner owner
+                   :service :service/api
+                   :request :get-models
+                   :context ch}))
+
+(defmethod request-handler
+  :add-forecast
+  [owner event {:keys [model-name model-version model-props name description]} ch]
+  (let [model-id (find-model-id-by-name-and-version model-name (js/parseInt model-version))]
+    (if (not-empty model-id)
+      (let [payload {:model-id (-> model-id first second)
+                     :name name}
+            payload (if (not-empty description) (assoc payload :description description) payload)
+            payload (if (not-empty model-props) (assoc payload :model-properties (mapv format-model-prop  model-props)) payload)]
+        (venue/request! {:owner owner
+                         :service :service/api
+                         :request :create-forecast
+                         :args payload
+                         :context ch}))
+      (log/severe "Unable to locate a model with this name and version: " model-name model-version))))
 ;;;
 
 (defmethod response-handler
   [:get-forecast :success] ;; singular
   [owner _ forecast-versions result-ch]
   (log/debug "Received" (count forecast-versions) "forecast versions.")
-  (forecasts-in-db forecast-versions)
+  (doseq [f forecast-versions]
+    (put-item-into-db! f :forecast))
   (put! result-ch [:success nil]))
 
 (defmethod response-handler
@@ -176,8 +220,8 @@
   [:get-forecasts :success] ;;plural
   [owner _ forecasts result-ch]
   (log/debug "Received" (count forecasts) "forecasts.")
-  (comment (reset-db!))
-  (forecasts-in-db forecasts)
+  (doseq [f forecasts]
+    (put-item-into-db! f :forecast))
   (put! result-ch [:success nil]))
 
 (defmethod response-handler
@@ -194,6 +238,25 @@
   [:get-user :failure]
   [owner _ _ result-ch]
   (put! result-ch [:failure nil]))
+
+(defmethod response-handler
+  [:get-models :success]
+  [owner _ models result-ch]
+  (log/debug "Received" (count models) "models.")
+  (doseq [m models]
+    (put-item-into-db! m :model))
+  (put! result-ch [:success (fetch-models)]))
+
+(defmethod response-handler
+  [:get-models :failure]
+  [owner _ _ result-ch]
+  (put! result-ch [:failure nil]))
+
+(defmethod response-handler
+  [:create-forecast :success]
+  [owner _ new-forecast result-ch]
+  (put-item-into-db! new-forecast :forecast)
+  (put! result-ch [:success (:version-id new-forecast)]))
 
 ;;;;;;;;;;;;;;;;;;;;;
 
