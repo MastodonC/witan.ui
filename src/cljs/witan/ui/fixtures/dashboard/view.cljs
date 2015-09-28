@@ -26,11 +26,11 @@
         has-ancestor?         (contains? ancestor-set (:id forecast))
         is-expanded?          (contains? expanded-set (:id forecast))
         has-descendant?       (not (nil? (:descendant-id forecast)))]
-    (-> forecast
-        (assoc :has-ancestor? has-ancestor?)
-        (assoc :is-selected-forecast? is-selected-forecast?)
-        (assoc :is-expanded? is-expanded?)
-        (assoc :has-descendant? has-descendant?))))
+    (assoc forecast
+           :has-ancestor?         has-ancestor?
+           :is-selected-forecast? is-selected-forecast?
+           :is-expanded?          is-expanded?
+           :has-descendant?       has-descendant?)))
 
 (defcomponent
   header
