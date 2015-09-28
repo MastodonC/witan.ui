@@ -97,7 +97,7 @@
                              (map #(as-forecast-tr cursor %) (:forecasts cursor))
                              {:key  :id
                               :opts {:on-click        #(venue/raise! %1 %2 %3)
-                                     :on-double-click #(when (nil? (:descendant-id %2))
+                                     :on-double-click #(when-not (:descendant-id %2)
                                                          (goto-window-location!
                                                           (venue/get-route :views/forecast {:id (:id %2) :action "input"})))}})]]]
             (when (:refreshing? cursor)
