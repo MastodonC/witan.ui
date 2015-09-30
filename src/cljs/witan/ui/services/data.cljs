@@ -83,7 +83,7 @@
 
 (defmethod request-handler
   :filter-forecasts
-  [owner event args ch]
+  [owner event args result-ch]
   (let [forecasts (fetch-forecasts (select-keys args [:expand :filter]))]
     (put! ch [:success {:forecasts forecasts
                         :has-ancestors (->>
@@ -93,7 +93,7 @@
 
 (defmethod request-handler
   :fetch-forecasts
-  [owner event id ch]
+  [owner event id result-ch]
   (venue/request! {:owner owner
                    :service :service/api
                    :request :get-forecasts
@@ -102,7 +102,7 @@
 
 (defmethod request-handler
   :fetch-forecast
-  [owner event id ch]
+  [owner event id result-ch]
   (venue/request! {:owner owner
                    :service :service/api
                    :request :get-forecast
@@ -113,12 +113,12 @@
 
 (defmethod response-handler
   [:get-forecast :success]
-  [owner _ response ch]
+  [owner _ response result-ch]
   (put! ch [:success response]))
 
 (defmethod response-handler
   [:get-forecasts :success]
-  [owner _ forecasts ch]
+  [owner _ forecasts result-ch]
   (log/debug "Received" (count forecasts) "forecasts.")
   (reset-db!)
   (d/transact! db-conn forecasts)
