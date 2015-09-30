@@ -75,7 +75,7 @@
   (POST event "/login" {:username email :password pass} result-ch))
 
 (defmethod service-m
-  :refresh-forecasts
+  :get-forecasts
   [event _ result-ch]
   (GET event "/forecasts" {:user "foobar"} result-ch))
 
@@ -99,11 +99,6 @@
       (log/info "Login failed.")
       (log/debug "Response:" response)
       false)))
-
-(defmethod api-response
-  [:refresh-forecasts :success]
-  [_ response]
-  (venue/publish! :api/forecasts-refreshed response))
 
 (defmethod api-response
   :default

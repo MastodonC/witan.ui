@@ -82,7 +82,7 @@
 
 
 (defmethod request-handler
-  :fetch-forecasts
+  :filter-forecasts
   [owner event args ch]
   (let [forecasts (fetch-forecasts (select-keys args [:expand :filter]))]
     (put! ch [:success {:forecasts forecasts
@@ -90,6 +90,15 @@
                                         (filter #(and (-> % :id fetch-ancestor-forecast empty? not) (nil? (:descendant-id %))) forecasts)
                                         (map #(vector (:db/id %) (:id %)))
                                         set)}])))
+
+(defmethod request-handler
+  :fetch-forecasts
+  [owner event id ch]
+  (venue/request! {:owner owner
+                   :service :service/api
+                   :request :get-forecasts
+                   :args id
+                   :context ch}))
 
 (defmethod request-handler
   :fetch-forecast
@@ -107,6 +116,14 @@
   [owner _ response ch]
   (put! ch [:success response]))
 
+(defmethod response-handler
+  [:get-forecasts :success]
+  [owner _ forecasts ch]
+  (log/debug "Received" (count forecasts) "forecasts.")
+  (reset-db!)
+  (d/transact! db-conn forecasts)
+  (put! ch [:success nil]))
+
 ;;;;;;;;;;;;;;;;;;;;;
 
 (defn- do-login!
@@ -114,17 +131,6 @@
   (swap! state assoc :logged-in? true)
   (venue/reactivate!))
 
-(defn- save-forecasts!
-  [forecasts]
-  (log/debug "Received" (count forecasts) "forecasts.")
-  (reset-db!)
-  (d/transact! db-conn forecasts)
-  (venue/publish! :data/forecasts-updated))
-
 (util/inline-subscribe!
   :api/user-logged-in
   #(do-login!))
-
-(util/inline-subscribe!
- :api/forecasts-refreshed
- #(save-forecasts! %))
