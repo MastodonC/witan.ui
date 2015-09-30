@@ -18,7 +18,7 @@
    (let [toggled-on (mapv #(vector :db/id (first %)) expanded)]
      (venue/request! {:owner owner
                       :service :service/data
-                      :request :fetch-forecasts
+                      :request :filter-forecasts
                       :args {:expand toggled-on
                              :filter filter}
                       :context cursor}))))
@@ -30,19 +30,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-initialise
-  [owner cursor]
-  (util/inline-subscribe!
-   :data/forecasts-updated
-   #(update-forecasts! owner cursor {:filter (:filter @cursor)
-                                     :expanded (:expanded @cursor)})))
+  [owner cursor])
 
 (defn on-activate
   [owner args cursor]
   (when (data/logged-in?)
     (om/update! cursor :refreshing? true)
     (venue/request! {:owner owner
-                     :service :service/api
-                     :request :refresh-forecasts
+                     :service :service/data
+                     :request :fetch-forecasts
                      :context cursor})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -83,6 +79,12 @@
 
 (defmethod response-handler
   [:fetch-forecasts :success]
+  [owner _ resp cursor]
+  (update-forecasts! owner cursor {:filter (:filter @cursor)
+                                   :expanded (:expanded @cursor)}))
+
+(defmethod response-handler
+  [:filter-forecasts :success]
   [owner _ {:keys [forecasts has-ancestors]} cursor]
   (om/update! cursor :forecasts forecasts)
   (om/update! cursor :has-ancestors has-ancestors)

@@ -82,8 +82,8 @@
 
 
 (defmethod request-handler
-  :fetch-forecasts
-  [owner event args ch]
+  :filter-forecasts
+  [owner event args result-ch]
   (let [forecasts (fetch-forecasts (select-keys args [:expand :filter]))]
     (put! ch [:success {:forecasts forecasts
                         :has-ancestors (->>
@@ -92,8 +92,17 @@
                                         set)}])))
 
 (defmethod request-handler
+  :fetch-forecasts
+  [owner event id result-ch]
+  (venue/request! {:owner owner
+                   :service :service/api
+                   :request :get-forecasts
+                   :args id
+                   :context ch}))
+
+(defmethod request-handler
   :fetch-forecast
-  [owner event id ch]
+  [owner event id result-ch]
   (venue/request! {:owner owner
                    :service :service/api
                    :request :get-forecast
@@ -104,8 +113,16 @@
 
 (defmethod response-handler
   [:get-forecast :success]
-  [owner _ response ch]
+  [owner _ response result-ch]
   (put! ch [:success response]))
+
+(defmethod response-handler
+  [:get-forecasts :success]
+  [owner _ forecasts result-ch]
+  (log/debug "Received" (count forecasts) "forecasts.")
+  (reset-db!)
+  (d/transact! db-conn forecasts)
+  (put! ch [:success nil]))
 
 ;;;;;;;;;;;;;;;;;;;;;
 
@@ -114,17 +131,6 @@
   (swap! state assoc :logged-in? true)
   (venue/reactivate!))
 
-(defn- save-forecasts!
-  [forecasts]
-  (log/debug "Received" (count forecasts) "forecasts.")
-  (reset-db!)
-  (d/transact! db-conn forecasts)
-  (venue/publish! :data/forecasts-updated))
-
 (util/inline-subscribe!
   :api/user-logged-in
   #(do-login!))
-
-(util/inline-subscribe!
- :api/forecasts-refreshed
- #(save-forecasts! %))
