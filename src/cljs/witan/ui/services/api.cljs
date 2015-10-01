@@ -7,11 +7,12 @@
                    [cljs.core.async.macros :refer [go]]))
 
 (def ^:private api-token (atom nil))
+(def token-name "tkn")
 
 (defn save-token!
   [token]
   (reset! api-token token)
-  (.set goog.net.cookies "tkn" token -1))
+  (.set goog.net.cookies token-name token -1))
 
 (defmulti response-handler
   (fn [result response cursor] result))
@@ -28,9 +29,11 @@
 
 (defn- handle-response
   [status event result-ch response]
-  (if (= status :failure)
+  (if (and (= status :failure) (not= event :token-test))
     (log/severe "An API error occurred: " event))
-  (put! result-ch [status (api-response [event status] (clojure.walk/keywordize-keys response))]))
+  (let [result (api-response [event status] (clojure.walk/keywordize-keys response))]
+    (when result-ch
+      (put! result-ch [status result]))))
 
 (defn POST
   [event method params result-ch]
@@ -51,6 +54,14 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn on-initialise
+  []
+  (if-let [token (.get goog.net.cookies token-name)]
+    (do
+      (reset! api-token token)
+      (GET :token-test "/" {} nil))
+    (log/debug "No existing token was found.")))
+
 (defn request-handler
   [event args result-ch]
   (if (or (= event :login) @api-token)
@@ -67,7 +78,10 @@
       (request-handler request args response-ch))
     venue/IHandleResponse
     (handle-response [owner outcome event response cursor]
-      (response-handler [event outcome] response cursor))))
+      (response-handler [event outcome] response cursor))
+    venue/IInitialise
+    (initialise [owner _]
+      (on-initialise))))
 
 (defmethod service-m
   :login
@@ -86,9 +100,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmethod api-response
-  [:login :success]
-  [_ response]
+(defn- login!
+  [response]
   (if-let [token (:token response)]
     (do
       (log/info "Login success.")
@@ -99,6 +112,16 @@
       (log/info "Login failed.")
       (log/debug "Response:" response)
       false)))
+
+(defmethod api-response
+  [:login :success]
+  [_ response]
+  (login! response))
+
+(defmethod api-response
+  [:token-test :success]
+  [_ response]
+  (login! {:token @api-token}))
 
 (defmethod api-response
   :default
