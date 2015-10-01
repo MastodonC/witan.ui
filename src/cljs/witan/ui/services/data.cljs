@@ -85,7 +85,7 @@
   :filter-forecasts
   [owner event args result-ch]
   (let [forecasts (fetch-forecasts (select-keys args [:expand :filter]))]
-    (put! ch [:success {:forecasts forecasts
+    (put! result-ch [:success {:forecasts forecasts
                         :has-ancestors (->>
                                         (filter #(and (-> % :id fetch-ancestor-forecast empty? not) (nil? (:descendant-id %))) forecasts)
                                         (map #(vector (:db/id %) (:id %)))
@@ -98,7 +98,7 @@
                    :service :service/api
                    :request :get-forecasts
                    :args id
-                   :context ch}))
+                   :context result-ch}))
 
 (defmethod request-handler
   :fetch-forecast
@@ -107,14 +107,14 @@
                    :service :service/api
                    :request :get-forecast
                    :args id
-                   :context ch}))
+                   :context result-ch}))
 
 ;;;
 
 (defmethod response-handler
   [:get-forecast :success]
   [owner _ response result-ch]
-  (put! ch [:success response]))
+  (put! result-ch [:success response]))
 
 (defmethod response-handler
   [:get-forecasts :success]
@@ -122,7 +122,7 @@
   (log/debug "Received" (count forecasts) "forecasts.")
   (reset-db!)
   (d/transact! db-conn forecasts)
-  (put! ch [:success nil]))
+  (put! result-ch [:success nil]))
 
 ;;;;;;;;;;;;;;;;;;;;;
 

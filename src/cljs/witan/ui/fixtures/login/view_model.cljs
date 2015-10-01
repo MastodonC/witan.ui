@@ -1,6 +1,7 @@
 (ns ^:figwheel-always witan.ui.fixtures.login.view-model
     (:require [om.core :as om :include-macros true]
               [venue.core :as venue]
+              [witan.ui.services.data :as data]
               [witan.ui.strings :as s])
     (:require-macros [cljs-log.core :as log]
                      [witan.ui.macros :as wm]))
@@ -15,7 +16,8 @@
   [owner cursor])
 
 (defn on-activate
-  [owner args cursor])
+  [owner args cursor]
+  (om/update! cursor :logged-in? (data/logged-in?)))
 
 (defmethod event-handler
   :event/reset-password
@@ -46,8 +48,7 @@
   [:login :success]
   [owner _ response cursor]
   (if response
-    (do
-      (om/update! cursor :logged-in? true))
+    (om/update! cursor :logged-in? true)
     (do
       (om/update! cursor :message (s/get-string :sign-in-failure))
       (om/update! cursor :phase :prompt))))
