@@ -3,6 +3,7 @@
               [venue.core :as venue :include-macros true]
               ;;
               [witan.ui.services.api]
+              [witan.ui.services.mock-api]
               [witan.ui.services.data]
               ;;
               [witan.ui.fixtures.login.view]
@@ -17,12 +18,10 @@
               [witan.ui.fixtures.share.view-model]
               [witan.ui.fixtures.menu.view]
               [witan.ui.fixtures.menu.view-model])
-    (:require-macros [cljs-log.core :as log]))
+    (:require-macros [cljs-log.core :as log]
+                     [witan.ui.env :as env :refer [cljs-env]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(comment (defonce load-test-data
-           (data/load-dummy-data!)))
 
 (venue/defview!
   {:target "app"
@@ -84,7 +83,9 @@
 
 (venue/defservice!
   {:id :service/api
-   :handler witan.ui.services.api/service})
+   :handler (if (cljs-env :mock-api)
+              witan.ui.services.mock-api/service
+              witan.ui.services.api/service)})
 
 (venue/defservice!
   {:id :service/data
