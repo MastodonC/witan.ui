@@ -4,7 +4,8 @@
             [venue.core :as venue]
             [goog.net.cookies :as cookies])
   (:require-macros [cljs-log.core :as log]
-                   [cljs.core.async.macros :refer [go]]))
+                   [cljs.core.async.macros :refer [go]]
+                   [witan.ui.env :as env :refer [cljs-env]]))
 
 (def ^:private api-token (atom nil))
 (def token-name "tkn")
@@ -25,7 +26,9 @@
 
 (defn local-endpoint
   [method]
-  (str "http://localhost:3000/api" method))
+  (let [env-url (cljs-env :api-url)
+        api-url (or env-url "http://localhost:3000")]
+    (str api-url "/api" method)))
 
 (defn- handle-response
   [status event result-ch response]
