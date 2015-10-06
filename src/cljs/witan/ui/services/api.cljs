@@ -25,7 +25,7 @@
 
 (defn local-endpoint
   [method]
-  (str "http://localhost:3000" method))
+  (str "http://localhost:3000/api" method))
 
 (defn- handle-response
   [status event result-ch response]
