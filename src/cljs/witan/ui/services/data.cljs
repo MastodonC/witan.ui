@@ -8,12 +8,25 @@
 (def state (atom {:logged-in? false}))
 (defonce db-schema {})
 (defonce db-conn (d/create-conn db-schema))
+(defonce id-lookup (atom {}))
+(defonce id-counter (atom 0))
+
 
 (defn reset-db!
   []
   (reset! db-conn (d/empty-db)))
 
 (defn logged-in? [] (:logged-in? @state))
+
+(defn find-or-add-lookup
+  "We're looking for a :db/id stored for this id. If we don't find one, add one. Return the :db/id either way."
+  [ns id]
+  (let [kid (util/add-ns ns (keyword id))]
+    (if-let [existing-id (get @id-lookup kid)]
+      existing-id
+      (let [new-id (swap! id-counter inc)]
+        (swap! id-lookup assoc kid new-id)
+        new-id))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -43,9 +56,9 @@
                        (util/contains-str n filter)))
         top-level (apply concat (d/q '[:find (pull ?e [*])
                                        :in $ ?pred
-                                       :where [?e :id _]
-                                       [?e :name ?n]
-                                       [(get-else $ ?e :descendant-id nil) ?u]
+                                       :where [?e :forecast/id _]
+                                       [?e :forecast/name ?n]
+                                       [(get-else $ ?e :forecast/descendant-id nil) ?u]
                                        [(nil? ?u)]
                                        [(?pred ?n)]]
                                      @db-conn
@@ -86,10 +99,10 @@
   [owner event args result-ch]
   (let [forecasts (fetch-forecasts (select-keys args [:expand :filter]))]
     (put! result-ch [:success {:forecasts forecasts
-                        :has-ancestors (->>
-                                        (filter #(and (-> % :id fetch-ancestor-forecast empty? not) (nil? (:descendant-id %))) forecasts)
-                                        (map #(vector (:db/id %) (:id %)))
-                                        set)}])))
+                               :has-ancestors (->>
+                                               (filter #(and (-> % :id fetch-ancestor-forecast empty? not) (nil? (:descendant-id %))) forecasts)
+                                               (map #(vector (:db/id %) (:id %)))
+                                               set)}])))
 
 (defmethod request-handler
   :fetch-forecasts
@@ -119,16 +132,24 @@
 ;;;
 
 (defmethod response-handler
-  [:get-forecast :success]
+  [:get-forecast :success] ;; singular
   [owner _ response result-ch]
   (put! result-ch [:success response]))
 
 (defmethod response-handler
-  [:get-forecasts :success]
+  [:get-forecasts :success] ;;plural
   [owner _ forecasts result-ch]
   (log/debug "Received" (count forecasts) "forecasts.")
-  (reset-db!)
-  (d/transact! db-conn forecasts)
+  (comment (reset-db!))
+  (doseq [f forecasts]
+    (let [id (:id f)
+          db-id (find-or-add-lookup :forecast id)
+          cleaned-f (->> f
+                         (filter second)
+                         (util/map-add-ns :forecast)
+                         (into {}))
+          with-db-id (assoc cleaned-f :db/id db-id)]
+      (d/transact! db-conn [with-db-id])))
   (put! result-ch [:success nil]))
 
 (defmethod response-handler
@@ -154,5 +175,5 @@
   (venue/reactivate!))
 
 (util/inline-subscribe!
-  :api/user-logged-in
-  #(do-login!))
+ :api/user-logged-in
+ #(do-login!))
