@@ -109,6 +109,13 @@
                    :args id
                    :context result-ch}))
 
+(defmethod request-handler
+  :fetch-user
+  [owner event id result-ch]
+  (venue/request! {:owner owner
+                   :service :service/api
+                   :request :get-user
+                   :context result-ch}))
 ;;;
 
 (defmethod response-handler
@@ -123,6 +130,21 @@
   (reset-db!)
   (d/transact! db-conn forecasts)
   (put! result-ch [:success nil]))
+
+(defmethod response-handler
+  [:get-forecasts :failure]
+  [owner _ _ result-ch]
+  (put! result-ch [:failure nil]))
+
+(defmethod response-handler
+  [:get-user :success]
+  [owner _ user result-ch]
+  (put! result-ch [:success user]))
+
+(defmethod response-handler
+  [:get-user :failure]
+  [owner _ _ result-ch]
+  (put! result-ch [:failure nil]))
 
 ;;;;;;;;;;;;;;;;;;;;;
 

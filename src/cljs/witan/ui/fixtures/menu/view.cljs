@@ -19,7 +19,7 @@
               [:a.pure-menu-heading {:href "#"} (get-string :witan-title)]
               [:ul.pure-menu-list
                [:li.witan-menu-item.pure-menu-item
-                [:a.pure-menu-link "Ron Burgundy"]]
+                [:a.pure-menu-link (get-in cursor [:user :name])]]
                [:li.witan-menu-item.pure-menu-item
                 [:a.pure-menu-link
                  [:i.fa.fa-user]]]
