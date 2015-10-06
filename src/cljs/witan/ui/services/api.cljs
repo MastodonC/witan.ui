@@ -98,6 +98,11 @@
   [event id result-ch]
   (GET event (str "/forecasts/" id) nil result-ch))
 
+(defmethod service-m
+  :get-user
+  [event id result-ch]
+  (GET event "/me" nil result-ch))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- login!

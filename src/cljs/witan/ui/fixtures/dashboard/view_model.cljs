@@ -91,5 +91,10 @@
   (om/update! cursor :refreshing? false))
 
 (defmethod response-handler
+  [:fetch-forecasts :failure]
+  [owner _ _ cursor]
+  (om/update! cursor :refreshing? true))
+
+(defmethod response-handler
   :default
   [owner _ response cursor])
