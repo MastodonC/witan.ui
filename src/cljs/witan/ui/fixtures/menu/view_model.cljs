@@ -29,7 +29,7 @@
 (defmethod response-handler
   [:fetch-user :success]
   [owner _ user cursor]
-  (om/update! cursor :user (first user)))
+  (om/update! cursor :user user))
 
 (defmethod response-handler
   [:fetch-user :failure]
