@@ -35,7 +35,7 @@
   [id]
   (first (d/q '[:find (pull ?e [*])
                 :in $ ?i
-                :where [?e :descendant-id ?i]] @db-conn id)))
+                :where [?e :forecast/descendant-id ?i]] @db-conn id)))
 
 (defn build-descendant-list
   [db-id]
@@ -43,7 +43,7 @@
          results []
          remaining-nodes []]
     (let [new-results (conj results (:db/id node))
-          new-remaining (concat remaining-nodes (fetch-ancestor-forecast (:id node)))]
+          new-remaining (concat remaining-nodes (fetch-ancestor-forecast (:forecast/id node)))]
       (if (not-empty new-remaining)
         (recur (d/touch (d/entity @db-conn (:db/id (first new-remaining)))) new-results (rest new-remaining))
         new-results))))
@@ -100,8 +100,9 @@
   (let [forecasts (fetch-forecasts (select-keys args [:expand :filter]))]
     (put! result-ch [:success {:forecasts forecasts
                                :has-ancestors (->>
-                                               (filter #(and (-> % :id fetch-ancestor-forecast empty? not) (nil? (:descendant-id %))) forecasts)
-                                               (map #(vector (:db/id %) (:id %)))
+                                               (filter #(and (-> % :forecast/id fetch-ancestor-forecast empty? not)
+                                                             (nil? (:forecast/descendant-id %))) forecasts)
+                                               (map #(vector (:db/id %) (:forecast/id %)))
                                                set)}])))
 
 (defmethod request-handler
