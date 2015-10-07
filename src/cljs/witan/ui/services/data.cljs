@@ -20,12 +20,12 @@
 
 (defn find-or-add-lookup
   "We're looking for a :db/id stored for this id. If we don't find one, add one. Return the :db/id either way."
-  [ns id]
+  [ns id lookup counter]
   (let [kid (util/add-ns ns (keyword id))]
-    (if-let [existing-id (get @id-lookup kid)]
+    (if-let [existing-id (get @lookup kid)]
       existing-id
-      (let [new-id (swap! id-counter inc)]
-        (swap! id-lookup assoc kid new-id)
+      (let [new-id (swap! counter inc)]
+        (swap! lookup assoc kid new-id)
         new-id))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -144,7 +144,7 @@
   (comment (reset-db!))
   (doseq [f forecasts]
     (let [id (:id f)
-          db-id (find-or-add-lookup :forecast id)
+          db-id (find-or-add-lookup :forecast id id-lookup id-counter)
           cleaned-f (->> f
                          (filter second)
                          (util/map-add-ns :forecast)
