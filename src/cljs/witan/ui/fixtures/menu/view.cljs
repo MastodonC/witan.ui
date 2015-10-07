@@ -7,7 +7,9 @@
             [schema.core :as s :include-macros true]
               ;;
             [witan.schema.core :refer [Forecast]]
-            [witan.ui.strings :refer [get-string]]))
+            [witan.ui.strings :refer [get-string]]
+            [venue.core :as venue])
+  (:require-macros [cljs-log.core :as log]))
 
 (defcomponent
   view
@@ -19,10 +21,11 @@
               [:a.pure-menu-heading {:href "#"} (get-string :witan-title)]
               [:ul.pure-menu-list
                [:li.witan-menu-item.pure-menu-item
-                [:a.pure-menu-link (get-in cursor [:user :name])]]
+                [:span.text-white [:strong (get-in cursor [:user :name])]]]
+               [:li.pure-menu-item {:style {:width "0.5em"}}]
                [:li.witan-menu-item.pure-menu-item
                 [:a.pure-menu-link
-                 [:i.fa.fa-user]]]
-               [:li.witan-menu-item.pure-menu-item
-                [:a.pure-menu-link
-                 [:i.fa.fa-users]]]]]])))
+                 {:on-click #(do
+                               (venue/raise! owner :event/logout {})
+                               (.preventDefault %))}
+                 [:small (get-string :logout)]]]]]])))

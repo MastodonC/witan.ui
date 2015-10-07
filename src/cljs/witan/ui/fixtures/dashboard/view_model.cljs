@@ -51,7 +51,7 @@
 
 (defmethod event-handler
   :event/filter-forecasts
-  [owner _ filter-text cursor _]
+  [owner _ filter-text cursor]
   (let [new-filter (not-empty filter-text)]
     (om/update! cursor :filter new-filter)
     (update-forecasts! owner cursor {:filter new-filter
@@ -59,7 +59,7 @@
 
 (defmethod event-handler
   :event/toggle-tree-view
-  [owner _ forecast cursor _]
+  [owner _ forecast cursor]
   (let [db-id        (:db/id forecast)
         id           (:forecast/id forecast)
         expanded     (:expanded @cursor)

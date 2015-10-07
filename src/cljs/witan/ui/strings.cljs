@@ -26,6 +26,7 @@
    :signing-in            "Signing in..."
    :sign-in-failure       "There was a problem with your details. Please try again."
    :api-failure           "There was a problem with the service. Please try again. If the problem persists, please contact us." ;; TODO add link?
+   :logout                "Log Out"
    })
 
 (defn get-string
