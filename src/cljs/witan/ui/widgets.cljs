@@ -37,7 +37,7 @@
                 classes [[is-selected-forecast? "witan-forecast-table-row-selected"]
                          [has-descendant? "witan-forecast-table-row-descendant"]]]
             (html
-             [:tr.witan-forecast-table-row {:key (:id forecast)
+             [:tr.witan-forecast-table-row {:key (:forecast/id forecast)
                                               :class (->> classes
                                                           (filter first)
                                                           (map second)
@@ -60,13 +60,10 @@
                                   is-expanded? [:i.fa.fa-minus-square-o.tree-control]
                                   has-ancestor? [:i.fa.fa-plus-square-o.tree-control])]
               [:td
-               [:span.name.unselectable (:name forecast)]]
+               [:span.name.unselectable (:forecast/name forecast)]]
               [:td.text-center
-               [:span.unselectable (-> forecast :type name i/capitalize)]]
+               [:span.unselectable (:forecast/owner forecast)]]
               [:td.text-center
-               [:span.unselectable (:owner forecast)]]
+               [:span.unselectable (:forecast/version forecast)]]
               [:td.text-center
-               [:span.unselectable (:version forecast)]]
-              [:td.text-center
-               [:span.unselectable (:last-modified forecast)]
-               [:span.modifier.unselectable (:last-modifier forecast)]]]))))
+               [:span.unselectable (:forecast/created forecast)]]]))))

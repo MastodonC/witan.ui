@@ -19,10 +19,12 @@
   (boolean (re-find (js/RegExp. pattern "i") source)))
 
 (defn goto-window-location!
+  "Sends the window to the specified location"
   [location]
   (set! (.. js/document -location -href) location))
 
 (defn inline-subscribe!
+  "Sugar for adding a subscription to the venue message bus"
   [topic fnc]
   (let [ch (chan)]
     (venue/subscribe! topic ch)
@@ -30,3 +32,15 @@
       (let [{:keys [content]} (<! ch)]
         (fnc content))
       (recur))))
+
+(defn add-ns
+  "Adds a namespace to a keyword"
+  [ns key]
+  (let [sns (name ns)
+        skey (name key)]
+    (keyword sns skey)))
+
+(defn map-add-ns
+  "Adjusts an entire map by adding namespace to all the keys"
+  [ns m]
+  (map (fn [[k v]] (hash-map (add-ns :forecast k) v)) m))

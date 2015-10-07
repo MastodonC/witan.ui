@@ -15,17 +15,17 @@
 
 (defn get-selected-forecast
   [cursor]
-  (some #(if (= (:id %) (-> cursor :selected second)) %) (:forecasts cursor)))
+  (some #(if (= (:forecast/id %) (-> cursor :selected second)) %) (:forecasts cursor)))
 
 (defn as-forecast-tr
   [cursor forecast]
   (let [selected-forecast     (:selected cursor)
         ancestor-set          (set (map second (:has-ancestors cursor)))
         expanded-set          (set (map second (:expanded cursor)))
-        is-selected-forecast? (= (:id forecast) (second selected-forecast))
-        has-ancestor?         (contains? ancestor-set (:id forecast))
-        is-expanded?          (contains? expanded-set (:id forecast))
-        has-descendant?       (not (nil? (:descendant-id forecast)))]
+        is-selected-forecast? (= (:forecast/id forecast) (second selected-forecast))
+        has-ancestor?         (contains? ancestor-set (:forecast/id forecast))
+        is-expanded?          (contains? expanded-set (:forecast/id forecast))
+        has-descendant?       (not (nil? (:forecast/descendant-id forecast)))]
     (assoc forecast
            :has-ancestor?         has-ancestor?
            :is-selected-forecast? is-selected-forecast?
@@ -36,7 +36,7 @@
   header
   [[selected top-level] owner]
   (render [_]
-          (let [selected-id (:id selected)
+          (let [selected-id (:forecast/id selected)
                 is-top-level? (contains? top-level selected-id)]
             (html
              [:div.pure-menu.pure-menu-horizontal.witan-dash-heading
@@ -80,26 +80,25 @@
              (om/build header [(get-selected-forecast cursor)
                                (->> :forecasts
                                     cursor
-                                    (remove :descendant-id)
-                                    (map :id)
+                                    (remove :forecast/descendant-id)
+                                    (map :forecast/id)
                                     set)])
              [:table.pure-table.pure-table-horizontal#witan-dash-forecast-list
               [:thead
                [:th {:key "forecast-tree"}] ;; empty, for the tree icon
                [:th {:key "forecast-name"} (get-string :forecast-name)]
-               (for [x [:forecast-type
-                        :forecast-owner
+               (for [x [:forecast-owner
                         :forecast-version
                         :forecast-lastmodified]]
                  [:th.text-center {:key (name x)} (get-string x)])]
               [:tbody
                (om/build-all widgets/forecast-tr
                              (map #(as-forecast-tr cursor %) (:forecasts cursor))
-                             {:key  :id
+                             {:key  :forecast/id
                               :opts {:on-click        #(venue/raise! %1 %2 %3)
-                                     :on-double-click #(when-not (:descendant-id %2)
+                                     :on-double-click #(when-not (:forecast/descendant-id %2)
                                                          (goto-window-location!
-                                                          (venue/get-route :views/forecast {:id (:id %2) :action "input"})))}})]]]
+                                                          (venue/get-route :views/forecast {:id (:forecast/id %2) :action "input"})))}})]]]
             (when (:refreshing? cursor)
               [:div.view-overlay.trans-bg
                [:div#loading
