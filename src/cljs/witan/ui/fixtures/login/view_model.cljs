@@ -47,11 +47,12 @@
 (defmethod response-handler
   [:login :success]
   [owner _ response cursor]
+  (om/update! cursor :phase :prompt)
   (if response
-    (om/update! cursor :logged-in? true)
     (do
-      (om/update! cursor :message (s/get-string :sign-in-failure))
-      (om/update! cursor :phase :prompt))))
+      (om/update! cursor :message nil)
+      (om/update! cursor :logged-in? true))
+    (om/update! cursor :message (s/get-string :sign-in-failure))))
 
 (defmethod response-handler
   [:login :failure]

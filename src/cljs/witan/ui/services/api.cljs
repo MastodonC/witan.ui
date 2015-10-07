@@ -106,6 +106,14 @@
   [event id result-ch]
   (GET event "/me" nil result-ch))
 
+(defmethod service-m
+  :logout
+  [event id result-ch]
+  (log/info "Logging out...")
+  (save-token! nil)
+  (venue/publish! :api/user-logged-out)
+  (put! result-ch [:success nil]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- login!
@@ -114,7 +122,7 @@
     (do
       (log/info "Login success.")
       (save-token! token)
-      (venue/publish! :api/user-logged-in {:name "foobar"})
+      (venue/publish! :api/user-logged-in)
       true)
     (do
       (log/info "Login failed.")

@@ -103,7 +103,8 @@
      [:.witan-menu-item
       [:a
        {:text-decoration :none
-        :color colour/menu-item}]
+        :color colour/menu-item
+        :cursor :pointer}]
       [:a:hover
        {:color colour/menu-item-hover}]]
 

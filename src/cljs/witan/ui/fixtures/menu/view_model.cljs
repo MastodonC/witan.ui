@@ -12,19 +12,23 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn fetch-user! [owner cursor]
-       (venue/request! {:owner owner
-                      :service :service/data
-                      :request :fetch-user
-                        :context cursor}))
+  (venue/request! {:owner owner
+                   :service :service/data
+                   :request :fetch-user
+                   :context cursor}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-initialise
   [owner cursor]
   (util/inline-subscribe!
-  :api/user-logged-in
-  #(fetch-user! owner cursor)))
+   :api/user-logged-in
+   #(fetch-user! owner cursor)))
 
 (defn on-activate
   [owner args cursor])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod response-handler
   [:fetch-user :success]
@@ -35,3 +39,16 @@
   [:fetch-user :failure]
   [owner _ _ cursor]
   (log/debug "fetch-user failure"))
+
+(defmethod response-handler
+  [:logout :success]
+  [_ _ _ _])
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmethod event-handler
+  :event/logout
+  [owner _ args cursor]
+  (venue/request! {:owner owner
+                   :service :service/api
+                   :request :logout}))

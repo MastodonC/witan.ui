@@ -171,10 +171,16 @@
 ;;;;;;;;;;;;;;;;;;;;;
 
 (defn- do-login!
-  []
-  (swap! state assoc :logged-in? true)
-  (venue/reactivate!))
+  [logged-in?]
+  (swap! state assoc :logged-in? logged-in?)
+  (if logged-in?
+    (venue/reactivate!)
+    (set! (.. js/document -location -href) "/")))
 
 (util/inline-subscribe!
  :api/user-logged-in
- #(do-login!))
+ #(do-login! true))
+
+(util/inline-subscribe!
+ :api/user-logged-out
+ #(do-login! false))
