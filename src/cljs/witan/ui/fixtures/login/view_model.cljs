@@ -22,7 +22,11 @@
 (defmethod event-handler
   :event/reset-password
   [owner _ email cursor]
-  (log/warn "TODO Reset instruction received in view-model"))
+  (.open js/window
+         (str
+         "mailto:support@mastodonc.com?subject=[Witan Password Reset Request]"
+         "&body=Please reset the password for the following email address: "
+         email)))
 
 (defmethod event-handler
   :event/show-password-reset
