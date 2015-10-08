@@ -43,12 +43,12 @@
          results []
          remaining-nodes []]
     (let [new-results (conj results (:db/id node))
-          new-remaining (concat remaining-nodes (fetch-ancestor-forecast (:forecast/id node)))]
+          new-remaining (concat remaining-nodes (fetch-ancestor-forecast (:forecast/version-id node)))]
       (if (not-empty new-remaining)
         (recur (d/touch (d/entity @db-conn (:db/id (first new-remaining)))) new-results (rest new-remaining))
         new-results))))
 
-(defn fetch-forecasts
+(defn filter-forecasts
   [{:keys [expand filter] :or {expand false
                                filter nil}}] ;; filter is only applied to top-level forecasts.
   (let [pred (fn [n] (if (nil? filter)
@@ -56,7 +56,7 @@
                        (util/contains-str n filter)))
         top-level (apply concat (d/q '[:find (pull ?e [*])
                                        :in $ ?pred
-                                       :where [?e :forecast/id _]
+                                       :where [?e :forecast/version-id _]
                                        [?e :forecast/name ?n]
                                        [(get-else $ ?e :forecast/descendant-id nil) ?u]
                                        [(nil? ?u)]
@@ -97,12 +97,12 @@
 (defmethod request-handler
   :filter-forecasts
   [owner event args result-ch]
-  (let [forecasts (fetch-forecasts (select-keys args [:expand :filter]))]
+  (let [forecasts (filter-forecasts (select-keys args [:expand :filter]))]
     (put! result-ch [:success {:forecasts forecasts
                                :has-ancestors (->>
-                                               (filter #(and (-> % :forecast/id fetch-ancestor-forecast empty? not)
+                                               (filter #(and (-> % :forecast/version-id fetch-ancestor-forecast empty? not)
                                                              (nil? (:forecast/descendant-id %))) forecasts)
-                                               (map #(vector (:db/id %) (:forecast/id %)))
+                                               (map #(vector (:db/id %) (:forecast/version-id %)))
                                                set)}])))
 
 (defmethod request-handler
@@ -143,7 +143,7 @@
   (log/debug "Received" (count forecasts) "forecasts.")
   (comment (reset-db!))
   (doseq [f forecasts]
-    (let [id (:id f)
+    (let [id (:version-id f)
           db-id (find-or-add-lookup :forecast id id-lookup id-counter)
           cleaned-f (->> f
                          (filter second)
