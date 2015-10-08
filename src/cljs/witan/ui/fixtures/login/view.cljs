@@ -68,10 +68,10 @@
              [:span {:id "reset-instructions"} (get-string :forgotten-instruction)]]
             [:form {:class "pure-form"
                     :on-submit (fn [e]
-                                 (set! (.-innerText (. js/document (getElementById "reset-instructions"))) (get-string :reset-submitted))
-                                 (set! (.-innerText (. js/document (getElementById "reset-button"))) (get-string :thanks))
-                                 (set! (.-disabled (. js/document (getElementById "reset-button"))) true)
-                                 (set! (.-disabled (. js/document (getElementById "reset-input"))) true)
+                                 (comment (set! (.-innerText (. js/document (getElementById "reset-instructions"))) (get-string :reset-submitted))
+                                          (set! (.-innerText (. js/document (getElementById "reset-button"))) (get-string :thanks))
+                                          (set! (.-disabled (. js/document (getElementById "reset-button"))) true)
+                                          (set! (.-disabled (. js/document (getElementById "reset-input"))) true))
                                  (venue/raise! owner :event/reset-password (.-value (om/get-node owner "reset-email")))
                                  (.preventDefault e))}
              [:input {:tab-index 1
