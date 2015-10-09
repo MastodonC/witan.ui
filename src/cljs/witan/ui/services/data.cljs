@@ -106,6 +106,15 @@
                                                set)}])))
 
 (defmethod request-handler
+  :fetch-forecast-versions
+  [owner event forecast-id result-ch]
+  (venue/request! {:owner owner
+                   :service :service/api
+                   :request :get-forecast
+                   :args forecast-id
+                   :context result-ch}))
+
+(defmethod request-handler
   :fetch-forecasts
   [owner event id result-ch]
   (venue/request! {:owner owner
@@ -134,8 +143,18 @@
 
 (defmethod response-handler
   [:get-forecast :success] ;; singular
-  [owner _ response result-ch]
-  (put! result-ch [:success response]))
+  [owner _ forecast-versions result-ch]
+  (log/debug "Received" (count forecast-versions) "forecast versions.")
+  (doseq [f forecast-versions]
+    (let [id (:version-id f)
+          db-id (find-or-add-lookup :forecast id id-lookup id-counter)
+          cleaned-f (->> f
+                         (filter second)
+                         (util/map-add-ns :forecast)
+                         (into {}))
+          with-db-id (assoc cleaned-f :db/id db-id)]
+      (d/transact! db-conn [with-db-id])))
+  (put! result-ch [:success nil]))
 
 (defmethod response-handler
   [:get-forecasts :success] ;;plural
