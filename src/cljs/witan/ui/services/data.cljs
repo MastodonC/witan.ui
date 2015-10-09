@@ -100,8 +100,7 @@
   (let [forecasts (filter-forecasts (select-keys args [:expand :filter]))]
     (put! result-ch [:success {:forecasts forecasts
                                :has-ancestors (->>
-                                               (filter #(and (-> % :forecast/version-id fetch-ancestor-forecast empty? not)
-                                                             (nil? (:forecast/descendant-id %))) forecasts)
+                                               (filter #(> (:forecast/version %) 1) forecasts)
                                                (map #(vector (:db/id %) (:forecast/version-id %)))
                                                set)}])))
 

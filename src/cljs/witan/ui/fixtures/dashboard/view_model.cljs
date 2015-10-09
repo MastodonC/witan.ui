@@ -61,7 +61,7 @@
   :event/toggle-tree-view
   [owner _ forecast cursor]
   (let [db-id        (:db/id forecast)
-        id           (:forecast/id forecast)
+        id           (:forecast/forecast-id forecast)
         expanded     (:expanded @cursor)
         toggled?     (contains? expanded [db-id id])
         dfn          (if toggled? disj conj)
