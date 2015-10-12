@@ -61,16 +61,18 @@
   :event/toggle-tree-view
   [owner _ forecast cursor]
   (let [db-id        (:db/id forecast)
-        id           (:forecast/forecast-id forecast)
+        forecast-id  (:forecast/forecast-id forecast)
+        version-id   (:forecast/version-id forecast)
         expanded     (:expanded @cursor)
-        toggled?     (contains? expanded [db-id id])
+        toggled?     (contains? expanded [db-id version-id])
         dfn          (if toggled? disj conj)
-        new-expanded (dfn expanded [db-id id])]
+        new-expanded (dfn expanded [db-id version-id])]
+    (log/debug "toggle-tree-view" forecast cursor)
     (om/update! cursor :expanded new-expanded)
     (venue/request! {:owner owner
                      :service :service/data
                      :request :fetch-forecast-versions
-                     :args id
+                     :args forecast-id
                      :context cursor})))
 
 (defmethod event-handler

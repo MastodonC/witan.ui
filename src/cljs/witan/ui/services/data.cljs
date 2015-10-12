@@ -93,12 +93,20 @@
       (response-handler owner [event outcome] response context))))
 
 
+(defn add-descendant-ids [forecasts]
+  (map (fn [item index]
+                 (if (and (> index 0)
+                          (== (:forecast/forecast-id (nth forecasts (dec index)))
+                             (:forecast/forecast-id item)))
+                   (assoc item :forecast/descendant-id true)
+                   item))
+               forecasts (range 0 (count forecasts))))
 
 (defmethod request-handler
   :filter-forecasts
   [owner event args result-ch]
   (let [forecasts (filter-forecasts (select-keys args [:expand :filter]))]
-    (put! result-ch [:success {:forecasts forecasts
+    (put! result-ch [:success {:forecasts (add-descendant-ids forecasts)
                                :has-ancestors (->>
                                                (filter #(> (:forecast/version %) 1) forecasts)
                                                (map #(vector (:db/id %) (:forecast/version-id %)))
