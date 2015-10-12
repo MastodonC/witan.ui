@@ -164,6 +164,11 @@
   (put! result-ch [:success nil]))
 
 (defmethod response-handler
+  [:get-forecast :failure]
+  [owner _ msg result-ch]
+  (log/debug "get-forecast failure" msg))
+
+(defmethod response-handler
   [:get-forecasts :success] ;;plural
   [owner _ forecasts result-ch]
   (log/debug "Received" (count forecasts) "forecasts.")
