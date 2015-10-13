@@ -102,6 +102,18 @@
                    item))
                forecasts (range 0 (count forecasts))))
 
+(defn forecasts-in-db
+  [forecast-versions]
+  (doseq [f forecast-versions]
+    (let [id (:version-id f)
+          db-id (find-or-add-lookup :forecast id id-lookup id-counter)
+          cleaned-f (->> f
+                         (filter second)
+                         (util/map-add-ns :forecast)
+                         (into {}))
+          with-db-id (assoc cleaned-f :db/id db-id)]
+      (d/transact! db-conn [with-db-id]))))
+
 (defmethod request-handler
   :filter-forecasts
   [owner event args result-ch]
@@ -152,15 +164,7 @@
   [:get-forecast :success] ;; singular
   [owner _ forecast-versions result-ch]
   (log/debug "Received" (count forecast-versions) "forecast versions.")
-  (doseq [f forecast-versions]
-    (let [id (:version-id f)
-          db-id (find-or-add-lookup :forecast id id-lookup id-counter)
-          cleaned-f (->> f
-                         (filter second)
-                         (util/map-add-ns :forecast)
-                         (into {}))
-          with-db-id (assoc cleaned-f :db/id db-id)]
-      (d/transact! db-conn [with-db-id])))
+  (forecasts-in-db forecast-versions)
   (put! result-ch [:success nil]))
 
 (defmethod response-handler
@@ -173,15 +177,7 @@
   [owner _ forecasts result-ch]
   (log/debug "Received" (count forecasts) "forecasts.")
   (comment (reset-db!))
-  (doseq [f forecasts]
-    (let [id (:version-id f)
-          db-id (find-or-add-lookup :forecast id id-lookup id-counter)
-          cleaned-f (->> f
-                         (filter second)
-                         (util/map-add-ns :forecast)
-                         (into {}))
-          with-db-id (assoc cleaned-f :db/id db-id)]
-      (d/transact! db-conn [with-db-id])))
+  (forecasts-in-db forecasts)
   (put! result-ch [:success nil]))
 
 (defmethod response-handler
