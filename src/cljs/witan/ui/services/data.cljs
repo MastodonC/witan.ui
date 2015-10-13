@@ -30,7 +30,7 @@
 
 (defn add-descendant-ids [forecasts]
   (map (fn [item index]
-         (if (and (> index 0)
+         (if (and (pos? index)
                   (== (:forecast/forecast-id (nth forecasts (dec index)))
                       (:forecast/forecast-id item)))
            (assoc item :forecast/descendant-id true)

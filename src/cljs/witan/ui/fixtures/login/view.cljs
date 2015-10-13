@@ -25,7 +25,7 @@
   :prompt
   [cursor owner]
   (did-mount [_]
-              (when-let [node (. js/document (getElementById "login-email"))]
+             (when-let [node (.getElementById js/document "login-email")]
                   (set! (.-value node) (:email @cursor))))
   (render [_]
           (html

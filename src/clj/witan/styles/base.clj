@@ -193,7 +193,7 @@
                 :stroke       "grey"
                 :stroke-width (px 2)
                 ;;:stroke-dasharray "3,3"
-                }]
+}]
       [:.highlight {:transition "fill 0.5s"
                     :stroke     "none"}]
       [:.forecast-label-circle {:stroke-weight (px 2)
