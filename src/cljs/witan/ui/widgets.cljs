@@ -37,7 +37,7 @@
                 classes [[is-selected-forecast? "witan-forecast-table-row-selected"]
                          [has-descendant? "witan-forecast-table-row-descendant"]]]
             (html
-             [:tr.witan-forecast-table-row {:key (:forecast/id forecast)
+             [:tr.witan-forecast-table-row {:key (:forecast/version-id forecast)
                                               :class (->> classes
                                                           (filter first)
                                                           (map second)

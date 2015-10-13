@@ -43,12 +43,12 @@
          results []
          remaining-nodes []]
     (let [new-results (conj results (:db/id node))
-          new-remaining (concat remaining-nodes (fetch-ancestor-forecast (:forecast/id node)))]
+          new-remaining (concat remaining-nodes (fetch-ancestor-forecast (:forecast/version-id node)))]
       (if (not-empty new-remaining)
         (recur (d/touch (d/entity @db-conn (:db/id (first new-remaining)))) new-results (rest new-remaining))
         new-results))))
 
-(defn fetch-forecasts
+(defn filter-forecasts
   [{:keys [expand filter] :or {expand false
                                filter nil}}] ;; filter is only applied to top-level forecasts.
   (let [pred (fn [n] (if (nil? filter)
@@ -56,7 +56,7 @@
                        (util/contains-str n filter)))
         top-level (apply concat (d/q '[:find (pull ?e [*])
                                        :in $ ?pred
-                                       :where [?e :forecast/id _]
+                                       :where [?e :forecast/version-id _]
                                        [?e :forecast/name ?n]
                                        [(get-else $ ?e :forecast/descendant-id nil) ?u]
                                        [(nil? ?u)]
@@ -93,17 +93,45 @@
       (response-handler owner [event outcome] response context))))
 
 
+(defn add-descendant-ids [forecasts]
+  (map (fn [item index]
+                 (if (and (> index 0)
+                          (== (:forecast/forecast-id (nth forecasts (dec index)))
+                             (:forecast/forecast-id item)))
+                   (assoc item :forecast/descendant-id true)
+                   item))
+               forecasts (range 0 (count forecasts))))
+
+(defn forecasts-in-db
+  [forecast-versions]
+  (doseq [f forecast-versions]
+    (let [id (:version-id f)
+          db-id (find-or-add-lookup :forecast id id-lookup id-counter)
+          cleaned-f (->> f
+                         (filter second)
+                         (util/map-add-ns :forecast)
+                         (into {}))
+          with-db-id (assoc cleaned-f :db/id db-id)]
+      (d/transact! db-conn [with-db-id]))))
 
 (defmethod request-handler
   :filter-forecasts
   [owner event args result-ch]
-  (let [forecasts (fetch-forecasts (select-keys args [:expand :filter]))]
-    (put! result-ch [:success {:forecasts forecasts
+  (let [forecasts (filter-forecasts (select-keys args [:expand :filter]))]
+    (put! result-ch [:success {:forecasts (add-descendant-ids forecasts)
                                :has-ancestors (->>
-                                               (filter #(and (-> % :forecast/id fetch-ancestor-forecast empty? not)
-                                                             (nil? (:forecast/descendant-id %))) forecasts)
-                                               (map #(vector (:db/id %) (:forecast/id %)))
+                                               (filter #(> (:forecast/version %) 1) forecasts)
+                                               (map #(vector (:db/id %) (:forecast/version-id %)))
                                                set)}])))
+
+(defmethod request-handler
+  :fetch-forecast-versions
+  [owner event forecast-id result-ch]
+  (venue/request! {:owner owner
+                   :service :service/api
+                   :request :get-forecast
+                   :args forecast-id
+                   :context result-ch}))
 
 (defmethod request-handler
   :fetch-forecasts
@@ -134,23 +162,22 @@
 
 (defmethod response-handler
   [:get-forecast :success] ;; singular
-  [owner _ response result-ch]
-  (put! result-ch [:success response]))
+  [owner _ forecast-versions result-ch]
+  (log/debug "Received" (count forecast-versions) "forecast versions.")
+  (forecasts-in-db forecast-versions)
+  (put! result-ch [:success nil]))
+
+(defmethod response-handler
+  [:get-forecast :failure]
+  [owner _ msg result-ch]
+  (log/debug "get-forecast failure" msg))
 
 (defmethod response-handler
   [:get-forecasts :success] ;;plural
   [owner _ forecasts result-ch]
   (log/debug "Received" (count forecasts) "forecasts.")
   (comment (reset-db!))
-  (doseq [f forecasts]
-    (let [id (:id f)
-          db-id (find-or-add-lookup :forecast id id-lookup id-counter)
-          cleaned-f (->> f
-                         (filter second)
-                         (util/map-add-ns :forecast)
-                         (into {}))
-          with-db-id (assoc cleaned-f :db/id db-id)]
-      (d/transact! db-conn [with-db-id])))
+  (forecasts-in-db forecasts)
   (put! result-ch [:success nil]))
 
 (defmethod response-handler

@@ -15,16 +15,16 @@
 
 (defn get-selected-forecast
   [cursor]
-  (some #(if (= (:forecast/id %) (-> cursor :selected second)) %) (:forecasts cursor)))
+  (some #(if (= (:forecast/version-id %) (-> cursor :selected second)) %) (:forecasts cursor)))
 
 (defn as-forecast-tr
   [cursor forecast]
   (let [selected-forecast     (:selected cursor)
         ancestor-set          (set (map second (:has-ancestors cursor)))
         expanded-set          (set (map second (:expanded cursor)))
-        is-selected-forecast? (= (:forecast/id forecast) (second selected-forecast))
-        has-ancestor?         (contains? ancestor-set (:forecast/id forecast))
-        is-expanded?          (contains? expanded-set (:forecast/id forecast))
+        is-selected-forecast? (= (:forecast/version-id forecast) (second selected-forecast))
+        has-ancestor?         (contains? ancestor-set (:forecast/version-id forecast))
+        is-expanded?          (contains? expanded-set (:forecast/version-id forecast))
         has-descendant?       (not (nil? (:forecast/descendant-id forecast)))]
     (assoc forecast
            :has-ancestor?         has-ancestor?
@@ -36,7 +36,7 @@
   header
   [[selected top-level] owner]
   (render [_]
-          (let [selected-id (:forecast/id selected)
+          (let [selected-id (:forecast/version-id selected)
                 is-top-level? (contains? top-level selected-id)]
             (html
              [:div.pure-menu.pure-menu-horizontal.witan-dash-heading
@@ -81,7 +81,7 @@
                                (->> :forecasts
                                     cursor
                                     (remove :forecast/descendant-id)
-                                    (map :forecast/id)
+                                    (map :forecast/version-id)
                                     set)])
              [:table.pure-table.pure-table-horizontal#witan-dash-forecast-list
               [:thead
@@ -94,11 +94,11 @@
               [:tbody
                (om/build-all widgets/forecast-tr
                              (map #(as-forecast-tr cursor %) (:forecasts cursor))
-                             {:key  :forecast/id
+                             {:key  :forecast/version-id
                               :opts {:on-click        #(venue/raise! %1 %2 %3)
                                      :on-double-click #(when-not (:forecast/descendant-id %2)
                                                          (goto-window-location!
-                                                          (venue/get-route :views/forecast {:id (:forecast/id %2) :action "input"})))}})]]]
+                                                          (venue/get-route :views/forecast {:id (:forecast/version-id %2) :action "input"})))}})]]]
             (when (:refreshing? cursor)
               [:div.view-overlay.trans-bg
                [:div#loading
