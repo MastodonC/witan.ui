@@ -96,7 +96,12 @@
           (html
            (if-not (:logged-in? cursor)
              [:div
-              [:div#login-bg {:key "login-bg"}]
+              [:div#login-bg {:key "login-bg"}
+               [:span#bg-attribution.trans-bg
+                 "Photo by "
+                [:a {:href "https://www.flickr.com/photos/fico86/" :target "_blank"}
+                 "Binayak Dasgupta"] " - "
+                [:a {:href "https://creativecommons.org/licenses/by/2.0/" :target "_blank"} "CC BY 2.0"]]]
               [:div#content-container {:key "login-content"}
                [:div#relative-container
                 [:div.login-title.trans-bg {:key "login-title"}
