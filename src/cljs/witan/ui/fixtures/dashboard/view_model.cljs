@@ -65,7 +65,6 @@
         toggled?     (contains? expanded [id version-id])
         dfn          (if toggled? disj conj)
         new-expanded (dfn expanded [id version-id])]
-    (log/debug "toggle-tree-view" forecast cursor)
     (om/update! cursor :expanded new-expanded)
     (venue/request! {:owner owner
                      :service :service/data
