@@ -100,7 +100,7 @@
   (GET event "/forecasts" nil result-ch))
 
 (defmethod service-m
-  :get-forecast
+  :get-forecast-versions
   [event id result-ch]
   (GET event (str "/forecasts/" id) nil result-ch))
 

@@ -126,7 +126,7 @@
   [owner event forecast-id result-ch]
   (venue/request! {:owner owner
                    :service :service/api
-                   :request :get-forecast
+                   :request :get-forecast-versions
                    :args forecast-id
                    :context result-ch}))
 
@@ -181,7 +181,7 @@
 ;;;
 
 (defmethod response-handler
-  [:get-forecast :success] ;; singular
+  [:get-forecast-versions :success]
   [owner _ forecast-versions result-ch]
   (log/debug "Received" (count forecast-versions) "forecast versions.")
   (let [latest-forecast (first forecast-versions)
@@ -193,7 +193,7 @@
   (put! result-ch [:success nil]))
 
 (defmethod response-handler
-  [:get-forecast :failure]
+  [:get-forecast-versions :failure]
   [owner _ msg result-ch]
   (log/debug "get-forecast failure" msg))
 
