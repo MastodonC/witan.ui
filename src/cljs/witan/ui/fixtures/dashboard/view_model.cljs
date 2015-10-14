@@ -75,7 +75,7 @@
 (defmethod event-handler
   :event/select-forecast
   [owner _ forecast cursor]
-  (om/update! cursor :selected (vector (:db/id forecast) (:forecast/id forecast))))
+  (om/update! cursor :selected (vector (:db/id forecast) (:forecast/version-id forecast))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
