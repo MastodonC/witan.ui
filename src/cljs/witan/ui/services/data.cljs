@@ -195,7 +195,7 @@
 (defmethod response-handler
   [:get-forecast-versions :failure]
   [owner _ msg result-ch]
-  (log/debug "get-forecast failure" msg))
+  (log/debug "get-forecast-versions failure" msg))
 
 (defmethod response-handler
   [:get-forecasts :success] ;;plural
