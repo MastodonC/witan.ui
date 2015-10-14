@@ -14,17 +14,17 @@
        (cljs.core/fn [owner# result# response# context#] result#))
 
      (cljs.core/defn ~'view-model
-        []
-        (cljs.core/reify
-          venue/IHandleEvent
-          (~'handle-event [owner# event# args# cursor#]
-                          (~'event-handler owner# event# args# cursor#))
-          venue/IHandleResponse
-          (~'handle-response [owner# outcome# event# response# context#]
-                             (~'response-handler owner# [event# outcome#] response# context#))
-          venue/IActivate
-          (~'activate [owner# args# cursor#]
-                      (~'on-activate owner# args# cursor#))
-          venue/IInitialise
-          (~'initialise [owner# cursor#]
-                        (~'on-initialise owner# cursor#))))))
+       []
+       (cljs.core/reify
+         venue/IHandleEvent
+         (~'handle-event [owner# event# args# cursor#]
+           (~'event-handler owner# event# args# cursor#))
+         venue/IHandleResponse
+         (~'handle-response [owner# outcome# event# response# context#]
+           (~'response-handler owner# [event# outcome#] response# context#))
+         venue/IActivate
+         (~'activate [owner# args# cursor#]
+           (~'on-activate owner# args# cursor#))
+         venue/IInitialise
+         (~'initialise [owner# cursor#]
+           (~'on-initialise owner# cursor#))))))

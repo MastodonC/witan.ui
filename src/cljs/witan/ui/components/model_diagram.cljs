@@ -137,7 +137,7 @@
                                                                :stroke stroke-colour
                                                                :key    "label-circle"})
                (svg/text [x-center label-offset]
-                         (str (+ 1 stage-index))
+                         (str (inc stage-index))
                          {:class       "forecast-label-text"
                           :fill        text-colour
                           :text-anchor "middle"

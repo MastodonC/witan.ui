@@ -25,7 +25,7 @@
   :prompt
   [cursor owner]
   (did-mount [_]
-              (when-let [node (. js/document (getElementById "login-email"))]
+             (when-let [node (.getElementById js/document "login-email")]
                   (set! (.-value node) (:email @cursor))))
   (render [_]
           (html
@@ -99,9 +99,9 @@
               [:div#login-bg {:key "login-bg"}
                [:span#bg-attribution.trans-bg
                  "Photo by "
-                [:a {:href "https://www.flickr.com/photos/fico86/" :target "_blank"}
+                [:a {:href "https://www.flickr.com/photos/fico86/" :target "_blank" :key "photo-attr1"}
                  "Binayak Dasgupta"] " - "
-                [:a {:href "https://creativecommons.org/licenses/by/2.0/" :target "_blank"} "CC BY 2.0"]]]
+                [:a {:href "https://creativecommons.org/licenses/by/2.0/" :target "_blank" :key "photo-attr2"} "CC BY 2.0"]]]
               [:div#content-container {:key "login-content"}
                [:div#relative-container
                 [:div.login-title.trans-bg {:key "login-title"}

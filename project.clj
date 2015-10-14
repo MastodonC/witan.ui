@@ -13,9 +13,9 @@
                  [datascript "0.11.6"]
                  [thi.ng/geom "0.0.881"]
                  [cljs-ajax "0.3.14"]
-                 [cljs-log "0.2.1"]
                  [environ "1.0.1"]
-                 [venue "0.1.5"]]
+                 [venue "0.1.5"]
+                 [cljs-log "0.2.2"]]
 
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]

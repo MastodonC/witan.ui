@@ -4,6 +4,7 @@
               [om-tools.core :refer-macros [defcomponent]]
               [sablono.core :as html :refer-macros [html]]
               [inflections.core :as i]
+              [clojure.string :as str]
               [schema.core :as s :include-macros true]
               ;;
               [witan.ui.widgets :as widgets]
@@ -40,11 +41,15 @@
                 is-top-level? (contains? top-level selected-id)]
             (html
              [:div.pure-menu.pure-menu-horizontal.witan-dash-heading
-              [:h1
-               (i/capitalize (get-string :forecasts))]
-              (om/build widgets/search-input
-                        (str (get-string :filter) " " (get-string :forecasts))
-                        {:opts {:on-input #(venue/raise! %1 :event/filter-forecasts %2)}})
+              [:div.witan-page-heading
+               [:h1
+                (get-string :forecast)]
+               (om/build widgets/search-input
+                         (str (get-string :filter) " " (->> :forecast
+                                                           get-string
+                                                           i/plural
+                                                           str/lower-case))
+                         {:opts {:on-input #(venue/raise! %1 :event/filter-forecasts %2)}})]
               [:ul.pure-menu-list
                [:li.witan-menu-item.pure-menu-item
                 [:a {:href (venue/get-route :views/new-forecast)}
