@@ -28,15 +28,6 @@
         (swap! lookup assoc kid new-id)
         new-id))))
 
-(defn add-descendant-ids [forecasts]
-  (map (fn [item index]
-         (if (and (pos? index)
-                  (== (:forecast/forecast-id (nth forecasts (dec index)))
-                      (:forecast/forecast-id item)))
-           (assoc item :forecast/descendant-id true)
-           item))
-       forecasts (range 0 (count forecasts))))
-
 (defn put-item-into-db!
   [item ns]
   (let [id (:version-id item)
@@ -51,26 +42,14 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn fetch-ancestor-forecast
-  "TODO This currently only handles the FIRST child. No support for branching."
-  [id]
-  (first (d/q '[:find (pull ?e [*])
-                :in $ ?i
-                :where [?e :forecast/descendant-id ?i]] @db-conn id)))
-
 (defn build-descendant-list
-  [db-id]
-  (loop [node (d/touch (d/entity @db-conn db-id))
-         results []
-         remaining-nodes []]
-    (let [new-results (conj results (:db/id node))
-          new-remaining (concat remaining-nodes (fetch-ancestor-forecast (:forecast/version-id node)))]
-      (if (not-empty new-remaining)
-        (recur (d/touch (d/entity @db-conn (:db/id (first new-remaining)))) new-results (rest new-remaining))
-        new-results))))
+  [id]
+  (apply concat (d/q '[:find ?e
+                      :in $ ?i
+                      :where [?e :forecast/descendant-id ?i]] @db-conn id)))
 
 (defn filter-forecasts
-  [{:keys [expand filter] :or {expand false
+  [{:keys [expand filter] :or {expand []
                                filter nil}}] ;; filter is only applied to top-level forecasts.
   (let [pred (fn [n] (if (nil? filter)
                        true
@@ -84,16 +63,14 @@
                                        [(?pred ?n)]]
                                      @db-conn
                                      pred))]
-    (if-not expand
-      top-level
-      (if (vector? expand)
-        (mapcat (fn [forecast]
-                  (if (some (fn [[ck cv]] (if (= (ck forecast) cv) [ck cv])) expand)
-                    (let [db-id (:db/id forecast)
-                          desc-tree (rest (build-descendant-list db-id))]
-                      (apply conj [forecast] (mapv #(merge {} (d/pull @db-conn '[*] %)) desc-tree)))
-                    [forecast])) top-level)
-        (throw (js/Error. ":expand must be a vector of [k v] vectors"))))))
+    (if (not-empty expand)
+      (mapcat (fn [forecast]
+                (if (some (fn [[ck cv]] (if (= (ck forecast) cv) [ck cv])) expand)
+                  (let [id (:forecast/version-id forecast)
+                        desc-list (build-descendant-list id)]
+                    (apply conj [forecast] (mapv #(merge {} (d/pull @db-conn '[*] %)) desc-list)))
+                  [forecast])) top-level)
+      top-level)))
 
 (defn fetch-models
   []
@@ -138,7 +115,7 @@
   :filter-forecasts
   [owner event args result-ch]
   (let [forecasts (filter-forecasts (select-keys args [:expand :filter]))]
-    (put! result-ch [:success {:forecasts (add-descendant-ids forecasts)
+    (put! result-ch [:success {:forecasts forecasts
                                :has-ancestors (->>
                                                (filter #(> (:forecast/version %) 1) forecasts)
                                                (map #(vector (:db/id %) (:forecast/version-id %)))
@@ -207,8 +184,12 @@
   [:get-forecast :success] ;; singular
   [owner _ forecast-versions result-ch]
   (log/debug "Received" (count forecast-versions) "forecast versions.")
-  (doseq [f forecast-versions]
-    (put-item-into-db! f :forecast))
+  (let [latest-forecast (first forecast-versions)
+        older-forecasts (map #(assoc % :descendant-id (:version-id latest-forecast)) (rest forecast-versions))]
+    (put-item-into-db! latest-forecast :forecast)
+    (doseq [f older-forecasts]
+      (put-item-into-db! f :forecast)))
+
   (put! result-ch [:success nil]))
 
 (defmethod response-handler

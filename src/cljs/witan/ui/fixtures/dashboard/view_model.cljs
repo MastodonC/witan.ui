@@ -65,7 +65,6 @@
         toggled?     (contains? expanded [id version-id])
         dfn          (if toggled? disj conj)
         new-expanded (dfn expanded [id version-id])]
-    (log/debug "toggle-tree-view" forecast cursor)
     (om/update! cursor :expanded new-expanded)
     (venue/request! {:owner owner
                      :service :service/data
@@ -76,7 +75,7 @@
 (defmethod event-handler
   :event/select-forecast
   [owner _ forecast cursor]
-  (om/update! cursor :selected (vector (:db/id forecast) (:forecast/id forecast))))
+  (om/update! cursor :selected (vector (:db/id forecast) (:forecast/version-id forecast))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
