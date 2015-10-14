@@ -238,7 +238,12 @@
   [:create-forecast :success]
   [owner _ new-forecast result-ch]
   (put-item-into-db! new-forecast :forecast)
-  (put! result-ch [:success (:version-id new-forecast)]))
+  (put! result-ch [:success (select-keys new-forecast [:forecast-id :version])]))
+
+(defmethod response-handler
+  [:get-forecast :success]
+  [owner _ forecast result-ch]
+  (put! result-ch [:success (put-item-into-db! forecast :forecast)]))
 
 ;;;;;;;;;;;;;;;;;;;;;
 

@@ -38,6 +38,8 @@
   [[selected top-level] owner]
   (render [_]
           (let [selected-id (:forecast/version-id selected)
+                selected-forecast-id (:forecast/forecast-id selected)
+                selected-version (:forecast/version selected)
                 is-top-level? (contains? top-level selected-id)]
             (html
              [:div.pure-menu.pure-menu-horizontal.witan-dash-heading
@@ -57,7 +59,7 @@
                   [:i.fa.fa-plus]]]]
                (if (and (not-empty selected) is-top-level?)
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (venue/get-route :views/forecast {:id selected-id :action "input"})}
+                  [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "input"})}
                    [:button.pure-button.button-error
                     [:i.fa.fa-pencil]]]])
                (if (seq selected)
@@ -67,7 +69,7 @@
                     [:i.fa.fa-copy]]]])
                (if (seq selected)
                  [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (venue/get-route :views/forecast {:id selected-id :action "output"})}
+                  [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "output"})}
                    [:button.pure-button.button-primary
                     [:i.fa.fa-download]]]])
                (if (seq selected)
@@ -103,7 +105,7 @@
                               :opts {:on-click        #(venue/raise! %1 %2 %3)
                                      :on-double-click #(when-not (:forecast/descendant-id %2)
                                                          (goto-window-location!
-                                                          (venue/get-route :views/forecast {:id (:forecast/version-id %2) :action "input"})))}})]]]
+                                                          (venue/get-route :views/forecast {:id (:forecast/forecast-id %2) :version (:forecast/version %2) :action "input"})))}})]]]
             (when (:refreshing? cursor)
               [:div.view-overlay.trans-bg
                [:div#loading

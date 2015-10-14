@@ -38,11 +38,11 @@
 
 (venue/defview!
   {:target "app"
-   :route "/forecast/:id/*action"
+   :route "/forecast/:id/:version/*action"
    :id :views/forecast
    :view witan.ui.fixtures.forecast.view/view
    :view-model witan.ui.fixtures.forecast.view-model/view-model
-   :state {}})
+   :state {:forecast nil}})
 
 (venue/defview!
   {:target "app"

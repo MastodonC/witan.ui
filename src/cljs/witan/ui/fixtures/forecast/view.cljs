@@ -9,7 +9,8 @@
             [witan.ui.widgets :as widgets]
             [witan.ui.components.model-diagram :as model-diagram]
             [witan.schema.core :refer [Forecast]]
-            [venue.core :as venue]))
+            [venue.core :as venue])
+  (:require-macros [cljs-log.core :as log]))
 
 (def valid-actions
   #{:input
@@ -64,31 +65,34 @@
       [:div "Model view"])))
 
 (defcomponent view
-  [{:keys [id action forecast]} owner]
+  [{:keys [id action forecast version]} owner]
   (render [_]
     (let [kaction (keyword action)
           ;; this is directly included in the forecast's data for now. More realistically
           ;; it would be derived from input and output information in the forecast.
           model-conf (merge {:action kaction} (select-keys forecast [:n-inputs :n-outputs]))]
       (html
-        [:div.pure-g
-         (om/build header forecast)
-         [:div.pure-u-1#witan-pw-top-spacer]
-         [:div.pure-u-1-12 {:key "forecast-left"}
-          [:div.witan-pw-nav-button
-           [:a {:href (venue/get-route :views/forecast {:id id :action (previous-action action)})}
-            [:i.fa.fa-chevron-left.fa-3x]]]]
-         [:div.pure-u-5-6.witan-model-diagram {:key "forecast-centre"}
-          (when forecast (om/build model-diagram/diagram model-conf))]
-         [:div.pure-u-1-12 {:key "forecast-right"}
-          [:div.witan-pw-nav-button
-           [:a {:href (venue/get-route :views/forecast {:id id :action (next-action action)})}
-            [:i.fa.fa-chevron-right.fa-3x]]]]
-         (if-not (contains? valid-actions kaction)
-           [:div.pure-u-1 [:span "Unknown forecast action"]]
-           [:div.pure-u-1 {:key "forecast-header"}
-            [:div.witan-pw-area-header
-             [:div
-              {:class action}
-              [:h2 (i/capitalize action)]]]
-            (om/build action-view [kaction forecast])])]))))
+       (if-not forecast
+         [:div.pure-g
+          [:h1 "LOADING"]]
+         [:div.pure-g
+          (om/build header forecast)
+          [:div.pure-u-1#witan-pw-top-spacer]
+          [:div.pure-u-1-12 {:key "forecast-left"}
+           [:div.witan-pw-nav-button
+            [:a {:href (venue/get-route :views/forecast {:id id :version version :action (previous-action action)})}
+             [:i.fa.fa-chevron-left.fa-3x]]]]
+          [:div.pure-u-5-6.witan-model-diagram {:key "forecast-centre"}
+           (when forecast (om/build model-diagram/diagram model-conf))]
+          [:div.pure-u-1-12 {:key "forecast-right"}
+           [:div.witan-pw-nav-button
+            [:a {:href (venue/get-route :views/forecast {:id id :version version :action (next-action action)})}
+             [:i.fa.fa-chevron-right.fa-3x]]]]
+          (if-not (contains? valid-actions kaction)
+            [:div.pure-u-1 [:span "Unknown forecast action"]]
+            [:div.pure-u-1 {:key "forecast-header"}
+             [:div.witan-pw-area-header
+              [:div
+               {:class action}
+               [:h2 (i/capitalize action)]]]
+             (om/build action-view [kaction forecast])])])))))

@@ -64,13 +64,13 @@
 
 (defmethod response-handler
   [:add-forecast :success]
-  [owner _ model-id cursor]
+  [owner _ {:keys [forecast-id version] :as fore} cursor]
   (om/update! cursor :working? false)
   (om/update! cursor :success? true)
-  (venue/navigate! :views/forecast {:id model-id :action "input"}))
+  (venue/navigate! :views/forecast {:id forecast-id :version version :action "input"}))
 
 (defmethod response-handler
   [:add-forecast :failure]
-  [owner _ models cursor]
+  [owner _ _ cursor]
   (om/update! cursor :working? false)
   (om/update! cursor :error :add-forecast))
