@@ -80,9 +80,10 @@
 
 (defn find-model-id-by-name-and-version
   [name version]
-  (d/q '[:find ?e ?id
+  (d/q '[:find ?e ?model-id ?id
          :in $ ?name ?version
          :where [?e :model/version-id ?id]
+         [?e :model/model-id ?model-id]
          [?e :model/version ?version]
          [?e :model/name ?name]]
        @db-conn
