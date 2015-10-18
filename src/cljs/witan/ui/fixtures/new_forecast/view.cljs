@@ -71,7 +71,7 @@
                   [:div
                    [:h3 {:key "mod-props-header"} (str (get-string :model) " " (get-string :properties))]
                    [:div.pure-form-aligned {:key "mod-form-div"}
-                    (for [{:keys [name type context]} properties]
+                    (for [{:keys [name type context enum_values]} properties]
                       (let [params {:ref (str "mod-prop-" name) :key (str "mod-prop-input-" name)}]
                         [:div.pure-control-group
                          {:key (str "mod-prop-" name)}
@@ -80,7 +80,7 @@
                            "dropdown"
                            [:select.pure-input-1-2
                             params
-                            (for [opt context]
+                            (for [opt enum_values]
                               [:option {:key (str "mod-prop-opt-" opt)} opt])]
                            "text"
                            [:input.pure-input-1-2 (merge params {:placeholder context :required true})]
