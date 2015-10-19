@@ -15,14 +15,15 @@
   [owner cursor])
 
 (defn on-activate
-  [owner {:keys [id action]} cursor]
+  [owner {:keys [id action version]} cursor]
   (om/update! cursor :id id)
-  (om/update! cursor :action action)
+  (om/update! cursor :action (or (not-empty action) "input"))
+  (om/update! cursor :version version)
   (when (data/logged-in?)
     (venue/request! {:owner owner
                      :service :service/data
                      :request :fetch-forecast
-                     :args id
+                     :args {:id id :version version}
                      :context cursor})))
 
 (defmethod response-handler

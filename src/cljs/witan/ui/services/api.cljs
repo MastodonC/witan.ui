@@ -65,7 +65,7 @@
   (if-let [token (.get goog.net.cookies token-name)]
     (do
       (reset! api-token token)
-      (GET :token-test "/" {} nil))
+      (GET :token-test "/" nil nil))
     (log/debug "No existing token was found.")))
 
 (defn request-handler
@@ -121,6 +121,11 @@
   :get-models
   [event id result-ch]
   (GET event "/models" nil result-ch))
+
+(defmethod service-m
+  :get-forecast
+  [event {:keys [id version]} result-ch]
+  (GET event (str "/forecasts/" id "/" version) nil result-ch))
 
 (defmethod service-m
   :create-forecast
