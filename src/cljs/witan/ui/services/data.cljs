@@ -38,7 +38,8 @@
                      (util/map-add-ns ns)
                      (into {}))
         with-db-id (assoc cleaned :db/id db-id)]
-    (d/transact! db-conn [with-db-id])))
+    (d/transact! db-conn [with-db-id])
+    with-db-id))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

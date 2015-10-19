@@ -48,65 +48,63 @@
                 (get-string :forecast)]
                (om/build widgets/search-input
                          (str (get-string :filter) " " (->> :forecast
-                                                           get-string
-                                                           i/plural
-                                                           str/lower-case))
-                         {:opts {:on-input #(venue/raise! %1 :event/filter-forecasts %2)}})]
-              [:ul.pure-menu-list
-               [:li.witan-menu-item.pure-menu-item
-                [:a {:href (venue/get-route :views/new-forecast)}
-                 [:button.pure-button.button-success
-                  [:i.fa.fa-plus]]]]
-               (if (and (not-empty selected) is-top-level?)
-                 [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "input"})}
-                   [:button.pure-button.button-error
-                    [:i.fa.fa-pencil]]]])
-               (if (seq selected)
-                 [:li.witan-menu-item.pure-menu-item
-                  [:a {:href "#"}
-                   [:button.pure-button.button-warning
-                    [:i.fa.fa-copy]]]])
-               (if (seq selected)
-                 [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "output"})}
-                   [:button.pure-button.button-primary
-                    [:i.fa.fa-download]]]])
-               (if (seq selected)
-                 [:li.witan-menu-item.pure-menu-item
-                  [:a {:href (venue/get-route :views/share {:id selected-id})}
-                   [:button.pure-button.button-primary
-                    [:i.fa.fa-share-alt]]]])]]))))
+                                                            get-string
+                                                            i/plural
+                                                            str/lower-case))
+                         {:opts {:on-input #(venue/raise! %1 :event/filter-forecasts %2)}})
+               [:ul.pure-menu-list
+                [:li.witan-menu-item.pure-menu-item
+                 [:a {:href (venue/get-route :views/new-forecast)}
+                  [:button.pure-button.button-success
+                   [:i.fa.fa-plus]]]]
+                (if (and (not-empty selected) is-top-level?)
+                  [:li.witan-menu-item.pure-menu-item
+                   [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "input"})}
+                    [:button.pure-button.button-error
+                     [:i.fa.fa-pencil]]]])
+                (if (seq selected)
+                  [:li.witan-menu-item.pure-menu-item
+                   [:a {:href "#"}
+                    [:button.pure-button.button-warning
+                     [:i.fa.fa-copy]]]])
+                (if (seq selected)
+                  [:li.witan-menu-item.pure-menu-item
+                   [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "output"})}
+                    [:button.pure-button.button-primary
+                     [:i.fa.fa-download]]]])
+                (if (seq selected)
+                  [:li.witan-menu-item.pure-menu-item
+                   [:a {:href (venue/get-route :views/share {:id selected-id})}
+                    [:button.pure-button.button-primary
+                     [:i.fa.fa-share-alt]]]])]]]))))
 
 (defcomponent view
   [cursor owner]
   (render [_]
           (html
-           [:div
-            [:div#forecasts-view
-             (om/build header [(get-selected-forecast cursor)
-                               (->> :forecasts
-                                    cursor
-                                    (remove :forecast/descendant-id)
-                                    (map :forecast/version-id)
-                                    set)])
-             [:table.pure-table.pure-table-horizontal#witan-dash-forecast-list
-              [:thead
-               [:th {:key "forecast-tree"}] ;; empty, for the tree icon
-               [:th {:key "forecast-name"} (get-string :forecast-name)]
-               (for [x [:forecast-owner
-                        :forecast-version
-                        :forecast-lastmodified]]
-                 [:th.text-center {:key (name x)} (get-string x)])]
-              [:tbody
-               (om/build-all widgets/forecast-tr
-                             (map #(as-forecast-tr cursor %) (:forecasts cursor))
-                             {:key  :forecast/version-id
-                              :opts {:on-click        #(venue/raise! %1 %2 %3)
-                                     :on-double-click #(when-not (:forecast/descendant-id %2)
-                                                         (goto-window-location!
-                                                          (venue/get-route :views/forecast {:id (:forecast/forecast-id %2) :version (:forecast/version %2) :action "input"})))}})]]]
-            (when (:refreshing? cursor)
-              [:div.view-overlay.trans-bg
-               [:div#loading
-                [:i.fa.fa-refresh.fa-2x.fa-spin]]])])))
+           (if (:refreshing? cursor)
+             [:i.fa.fa-refresh.fa-spin]
+             [:div
+              [:div#forecasts-view
+               (om/build header [(get-selected-forecast cursor)
+                                 (->> :forecasts
+                                      cursor
+                                      (remove :forecast/descendant-id)
+                                      (map :forecast/version-id)
+                                      set)])
+               [:table.pure-table.pure-table-horizontal#witan-dash-forecast-list
+                [:thead
+                 [:th {:key "forecast-tree"}] ;; empty, for the tree icon
+                 (for [[x width class] [[:forecast-name "35%"]
+                                        [:forecast-owner "25%" "text-center"]
+                                        [:forecast-version "20%"]
+                                        [:forecast-lastmodified "20%" "text-center"]]]
+                   [:th {:key (name x) :class class :style {:width width}} (get-string x)])]
+                [:tbody
+                 (om/build-all widgets/forecast-tr
+                               (map #(as-forecast-tr cursor %) (:forecasts cursor))
+                               {:key  :forecast/version-id
+                                :opts {:on-click        #(venue/raise! %1 %2 %3)
+                                       :on-double-click #(when-not (:forecast/descendant-id %2)
+                                                           (goto-window-location!
+                                                            (venue/get-route :views/forecast {:id (:forecast/forecast-id %2) :version (:forecast/version %2) :action "input"})))}})]]]]))))

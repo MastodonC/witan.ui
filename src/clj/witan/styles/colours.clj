@@ -17,12 +17,18 @@
 
 ;; aliases
 (def error button-error)
+(def warning button-warning)
 
 ;;
 (def forecast-input "#9fc5f8")
 (def forecast-model "#ffd966")
 (def forecast-output "#b6d7a8")
 (def forecast-group "#c0c5f7")
+(def forecast-changed "#fa8144")
+(def forecast-input-light  (color/lighten forecast-input 12))
+(def forecast-model-light  (color/lighten forecast-model 12))
+(def forecast-output-light (color/lighten forecast-output 12))
+(def forecast-changed-light (color/lighten forecast-changed 12))
 
 ;; page background
 (def bg white)
@@ -41,6 +47,7 @@
 
 ;; title (h1) of the page
 (def title primary)
+(def title-light (color/lighten primary 40))
 
 ;; page subtitle and also h2
 (def subtitle secondary)
@@ -69,3 +76,9 @@
 
 ;; row selected
 (def row-selected (color/darken row-highlight 30))
+
+;; themes
+(def in-progress "#b835f3")
+(def in-progress-light (color/lighten in-progress 20))
+
+(def new-forecast "#ee52d0")
