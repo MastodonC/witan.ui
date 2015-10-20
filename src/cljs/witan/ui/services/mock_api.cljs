@@ -107,7 +107,7 @@
                        (let [{:keys [forecast-id version]} forecast
                              find-forecast-id (:id args)
                              find-version (js/parseInt (:version args))]
-                         (if (and (= find-forecast-id forecast-id)
+                         (when (and (= find-forecast-id forecast-id)
                                   (= find-version version))
                            forecast)))
                      (concat
