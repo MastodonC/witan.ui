@@ -5,10 +5,8 @@
               [sablono.core :as html :refer-macros [html]]
               [inflections.core :as i]
               [clojure.string :as str]
-              [schema.core :as s :include-macros true]
               ;;
               [witan.ui.widgets :as widgets]
-              [witan.schema.core :refer [Forecast]]
               [witan.ui.strings :refer [get-string]]
               [witan.ui.util :refer [goto-window-location!]]
               [venue.core :as venue])

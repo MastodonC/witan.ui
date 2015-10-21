@@ -4,12 +4,10 @@
               [om-tools.core :refer-macros [defcomponent defcomponentmethod]]
               [sablono.core :as html :refer-macros [html]]
               [inflections.core :as i]
-              [schema.core :as s :include-macros true]
               ;;
               [witan.ui.widgets :as widgets]
               [witan.ui.strings :refer [get-string]]
               [witan.ui.components.model-diagram :as model-diagram]
-              [witan.schema.core :refer [Forecast]]
               [venue.core :as venue])
     (:require-macros [cljs-log.core :as log]))
 

@@ -4,10 +4,8 @@
               [om-tools.core :refer-macros [defcomponent]]
               [sablono.core :as html :refer-macros [html]]
               [inflections.core :as i]
-              [schema.core :as s :include-macros true]
               ;;
               [witan.ui.widgets :as widgets]
-              [witan.schema.core :refer [Forecast]]
               [witan.ui.strings :refer [get-string]]
               ))
 

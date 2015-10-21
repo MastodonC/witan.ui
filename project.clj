@@ -23,20 +23,20 @@
             [lein-cljfmt "0.3.0"]
             [lein-ring "0.9.6"]]
 
-  :source-paths ["src/clj" "src/cljc"]
+  :source-paths ["src/clj"]
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
   :cljsbuild {
               :builds [{:id "prod"
-                        :source-paths ["src/cljs" "src/cljc"]
+                        :source-paths ["src/cljs"]
                         :compiler {:output-to "resources/public/js/compiled/witan-ui.js"
                                    :main witan.ui.core
                                    :optimizations :advanced
                                    :pretty-print false
                                    :warnings {:single-segment-namespace false}}}
                        {:id "dev"
-                        :source-paths ["src/cljs" "src/cljc"]
+                        :source-paths ["src/cljs"]
                         :figwheel {:on-jsload "witan.ui.core/on-js-reload" }
                         :compiler {:main witan.ui.core
                                    :asset-path "js/compiled/out"

@@ -2,7 +2,6 @@
     (:require [cljs.core.async :refer [<! chan]]
               [om.core :as om :include-macros true]
               [schema.core :as s :include-macros true]
-              [witan.schema.core :refer [Forecast]]
               [witan.ui.util :as util]
               [witan.ui.services.data :as data]
               [venue.core :as venue :include-macros true])
