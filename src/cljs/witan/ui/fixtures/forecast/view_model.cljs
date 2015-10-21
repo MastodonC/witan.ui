@@ -30,3 +30,13 @@
   [:fetch-forecast :success]
   [owner _ forecast cursor]
   (om/update! cursor :forecast forecast))
+
+(defmethod event-handler
+  :revert-forecast
+  [owner _ _ cursor]
+  (om/update! cursor :edited-forecast nil))
+
+(defmethod event-handler
+  :refresh-forecast
+  [owner _ _ cursor]
+  (.reload (.-location js/window)))

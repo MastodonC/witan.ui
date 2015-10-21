@@ -36,13 +36,27 @@
    :create                        "Create"
    :logout                        "Log Out"
    :no-model-properties           "This model has no properties to configure"
+   :please-wait                   "Please Wait..."
+   :create-new-forecast           "Create a New Version"
+   :revert-forecast               "Revert changes"
+   :in-progress                   "In-Progress"
+   :changed                       "Changed"
+   :refresh-now                   "Refresh"
+   :new                           "New"
+   :forecast-changes-text         "There are changes to this forecast. Would you like to save them and create a new version?"
+   :forecast-in-progress-text     "This version is currently being generated. During this time you will be unable to make changes or download results. This can take several minutes."
+   :input-intro                   "The fields below show the inputs that currently configured for this forecast. If there are required inputs, these need to be specified before the model can be run. You can adjust existing inputs in the same way and this will cause the model to be re-run."
+   :model-intro                   "These are the model details that have been configured for this forecast."
+   :output-intro                  "Download the latest results of this forecast."
    })
 
 (defn get-string
   ""
-  [keywd]
+  [keywd & add]
   (if (contains? strings keywd)
-    (keywd strings)
+    (if add
+      (str (keywd strings) (first add) (clojure.string/join " " (concat " " (rest add))))
+      (keywd strings))
     (do
       (log/severe "Failed to find string " (str keywd))
       "## ERROR ##")))

@@ -2,16 +2,17 @@
   (:require [om.core :as om :include-macros true]
             [om-tools.core :refer-macros [defcomponent]]
             [thi.ng.geom.svg.core :as svg]
-            [sablono.core :as sablono]))
+            [sablono.core :as sablono])
+  (:require-macros [cljs-log.core :as log]))
 
 ;; All values will used in SVG without units.
 (def render-options
   {:box-height        30
    :box-h-spacing     20
-   :box-width         125
-   :box-w-spacing     80
+   :box-width         195
+   :box-w-spacing     85
    :group-box-padding 7
-   :canvas-width      600
+   :canvas-width      810
    :padding           40
    :top-offset        60
    :label-offset      0
@@ -109,22 +110,21 @@
 (defn stage-highlight
   "Draws a highlight box which indicates which stage of the modelling process is being configured.
   The fill is set according to whether this box is `highlighted`."
-  [render-options max-n stage-index highlighted]
+  [render-options max-n stage-index highlighted stage-name]
   (let [{:keys [row-height column-width box-width box-h-spacing highlight-padding top-offset]} render-options
         x-start (+ (* -1 highlight-padding) (* stage-index column-width))
         y-start (* -1 highlight-padding)
         x-size (+ box-width (* 2 highlight-padding))
-        y-size (+ (* row-height max-n) (* 2 highlight-padding) (* -1 box-h-spacing) top-offset)
-        fill-colour (if highlighted "#dddddd" "white")]
+        y-size (+ (* row-height max-n) (* 2 highlight-padding) (* -1 box-h-spacing) top-offset)]
     (svg/rect [x-start y-start] x-size y-size
-              {:class "highlight"
-               :key   (str "highlight-box-" stage-index)
-               :fill  fill-colour})))
+              {:class [(str "highlight-" stage-name) (when highlighted "highlighted") ]
+               :key (str "highlight-box-" stage-name)})))
 
 (defn stage-highlights
   "Draws a highlight box for each stage. The highlighted box will have a different fill than the others."
   [render-options max-n highlight-index]
-  (mapv #(stage-highlight render-options max-n % (= % highlight-index)) (range 3)))
+  (let [stage-names ["input" "model" "output"]]
+    (mapv #(stage-highlight render-options max-n % (= % highlight-index) (nth stage-names %)) (range 3))))
 
 (defn stage-label
   [render-options stage-index highlighted]
@@ -159,7 +159,7 @@
   "Draws a digram for a given model specification."
   [render-options model-conf]
   (let [{:keys [canvas-width box-width box-w-spacing box-height box-h-spacing padding top-offset]} render-options
-        {:keys [n-inputs n-outputs action]} model-conf
+        {:keys [n-inputs n-outputs action] :or {n-inputs 3 n-outputs [2 3]}} model-conf
         total-outputs (apply + n-outputs)
         max-n (max n-inputs total-outputs)
         ;; geometry related definitions
@@ -170,7 +170,7 @@
         render-options-plus (merge render-options {:column-width column-width :row-height row-height})
         stage-index (stage-to-index action)]
     (sablono/html (svg/svg
-                    {:width  (+ canvas-width (* 2 padding))
+                    {:width  (+ canvas-width (* 0.75 padding))
                      :height (+ (* max-n row-height) (* 2 padding) top-offset)
                      :key    "model-diagram-g1"}
                     (svg/group

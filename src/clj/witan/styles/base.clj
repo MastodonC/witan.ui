@@ -26,7 +26,11 @@
       {:font-family f/base-fonts}]
      [:h1
       {:color     colour/title
-       :font-size (em 2.5)}]
+       :font-size (em 2.5)}
+      [:em
+       {:font-size (em 0.70)
+        :color colour/title-light
+        :margin-left (em 0.5)}]]
      [:h2
       {:color     colour/subtitle
        :font-size (em 1.75)}]
@@ -74,6 +78,11 @@
      [:#app
       {:padding "0 1em"}]
 
+     [".unselectable::selection"
+      {:background-color :transparent}]
+
+     ;; buttons
+
      [:.button-success
       {:background-color colour/button-success
        :color            colour/white}]
@@ -94,16 +103,42 @@
       {:background-color colour/button-secondary
        :color            colour/white}]
 
+     ;; text
+
      [:.text-center
       {:text-align :center}]
 
      [:.text-white
       {:color colour/white}]
 
-     [".unselectable::selection"
-      {:background-color :transparent}]
+     ;; labels
 
-         ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+     [:.label-in-progress
+      {:background-color colour/in-progress}]
+
+     [:.label-forecast-changed
+      {:background-color colour/forecast-changed}]
+
+     [:.label-new
+      {:background-color colour/new-forecast}]
+
+     [:.label
+      {:display :inline
+       :padding ".2em .6em .3em"
+       :font-size (percent 75)
+       :font-weight 700
+       :line-height 1
+       :color colour/white
+       :text-align :center
+       :white-space :nowrap
+       :vertical-align :middle
+       :border-radius (em 0.25)
+       :margin-right (em 0.20)}]
+
+     [:.label-small
+      {:font-size (percent 65)}]
+
+     ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
      [:#container
       {:margin (em 1)}]
@@ -111,7 +146,8 @@
      ;; witan
 
      [:#witan-menu
-      {:background-color colour/header}]
+      {:background-color colour/header
+       :box-shadow "0px 3px 4px #888888"}]
 
      [:.witan-menu-item
       [:a
@@ -130,17 +166,19 @@
       [:#filter-input
        {:padding-left (px 30)}]]
 
+     [:.witan-page-heading
+      [:.pure-menu-list
+       {:bottom (em 0.55)}]
+      [:button
+       {:margin-left (em 0.5)}]]
+
      [:.witan-dash-heading
       {:color         colour/primary
-       ;;:font-size (px 20)
        :border-bottom "#ccc 2px solid"}
       [:h1
        {:margin-bottom (em 0.2)
         :display       :inline-block}]
-      [:button
-       {:margin-left (em 0.5)}]
-      [:.pure-menu-list
-       {:bottom (em 0.55)}]
+
       [:.pure-form
        {:display        :inline-flex
         :font-size      (px 14)
@@ -167,7 +205,10 @@
        {:background-color colour/white}]
       [:&:hover
        {:background-color colour/row-highlight
-        :cursor           :pointer}]]
+        :cursor           :pointer}]
+      [:.version-labels
+       {:display :inline
+        :margin-left (em 0.5)}]]
 
      [:.witan-forecast-table-row-selected
       :.witan-forecast-table-row-selected:hover
@@ -179,23 +220,72 @@
       [:.name
        {:margin-left (em 1)}]]
 
+     [:.witan-forecast-table-version-descendant
+      {:margin-left (em 0.3)}]
+
      [:#witan-pw-top-spacer
       {:height (em 2)}]
+
+     [:#witan-pw-edits
+      {:background-color colour/forecast-changed-light
+       :border "solid 2px"
+       :border-color colour/forecast-changed
+       :border-radius (em 0.3)
+       :padding (em 1)
+       :line-height (em 1.6)
+       :font-size (em 1.1)}
+      [:#witan-pw-edits-buttons
+       {:text-align :right}]
+      [:button
+       {:margin-left (em 1)}
+       [:&#create
+        {:background-color colour/forecast-changed}]
+       [:&#revert
+        {:background-color colour/button-error}]]]
+
+     [:#witan-pw-in-prog
+      {:background-color colour/in-progress-light
+       :border "solid 2px"
+       :border-color colour/in-progress
+       :border-radius (em 0.3)
+       :padding (em 1)
+       :line-height (em 1.6)
+       :font-size (em 1.1)}
+      [:button
+       {:margin-left (em 1)
+        :display :inline
+        :background-color colour/in-progress
+        }]]
+     [:#witan-pw-in-prog-text
+      {:display :inline}]
+
+     [:#witan-pw-area
+      {:line-height (em 1.6)}]
 
      [:.witan-model-diagram
       {:stroke       colour/black
        :stroke-width 3
        :text-align   "center"}
-      [:.input {:fill colour/forecast-input}]
+      [:.input  {:fill colour/forecast-input}]
       [:.output {:fill colour/forecast-output}]
-      [:.model {:fill colour/forecast-model}]
-      [:.group {:fill         colour/forecast-group
-                :stroke       "grey"
-                :stroke-width (px 2)
-                ;;:stroke-dasharray "3,3"
-}]
-      [:.highlight {:transition "fill 0.5s"
-                    :stroke     "none"}]
+      [:.model  {:fill colour/forecast-model}]
+      [:.group  {:fill         colour/forecast-group
+                 :stroke       "grey"
+                 :stroke-width (px 2)}]
+
+      [:.highlight-input  {:fill colour/forecast-input-light
+                           :transition "stroke 0.5s"
+                           :stroke     "white"}]
+      [:.highlight-output {:fill colour/forecast-output-light
+                           :transition "stroke 0.5s"
+                           :stroke     "white"}]
+      [:.highlight-model  {:fill colour/forecast-model-light
+                           :transition "stroke 0.5s"
+                           :stroke     "white"}]
+
+      [:.highlighted
+       {:stroke "none"}]
+
       [:.forecast-label-circle {:stroke-weight (px 2)
                                 :fill          :none
                                 :transition    "stroke 0.5s"}]
@@ -208,18 +298,30 @@
       {:border-bottom "#ccc 2px solid"}
       [:h1
        {:margin-bottom (em 0.2)
-        :display       :inline-block}]]
+        :display       :inline-block}]
+      [:.version-zero
+       {:color colour/new-forecast}]
+      [:.labels
+       {:display     :inline
+        :margin-left (em 0.5)
+        :font-size (percent 60)}]]
 
      [:.witan-pw-nav-button
-      ;; I really want this to vertically centre, but can't seem to figure it out
-      {:padding-top (em 8)
-       :text-align :center}
-      [:a {:color colour/primary}]]
+      {:text-align :center
+       :color colour/primary
+       :display :block
+       :height :inherit
+       :position :relative}
+      [:i
+       {:top (percent 40)
+        :position :absolute
+        :left (percent 10)
+        :right (percent 10)}]]
 
      [:.witan-pw-area-header
       {:text-align    :center
        :width         (percent 100)
-       :margin-top    (px 20)
+       ;;:margin-top    (px 20)
        :margin-bottom (px 15)}
       [:h2
        {:color       colour/primary
