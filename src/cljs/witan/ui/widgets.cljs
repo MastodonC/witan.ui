@@ -71,13 +71,19 @@
               [:td
                {:style {:padding-left "2em"}}
                [:span.unselectable
-                {:class (when has-descendant? "witan-forecast-table-version-descendant")}
+                {:class (when has-descendant? "witan-forecast-table-version-descendant")
+                 :key "witan-forecast-table-version-key"}
                 (:forecast/version forecast)]
                (when (or new? in-progress?)
                  [:div.version-labels
+                  {:key "witan-forecast-table-labels-key"}
                   (when in-progress?
-                    [:span.unselectable.label.label-in-progress.label-small (get-string :in-progress)])
+                    [:span.unselectable.label.label-in-progress.label-small
+                     {:key "witan-forecast-table-labels-in-prog-key"}
+                     (get-string :in-progress)])
                   (when new?
-                    [:span.unselectable.label.label-new.label-small (get-string :new)])])]
+                    [:span.unselectable.label.label-new.label-small
+                     {:key "witan-forecast-table-label-new-key"}
+                     (get-string :new)])])]
               [:td.text-center
                [:span.unselectable (:forecast/created forecast)]]]))))

@@ -37,14 +37,14 @@
   [{:keys [forecast/name forecast/version forecast/version-id forecast/in-progress? edited?]} owner]
   (render [_]
           (let [new? (= version 0)]
-            (log/debug "NEW" new?)
             (html
              [:div.pure-menu.pure-menu-horizontal.witan-pw-header
               [:div.witan-page-heading
                [:h1 name
-                [:em {:class (when new? "version-zero")}
+                [:em {:class (when new? "version-zero") :key "witan-pw-version"}
                  (get-string :forecast-version " " version)]
                 [:div.labels
+                 {:key "witan-pw-header-labels"}
                  (when in-progress?
                    [:span.label.label-in-progress.label-small (get-string :in-progress)])
                  (when new?
