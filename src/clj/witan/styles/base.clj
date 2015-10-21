@@ -69,9 +69,12 @@
         :right      (em 0.3)
         :margin-top (em 0.3)}]]
      [:.pure-table
-      [:thead
+      {:border (px 0)}
+      [:thead :th :td
        {:background-color :transparent
         :border           (px 0)}]]
+     [:.pure-g
+      {:font-family f/base-fonts}]
 
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -108,8 +111,20 @@
      [:.text-center
       {:text-align :center}]
 
+     [:.text-right
+      {:text-align :right}]
+
+     [:.text-left
+      {:text-align :left}]
+
      [:.text-white
       {:color colour/white}]
+
+     [:.text-gray
+      {:color colour/gray}]
+
+     [:.padding-1
+      {:padding (em 1)}]
 
      ;; labels
 
@@ -254,13 +269,18 @@
       [:button
        {:margin-left (em 1)
         :display :inline
-        :background-color colour/in-progress
-        }]]
+        :background-color colour/in-progress}]]
      [:#witan-pw-in-prog-text
       {:display :inline}]
 
      [:#witan-pw-area
       {:line-height (em 1.6)}]
+
+     [:#witan-pw-action-body
+      {:text-align :left}
+      [:.model-value
+       {:margin-left (em 1)
+        :margin-right (em 1)}]]
 
      [:.witan-model-diagram
       {:stroke       colour/black
@@ -327,6 +347,11 @@
        {:color       colour/primary
         :margin      "10px"
         :font-weight 400}]
+
+      [:.witan-pw-input-data-row
+       [:small
+        {:display :block
+         :line-height (px 6)}]]
 
       [:.input
        {:width            (percent 100)

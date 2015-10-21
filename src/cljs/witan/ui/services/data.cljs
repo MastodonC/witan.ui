@@ -46,8 +46,8 @@
 (defn build-descendant-list
   [id]
   (apply concat (d/q '[:find ?e
-                      :in $ ?i
-                      :where [?e :forecast/descendant-id ?i]] @db-conn id)))
+                       :in $ ?i
+                       :where [?e :forecast/descendant-id ?i]] @db-conn id)))
 
 (defn filter-forecasts
   [{:keys [expand filter] :or {expand []
@@ -151,6 +151,15 @@
                    :context result-ch}))
 
 (defmethod request-handler
+  :fetch-model
+  [owner event id result-ch]
+  (venue/request! {:owner owner
+                   :service :service/api
+                   :request :get-model
+                   :args id
+                   :context result-ch}))
+
+(defmethod request-handler
   :fetch-user
   [owner event id result-ch]
   (venue/request! {:owner owner
@@ -245,6 +254,16 @@
   [:get-forecast :success]
   [owner _ forecast result-ch]
   (put! result-ch [:success (put-item-into-db! forecast :forecast)]))
+
+(defmethod response-handler
+  [:get-forecast :failure]
+  [owner _ {:keys [status]} result-ch]
+  (put! result-ch [:failure status]))
+
+(defmethod response-handler
+  [:get-model :success]
+  [owner _ model result-ch]
+  (put! result-ch [:success (put-item-into-db! model :model)]))
 
 ;;;;;;;;;;;;;;;;;;;;;
 

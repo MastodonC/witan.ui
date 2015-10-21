@@ -40,7 +40,7 @@
                         classes [[is-selected-forecast? "witan-forecast-table-row-selected"]
                                  [has-descendant? "witan-forecast-table-row-descendant"]]
                         in-progress? (:forecast/in-progress? forecast)
-                        new? (= (:forecast/version forecast) 0)]
+                        new? (zero? (:forecast/version forecast))]
             (html
              [:tr.witan-forecast-table-row {:key (:forecast/version-id forecast)
                                             :class (->> classes

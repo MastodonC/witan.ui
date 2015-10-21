@@ -33,7 +33,7 @@
 (defn- handle-response
   [status event result-ch response]
   (if (and (= status :failure) (not= event :token-test))
-    (log/severe "An API error occurred: " event))
+    (log/severe "An API error occurred: " event response))
   (let [result (api-response [event status] (clojure.walk/keywordize-keys response))]
     (when result-ch
       (put! result-ch [status result]))))
@@ -131,6 +131,11 @@
   :create-forecast
   [event args result-ch]
   (POST event "/forecasts" args result-ch))
+
+(defmethod service-m
+  :get-model
+  [event {:keys [id]} result-ch]
+  (GET event (str "/models/" id) nil result-ch))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
