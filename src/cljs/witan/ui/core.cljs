@@ -43,7 +43,8 @@
    :view witan.ui.fixtures.forecast.view/view
    :view-model witan.ui.fixtures.forecast.view-model/view-model
    :state {:forecast nil
-           :edited-forecast nil}})
+           :edited-forecast nil
+           :model nil}})
 
 (venue/defview!
   {:target "app"

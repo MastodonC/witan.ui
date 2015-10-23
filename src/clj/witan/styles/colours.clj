@@ -9,15 +9,18 @@
 (def darker-gray (color/darken (:darkgray color/color-name->hex) 20))
 
 ;;
-(def button-success "#59cd90")
-(def button-error "#ee6352")
-(def button-warning "#fac05e")
-(def button-primary "#3590f3")
-(def button-secondary (color/lighten button-primary 12))
+(def error   (rgb 238 66 102))
+(def warning (rgb 242 158 76))
+(def success (rgb 14 173 105))
+(def normal  (rgb 4 139 168))
+(def deep    (rgb 29 53 87))
 
-;; aliases
-(def error button-error)
-(def warning button-warning)
+;;
+(def button-success   success)
+(def button-error     error)
+(def button-warning   warning)
+(def button-primary   normal)
+(def button-secondary (color/lighten button-primary 20))
 
 ;;
 (def forecast-input "#9fc5f8")
@@ -72,13 +75,14 @@
 (def link (rgb 76 174 207))
 
 ;; row highlight
-(def row-highlight (rgb 255 252 219))
+(def row-selected (rgb 255 221 63))
+(def row-highlight (color/lighten row-selected 25))
 
 ;; row selected
-(def row-selected (color/darken row-highlight 30))
+
 
 ;; themes
-(def in-progress "#b835f3")
+(def in-progress (rgb 84 13 110))
 (def in-progress-light (color/lighten in-progress 20))
 
-(def new-forecast "#ee52d0")
+(def new-forecast (rgb 234 122 244))

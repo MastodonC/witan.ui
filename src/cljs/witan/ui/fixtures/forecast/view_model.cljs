@@ -29,7 +29,26 @@
 (defmethod response-handler
   [:fetch-forecast :success]
   [owner _ forecast cursor]
-  (om/update! cursor :forecast forecast))
+  (om/update! cursor :forecast forecast)
+  ;; get the model
+  (venue/request! {:owner owner
+                   :service :service/data
+                   :request :fetch-model
+                   :args {:id (:forecast/model-id forecast)}
+                   :context cursor}))
+
+(defmethod response-handler
+  [:fetch-forecast :failure]
+  [owner _ error cursor]
+  (let [response (condp = error
+                   404 "A forecast with this ID or version could not be found."
+                   "An unknown error occurred.")]
+    (om/update! cursor :error? response)))
+
+(defmethod response-handler
+  [:fetch-model :success]
+  [owner _ model cursor]
+  (om/update! cursor :model model))
 
 (defmethod event-handler
   :revert-forecast
