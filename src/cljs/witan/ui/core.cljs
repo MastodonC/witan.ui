@@ -5,6 +5,8 @@
               [witan.ui.services.api]
               [witan.ui.services.mock-api]
               [witan.ui.services.data]
+              [witan.ui.services.upload]
+              [witan.ui.services.mock-upload]
               ;;
               [witan.ui.fixtures.login.view]
               [witan.ui.fixtures.login.view-model]
@@ -30,11 +32,11 @@
    :view witan.ui.fixtures.dashboard.view/view
    :view-model witan.ui.fixtures.dashboard.view-model/view-model
    :state {:expanded      #{}
-           :selected       []
+           :selected      []
            :has-ancestors #{}
-           :filter         nil
-           :refreshing?    false
-           :forecasts      []}})
+           :filter        nil
+           :refreshing?   false
+           :forecasts     []}})
 
 (venue/defview!
   {:target "app"
@@ -42,9 +44,21 @@
    :id :views/forecast
    :view witan.ui.fixtures.forecast.view/view
    :view-model witan.ui.fixtures.forecast.view-model/view-model
-   :state {:forecast nil
-           :edited-forecast nil
-           :model nil}})
+   :state {:id                   nil
+           :forecast             nil
+           :edited-forecast      nil
+           :model                nil
+           :browsing-input       nil
+           :upload-file          nil
+           :upload-filename      ""
+           :upload-type          :existing
+           :uploading?           false
+           :upload-error?        false
+           :upload-success?      false
+           :last-upload-filename ""
+           :data-items           nil
+           :selected-data-item   nil
+           :creating?            false}})
 
 (venue/defview!
   {:target "app"
@@ -52,11 +66,11 @@
    :id :views/new-forecast
    :view witan.ui.fixtures.new-forecast.view/view
    :view-model witan.ui.fixtures.new-forecast.view-model/view-model
-   :state {:error nil
-           :success? false
-           :models []
+   :state {:error          nil
+           :success?       false
+           :models         []
            :selected-model nil
-           :working? false}})
+           :working?       false}})
 
 (venue/defview!
   {:target "app"
@@ -73,10 +87,10 @@
    :id :views/login
    :view witan.ui.fixtures.login.view/view
    :view-model witan.ui.fixtures.login.view-model/view-model
-   :state {:phase :prompt
-           :message nil
+   :state {:phase      :prompt
+           :message    nil
            :logged-in? false
-           :email nil}})
+           :email      nil}})
 
 (venue/defstatic!
   {:target "menu"
@@ -96,6 +110,12 @@
 (venue/defservice!
   {:id :service/data
    :handler witan.ui.services.data/service})
+
+(venue/defservice!
+  {:id :service/upload
+   :handler (if (cljs-env :mock-api)
+              witan.ui.services.mock-upload/service
+              witan.ui.services.upload/service)})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

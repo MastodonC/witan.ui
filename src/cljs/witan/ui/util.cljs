@@ -18,6 +18,11 @@
   [source pattern]
   (boolean (re-find (js/RegExp. pattern "i") source)))
 
+(defn str-fmt-map
+  "String format with map using mustache delimiters, e.g. (str-fmt-map 'hello {{name}}' {:name 'foo'})"
+  [s m]
+  (reduce (fn [x [k v]] (clojure.string/replace x (str "{{"(name k)"}}") (str v)) ) s m))
+
 (defn goto-window-location!
   "Sends the window to the specified location"
   [location]
@@ -40,7 +45,21 @@
         skey (name key)]
     (keyword sns skey)))
 
+(defn remove-ns
+  "Removes a namespace from a keyword"
+  [key]
+  (-> key name keyword))
+
 (defn map-add-ns
   "Adjusts an entire map by adding namespace to all the keys"
   [ns m]
   (map (fn [[k v]] (hash-map (add-ns ns k) v)) m))
+
+(defn map-remove-ns
+  "Adjusts an entire map by removing namespace to all the keys"
+  [m]
+  (map (fn [[k v]] (hash-map (remove-ns k) v)) m))
+
+(defn sanitize-filename
+  [filename]
+  (.replace filename #".*[\\\/]" ""))

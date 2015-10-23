@@ -17,9 +17,13 @@
           (let [{:keys [on-input]} (first opts)]
             (html
              [:form.pure-form
+              {:key "search-filter-form"}
               [:div.witan-search-input
-               [:i.fa.fa-search]
-               [:input {:id "filter-input"
+               {:key "search-filter-inner-div"}
+               [:i.fa.fa-search
+                {:key "icon"}]
+               [:input {:key "filter-input"
+                        :id "filter-input"
                         :type "text"
                         :placeholder placeholder
                         :on-input (fn [e]
