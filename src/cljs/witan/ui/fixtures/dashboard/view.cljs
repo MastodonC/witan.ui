@@ -6,6 +6,7 @@
               [inflections.core :as i]
               [clojure.string :as str]
               ;;
+              [witan.ui.util :as util]
               [witan.ui.widgets :as widgets]
               [witan.ui.strings :refer [get-string]]
               [witan.ui.util :refer [goto-window-location!]]
@@ -15,6 +16,75 @@
 (defn get-selected-forecast
   [cursor]
   (some #(if (= (:forecast/version-id %) (-> cursor :selected second)) %) (:forecasts cursor)))
+
+(defcomponent
+  forecast-tr
+  "Table row for displaying a forecast"
+  [forecast owner & opts]
+  (render [_]
+          (let [{:keys [on-click on-double-click]} (first opts)
+                {:keys [is-selected-forecast?
+                        has-ancestor?
+                        is-expanded?
+                        has-descendant?]} forecast
+                        classes [[is-selected-forecast? "witan-forecast-table-row-selected"]
+                                 [has-descendant? "witan-forecast-table-row-descendant"]]
+                        version (:forecast/version forecast)
+                        in-progress? (:forecast/in-progress? forecast)
+                        new? (zero? version)
+                        tag (:forecast/tag forecast)]
+            (html
+             [:tr.witan-forecast-table-row {:key (:forecast/version-id forecast)
+                                            :class (->> classes
+                                                        (filter first)
+                                                        (map second)
+                                                        (interpose " ")
+                                                        (apply str))
+                                            :on-click (fn [e]
+                                                        (if (fn? on-click)
+                                                          (if (and
+                                                               has-ancestor?
+                                                               (util/contains-str (.. e -target -className) "tree-control"))
+                                                            (on-click owner :event/toggle-tree-view forecast e)
+                                                            (on-click owner :event/select-forecast forecast e)))
+                                                        (.preventDefault e))
+                                            :on-double-click (fn [e]
+                                                               (if (fn? on-double-click)
+                                                                 (on-double-click owner forecast e))
+                                                               (.preventDefault e))}
+
+              [:td.tree-control (cond
+                                  is-expanded? [:i.fa.fa-minus-square-o.tree-control]
+                                  has-ancestor? [:i.fa.fa-plus-square-o.tree-control])]
+              [:td
+               [:span.name.unselectable (:forecast/name forecast)]
+               (when (or new? in-progress?)
+                 [:div.version-labels
+                  {:key "witan-forecast-table-labels-key"}
+                  (when in-progress?
+                    [:span.unselectable.label.label-in-progress.label-small
+                     {:key "witan-forecast-table-labels-in-prog-key"}
+                     (get-string :in-progress)])
+                  (when new?
+                    [:span.unselectable.label.label-new.label-small
+                     {:key "witan-forecast-table-label-new-key"}
+                     (get-string :new)])])]
+              [:td.text-center
+               [:span.unselectable (:forecast/owner-name forecast)]]
+              [:td
+               {:style {:padding-left "2em"}}
+               (if tag
+                 [:div.tag-labels
+                  {:key "witan-forecast-table-tags-key"}
+                  [:span.unselectable.label.label-tag.label-small
+                   {:key "witan-forecast-table-tag-key"}
+                   tag]]
+                 [:span.unselectable
+                  {:class (when has-descendant? "witan-forecast-table-version-descendant")
+                   :key "witan-forecast-table-version-key"}
+                  (:forecast/version forecast)])]
+              [:td.text-center
+               [:span.unselectable (:forecast/created forecast)]]]))))
 
 (defn as-forecast-tr
   [cursor forecast]
@@ -99,7 +169,7 @@
                                         [:forecast-lastmodified "20%" "text-center"]]]
                    [:th {:key (name x) :class class :style {:width width}} (get-string x)])]
                 [:tbody
-                 (om/build-all widgets/forecast-tr
+                 (om/build-all forecast-tr
                                (map #(as-forecast-tr cursor %) (:forecasts cursor))
                                {:key  :forecast/version-id
                                 :opts {:on-click        #(venue/raise! %1 %2 %3)

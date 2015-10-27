@@ -137,6 +137,9 @@
      [:.label-new
       {:background-color colour/new-forecast}]
 
+     [:.label-tag
+      {:background-color colour/deep}]
+
      [:.label
       {:display :inline
        :padding ".2em .6em .3em"
@@ -223,7 +226,10 @@
         :cursor           :pointer}]
       [:.version-labels
        {:display :inline
-        :margin-left (em 0.5)}]]
+        :margin-left (em 0.5)}]
+      [:.tag-labels
+       {:display :inline
+        :margin-left (em -1)}]]
 
      [:.witan-forecast-table-row-selected
       :.witan-forecast-table-row-selected:hover
