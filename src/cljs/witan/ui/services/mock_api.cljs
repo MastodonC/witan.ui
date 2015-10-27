@@ -13,7 +13,8 @@
      :forecast-id "fd44474d-e0f8-4713-bacf-299e503e4f30"
      :version 2
      :owner "cac4ba3a-07c8-4e79-9ae0-d97317bb0d45"
-     :owner-name "Mock User 1"}
+     :owner-name "Mock User 1"
+     :tag "2015 GLA"}
     {:description "Description of my forecast"
      :name "My Forecast 2"
      :created "2015-10-06T12:44:17.210-00:00"
