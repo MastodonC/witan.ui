@@ -5,22 +5,18 @@
               [sablono.core :as html :refer-macros [html]]
               [inflections.core :as i]
               ;;
+              [witan.ui.fixtures.forecast.input-view]
+              [witan.ui.fixtures.forecast.output-view]
               [witan.ui.widgets :as widgets]
               [witan.ui.strings :refer [get-string]]
               [witan.ui.components.model-diagram :as model-diagram]
               [venue.core :as venue])
     (:require-macros [cljs-log.core :as log]))
 
-(def valid-actions
-  {:input  [nil :model]
-   :output [:model nil]
-   :model  [:input :output]})
-
-(def select-width  "3%")
-(def name-width    "57%")
-(def version-width "10%")
-(def lm-width      "30%")
-
+(def valid-actions ;; NOTE keep them in this order or weird stuff will 'appen.
+  {:input  [nil    :model  (-> :input get-string i/plural)]
+   :model  [:input :output (-> :model get-string)]
+   :output [:model nil     (-> :output get-string i/plural)]})
 
 ;; There's probably a more elegant way to do this
 (defn next-action
@@ -64,88 +60,26 @@
                   [:button.pure-button.button-primary
                    [:i.fa.fa-share-alt]]]]]]]))))
 
-(defcomponent
-  data-item-input-table-row
-  [{:keys [data-item default?]}]
-  (render [_]
-          (let [{:keys [name version created]} data-item
-                key-prefix (partial str (i/hyphenate name) "-")]
-            (html
-             [:table.pure-table.pure-table-horizontal#witan-dash-forecast-list
-              {:key (key-prefix "table-body")}
-              [:tbody
-               {:style {:text-align "left"}}
-               [:td {:key (key-prefix "selector") :style {:width select-width}}
-                [:button.pure-button.input
-                 [:i.fa.fa-caret-right]]]
-               [:td {:key (key-prefix "name") :style {:width name-width}}
-                [:div.witan-pw-input-data-row
-                 [:span (or (i/capitalize name) [:i (get-string :no-input-specified)])]
-                 (cond
-                   (and name default?) [:small.text-gray (get-string :default-brackets)]
-                   (not name) [:small.text-gray
-                               (get-string :please-select-data-input)])]]
-               [:td {:key (key-prefix "version") :style {:width version-width}} version]
-               [:td {:key (key-prefix "lastmodified") :style {:width lm-width}} created]]]))))
+
 
 (defmulti action-view
-  (fn [[action forecast] owner] action))
+  (fn [[action cursor] owner] action))
 
 (defcomponentmethod action-view
   :input
-  [[action forecast model] owner]
+  [[action cursor] owner]
   (render [_]
-          (html
-           (let [first-input   (first (:model/input-data model))
-                 rest-inputs   (rest  (:model/input-data model))]
-             [:div
-              [:div
-               {:key "input-intro"}
-               [:div.pure-u-1
-                [:div.pure-u-1-2 [:p (get-string :input-intro)]]]]
-
-              ;; first row
-              [:div
-               {:key "first-input-div"}
-               [:div.pure-u-4-5
-                [:table.pure-table.pure-table-horizontal
-                 {:key "first-input-table-head"}
-                 [:thead
-                  [:th {:key "first-input-collapser"}] ;; empty, for the tree icon
-                  [:th {:key "first-input-name" :style {:width name-width}} (i/capitalize (:category first-input))]
-                  [:th {:key "first-input-version" :style {:width version-width}} (get-string :forecast-version)]
-                  [:th {:key "first-input-lastmodified" :style {:width lm-width}} (get-string :forecast-lastmodified)]]]
-                [:hr {:key "first-input-hr"}]
-                (om/build data-item-input-table-row {:data-item (:default first-input) :default? true})]]
-
-              ;; other rows
-              (for [input rest-inputs]
-                (let [category (:category input)
-                      prefix (partial str category)]
-                  [:div
-                   {:key (prefix "-input-div")}
-                   [:div.pure-u-4-5
-                    [:table.pure-table.pure-table-horizontal
-                     {:key (prefix "-input-table-head")}
-                     [:thead
-                      [:th {:key (prefix "-input-collapser") :style {:width select-width}}] ;; empty, for the tree icon
-                      [:th {:key (prefix "-input-name") :style {:width name-width}} (i/capitalize category)]
-                      [:th {:key (prefix "-input-version") :style {:width version-width}}]
-                      [:th {:key (prefix "-input-lastmodified") :style {:width lm-width}}]]]
-                    [:hr {:key (prefix "-input-hr")}]
-                    (om/build data-item-input-table-row {:data-item (:default input) :default? true})]]))]))))
+          (om/build witan.ui.fixtures.forecast.input-view/view [action cursor])))
 
 (defcomponentmethod action-view
   :output
-  [[action forecast model] owner]
+  [[action cursor] owner]
   (render [_]
-          (html
-           [:div
-            [:p (get-string :output-intro)]])))
+          (om/build witan.ui.fixtures.forecast.output-view/view [action cursor])))
 
 (defcomponentmethod action-view
   :model
-  [[action forecast model] owner]
+  [[action {:keys [forecast model]}] owner]
   (render [_]
           (html
            [:div
@@ -173,12 +107,13 @@
                [:h3.model-value 2]]]]])))
 
 (defcomponent view
-  [{:keys [id action forecast version edited-forecast error? model]} owner]
+  [{:keys [id action forecast version edited-forecast error? model creating?] :as cursor} owner]
   (render [_]
           (let [kaction (keyword action)
-                ;; this is directly included in the forecast's data for now. More realistically
-                ;; it would be derived from input and output information in the forecast.
-                model-conf (merge {:action kaction} (select-keys forecast [:n-inputs :n-outputs]))
+                model-conf  {:action kaction
+                             :n-inputs (-> model :model/input-data count)
+                             :n-outputs [(-> model :model/output-data count)];; TODO add grps
+                             :stage-names (map (fn [[k v]] (last v)) valid-actions)}
                 next-action (next-action kaction)
                 prev-action (previous-action kaction)
                 in-progress? (:forecast/in-progress? forecast)]
@@ -187,8 +122,10 @@
                [:div
                 [:h1 "Error"]
                 [:h3 error?]]
-               (if-not forecast
-                 [:i.fa.fa-refresh.fa-spin]
+               (if (or creating? (not (and forecast model)))
+                 [:div.view-overlay
+                  [:i.fa.fa-cog.fa-spin.fa-4x]
+                  (when creating? [:h2 (get-string :creating-forecast)])]
                  [:div
                   [:div
                    {:key "witan-pw-header-container"}
@@ -202,7 +139,8 @@
                            (when prev-action
                              {:href (venue/get-route :views/forecast {:id id :version version :action (name prev-action)})}))
                     (when prev-action [:i.fa.fa-chevron-left.fa-3x])]
-                   [:div.pure-u-5-6.witan-model-diagram {:key "forecast-centre"}
+                   [:div.pure-u-5-6.witan-model-diagram
+                    {:key "forecast-centre"}
                     (when forecast (om/build model-diagram/diagram model-conf))]
                    [:a.pure-u-1-12.witan-pw-nav-button
                     (merge {:key (str "forecast-right-" next-action)}
@@ -238,7 +176,9 @@
                        [:div.pure-u-1-2#witan-pw-edits-buttons
                         {:key "witan-pw-edits-buttons"}
                         [:button.pure-button#create
-                         {:key "witan-pw-edits-button-create"}
+                         {:key "witan-pw-edits-button-create"
+                          :on-click #(do (venue/raise! owner :create-forecast-version)
+                                         (.preventDefault %))}
                          [:span
                           [:i.fa.fa-thumbs-o-up {:key "witan-pw-edits-button-create-i"}]
                           [:span {:key "witan-pw-edits-button-create-span"}
@@ -260,15 +200,11 @@
                      [:div.pure-u-1.witan-pw-area-header
                       {:key "witan-pw-area-header"}
                       [:div
-                       {:class action
-                        :key (str action "-key")}
-                       [:h2 (let [action-name (i/capitalize action)]
-                              (if (= action "model")
-                                action-name
-                                (i/plural action-name)))
+                       {:class action}
+                       [:h2 (-> valid-actions kaction last)
                         (when in-progress?
                           [:i.fa.fa-lock {:key (str action "-locked-key")
                                           :style {:margin-left "0.6em"}}])]]
                       [:div#witan-pw-area
                        {:key "witan-pw-area"}
-                       (om/build action-view [kaction forecast model])]])]]))))))
+                       (om/build action-view [kaction cursor])]])]]))))))

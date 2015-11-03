@@ -14,8 +14,9 @@
    :group-box-padding 7
    :canvas-width      810
    :padding           40
-   :top-offset        60
-   :label-offset      0
+   :top-offset        80
+   :label-offset      25
+   :name-offset       -15
    :label-size        20
    ;; this must be less than :padding to avoid clipping
    :highlight-padding 40})
@@ -127,8 +128,8 @@
     (mapv #(stage-highlight render-options max-n % (= % highlight-index) (nth stage-names %)) (range 3))))
 
 (defn stage-label
-  [render-options stage-index highlighted]
-  (let [{:keys [box-width column-width label-offset label-size]} render-options
+  [render-options stage-index highlighted name]
+  (let [{:keys [box-width column-width label-offset label-size name-offset]} render-options
         x-center (+ (* stage-index column-width) (/ box-width 2))
         stroke-colour (if highlighted "#555555" "#dddddd")
         text-colour (if highlighted "black" "#555555")]
@@ -142,11 +143,20 @@
                           :fill        text-colour
                           :text-anchor "middle"
                           :style       {:dominant-baseline "middle"}
-                          :key         "label-text"}))))
+                          :key         "label-text"})
+
+               (svg/text [x-center name-offset]
+                         name
+                         {:class       "forecast-label-text"
+                          :fill        text-colour
+                          :text-anchor "middle"
+                          :style       {:dominant-baseline "middle"}
+                          :key         (str "label-text-" name)})
+               )))
 
 (defn stage-labels
-  [render-options highlight-index]
-  (mapv #(stage-label render-options % (= % highlight-index)) (range 3)))
+  [render-options highlight-index stage-names]
+  (mapv #(stage-label render-options % (= % highlight-index) (nth stage-names %)) (range 3)))
 
 (defn stage-to-index
   [stage]
@@ -159,7 +169,7 @@
   "Draws a digram for a given model specification."
   [render-options model-conf]
   (let [{:keys [canvas-width box-width box-w-spacing box-height box-h-spacing padding top-offset]} render-options
-        {:keys [n-inputs n-outputs action] :or {n-inputs 3 n-outputs [2 3]}} model-conf
+        {:keys [n-inputs n-outputs action stage-names] :or {n-inputs 3 n-outputs [2 3]}} model-conf
         total-outputs (apply + n-outputs)
         max-n (max n-inputs total-outputs)
         ;; geometry related definitions
@@ -170,45 +180,47 @@
         render-options-plus (merge render-options {:column-width column-width :row-height row-height})
         stage-index (stage-to-index action)]
     (sablono/html (svg/svg
-                    {:width  (+ canvas-width (* 0.75 padding))
-                     :height (+ (* max-n row-height) (* 2 padding) top-offset)
-                     :key    "model-diagram-g1"}
+                   {:width  (+ canvas-width (* 0.75 padding))
+                    :height (+ (* max-n row-height) (* 2 padding) top-offset)
+                    :key    "model-diagram-g1"}
+                   (svg/group
+                    {:transform (str "translate(" padding ", " padding ")")
+                     :key       "model-diagram-g2"}
                     (svg/group
-                      {:transform (str "translate(" padding ", " padding ")")
-                       :key       "model-diagram-g2"}
-                      (svg/group
-                        {:key "model-diagram-g3"}
-                        (concat
-                          ;; stage highlight
-                          (stage-highlights render-options-plus max-n stage-index)
-                          ;; stage labels
-                          (stage-labels render-options-plus stage-index)))
-                      (svg/group
-                        {:transform (str "translate(0," top-offset ")")
-                         :key       "model-diagram-g4"}
-                        (concat
-                          ;; inputs
-                          (stack-of-boxes render-options-plus 0 max-n n-inputs "input")
-                          ;; lines from inputs to model
-                          (stack-of-lines render-options-plus box-width column-width max-n n-inputs)
-                          ;; model
-                          [(svg/rect [column-width 0]
-                                     box-width
-                                     (- (* max-n row-height) box-h-spacing)
-                                     {:class "model" :key "model-box"})]
-                          ;; output grouping boxes
-                          (group-boxes render-options-plus output-column-start-x max-n n-outputs)
-                          ;; outputs
-                          (stack-of-boxes render-options-plus output-column-start-x max-n total-outputs "output")
-                          ;; lines from model to outputs
-                          (stack-of-lines render-options-plus
-                                          (- output-column-start-x box-w-spacing)
-                                          output-column-start-x
-                                          max-n
-                                          total-outputs)
-                          )))))))
+                     {:key "model-diagram-g3"}
+                     (concat
+                      ;; stage highlight
+                      (stage-highlights render-options-plus max-n stage-index)
+                      ;; stage labels
+                      (stage-labels render-options-plus stage-index stage-names)))
+                    (svg/group
+                     {:transform (str "translate(0," top-offset ")")
+                      :key       "model-diagram-g4"}
+                     (concat
+                      ;; inputs
+                      (stack-of-boxes render-options-plus 0 max-n n-inputs "input")
+                      ;; lines from inputs to model
+                      (stack-of-lines render-options-plus box-width column-width max-n n-inputs)
+                      ;; model
+                      (if-not (zero? max-n)
+                        [(svg/rect [column-width 0]
+                                   box-width
+                                   (- (* max-n row-height) box-h-spacing)
+                                   {:class "model" :key "model-box"})])
+                      ;; output grouping boxes
+                      (if (and (pos? max-n) (> (count n-outputs) 1))
+                        (group-boxes render-options-plus output-column-start-x max-n n-outputs))
+                      ;; outputs
+                      (stack-of-boxes render-options-plus output-column-start-x max-n total-outputs "output")
+                      ;; lines from model to outputs
+                      (stack-of-lines render-options-plus
+                                      (- output-column-start-x box-w-spacing)
+                                      output-column-start-x
+                                      max-n
+                                      total-outputs)
+                      )))))))
 
 (defcomponent diagram
   [model-conf owner]
   (render [this]
-    (render-model render-options model-conf)))
+          (render-model render-options model-conf)))

@@ -17,17 +17,18 @@
 
 ;;
 (def button-success   success)
+(def button-success-light (color/lighten success 10))
 (def button-error     error)
 (def button-warning   warning)
 (def button-primary   normal)
-(def button-secondary (color/lighten button-primary 20))
+(def button-secondary (color/lighten button-primary 10))
 
 ;;
-(def forecast-input "#9fc5f8")
-(def forecast-model "#ffd966")
-(def forecast-output "#b6d7a8")
-(def forecast-group "#c0c5f7")
-(def forecast-changed "#fa8144")
+(def forecast-input (rgb 77 157 224))
+(def forecast-model (rgb 225 188 41))
+(def forecast-output (rgb 59 178 115))
+(def forecast-group (rgb 253 26 68))
+(def forecast-changed (rgb 230 145 56))
 (def forecast-input-light  (color/lighten forecast-input 12))
 (def forecast-model-light  (color/lighten forecast-model 12))
 (def forecast-output-light (color/lighten forecast-output 12))
@@ -46,7 +47,7 @@
 (def tertiary (rgb 100 100 100))
 
 ;; used as a block colour background for menu/nav bars
-(def header primary)
+(def header (rgb 37 37 37))
 
 ;; title (h1) of the page
 (def title primary)
@@ -75,14 +76,12 @@
 (def link (rgb 76 174 207))
 
 ;; row highlight
-(def row-selected (rgb 255 221 63))
-(def row-highlight (color/lighten row-selected 25))
-
-;; row selected
-
+(def row-selected (rgb 66 133 244))
+(def row-highlight (color/lighten gray 46))
 
 ;; themes
 (def in-progress (rgb 84 13 110))
 (def in-progress-light (color/lighten in-progress 20))
 
 (def new-forecast (rgb 234 122 244))
+(def input-browser (rgb 204 224 241))

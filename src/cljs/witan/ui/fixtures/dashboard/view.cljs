@@ -56,35 +56,35 @@
               [:td.tree-control (cond
                                   is-expanded? [:i.fa.fa-minus-square-o.tree-control]
                                   has-ancestor? [:i.fa.fa-plus-square-o.tree-control])]
-              [:td
-               [:span.name.unselectable (:forecast/name forecast)]
+              [:td.first-round
+               [:span.name (:forecast/name forecast)]
                (when (or new? in-progress?)
                  [:div.version-labels
                   {:key "witan-forecast-table-labels-key"}
                   (when in-progress?
-                    [:span.unselectable.label.label-in-progress.label-small
+                    [:span.label.label-in-progress.label-small
                      {:key "witan-forecast-table-labels-in-prog-key"}
                      (get-string :in-progress)])
                   (when new?
-                    [:span.unselectable.label.label-new.label-small
+                    [:span.label.label-new.label-small
                      {:key "witan-forecast-table-label-new-key"}
                      (get-string :new)])])]
               [:td.text-center
-               [:span.unselectable (:forecast/owner-name forecast)]]
+               [:span (:forecast/owner-name forecast)]]
               [:td
                {:style {:padding-left "2em"}}
                (if tag
                  [:div.tag-labels
                   {:key "witan-forecast-table-tags-key"}
-                  [:span.unselectable.label.label-tag.label-small
+                  [:span.label.label-tag.label-small
                    {:key "witan-forecast-table-tag-key"}
                    tag]]
-                 [:span.unselectable
+                 [:span
                   {:class (when has-descendant? "witan-forecast-table-version-descendant")
                    :key "witan-forecast-table-version-key"}
                   (:forecast/version forecast)])]
-              [:td.text-center
-               [:span.unselectable (:forecast/created forecast)]]]))))
+              [:td.text-center.last-round
+               [:span (:forecast/created forecast)]]]))))
 
 (defn as-forecast-tr
   [cursor forecast]
@@ -113,7 +113,7 @@
              [:div.pure-menu.pure-menu-horizontal.witan-dash-heading
               [:div.witan-page-heading
                [:h1
-                (get-string :forecast)]
+                (i/plural (get-string :forecast))]
                (om/build widgets/search-input
                          (str (get-string :filter) " " (->> :forecast
                                                             get-string
@@ -151,7 +151,7 @@
   (render [_]
           (html
            (if (:refreshing? cursor)
-             [:i.fa.fa-refresh.fa-spin]
+             [:div.view-overlay [:i.fa.fa-cog.fa-spin.fa-4x]]
              [:div
               [:div#forecasts-view
                (om/build header [(get-selected-forecast cursor)

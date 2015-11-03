@@ -2,7 +2,8 @@
   (:require [ajax.core :as ajax]
             [cljs.core.async :refer [put! take! chan <! close!]]
             [venue.core :as venue]
-            [goog.net.cookies :as cookies])
+            [goog.net.cookies :as cookies]
+            [witan.ui.util :as util])
   (:require-macros [cljs-log.core :as log]
                    [cljs.core.async.macros :refer [go]]
                    [witan.ui.env :as env :refer [cljs-env]]))
@@ -33,7 +34,7 @@
 (defn- handle-response
   [status event result-ch response]
   (if (and (= status :failure) (not= event :token-test))
-    (log/severe "An API error occurred: " event response))
+    (log/severe "An API error occurred: " status event response))
   (let [result (api-response [event status] (clojure.walk/keywordize-keys response))]
     (when result-ch
       (put! result-ch [status result]))))
@@ -133,9 +134,33 @@
   (POST event "/forecasts" args result-ch))
 
 (defmethod service-m
+  :create-forecast-version
+  [event forecast result-ch]
+  (let [inputs (hash-map :inputs (into {} (map (fn [{:keys [category selected]}]
+                                                 (let [selected-req (select-keys selected [:file-name :name :s3-key])]
+                                                   (hash-map category selected-req)))
+                                               (:forecast/inputs forecast))))]
+    (POST event (util/str-fmt-map "/forecasts/{{id}}/versions" {:id (:forecast/forecast-id forecast)}) inputs result-ch)))
+
+(defmethod service-m
   :get-model
   [event {:keys [id]} result-ch]
   (GET event (str "/models/" id) nil result-ch))
+
+(defmethod service-m
+  :get-upload-token
+  [event _ result-ch]
+  (GET event "/data/pre-sign" nil result-ch))
+
+(defmethod service-m
+  :get-data-items
+  [event category result-ch]
+  (GET event (util/str-fmt-map "/data/{{category}}" {:category category}) nil result-ch))
+
+(defmethod service-m
+  :create-data-item
+  [event {:keys [id version category] :as args} result-ch]
+  (POST event (str "/forecasts/" id "/" version "/input/" category) (dissoc args :id :version :category) result-ch))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

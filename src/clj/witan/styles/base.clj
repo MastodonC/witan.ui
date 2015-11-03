@@ -81,13 +81,14 @@
      [:#app
       {:padding "0 1em"}]
 
-     [".unselectable::selection"
-      {:background-color :transparent}]
-
      ;; buttons
 
      [:.button-success
       {:background-color colour/button-success
+       :color            colour/white}]
+
+     [:.button-success-light
+      {:background-color colour/button-success-light
        :color            colour/white}]
 
      [:.button-warning
@@ -123,6 +124,15 @@
      [:.text-gray
       {:color colour/gray}]
 
+     [:.text-primary
+      {:color colour/button-primary}]
+
+     [:.text-success
+      {:color colour/success}]
+
+     [:.text-error
+      {:color colour/error}]
+
      [:.padding-1
       {:padding (em 1)}]
 
@@ -156,6 +166,14 @@
      [:.label-small
       {:font-size (percent 65)}]
 
+     ;; util
+     [:.full-width
+      {:width (percent 100)}]
+
+     [:.hidden-file-input
+      {:position :fixed
+       :top (em -100)}]
+
      ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
      [:#container
@@ -165,7 +183,13 @@
 
      [:#witan-menu
       {:background-color colour/header
-       :box-shadow "0px 3px 4px #888888"}]
+       :box-shadow "0px 3px 4px #888888"
+       :height (em 4)
+       :position :relative}
+      [:.pure-menu
+       {:height (percent 80)
+        :position :absolute
+        :bottom (px 0)}]]
 
      [:.witan-menu-item
       [:a
@@ -182,7 +206,8 @@
         :vertical-align :middle
         :margin         (em 0.5)}]
       [:#filter-input
-       {:padding-left (px 30)}]]
+       {:padding-left (px 30)
+        :width          (percent 100)}]]
 
      [:.witan-page-heading
       [:.pure-menu-list
@@ -220,7 +245,8 @@
        {:color       colour/gray
         :margin-left (em 0.5)}]
       [:.tree-control
-       {:background-color colour/white}]
+       {:background-color colour/white
+        :color colour/black}]
       [:&:hover
        {:background-color colour/row-highlight
         :cursor           :pointer}]
@@ -229,11 +255,15 @@
         :margin-left (em 0.5)}]
       [:.tag-labels
        {:display :inline
-        :margin-left (em -1)}]]
-
-     [:.witan-forecast-table-row-selected
-      :.witan-forecast-table-row-selected:hover
-      {:background-color colour/row-selected}]
+        :margin-left (em -1)}]
+      [:.first-round
+       {:border-radius "2px 0px 0px 2px"}]
+      [:.last-round
+       {:border-radius "0px 2px 2px 0px"}]
+      ["span::selection"
+       {:background-color :transparent}]
+      ["td::selection"
+       {:background-color :transparent}]]
 
      [:.witan-forecast-table-row-descendant
       {:color     colour/darker-gray
@@ -241,26 +271,39 @@
       [:.name
        {:margin-left (em 1)}]]
 
+     [:.witan-forecast-table-row-selected
+      :.witan-forecast-table-row-selected:hover
+      {:background-color colour/row-selected
+       :color colour/white}]
+
      [:.witan-forecast-table-version-descendant
       {:margin-left (em 0.3)}]
 
      [:#witan-pw-top-spacer
-      {:height (em 2)}]
+      {:height (em 1)}]
 
      [:#witan-pw-edits
       {:background-color colour/forecast-changed-light
        :border "solid 2px"
        :border-color colour/forecast-changed
-       :border-radius (em 0.3)
-       :padding (em 1)
+       :border-radius (em 0.2)
+       :padding (em 0.5)
        :line-height (em 1.6)
-       :font-size (em 1.1)}
+       :font-size (em 1.1)
+       :margin-bottom (em 1)}
+      [:#witan-pw-edits-text
+       {:text-align :left
+        :margin "auto 0px"
+        :height (percent 50)}]
       [:#witan-pw-edits-buttons
-       {:text-align :right}]
+       {:text-align :right
+        :margin "auto 0px"
+        :height (percent 50)}]
       [:button
-       {:margin-left (em 1)}
+       {:margin-left (em 1)
+        :color colour/white}
        [:&#create
-        {:background-color colour/forecast-changed}]
+        {:background-color colour/button-success}]
        [:&#revert
         {:background-color colour/button-error}]]]
 
@@ -268,16 +311,20 @@
       {:background-color colour/in-progress-light
        :border "solid 2px"
        :border-color colour/in-progress
-       :border-radius (em 0.3)
-       :padding (em 1)
+       :border-radius (em 0.2)
+       :padding (em 0.5)
        :line-height (em 1.6)
-       :font-size (em 1.1)}
+       :font-size (em 1.1)
+       :margin-bottom (em 1)}
       [:button
        {:margin-left (em 1)
         :display :inline
-        :background-color colour/in-progress}]]
+        :background-color colour/in-progress}]
+      [:#refresh
+       {:color colour/white}]]
      [:#witan-pw-in-prog-text
-      {:display :inline}]
+      {:display :inline
+       :color colour/white}]
 
      [:#witan-pw-area
       {:line-height (em 1.6)}]
@@ -349,34 +396,112 @@
        :width         (percent 100)
        ;;:margin-top    (px 20)
        :margin-bottom (px 15)}
+
+      [:div
+       {:transition "background-color 0.5s, height 0.5s"}]
+
       [:h2
        {:color       colour/primary
-        :margin      "10px"
+        :margin      (px 0)
+        :padding      (px 5)
         :font-weight 400}]
 
       [:.witan-pw-input-data-row
        [:small
         {:display :block
-         :line-height (px 6)}]]
+         :line-height (px 10)}]
+       [:.not-specified
+        {:color colour/error}]
+       [:.edited
+        {:color colour/forecast-changed}]]
+
+      [:.witan-pw-browse-toggle
+       {:width (px 40)
+        :background-color colour/forecast-input}]
 
       [:.input
-       {:width            (percent 100)
-        :background-color colour/forecast-input
-        :transition       "background-color 0.5s"}]
+       {:background-color colour/forecast-input
+        :border-radius (px 2)}]
       [:.model
-       {:width            (percent 100)
-        :background-color colour/forecast-model
-        :transition       "background-color 0.5s"}]
+       {:background-color colour/forecast-model
+        :border-radius (px 2)}]
       [:.output
-       {:width            (percent 100)
-        :background-color colour/forecast-output
-        :transition       "background-color 0.5s"}]]
+       {:background-color colour/forecast-output
+        :border-radius (px 2)}]
+
+      [:.download
+       {:margin-left (em 0.5)
+        :margin-bottom (em 0.5)
+        :width (em 8)}]]
+
+     [:.witan-pw-input-browser-container
+      {:padding-top (em 1)}
+
+      [:.witan-pw-input-browser
+       {:width (percent 100)
+        :height (percent 100)
+        :background-color colour/input-browser
+        :overflow :hidden ;; TODO this should be scroll, really, else you can't see the upload form on a small device
+        :box-shadow "inset 0px 0px 10px rgba (0,0,0,0.8)"}
+
+       [:.witan-pw-input-browser-content
+        {:margin (em 1)
+         :height (percent 90)}
+        [:h3 {:margin-top (px 0)}]
+        [:.spacer
+         {:margin-top (em 1.4)}]
+
+        [:.witan-pw-input-browser-content-search
+         {:text-align :left
+          :height (percent 90)}
+         [:.spacer
+          {:margin-top (em 0.5)}]
+         [:.search-input
+          {:width (percent 100)
+           :padding-bottom (em 0.5)}
+          [:.search-input-inner
+           {:width (percent 80)
+            :margin-right (em 1)}]
+          [:form
+           {:width (percent 100)
+            :display :inline-block}]
+          [:button
+           {:margin-right (em 0.4)}]]
+         [:.list
+          {:position   :relative
+           :height     (percent 65)
+           :overflow-y :scroll}
+          [:.data-item
+           {:cursor       :pointer
+            :transition   :none
+            :line-height  (em 1.8)
+            :width        (percent 97)
+            :margin-left  (em 0.5)
+            :padding-left (em 0.5)
+            :border-top   "1px dashed silver"}
+           [:&:hover
+            {:background-color colour/row-highlight}]
+           ["::selection"
+            {:background-color :transparent}]]
+          [:.selected
+           {:background-color colour/row-selected}
+           [:&:hover
+            {:background-color colour/row-selected}]]]]
+
+        [:.witan-pw-input-browser-content-upload
+         {:text-align :left}
+         [:.container
+          {:margin-left (em 1)}]
+         [:.upload-button
+          {:font-size (percent 100)
+           :font-weight :bold
+           :margin-top (px 5)}]]]]]
 
      [:.view-overlay
       {:width      (percent 100)
        :height     (percent 100)
        :position   :absolute
-       :top        (px 0)
+       :top        (px 100)
        :left       (px 0)
        :text-align :center}
       [:#loading

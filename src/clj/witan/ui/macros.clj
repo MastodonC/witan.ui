@@ -28,3 +28,22 @@
          venue/IInitialise
          (~'initialise [owner# cursor#]
            (~'on-initialise owner# cursor#))))))
+
+(defmacro create-standard-service!
+  []
+  `(do
+     (cljs.core/defmulti ~'request-handler
+       (cljs.core/fn [owner# event# args# result-ch#] event#))
+
+     (cljs.core/defmulti ~'response-handler
+       (cljs.core/fn [owner# result# response# context#] result#))
+
+     (cljs.core/defn ~'service
+       []
+       (cljs.core/reify
+         venue/IHandleRequest
+         (~'handle-request [owner# request# args# response-ch#]
+           (~'request-handler owner# request# args# response-ch#))
+         venue/IHandleResponse
+         (~'handle-response [owner# outcome# event# response# context#]
+           (~'response-handler owner# [event# outcome#] response# context#))))))

@@ -2,10 +2,13 @@
   (:require [cljs.core.async :refer [put! take! chan <! close!]]
             [witan.ui.util :as util]
             [venue.core :as venue]
+            [cljs-time.core :as t]
+            [cljs-time.format :as tf]
             [datascript :as d])
-  (:require-macros [cljs-log.core :as log]))
+  (:require-macros [cljs-log.core :as log]
+                   [witan.ui.macros :as wm]))
 
-(def state (atom {:logged-in? false}))
+(defonce state (atom {:logged-in? false}))
 (defonce db-schema {})
 (defonce db-conn (d/create-conn db-schema))
 (defonce id-lookup (atom {}))
@@ -29,19 +32,31 @@
         new-id))))
 
 (defn put-item-into-db!
-  [item ns]
-  (let [id (:version-id item)
-        db-id (find-or-add-lookup ns id id-lookup id-counter)
-        cleaned (->> item
-                     (filter second)
-                     (filter (fn [[k v]] (if (coll? v) (-> v empty? not) true)))
-                     (util/map-add-ns ns)
-                     (into {}))
-        with-db-id (assoc cleaned :db/id db-id)]
-    (d/transact! db-conn [with-db-id])
-    with-db-id))
+  ([item ns]
+   (put-item-into-db! item ns :version-id))
+  ([item ns id-fn]
+   (log/debug "Adding item to db: " ns item id-fn)
+   (let [id (id-fn item)
+         db-id (find-or-add-lookup ns id id-lookup id-counter)
+         cleaned (->> item
+                      (filter second)
+                      (filter (fn [[k v]] (if (coll? v) (-> v empty? not) true)))
+                      (util/map-add-ns ns))
+         with-db-id (assoc cleaned :db/id db-id)]
+     (d/transact! db-conn [with-db-id])
+     with-db-id)))
+
+(defn s3-key-from-url
+  [url]
+  (.substring url (inc (.lastIndexOf url "/"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn create-filter-pred
+  [filter]
+  (fn [n] (if (nil? filter)
+            true
+            (util/contains-str n filter))))
 
 (defn build-descendant-list
   [id]
@@ -52,12 +67,11 @@
 (defn filter-forecasts
   [{:keys [expand filter] :or {expand []
                                filter nil}}] ;; filter is only applied to top-level forecasts.
-  (let [pred (fn [n] (if (nil? filter)
-                       true
-                       (util/contains-str n filter)))
+  (let [pred      (create-filter-pred filter)
         top-level (apply concat (d/q '[:find (pull ?e [*])
                                        :in $ ?pred
-                                       :where [?e :forecast/version-id _]
+                                       :where
+                                       [?e :forecast/version-id _]
                                        [?e :forecast/name ?n]
                                        [(get-else $ ?e :forecast/descendant-id nil) ?u]
                                        [(nil? ?u)]
@@ -94,24 +108,33 @@
   [[k v]]
   {:name k :value v})
 
+(defn fetch-data-items
+  [{:keys [filter category] :or {filter nil
+                                 category nil}}]
+  (let [pred (create-filter-pred filter)]
+    (apply concat (d/q '[:find (pull ?e [*])
+                         :in $ ?pred
+                         :where
+                         [?e :data/data-id _]
+                         [?e :data/name ?n]
+                         [(?pred ?n)]]
+                       @db-conn
+                       pred))))
+
+(defn fix-forecast-inputs
+  [forecast]
+  (let [inputs (->> forecast
+                    :inputs
+                    (mapv #(first
+                            (map
+                             (fn [[k v]] (hash-map :category (:category v) :selected v)) %))))]
+    (assoc forecast :inputs inputs)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defmulti request-handler
-  (fn [owner event args result-ch] event))
+(wm/create-standard-service!)
 
-(defmulti response-handler
-  (fn [owner result response cursor] result))
-
-(defn service
-  []
-  (reify
-    venue/IHandleRequest
-    (handle-request [owner request args response-ch]
-      (request-handler owner request args response-ch))
-    venue/IHandleResponse
-    (handle-response [owner outcome event response context]
-      (response-handler owner [event outcome] response context))))
-
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod request-handler
   :filter-forecasts
@@ -126,70 +149,110 @@
 (defmethod request-handler
   :fetch-forecast-versions
   [owner event forecast-id result-ch]
-  (venue/request! {:owner owner
+  (venue/request! {:owner   owner
                    :service :service/api
                    :request :get-forecast-versions
-                   :args forecast-id
+                   :args    forecast-id
                    :context result-ch}))
 
 (defmethod request-handler
   :fetch-forecasts
   [owner event id result-ch]
-  (venue/request! {:owner owner
+  (venue/request! {:owner   owner
                    :service :service/api
                    :request :get-forecasts
-                   :args id
+                   :args    id
                    :context result-ch}))
 
 (defmethod request-handler
   :fetch-forecast
   [owner event id result-ch]
-  (venue/request! {:owner owner
+  (venue/request! {:owner   owner
                    :service :service/api
                    :request :get-forecast
-                   :args id
+                   :args    id
                    :context result-ch}))
 
 (defmethod request-handler
   :fetch-model
   [owner event id result-ch]
-  (venue/request! {:owner owner
+  (venue/request! {:owner   owner
                    :service :service/api
                    :request :get-model
-                   :args id
+                   :args    id
                    :context result-ch}))
 
 (defmethod request-handler
   :fetch-user
   [owner event id result-ch]
-  (venue/request! {:owner owner
+  (venue/request! {:owner   owner
                    :service :service/api
                    :request :get-user
                    :context result-ch}))
 (defmethod request-handler
   :fetch-models
   [owner event _ ch]
-  (venue/request! {:owner owner
+  (venue/request! {:owner   owner
                    :service :service/api
                    :request :get-models
                    :context ch}))
 
 (defmethod request-handler
   :add-forecast
-  [owner event {:keys [model-name model-version model-props name description]} ch]
+  [owner event {:keys [model-name model-version model-props name description]} result-ch]
   (let [model-id (find-model-id-by-name-and-version model-name (js/parseInt model-version))]
     (if (not-empty model-id)
       (let [payload {:model-id (-> model-id first second)
                      :name name}
             payload (if (not-empty description) (assoc payload :description description) payload)
             payload (if (not-empty model-props) (assoc payload :model-properties (mapv format-model-prop  model-props)) payload)]
-        (venue/request! {:owner owner
+        (venue/request! {:owner   owner
                          :service :service/api
                          :request :create-forecast
-                         :args payload
-                         :context ch}))
+                         :args    payload
+                         :context result-ch}))
       (log/severe "Unable to locate a model with this name and version: " model-name model-version))))
-;;;
+
+(defmethod request-handler
+  :upload-data
+  ;;This is a complex request-handler. Upon receiving an upload token, it
+  ;;requests that the upload service perform the upload and after that succeeds
+  ;;it uses the API service again to create the data item.
+  [owner event args result-ch]
+  (venue/request! {:owner   owner
+                   :service :service/api
+                   :request :get-upload-token
+                   :context {:result-ch result-ch
+                             :args args}}))
+
+(defmethod request-handler
+  :fetch-data-items
+  [owner event args result-ch]
+  (venue/request! {:owner   owner
+                   :service :service/api
+                   :request :get-data-items
+                   :args    args
+                   :context {:result-ch result-ch
+                             :category args}}))
+
+(defmethod request-handler
+  :filter-data-items
+  [owner event args result-ch]
+  (let [result (fetch-data-items args)]
+    (log/debug result)
+    (put! result-ch [:success result])))
+
+(defmethod request-handler
+  :add-forecast-version
+  [owner event forecast result-ch]
+  (log/info "Creating a new version of forecast " (:name forecast))
+  (venue/request! {:owner owner
+                   :service :service/api
+                   :request :create-forecast-version
+                   :args forecast
+                   :context result-ch}))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod response-handler
   [:get-forecast-versions :success]
@@ -253,7 +316,8 @@
 (defmethod response-handler
   [:get-forecast :success]
   [owner _ forecast result-ch]
-  (put! result-ch [:success (put-item-into-db! forecast :forecast)]))
+  (let [fixed (fix-forecast-inputs forecast)]
+    (put! result-ch [:success (put-item-into-db! fixed :forecast)])))
 
 (defmethod response-handler
   [:get-forecast :failure]
@@ -264,6 +328,73 @@
   [:get-model :success]
   [owner _ model result-ch]
   (put! result-ch [:success (put-item-into-db! model :model)]))
+
+(defmethod response-handler
+  [:get-upload-token :success]
+  [owner _ s3-beam-payload context]
+  (venue/request! {:owner owner
+                   :service :service/upload
+                   :request :upload-data
+                   :args {:s3-beam-payload s3-beam-payload
+                          :file            (-> context :args :file)}
+                   :context (assoc context :s3-key
+                                   (s3-key-from-url (:Action s3-beam-payload)))
+                   :timeout? false}))
+
+(defn data-id-db-workaround
+  [{:keys [data-id version]}]
+   (str data-id "-" version))
+
+(defmethod response-handler
+  [:upload-data :success]
+  [owner _ response context]
+  ;; we create a local data-item. although it's uploaded to s3, witan.app
+  ;; doesn't hear about it until we send the key as part of a forecast update
+  (let [category  (-> context :args :category)
+        name      (-> context :args :name)
+        existing  (fetch-data-items {:category category :filter name})
+        version   (if (not-empty existing) (-> existing count inc) 1)
+        s3-key    (:s3-key context)
+        data-item {:category  category
+                   :name      name
+                   :file-name (-> context :args :filename)
+                   :s3-key    s3-key
+                   :created   (tf/unparse (tf/formatters :date-hour-minute-second) (t/now))
+                   :version   version
+                   :data-id   (str "local-" s3-key "-" version)
+                   :local?    true}]
+    (log/debug "Upload succeeded.")
+    (put-item-into-db! data-item :data data-id-db-workaround)
+    (put! (:result-ch context) [:success (fetch-data-items {:category (-> context :args :category)})])))
+
+(defmethod response-handler
+  [:upload-data :failure]
+  [owner _ response {:keys [result-ch]}]
+  (put! result-ch [:failure nil]))
+
+(defmethod response-handler
+  [:get-data-items :success]
+  [owner _ data-items {:keys [result-ch category]}]
+  (log/debug "Received" (count data-items) "data items.")
+  (doseq [d data-items]
+    (put-item-into-db! d :data data-id-db-workaround))
+  (put! result-ch [:success (fetch-data-items {:category category})]))
+
+(defmethod response-handler
+  [:get-data-items :failure]
+  [owner _ response {:keys [result-ch]}]
+  (put! result-ch [:failure nil]))
+
+(defmethod response-handler
+  [:create-forecast-version :success]
+  [owner _ forecast result-ch]
+  (let [fixed (fix-forecast-inputs forecast)]
+    (put! result-ch [:success (put-item-into-db! fixed :forecast)])))
+
+(defmethod response-handler
+  [:create-forecast-version :failure]
+  [owner _ _ result-ch]
+  (put! result-ch [:failure nil]))
 
 ;;;;;;;;;;;;;;;;;;;;;
 
