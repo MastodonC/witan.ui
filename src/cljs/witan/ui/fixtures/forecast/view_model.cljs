@@ -135,7 +135,7 @@
   [owner _ _ cursor]
   (let [category        (-> @cursor :browsing-input :category)
         edited-forecast (or (:edited-forecast @cursor) (:forecast @cursor))
-        input-entry     (hash-map :category category :selected (into {} (util/map-remove-ns (assoc (:selected-data-item @cursor) :edited? true))))
+        input-entry     (hash-map :category category :selected (util/map-remove-ns (assoc (:selected-data-item @cursor) :edited? true)))
         inputs          (conj (vec (:inputs edited-forecast)) input-entry)
         with-input      (assoc edited-forecast :forecast/inputs inputs)]
     (om/update! cursor :edited-forecast with-input)

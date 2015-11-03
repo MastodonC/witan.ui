@@ -41,8 +41,7 @@
          cleaned (->> item
                       (filter second)
                       (filter (fn [[k v]] (if (coll? v) (-> v empty? not) true)))
-                      (util/map-add-ns ns)
-                      (into {}))
+                      (util/map-add-ns ns))
          with-db-id (assoc cleaned :db/id db-id)]
      (d/transact! db-conn [with-db-id])
      with-db-id)))

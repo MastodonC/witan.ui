@@ -53,12 +53,12 @@
 (defn map-add-ns
   "Adjusts an entire map by adding namespace to all the keys"
   [ns m]
-  (map (fn [[k v]] (hash-map (add-ns ns k) v)) m))
+  (reduce (fn [a [k v]] (assoc a (add-ns ns k) v)) {} m))
 
 (defn map-remove-ns
   "Adjusts an entire map by removing namespace to all the keys"
   [m]
-  (map (fn [[k v]] (hash-map (remove-ns k) v)) m))
+  (reduce (fn [a [k v]] (assoc a (remove-ns k) v)) {} m))
 
 (defn sanitize-filename
   [filename]

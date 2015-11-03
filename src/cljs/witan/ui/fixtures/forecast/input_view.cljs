@@ -223,7 +223,7 @@
   data-item-input-table-row
   [{:keys [disabled data-item default? input browsing?]} owner]
   (render [_]
-          (let [processed-item (into {} (util/map-remove-ns data-item))
+          (let [processed-item (util/map-remove-ns data-item)
                 {:keys [name version created edited?]} processed-item
                 key-prefix (partial str (i/hyphenate name) "-")]
             (html
