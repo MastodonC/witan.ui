@@ -126,10 +126,9 @@
   [forecast]
   (let [inputs (->> forecast
                     :inputs
-                    (mapv #(->
+                    (mapv #(first
                             (map
-                             (fn [[k v]] (hash-map :category (:category v) :selected v)) %)
-                            first)))]
+                             (fn [[k v]] (hash-map :category (:category v) :selected v)) %))))]
     (assoc forecast :inputs inputs)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
