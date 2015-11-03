@@ -14,7 +14,7 @@
                  [thi.ng/geom "0.0.881"]
                  [cljs-ajax "0.3.14"]
                  [environ "1.0.1"]
-                 [venue "0.1.6"]
+                 [venue "0.1.7"]
                  [cljs-log "0.2.2"]
                  [com.andrewmcveigh/cljs-time "0.3.14"]
                  [kixi/s3-beam "0.4.0"]]
