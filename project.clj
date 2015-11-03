@@ -39,7 +39,8 @@
                                    :warnings {:single-segment-namespace false}}}
                        {:id "dev"
                         :source-paths ["src/cljs"]
-                        :figwheel {:on-jsload "witan.ui.core/on-js-reload" }
+                        :figwheel {:websocket-host :js-client-host
+                                   :on-jsload "witan.ui.core/on-js-reload" }
                         :compiler {:main witan.ui.core
                                    :asset-path "js/compiled/out"
                                    :output-to "resources/public/js/compiled/witan-ui.js"
