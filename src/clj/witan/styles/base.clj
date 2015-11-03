@@ -1,6 +1,6 @@
 (ns witan.styles.base
   (:require [garden.def :refer [defstylesheet defstyles]]
-            [garden.units :refer [px em percent vw]]
+            [garden.units :refer [px em percent]]
             [witan.styles.fonts :as f]
             [witan.styles.colours :as colour]
             [witan.styles.util :refer [url]]
@@ -185,8 +185,7 @@
       {:background-color colour/header
        :box-shadow "0px 3px 4px #888888"
        :height (em 4)
-       :position :relative
-       }
+       :position :relative}
       [:.pure-menu
        {:height (percent 80)
         :position :absolute
