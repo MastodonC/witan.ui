@@ -29,7 +29,7 @@
 (def browser-height "375px")
 
 (defcomponent
-  input-browser
+  upload-widget
   [{:keys [cursor browsing?]} owner]
   (render [_]
           (html
@@ -40,13 +40,137 @@
                          upload-error?
                          upload-success?
                          last-upload-filename
-                         data-items
+                         data-items]} cursor]
+             [:div.container
+              [:h3 {:key "subtitle"}
+               (get-string :upload-new-data)]
+              (cond
+
+                ;;;;;;;;;;;;;;;
+                ;; ERROR MESSAGE
+                ;;;;;;;;;;;;;;;
+                upload-error?
+                [:div
+                 {:key "upload-error"}
+                 [:h4
+                  {:key "upload-error-title"}
+                  (get-string :browser-upload-error)]
+                 [:button.pure-button.button-warning
+                  {:key "upload-error-reset"
+                   :on-click #(do
+                                (venue/raise! owner :error-reset)
+                                (.preventDefault %))}
+                  (get-string :back)]]
+
+                ;;;;;;;;;;;;;;;
+                ;; UPLOADING SPINNER
+                ;;;;;;;;;;;;;;;
+                uploading?
+                [:div
+                 {:key "uploading"
+                  :style {:text-align :center}}
+                 [:h4
+                  {:key "uploading-title"}
+                  (get-string :browser-upload-completes)]
+                 [:div
+                  {:key "uploading-spinner"}
+                  [:i.fa.fa-refresh.fa-spin.fa-4x.text-primary]]]
+
+                ;;;;;;;;;;;;;;;
+                ;; FORM
+                ;;;;;;;;;;;;;;;
+                :else
+                [:div
+                 {:key "upload-form-container"}
+                 [:div
+                  {:key "upload-form"}
+                  [:button.pure-button.button-secondary
+                   {:key "button"
+                    :style {:margin "0" :padding "0" :height "2em"}
+                    :on-click #(.stopPropagation %)}
+                   [:label {:for "upload-filename" :style {:padding "2em"}} "Choose file"]]
+                  [:input.hidden-file-input {:key "input"
+                                             :id "upload-filename"
+                                             :type "file"
+                                             :on-change #(venue/raise! owner
+                                                                       :pending-upload
+                                                                       (first (array-seq (.. % -target -files))))}]
+                  [:div
+                   {:key "filename"}
+                   [:small (if upload-file upload-filename (get-string :browser-no-file-selected))]]]
+
+                 [:form.pure-form.pure-form-stacked
+                  {:key "upload-form-submit"
+                   :on-submit #(do
+                                 (let [node (om/get-node owner "upload-data-name")
+                                       idx (.-selectedIndex node) ;; if it has a selectedIndex it's a select input
+                                       result (if idx (.-value (aget (.-options node) idx)) (.-value node))]
+                                   (venue/raise! owner :upload-file result))
+                                 (.preventDefault %))}
+
+                  ;;;;;;;;;;;;;;;
+                  ;; UPLOAD TYPE SELECTOR
+                  ;;;;;;;;;;;;;;;
+                  [:select {:key "upload-select"
+                            :disabled (if-not upload-file "disabled")
+                            :value upload-type
+                            :on-change #(venue/raise! owner :pending-upload-type (.. % -target -value))}
+                   [:option {:key "existing" :value "existing"} (get-string :browser-upload-option-existing) ]
+                   [:option {:key "new" :value "new" } (get-string :browser-upload-option-new)]]
+
+                  (cond
+                    (and upload-file browsing?)
+                    [:div
+                     {:key "upload-options"}
+                     (condp = upload-type
+                       :existing [:div
+                                  {:key "upload-options-div"}
+                                  [:label {:key "label"} (get-string :browser-upload-select-existing)]
+                                  [:select.full-width
+                                   {:key "input":ref "upload-data-name"}
+                                   (for [{:keys [:data/name] :as item} data-items]
+                                     [:option {:key (str "upload-data-option-" name) :value name} name])]]
+                       :new      [:div
+                                  {:key "upload-options-div"}
+                                  [:label {:key "label"} (get-string :browser-upload-select-new)]
+                                  [:input.full-width {:key "input"
+                                                      :ref "upload-data-name"
+                                                      :type "text"
+                                                      :required true}]])
+                     [:div.spacer
+                      {:key "spacer"}]
+                     [:button.pure-button.button-primary.upload-button {:key "button"} (get-string :upload)]]
+
+                    ;;;;;;;;;;;;;;;
+                    ;; SUCCESS MESSAGE
+                    ;;;;;;;;;;;;;;;
+                    upload-success?
+                    [:div
+                     {:key "upload-success"}
+                     [:div.spacer
+                      {:key "spacer"}]
+                     [:p
+                      {:key "paragraph"}
+                      [:i.fa.fa-check.text-success
+                       {:key "upload-tick" :style {:margin-right "0.5em"}}]
+                      [:span {:key "label"} (get-string :upload-success ":" last-upload-filename)]]])]])]))))
+
+(defcomponent
+  input-browser
+  [{:keys [cursor browsing?] :as state} owner]
+  (render [_]
+          (html
+           (let [{:keys [data-items
                          selected-data-item]} cursor
                          has-selected? (contains? (set data-items) selected-data-item)]
              [:div.witan-pw-input-browser
               [:div.witan-pw-input-browser-content
                [:span.text-gray {:key "title"} (get-string :browser-choose-data)]
                [:div.spacer {:key "spacer"}]
+
+               ;;;;;;;;;;;;;;;
+               ;; SEARCH
+               ;;;;;;;;;;;;;;;
                [:div.pure-u-1.pure-u-md-2-3.witan-pw-input-browser-content-search
                 {:key "search"}
                 [:h3 {:key "subtitle"}
@@ -87,104 +211,13 @@
                                   (venue/raise! owner :select-data-item data-item)
                                   (.preventDefault %))}
                     [:span (str name " - v" version)]])]]
+
+               ;;;;;;;;;;;;;;;
+               ;; UPLOAD
+               ;;;;;;;;;;;;;;;
                [:div.pure-u-1.pure-u-md-1-3.witan-pw-input-browser-content-upload
                 {:key "upload"}
-                [:div.container
-                 [:h3 {:key "subtitle"}
-                  (get-string :upload-new-data)]
-                 (cond
-                   upload-error?
-                   [:div
-                    {:key "upload-error"}
-                    [:h4
-                     {:key "upload-error-title"}
-                     (get-string :browser-upload-error)]
-                    [:button.pure-button.button-warning
-                     {:key "upload-error-reset"
-                      :on-click #(do
-                                   (venue/raise! owner :error-reset)
-                                   (.preventDefault %))}
-                     (get-string :back)]]
-                   uploading?
-                   [:div
-                    {:key "uploading"
-                     :style {:text-align :center}}
-                    [:h4
-                     {:key "uploading-title"}
-                     (get-string :browser-upload-completes)]
-                    [:div
-                     {:key "uploading-spinner"}
-                     [:i.fa.fa-refresh.fa-spin.fa-4x.text-primary]]]
-                   :else
-                   [:div
-                    {:key "upload-form-container"}
-                    [:div
-                     {:key "upload-form"}
-                     [:button.pure-button.button-secondary
-                      {:key "button"
-                       :style {:margin "0" :padding "0" :height "2em"}
-                       :on-click #(.stopPropagation %)}
-                      [:label {:for "upload-filename" :style {:padding "2em"}} "Choose file"]]
-                     [:input.hidden-file-input {:key "input"
-                                                :id "upload-filename"
-                                                :type "file"
-                                                :on-change #(venue/raise! owner
-                                                                          :pending-upload
-                                                                          (first (array-seq (.. % -target -files))))}]
-                     [:div
-                      {:key "filename"}
-                      [:small (if upload-file upload-filename (get-string :browser-no-file-selected))]]]
-
-                    [:form.pure-form.pure-form-stacked
-                     {:key "upload-form-submit"
-                      :on-submit #(do
-                                    (let [node (om/get-node owner "upload-data-name")
-                                          idx (.-selectedIndex node) ;; if it has a selectedIndex it's a select input
-                                          result (if idx (.-value (aget (.-options node) idx)) (.-value node))]
-                                      (venue/raise! owner :upload-file result))
-                                    (.preventDefault %))}
-
-
-                     [:select {:key "upload-select"
-                               :disabled (if-not upload-file "disabled")
-                               :value upload-type
-                               :on-change #(venue/raise! owner :pending-upload-type (.. % -target -value))}
-                      [:option {:key "existing" :value "existing"} (get-string :browser-upload-option-existing) ]
-                      [:option {:key "new" :value "new" } (get-string :browser-upload-option-new)]]
-
-                     (cond
-                       (and upload-file browsing?)
-                       [:div
-                        {:key "upload-options"}
-                        (condp = upload-type
-                          :existing [:div
-                                     {:key "upload-options-div"}
-                                     [:label {:key "label"} (get-string :browser-upload-select-existing)]
-                                     [:select.full-width
-                                      {:key "input":ref "upload-data-name"}
-                                      (for [{:keys [:data/name] :as item} data-items]
-                                        [:option {:key (str "upload-data-option-" name) :value name} name])]]
-                          :new      [:div
-                                     {:key "upload-options-div"}
-                                     [:label {:key "label"} (get-string :browser-upload-select-new)]
-                                     [:input.full-width {:key "input"
-                                                         :ref "upload-data-name"
-                                                         :type "text"
-                                                         :required true}]])
-                        [:div.spacer
-                         {:key "spacer"}]
-                        [:button.pure-button.button-primary.upload-button {:key "button"} (get-string :upload)]]
-
-                       upload-success?
-                       [:div
-                        {:key "upload-success"}
-                        [:div.spacer
-                         {:key "spacer"}]
-                        [:p
-                         {:key "paragraph"}
-                         [:i.fa.fa-check.text-success
-                          {:key "upload-tick" :style {:margin-right "0.5em"}}]
-                         [:span {:key "label"} (get-string :upload-success ":" last-upload-filename)]]])]])]]]]))))
+                (om/build upload-widget state)]]]))))
 
 (defcomponent
   data-item-input-table-row
