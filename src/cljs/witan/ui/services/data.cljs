@@ -54,7 +54,7 @@
 
 (defn create-filter-pred
   [filter]
-  (fn [n] (if (nil? filter)
+  (fn [n] (if-not filter
             true
             (util/contains-str n filter))))
 
@@ -121,7 +121,7 @@
   [{:keys [filter category] :or {filter nil
                                  category nil}}]
   (let [pred (create-filter-pred filter)
-        category-pred (fn [c] (if (nil? category)
+        category-pred (fn [c] (if-not category
                                 true
                                 (= c category)))]
     (apply concat (d/q '[:find (pull ?e [*])
