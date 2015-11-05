@@ -54,7 +54,7 @@
 
 (defn create-filter-pred
   [filter]
-  (fn [n] (if (nil? filter)
+  (fn [n] (if-not filter
             true
             (util/contains-str n filter))))
 
@@ -120,15 +120,21 @@
 (defn fetch-data-items
   [{:keys [filter category] :or {filter nil
                                  category nil}}]
-  (let [pred (create-filter-pred filter)]
+  (let [pred (create-filter-pred filter)
+        category-pred (fn [c] (if-not category
+                                true
+                                (= c category)))]
     (apply concat (d/q '[:find (pull ?e [*])
-                         :in $ ?pred
+                         :in $ ?pred ?category-pred
                          :where
                          [?e :data/data-id _]
                          [?e :data/name ?n]
-                         [(?pred ?n)]]
+                         [?e :data/category ?c]
+                         [(?pred ?n)]
+                         [(?category-pred ?c)]]
                        @db-conn
-                       pred))))
+                       pred
+                       category-pred))))
 
 (defn fix-forecast-inputs
   [forecast]
