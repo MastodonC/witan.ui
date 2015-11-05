@@ -136,8 +136,10 @@
   (let [category        (-> @cursor :browsing-input :category)
         edited-forecast (or (:edited-forecast @cursor) (:forecast @cursor))
         input-entry     (hash-map :category category :selected (util/map-remove-ns (assoc (:selected-data-item @cursor) :edited? true)))
-        inputs          (conj (vec (:inputs edited-forecast)) input-entry)
-        with-input      (assoc edited-forecast :forecast/inputs inputs)]
+        model-inputs    (-> @cursor :model :model/input-data)
+        inputs          (util/squash-maps model-inputs (:forecast/inputs edited-forecast) :category)
+        inputs-ex       (util/squash-maps inputs [input-entry] :category)
+        with-input      (assoc edited-forecast :forecast/inputs inputs-ex)]
     (om/update! cursor :edited-forecast with-input)
     (event-handler owner :toggle-browse-input nil cursor)))
 

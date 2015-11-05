@@ -64,10 +64,12 @@
   (reduce (fn [a [k v]] (assoc a (remove-ns k) v)) {} m))
 
 (defn sanitize-filename
+  "Removed slashes from a filename"
   [filename]
   (.replace filename #".*[\\\/]" ""))
 
 (defn humanize-time
+  "Converts timestamp to a human readable time"
   [time-str]
   (when (not-empty time-str)
     (let [now  (t/now)
@@ -79,3 +81,14 @@
                   (= (calfn (t/yesterday)) (calfn time)) (get-string :yesterday)
                   :default (tf/unparse (tf/formatter "MMMM dth") time))]
       (str front ", " clock))))
+
+(defn squash-maps
+  "Squashes m2 into m1, replacing maps with matching keys based on id-fn"
+  [m1 m2 id-fn]
+  (let [m1-vals (set (map id-fn m1))
+        m2-vals (set (map id-fn m2))
+        inter-vals (clojure.set/intersection m1-vals m2-vals)]
+    (if (empty? inter-vals)
+      (concat m1 m2)
+      (let [m1-removed (remove #(contains? inter-vals (id-fn %)) m1)]
+        (concat m1-removed m2)))))
