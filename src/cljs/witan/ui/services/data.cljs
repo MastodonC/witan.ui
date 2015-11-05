@@ -265,7 +265,8 @@
                    :service :service/api
                    :request :create-forecast-version
                    :args forecast
-                   :context result-ch}))
+                   :context result-ch
+                   :timeout 20000}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -16,6 +16,7 @@
   [cursor]
   (om/update! cursor :forecast             nil)
   (om/update! cursor :edited-forecast      nil)
+  (om/update! cursor :missing-required     #{})
   (om/update! cursor :model                nil)
   (om/update! cursor :browsing-input       nil)
   (om/update! cursor :upload-file          nil)
@@ -45,6 +46,25 @@
     (om/update! cursor :id      id)
     (om/update! cursor :action  (or (not-empty action) "input"))
     (om/update! cursor :version version)))
+
+(defn update-required-inputs!
+  "Updates `:missing-required` based on forecast and model input difference"
+  [cursor]
+  (let [categories (some->> @cursor
+                            :model
+                            :model/input-data
+                            (remove #(contains? % :default))
+                            (map :category)
+                            set)]
+    (if (not-empty categories)
+      (let [forecast (or (:edited-forecast @cursor) (:forecast @cursor))
+            f-categories (some->> forecast
+                                  :forecast/inputs
+                                  (filter :selected)
+                                  (map :category)
+                                  set)]
+        (om/update! cursor :missing-required (clojure.set/difference categories f-categories)))
+      (om/update! cursor :missing-required #{}))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -141,6 +161,7 @@
         inputs-ex       (util/squash-maps inputs [input-entry] :category)
         with-input      (assoc edited-forecast :forecast/inputs inputs-ex)]
     (om/update! cursor :edited-forecast with-input)
+    (update-required-inputs! cursor)
     (event-handler owner :toggle-browse-input nil cursor)))
 
 (defmethod event-handler
@@ -151,7 +172,8 @@
                    :service :service/data
                    :request :add-forecast-version
                    :args (:edited-forecast @cursor)
-                   :context cursor}))
+                   :context cursor
+                   :timeout 20000}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -159,6 +181,7 @@
   [:fetch-forecast :success]
   [owner _ forecast cursor]
   (om/update! cursor :forecast forecast)
+  (update-required-inputs! cursor)
   ;; get the model
   (venue/request! {:owner   owner
                    :service :service/data
@@ -177,7 +200,8 @@
 (defmethod response-handler
   [:fetch-model :success]
   [owner _ model cursor]
-  (om/update! cursor :model model))
+  (om/update! cursor :model model)
+  (update-required-inputs! cursor))
 
 (defmethod response-handler
   [:upload-data :success]

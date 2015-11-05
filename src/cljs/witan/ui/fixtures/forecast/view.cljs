@@ -109,8 +109,69 @@
                [:h2 (get-string :forecast-version)]
                [:h3.model-value 2]]]]])))
 
+(defcomponent in-progress-message
+  [cursor owner]
+  (render [_]
+          (html
+           [:div.pure-g.witan-pw-message-box#witan-pw-in-prog
+            {:key "witan-pw-in-prog"}
+            [:div.pure-u-1#witan-pw-in-prog-text
+             {:key "witan-pw-in-prog-text"}
+             [:span
+              {:key "witan-pw-in-prog-text-span"}
+              (get-string :forecast-in-progress-text)]
+             [:button.pure-button#refresh
+              {:key "witan-pw-in-prog-button-refresh"
+               :on-click #(do
+                            (venue/raise! owner :refresh-forecast)
+                            (.preventDefault %))}
+              [:span
+               [:i.fa.fa-refresh {:key "witan-pw-in-prog-button-refresh-i"}]
+               [:span {:key "witan-pw-in-prog-button-refresh-span"}
+                (str " " (get-string :refresh-now))]]]]])))
+
+(defcomponent edited-forecast-message
+  [cursor owner]
+  (render [_]
+          (html
+           [:div.pure-g.witan-pw-message-box#witan-pw-edits
+            {:key "witan-pw-edits"}
+            [:div.pure-u-1-2#witan-pw-edits-text
+             {:key "witan-pw-edits-text"}
+             [:span (get-string :forecast-changes-text)]]
+            [:div.pure-u-1-2#witan-pw-edits-buttons
+             {:key "witan-pw-edits-buttons"}
+             [:button.pure-button#create
+              {:key "witan-pw-edits-button-create"
+               :on-click #(do (venue/raise! owner :create-forecast-version)
+                              (.preventDefault %))}
+              [:span
+               [:i.fa.fa-thumbs-o-up {:key "witan-pw-edits-button-create-i"}]
+               [:span {:key "witan-pw-edits-button-create-span"}
+                (str " " (get-string :create-new-forecast))]]]
+             [:button.pure-button#revert
+              {:key "witan-pw-edits-button-revert"
+               :on-click #(do
+                            (venue/raise! owner :revert-forecast)
+                            (.preventDefault %))}
+              [:span
+               [:i.fa.fa-undo {:key "witan-pw-edits-button-revert-i"}]
+               [:span {:key "witan-pw-edits-button-revert-span"}
+                (str " " (get-string :revert-forecast))]]]]])))
+
+(defcomponent missing-required-message
+  [cursor owner]
+  (render [_]
+          (html
+           [:div.pure-g.witan-pw-message-box#witan-pw-missing
+            {:key "witan-pw-missing"}
+            [:div.pure-u-1#witan-pw-missing-text
+             {:key "witan-pw-missing-text"}
+             [:span (get-string :missing-required-inputs)]]
+            ])))
+
 (defcomponent view
-  [{:keys [id action forecast version edited-forecast error? model creating?] :as cursor} owner]
+  [{:keys [id action forecast version edited-forecast error? model creating? missing-required] :as cursor} owner]
   (render [_]
           (let [kaction (keyword action)
                 model-conf  {:action kaction
@@ -152,49 +213,13 @@
                     (when next-action [:i.fa.fa-chevron-right.fa-3x])]]
 
                   (if in-progress?
-                    [:div.pure-g#witan-pw-in-prog
-                     {:key "witan-pw-in-prog"}
-                     [:div.pure-u-1#witan-pw-in-prog-text
-                      {:key "witan-pw-in-prog-text"}
-                      [:span
-                       {:key "witan-pw-in-prog-text-span"}
-                       (get-string :forecast-in-progress-text)]
-                      [:button.pure-button#refresh
-                       {:key "witan-pw-in-prog-button-refresh"
-                        :on-click #(do
-                                     (venue/raise! owner :refresh-forecast)
-                                     (.preventDefault %))}
-                       [:span
-                        [:i.fa.fa-refresh {:key "witan-pw-in-prog-button-refresh-i"}]
-                        [:span {:key "witan-pw-in-prog-button-refresh-span"}
-                         (str " " (get-string :refresh-now))]]]]]
+                    (om/build in-progress-message {})
 
                     ;; only show edited if not in-progress?
                     (when edited-forecast
-                      [:div.pure-g#witan-pw-edits
-                       {:key "witan-pw-edits"}
-                       [:div.pure-u-1-2#witan-pw-edits-text
-                        {:key "witan-pw-edits-text"}
-                        [:span (get-string :forecast-changes-text)]]
-                       [:div.pure-u-1-2#witan-pw-edits-buttons
-                        {:key "witan-pw-edits-buttons"}
-                        [:button.pure-button#create
-                         {:key "witan-pw-edits-button-create"
-                          :on-click #(do (venue/raise! owner :create-forecast-version)
-                                         (.preventDefault %))}
-                         [:span
-                          [:i.fa.fa-thumbs-o-up {:key "witan-pw-edits-button-create-i"}]
-                          [:span {:key "witan-pw-edits-button-create-span"}
-                           (str " " (get-string :create-new-forecast))]]]
-                        [:button.pure-button#revert
-                         {:key "witan-pw-edits-button-revert"
-                          :on-click #(do
-                                       (venue/raise! owner :revert-forecast)
-                                       (.preventDefault %))}
-                         [:span
-                          [:i.fa.fa-undo {:key "witan-pw-edits-button-revert-i"}]
-                          [:span {:key "witan-pw-edits-button-revert-span"}
-                           (str " " (get-string :revert-forecast))]]]]]))
+                      (if (empty? missing-required)
+                        (om/build edited-forecast-message {})
+                        (om/build missing-required-message {}))))
 
                   [:div.pure-g
                    {:key "witan-pw-area-container"}
