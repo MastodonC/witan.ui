@@ -72,6 +72,8 @@
    :data-items                     "data items"
    :upload-success                 "Upload successful"
    :creating-forecast              "Please wait whilst we update this forecast..."
+   :today                          "Today"
+   :yesterday                      "Yesterday"
    })
 
 (defn get-string

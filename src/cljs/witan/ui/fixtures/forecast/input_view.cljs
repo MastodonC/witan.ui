@@ -250,7 +250,7 @@
                    (not name) [:small.text-gray
                                (get-string :please-select-data-input)])]]
                [:td {:key (key-prefix "version") :style {:width row-version-width} :class (when edited? "edited")} version]
-               [:td {:key (key-prefix "lastmodified") :style {:width row-lm-width} :class (when edited? "edited")} created]]]))))
+               [:td {:key (key-prefix "lastmodified") :style {:width row-lm-width} :class (when edited? "edited")} (util/humanize-time created)]]]))))
 
 (defcomponent
   data-item-input-table
