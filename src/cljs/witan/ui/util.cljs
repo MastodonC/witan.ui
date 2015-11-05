@@ -1,6 +1,9 @@
 (ns ^:figwheel-always witan.ui.util
     (:require [cljs.core.async :refer [<! chan]]
-              [venue.core :as venue])
+              [venue.core :as venue]
+              [cljs-time.core :as t]
+              [cljs-time.format :as tf]
+              [witan.ui.strings :refer [get-string]])
     (:require-macros [cljs.core.async.macros :as am :refer [go go-loop alt!]]
                      [cljs-log.core :as log]))
 
@@ -63,3 +66,14 @@
 (defn sanitize-filename
   [filename]
   (.replace filename #".*[\\\/]" ""))
+
+(defn humanize-time
+  [time-str]
+  (let [now  (t/now)
+        time (tf/parse (:date-hour-minute-second tf/formatters) time-str)
+        clock (tf/unparse (tf/formatter "HH:mm A") time)
+        front (cond
+                (= (t/day time) (t/day now)) (get-string :today)
+                (= (- (t/day now) (t/day time)) 1) (get-string :yesterday)
+                :default (tf/unparse (tf/formatter "MMMM dth") time))]
+    (str front ", " clock)))

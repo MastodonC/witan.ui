@@ -84,7 +84,9 @@
                    :key "witan-forecast-table-version-key"}
                   (:forecast/version forecast)])]
               [:td.text-center.last-round
-               [:span (:forecast/created forecast)]]]))))
+               [:span (-> forecast
+                          :forecast/created
+                          util/humanize-time)]]]))))
 
 (defn as-forecast-tr
   [cursor forecast]

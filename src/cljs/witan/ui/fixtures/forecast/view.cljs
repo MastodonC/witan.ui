@@ -5,6 +5,7 @@
               [sablono.core :as html :refer-macros [html]]
               [inflections.core :as i]
               ;;
+              [witan.ui.util :as util]
               [witan.ui.fixtures.forecast.input-view]
               [witan.ui.fixtures.forecast.output-view]
               [witan.ui.widgets :as widgets]
@@ -102,7 +103,9 @@
                [:h2 (get-string :model-publisher)]
                [:h3.model-value (:model/owner model)]
                [:h2 (get-string :created)]
-               [:h3.model-value (:model/created model)]
+               [:h3.model-value (-> model
+                                    :model/created
+                                    util/humanize-time)]
                [:h2 (get-string :forecast-version)]
                [:h3.model-value 2]]]]])))
 
