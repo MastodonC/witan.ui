@@ -94,8 +94,7 @@
                        :where
                        [?e :forecast/forecast-id ?forecast-id]]
                      @db-conn
-                     forecast-id))
-  )
+                     forecast-id)))
 
 (defn fetch-models
   []
