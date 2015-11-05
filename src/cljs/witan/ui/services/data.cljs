@@ -87,6 +87,16 @@
                   [forecast])) top-level)
       top-level)))
 
+(defn fetch-forecasts-by-forecast-id
+  [forecast-id]
+  (apply concat (d/q '[:find (pull ?e [*])
+                       :in $ ?forecast-id
+                       :where
+                       [?e :forecast/forecast-id ?forecast-id]]
+                     @db-conn
+                     forecast-id))
+  )
+
 (defn fetch-models
   []
   (apply concat (d/q '[:find (pull ?e [*])
@@ -343,7 +353,7 @@
 
 (defn data-id-db-workaround
   [{:keys [data-id version]}]
-   (str data-id "-" version))
+  (str data-id "-" version))
 
 (defmethod response-handler
   [:upload-data :success]
@@ -388,7 +398,10 @@
 (defmethod response-handler
   [:create-forecast-version :success]
   [owner _ forecast result-ch]
-  (let [fixed (fix-forecast-inputs forecast)]
+  (let [fixed (fix-forecast-inputs forecast)
+        ancestors (fetch-forecasts-by-forecast-id (:forecast-id fixed))]
+    (doseq [f ancestors]
+      (d/transact! db-conn [[:db/add (:db/id f) :forecast/descendant-id (:version-id fixed)]]))
     (put! result-ch [:success (put-item-into-db! fixed :forecast)])))
 
 (defmethod response-handler
