@@ -138,7 +138,8 @@
   [event forecast result-ch]
   (let [inputs (hash-map :inputs (into {} (map (fn [{:keys [category selected]}]
                                                  (let [selected-req (select-keys selected [:file-name :name :s3-key])]
-                                                   (hash-map category selected-req)))
+                                                   (when (not-empty selected-req)
+                                                     (hash-map category selected-req))))
                                                (:forecast/inputs forecast))))]
     (POST event (util/str-fmt-map "/forecasts/{{id}}/versions" {:id (:forecast/forecast-id forecast)}) inputs result-ch)))
 

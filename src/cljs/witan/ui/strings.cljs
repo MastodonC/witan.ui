@@ -74,6 +74,7 @@
    :creating-forecast              "Please wait whilst we update this forecast..."
    :today                          "Today"
    :yesterday                      "Yesterday"
+   :missing-required-inputs        "Some inputs are still missing data. Before you can save this forecast, please select or upload appropriate data for the corresponding inputs."
    })
 
 (defn get-string

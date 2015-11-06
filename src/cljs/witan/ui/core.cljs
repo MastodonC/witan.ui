@@ -47,6 +47,7 @@
    :state {:id                   nil
            :forecast             nil
            :edited-forecast      nil
+           :missing-required     #{}
            :model                nil
            :browsing-input       nil
            :upload-file          nil

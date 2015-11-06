@@ -14,6 +14,7 @@
 (def success (rgb 14 173 105))
 (def normal  (rgb 4 139 168))
 (def deep    (rgb 29 53 87))
+(def error-light (color/lighten error 20))
 
 ;;
 (def button-success   success)

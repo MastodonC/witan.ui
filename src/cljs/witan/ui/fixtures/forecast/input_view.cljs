@@ -288,12 +288,11 @@
   [[action {:keys [edited-forecast forecast model browsing-input] :as cursor}] owner]
   (render [_]
           (html
-           (let [inputs     (sort-by
+           (let [current-forecast-inputs (or (:forecast/inputs edited-forecast)
+                                             (:forecast/inputs forecast))
+                 inputs     (sort-by
                              :category
-                             (or
-                              (:forecast/inputs edited-forecast)
-                              (:forecast/inputs forecast)
-                              (:model/input-data model)))
+                             (util/squash-maps (:model/input-data model) current-forecast-inputs :category))
                  first-input (first inputs)
                  rest-inputs (rest inputs)]
              [:div

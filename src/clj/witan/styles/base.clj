@@ -282,15 +282,17 @@
      [:#witan-pw-top-spacer
       {:height (em 1)}]
 
-     [:#witan-pw-edits
-      {:background-color colour/forecast-changed-light
-       :border "solid 2px"
-       :border-color colour/forecast-changed
+     [:.witan-pw-message-box
+      {:border "solid 2px"
        :border-radius (em 0.2)
        :padding (em 0.5)
        :line-height (em 1.6)
        :font-size (em 1.1)
-       :margin-bottom (em 1)}
+       :margin-bottom (em 1)}]
+
+     [:#witan-pw-edits
+      {:background-color colour/forecast-changed-light
+       :border-color colour/forecast-changed}
       [:#witan-pw-edits-text
        {:text-align :left
         :margin "auto 0px"
@@ -310,12 +312,7 @@
      [:#witan-pw-in-prog
       {:background-color colour/in-progress-light
        :border "solid 2px"
-       :border-color colour/in-progress
-       :border-radius (em 0.2)
-       :padding (em 0.5)
-       :line-height (em 1.6)
-       :font-size (em 1.1)
-       :margin-bottom (em 1)}
+       :border-color colour/in-progress}
       [:button
        {:margin-left (em 1)
         :display :inline
@@ -325,6 +322,14 @@
      [:#witan-pw-in-prog-text
       {:display :inline
        :color colour/white}]
+
+     [:#witan-pw-missing
+      {:background-color colour/error-light
+       :border-color colour/error}
+      [:#witan-pw-missing-text
+       {:text-align :center
+        :margin "auto 0px"
+        :height (percent 50)}]]
 
      [:#witan-pw-area
       {:line-height (em 1.6)}]
