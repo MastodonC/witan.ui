@@ -289,7 +289,7 @@
   (render [_]
           (html
            (let [current-forecast-inputs (or (:forecast/inputs edited-forecast)
-                                      (:forecast/inputs forecast))
+                                             (:forecast/inputs forecast))
                  inputs     (sort-by
                              :category
                              (util/squash-maps (:model/input-data model) current-forecast-inputs :category))
