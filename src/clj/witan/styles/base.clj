@@ -19,9 +19,13 @@
     ;; style
     [;; tags
      [:html
-      {:background-color colour/bg}]
+      {:background-color colour/bg
+       :height (percent 100)
+       :width (percent 100)
+       :overflow :hidden}]
      [:body
-      {}]
+      {:height (percent 100)
+       :width (percent 100)}]
      [:body :h1 :h2 :h3 :h4 :h5
       {:font-family f/base-fonts}]
      [:h1
@@ -79,7 +83,8 @@
          ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
      [:#app
-      {:padding "0 1em"}]
+      {:height (percent 100)
+       :width (percent 100)}]
 
      ;; buttons
 
@@ -170,6 +175,9 @@
      [:.full-width
       {:width (percent 100)}]
 
+     [:.full-height
+      {:height (percent 100)}]
+
      [:.hidden-file-input
       {:position :fixed
        :top (em -100)}]
@@ -183,9 +191,10 @@
 
      [:#witan-menu
       {:background-color colour/header
-       :box-shadow "0px 3px 4px #888888"
+       :box-shadow "0px 2px 4px #888888"
        :height (em 4)
-       :position :relative}
+       :position :relative
+       :z-index 10}
       [:.pure-menu
        {:height (percent 80)
         :position :absolute
@@ -210,17 +219,22 @@
         :width          (percent 100)}]]
 
      [:.witan-page-heading
+      {:background-color colour/lighter-gray
+       :box-shadow "0px 2px 4px #888888"
+       :height (em 3.5)
+       :position :relative
+       :z-index 5}
       [:.pure-menu-list
-       {:bottom (em 0.55)}]
+       {:bottom (em 0.6)
+        :right (em 0.7)}]
       [:button
-       {:margin-left (em 0.5)}]]
+       {:margin-left (em 0.5)}]
+      [:h1
+       {:margin (em 0.15)
+        :margin-left (em 0.7)
+        :display       :inline-block}]]
 
      [:.witan-dash-heading
-      {:color         colour/primary
-       :border-bottom "#ccc 2px solid"}
-      [:h1
-       {:margin-bottom (em 0.2)
-        :display       :inline-block}]
 
       [:.pure-form
        {:display        :inline-flex
@@ -234,7 +248,8 @@
 
      [:#witan-dash-forecast-list
       {:width  (percent 100)
-       :border (px 0)}
+       :border (px 0)
+       :margin-top (em 0.5)}
       [:th :td
        {:border (px 0)}]
       [:th:first-child
@@ -283,31 +298,29 @@
       {:height (em 1)}]
 
      [:.witan-pw-message-box
-      {:border "solid 2px"
-       :border-radius (em 0.2)
+      {:border-bottom "1px solid"
+       :border-top "1px solid"
        :padding (em 0.5)
        :line-height (em 1.6)
        :font-size (em 1.1)
-       :margin-bottom (em 1)}]
+       :height (px 28)
+       :overflow :hidden}
+      [:button
+       {:margin-left (em 1)
+        :height (em 1.5)
+        :color colour/white
+        :line-height (px 0)
+        :padding "0em 1em"}
+       [:&#create
+        {:background-color colour/button-success}]
+       [:&#revert
+        {:background-color colour/button-error}]]]
 
      [:#witan-pw-edits
       {:background-color colour/forecast-changed-light
        :border-color colour/forecast-changed}
       [:#witan-pw-edits-text
-       {:text-align :left
-        :margin "auto 0px"
-        :height (percent 50)}]
-      [:#witan-pw-edits-buttons
-       {:text-align :right
-        :margin "auto 0px"
-        :height (percent 50)}]
-      [:button
-       {:margin-left (em 1)
-        :color colour/white}
-       [:&#create
-        {:background-color colour/button-success}]
-       [:&#revert
-        {:background-color colour/button-error}]]]
+       {:text-align :center}]]
 
      [:#witan-pw-in-prog
       {:background-color colour/in-progress-light
@@ -321,21 +334,17 @@
        {:color colour/white}]]
      [:#witan-pw-in-prog-text
       {:display :inline
+       :text-align :center
        :color colour/white}]
 
      [:#witan-pw-missing
       {:background-color colour/error-light
        :border-color colour/error}
       [:#witan-pw-missing-text
-       {:text-align :center
-        :margin "auto 0px"
-        :height (percent 50)}]]
-
-     [:#witan-pw-area
-      {:line-height (em 1.6)}]
+       {:text-align :center}]]
 
      [:#witan-pw-action-body
-      {:text-align :left}
+      {:margin-bottom (em 1)}
       [:.model-value
        {:margin-left (em 1)
         :margin-right (em 1)}]]
@@ -373,10 +382,7 @@
                               :transition  "fill 0.5s"}]]
 
      [:.witan-pw-header
-      {:border-bottom "#ccc 2px solid"}
-      [:h1
-       {:margin-bottom (em 0.2)
-        :display       :inline-block}]
+
       [:.version-zero
        {:color colour/new-forecast}]
       [:.labels
@@ -396,14 +402,31 @@
         :left (percent 10)
         :right (percent 10)}]]
 
-     [:.witan-pw-area-header
-      {:text-align    :center
-       :width         (percent 100)
-       ;;:margin-top    (px 20)
-       :margin-bottom (px 15)}
+     [:#venue-view-views-forecast
+      {:background-color colour/lightest-gray
+       :height (percent 100)
+       :width (percent 100)}]
 
-      [:div
-       {:transition "background-color 0.5s, height 0.5s"}]
+     [:#witan-pw-body
+      {:position :relative
+       :z-index 1
+       :background-color colour/white
+       :box-shadow "inset 0px -2px 3px 0px #999999"}]
+
+     [:#witan-pw-area-container
+      {:margin-top (px 0)}]
+
+     [:#witan-pw-area
+      {:line-height (em 1.6)
+       :text-align    :center
+       :width         (percent 100)
+       ;;:border-top "1px solid silver"
+       :overflow-y :auto
+       :position :absolute
+       :top (px 430)
+       :left (px 0)
+       :bottom (px 0)
+       :right (px 0)}
 
       [:h2
        {:color       colour/primary
@@ -440,7 +463,8 @@
         :width (em 8)}]]
 
      [:.witan-pw-input-browser-container
-      {:padding-top (em 1)}
+      {:padding-top (em 1)
+       :transition "height 0.5s"}
 
       [:.witan-pw-input-browser
        {:width (percent 100)
@@ -501,6 +525,33 @@
           {:font-size (percent 100)
            :font-weight :bold
            :margin-top (px 5)}]]]]]
+
+     [:#witan-new-forecast-container
+      {:padding (em 1)}]
+
+     [:#witan-pw-forecast-nav
+      {:margin-bottom (em 1)}
+      [:.witan-pw-forecast-nav-box
+       {:display :inline-block
+        :width (em 16)
+        :height (em 12)
+        :margin (em 1)
+        :border-radius (px 4)
+        :cursor :pointer
+        :transition "box-shadow 0.3s"
+        :line-height (em 2)}
+       [:h1 :h2 :h3
+        {:color colour/white
+         :transition "color 0.5s"}]]
+      [:.input  {:background-color colour/forecast-input-gs}]
+      [:.model  {:background-color colour/forecast-model-gs}]
+      [:.output {:background-color colour/forecast-output-gs}]
+      [:.active {:box-shadow "8px 8px 8px #888888"}
+       [:h1 :h2 :h3
+        {:color :initial}]
+       [:.action
+        [:h2
+         {:color "#444444"}]]]]
 
      [:.view-overlay
       {:width      (percent 100)

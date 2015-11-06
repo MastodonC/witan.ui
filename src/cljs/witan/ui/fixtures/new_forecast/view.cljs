@@ -29,7 +29,7 @@
             [:div.witan-page-heading
              [:h1
               (get-string :new-forecast)]]
-            [:div.pure-g
+            [:div.pure-g#witan-new-forecast-container
              [:div.pure-u-1-2
               [:form.pure-form
                {:on-submit (fn [e]

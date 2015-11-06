@@ -51,7 +51,7 @@
           (let [category (:category output)
                 prefix (partial str category)]
             (html
-             [:div
+             [:div#witan-pw-action-body
               {:key (prefix "-output-div")}
               [:div.pure-u-4-5
                {:key (prefix "-output-table-container")}
