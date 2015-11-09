@@ -61,7 +61,47 @@
                   [:button.pure-button.button-primary
                    [:i.fa.fa-share-alt]]]]]]]))))
 
+(defcomponent
+  forecast-box
+  [{:keys [number text action active? id version]} owner]
+  (render [_]
+          (html
+           [:div.witan-pw-forecast-nav-box
+            {:class (str (name action) (when active? " active"))
+             :on-click #(do
+                          (venue/navigate! :views/forecast {:id id :version version :action (name action)})
+                          (.preventDefault %))}
+            [:div.number
+             [:h1 number]]
+            [:div.action
+             [:h2 (-> valid-actions action last)]]
+            [:div.text
+             [:h3 text]]])))
 
+(defcomponent
+  forecast-nav
+  [{:keys [action id version]} owner]
+  (render [_]
+          (html
+           [:div#witan-pw-forecast-nav
+            (om/build forecast-box {:text (get-string :pw-input-brief)
+                                    :number 1
+                                    :action :input
+                                    :active? (= :input  action)
+                                    :id id
+                                    :version version} {:key :number})
+            (om/build forecast-box {:text (get-string :pw-model-brief)
+                                    :number 2
+                                    :action :model
+                                    :active? (= :model  action)
+                                    :id id
+                                    :version version} {:key :number})
+            (om/build forecast-box {:text (get-string :pw-output-brief)
+                                    :number 3
+                                    :action :output
+                                    :active? (= :output action)
+                                    :id id
+                                    :version version} {:key :number})])))
 
 (defmulti action-view
   (fn [[action cursor] owner] action))
@@ -70,44 +110,72 @@
   :input
   [[action cursor] owner]
   (render [_]
-          (om/build witan.ui.fixtures.forecast.input-view/view [action cursor])))
+          (html [:div#witan-pw-action-body-container
+                 (om/build witan.ui.fixtures.forecast.input-view/view [action cursor])])))
 
 (defcomponentmethod action-view
   :output
   [[action cursor] owner]
   (render [_]
-          (om/build witan.ui.fixtures.forecast.output-view/view [action cursor])))
+          (html [:div#witan-pw-action-body-container
+                 (om/build witan.ui.fixtures.forecast.output-view/view [action cursor])])))
 
 (defcomponentmethod action-view
   :model
   [[action {:keys [forecast model]}] owner]
   (render [_]
           (html
-           [:div
-            [:p (get-string :model-intro)]
+           [:div#witan-pw-action-body-container
+            {:key "model-container"}
+            [:p
+             {:key "model-intro"}
+             (get-string :model-intro)]
             [:div.pure-g#witan-pw-action-body
+             {:key "model-intro-body"}
              [:div.pure-u-1-2.text-right
+              {:key "model-info-left"}
               [:div.padding-1
-
-               [:h2 (get-string :model)]
-               [:h3.model-value (:model/name model)]
-               [:h2 (get-string :forecast-desc)]
-               [:h3.model-value (:model/description model)]
+               {:key "model-info-left-inner"}
+               [:h2
+                {:key "model-title"}
+                (get-string :model)]
+               [:h3.model-value
+                {:key "model-title-value"}
+                (:model/name model)]
+               [:h2
+                {:key "model-desc"}
+                (get-string :forecast-desc)]
+               [:h3.model-value
+                {:key "model-desc-value"} (:model/description model)]
                (when (not-empty (:forecast/property-values forecast))
-                 [:div [:h2 (get-string :properties)]
+                 [:div
+                  {:key "model-props"}
+                  [:h2
+                   {:key "model-props-title"}
+                   (get-string :properties)]
                   (for [{:keys [name value]} (:forecast/property-values forecast)]
-                    [:div [:h3.model-value name ": " [:small {:style {:font-weight "normal"}} value]]])])]]
+                    [:div {:key (str "model-prop-" name)} [:h3.model-value {:key "name"} name ": " [:small {:key "small" :style {:font-weight "normal"}} value]]])])]]
              [:div.pure-u-1-2
-              [:div.padding-1
-               {:style {:border-left "1px solid silver"}}
-               [:h2 (get-string :model-publisher)]
-               [:h3.model-value (:model/owner model)]
-               [:h2 (get-string :created)]
-               [:h3.model-value (-> model
-                                    :model/created
-                                    util/humanize-time)]
-               [:h2 (get-string :forecast-version)]
-               [:h3.model-value 2]]]]])))
+              {:key "model-info-right"}
+              [:div.padding-1.text-left
+               {:key "model-info-right-inner"
+                :style {:border-left "1px solid silver"}}
+               [:h2
+                {:key "model-publisher"}
+                (get-string :model-publisher)]
+               [:h3.model-value
+                {:key "model-publisher-value"}
+                (:model/owner model)]
+               [:h2 {:key "model-created"}
+                (get-string :created)]
+               [:h3.model-value {:key "model-created-value"}
+                (-> model
+                    :model/created
+                    util/humanize-time)]
+               [:h2 {:key "model-version"}
+                (get-string :forecast-version)]
+               [:h3.model-value
+                {:key "model-version-value"} (:model/version model)]]]]])))
 
 (defcomponent in-progress-message
   [cursor owner]
@@ -136,11 +204,11 @@
           (html
            [:div.pure-g.witan-pw-message-box#witan-pw-edits
             {:key "witan-pw-edits"}
-            [:div.pure-u-1-2#witan-pw-edits-text
+            [:div.pure-u-1#witan-pw-edits-text
              {:key "witan-pw-edits-text"}
-             [:span (get-string :forecast-changes-text)]]
-            [:div.pure-u-1-2#witan-pw-edits-buttons
-             {:key "witan-pw-edits-buttons"}
+             [:span
+              {:key "witan-pw-edits-text-span"}
+              (get-string :forecast-changes-text)]
              [:button.pure-button#create
               {:key "witan-pw-edits-button-create"
                :on-click #(do (venue/raise! owner :create-forecast-version)
@@ -167,8 +235,7 @@
             {:key "witan-pw-missing"}
             [:div.pure-u-1#witan-pw-missing-text
              {:key "witan-pw-missing-text"}
-             [:span (get-string :missing-required-inputs)]]
-            ])))
+             [:span (get-string :missing-required-inputs)]]])))
 
 (defcomponent view
   [{:keys [id action forecast version edited-forecast error? model creating? missing-required] :as cursor} owner]
@@ -190,27 +257,17 @@
                  [:div.view-overlay
                   [:i.fa.fa-cog.fa-spin.fa-4x]
                   (when creating? [:h2 (get-string :creating-forecast)])]
-                 [:div
-                  [:div
+                 [:div.full-height
+                  [:div#witan-pw-header-container
                    {:key "witan-pw-header-container"}
                    (om/build header (assoc forecast :edited? (-> edited-forecast nil? not)))]
-                  [:div.pure-g
+                  [:div.pure-g#witan-pw-body
                    {:key "witan-pw-body"}
                    [:div.pure-u-1#witan-pw-top-spacer
                     {:key "witan-pw-top-spacer"}]
-                   [:a.pure-u-1-12.witan-pw-nav-button
-                    (merge {:key (str "forecast-left-" prev-action)}
-                           (when prev-action
-                             {:href (venue/get-route :views/forecast {:id id :version version :action (name prev-action)})}))
-                    (when prev-action [:i.fa.fa-chevron-left.fa-3x])]
-                   [:div.pure-u-5-6.witan-model-diagram
+                   [:div.pure-u-1.witan-model-diagram
                     {:key "forecast-centre"}
-                    (when forecast (om/build model-diagram/diagram model-conf))]
-                   [:a.pure-u-1-12.witan-pw-nav-button
-                    (merge {:key (str "forecast-right-" next-action)}
-                           (when next-action
-                             {:href (venue/get-route :views/forecast {:id id :version version :action (name next-action)})}))
-                    (when next-action [:i.fa.fa-chevron-right.fa-3x])]]
+                    (when forecast (om/build forecast-nav {:action kaction :id id :version version}))]]
 
                   (if in-progress?
                     (om/build in-progress-message {})
@@ -221,18 +278,11 @@
                         (om/build edited-forecast-message {})
                         (om/build missing-required-message {}))))
 
-                  [:div.pure-g
+                  [:div.pure-g#witan-pw-area-container
                    {:key "witan-pw-area-container"}
                    (if-not (contains? (set (keys valid-actions)) kaction)
                      [:div.pure-u-1 [:span "Unknown forecast action"]]
-                     [:div.pure-u-1.witan-pw-area-header
-                      {:key "witan-pw-area-header"}
+                     [:div.pure-u-1#witan-pw-area
+                      {:key "witan-pw-area"}
                       [:div
-                       {:class action}
-                       [:h2 (-> valid-actions kaction last)
-                        (when in-progress?
-                          [:i.fa.fa-lock {:key (str action "-locked-key")
-                                          :style {:margin-left "0.6em"}}])]]
-                      [:div#witan-pw-area
-                       {:key "witan-pw-area"}
                        (om/build action-view [kaction cursor])]])]]))))))

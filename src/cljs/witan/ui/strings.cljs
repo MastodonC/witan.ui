@@ -75,6 +75,9 @@
    :today                          "Today"
    :yesterday                      "Yesterday"
    :missing-required-inputs        "Some inputs are still missing data. Before you can save this forecast, please select or upload appropriate data for the corresponding inputs."
+   :pw-input-brief                 "Choose your input data"
+   :pw-model-brief                 "See how the model works"
+   :pw-output-brief                "Download your new data"
    })
 
 (defn get-string

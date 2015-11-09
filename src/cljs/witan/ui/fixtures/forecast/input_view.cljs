@@ -295,11 +295,11 @@
                              (util/squash-maps (:model/input-data model) current-forecast-inputs :category))
                  first-input (first inputs)
                  rest-inputs (rest inputs)]
-             [:div
+             [:div#witan-pw-action-body
               [:div
                {:key "input-intro"}
                [:div.pure-u-1
-                [:div.pure-u-3-5 [:p (get-string :input-intro)]]]]
+                [:div.pure-u-3-5 (get-string :input-intro)]]]
 
               ;; first row
               [:div

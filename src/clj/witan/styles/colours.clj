@@ -7,6 +7,9 @@
 (def gray (:gray color/color-name->hex))
 (def dark-gray (:darkgray color/color-name->hex))
 (def darker-gray (color/darken (:darkgray color/color-name->hex) 20))
+(def light-gray (:lightgray color/color-name->hex))
+(def lighter-gray (color/lighten (:lightgray color/color-name->hex) 8))
+(def lightest-gray (color/lighten (:lightgray color/color-name->hex) 12))
 
 ;;
 (def error   (rgb 238 66 102))
@@ -34,6 +37,10 @@
 (def forecast-model-light  (color/lighten forecast-model 12))
 (def forecast-output-light (color/lighten forecast-output 12))
 (def forecast-changed-light (color/lighten forecast-changed 12))
+
+(def forecast-input-gs (rgb 136 136 136))
+(def forecast-model-gs (rgb 170 170 170))
+(def forecast-output-gs (rgb 204 204 204))
 
 ;; page background
 (def bg white)
@@ -84,5 +91,5 @@
 (def in-progress (rgb 84 13 110))
 (def in-progress-light (color/lighten in-progress 20))
 
-(def new-forecast (rgb 234 122 244))
+(def new-forecast (rgb 244 122 126))
 (def input-browser (rgb 204 224 241))

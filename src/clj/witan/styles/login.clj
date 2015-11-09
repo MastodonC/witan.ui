@@ -18,6 +18,7 @@
      :left       (px 0)
      :width      (percent 100)
      :height     (percent 100)
+     :z-index    15
      :background "url ('../img/login-bg.jpg') no-repeat center center fixed"
      :filter     "progid:DXImageTransform.Microsoft.AlphaImageLoader (src='.myBackground.jpg', sizingMethod='scale')"
      :-ms-filter "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='myBackground.jpg', sizingMethod='scale')"}
@@ -54,7 +55,8 @@
     {:position :absolute
      :top      (px 0)
      :left     (px 0)
-     :width    (percent 100)}]
+     :width    (percent 100)
+     :z-index    16}]
 
    [:#relative-container
     {:position :relative
