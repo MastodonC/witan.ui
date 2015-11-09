@@ -420,7 +420,6 @@
       {:line-height (em 1.6)
        :text-align    :center
        :width         (percent 100)
-       ;;:border-top "1px solid silver"
        :overflow-y :auto
        :position :absolute
        :top (px 430)
