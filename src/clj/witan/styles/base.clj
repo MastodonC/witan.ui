@@ -226,7 +226,7 @@
        :z-index 5}
       [:.pure-menu-list
        {:bottom (em 0.6)
-        :right (em 0.7)}]
+        :right  (em 0.7)}]
       [:button
        {:margin-left (em 0.5)}]
       [:h1
@@ -247,8 +247,8 @@
        :padding-right (px 30)}]
 
      [:#witan-dash-forecast-list
-      {:width  (percent 100)
-       :border (px 0)
+      {:width      (percent 100)
+       :border     (px 0)
        :margin-top (em 0.5)}
       [:th :td
        {:border (px 0)}]
@@ -261,7 +261,7 @@
         :margin-left (em 0.5)}]
       [:.tree-control
        {:background-color colour/white
-        :color colour/black}]
+        :color            colour/black}]
       [:&:hover
        {:background-color colour/row-highlight
         :cursor           :pointer}]
@@ -298,13 +298,16 @@
       {:height (em 1)}]
 
      [:.witan-pw-message-box
-      {:border-bottom "1px solid"
-       :border-top "1px solid"
-       :padding (em 0.5)
-       :line-height (em 1.6)
-       :font-size (em 1.1)
-       :height (px 28)
-       :overflow :hidden}
+      {:border-bottom "2px solid"
+       :border-top    "2px solid"
+       :padding       (em 0.5)
+       :line-height   (em 1.6)
+       :font-size     (em 1)
+       :height        (px 36)
+       :overflow      :hidden
+       :position      :absolute
+       :top           (px 0)
+       :width         (percent 100)}
       [:button
        {:margin-left (em 1)
         :height (em 1.5)
@@ -324,7 +327,6 @@
 
      [:#witan-pw-in-prog
       {:background-color colour/in-progress-light
-       :border "solid 2px"
        :border-color colour/in-progress}
       [:button
        {:margin-left (em 1)
@@ -413,19 +415,34 @@
        :background-color colour/white
        :box-shadow "inset 0px -2px 3px 0px #999999"}]
 
+     [:#witan-pw-body-content
+      {:position :relative
+       :border-bottom "1px solid silver"
+       :box-shadow "0px 0px 10px #999999"
+       :z-index 1}]
+
+     [:#witan-pw-stage-desc
+      [:p {:line-height (em 1.4)
+           :min-width (px 635)}]
+      [:h2 {:margin-top (em 0.4)
+            :margin-bottom (em 0)
+            :padding-bottom (em 0.4)
+            :border-bottom "1px solid silver"}]]
+
      [:#witan-pw-area-container
       {:margin-top (px 0)}]
 
      [:#witan-pw-area
       {:line-height (em 1.6)
        :text-align    :center
-       :width         (percent 100)
        :overflow-y :auto
        :position :absolute
-       :top (px 430)
+       :top (px 508)
        :left (px 0)
        :bottom (px 0)
-       :right (px 0)}
+       :right (px 0)
+       :margin "0px auto"
+       :padding-top (em 1)}
 
       [:h2
        {:color       colour/primary

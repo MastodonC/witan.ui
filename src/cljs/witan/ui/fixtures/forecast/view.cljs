@@ -15,9 +15,20 @@
     (:require-macros [cljs-log.core :as log]))
 
 (def valid-actions ;; NOTE keep them in this order or weird stuff will 'appen.
-  {:input  [nil    :model  (-> :input get-string i/plural)]
-   :model  [:input :output (-> :model get-string)]
-   :output [:model nil     (-> :output get-string i/plural)]})
+  {:input  [nil    :model ]
+   :model  [:input :output]
+   :output [:model nil    ]})
+
+(def action-strings
+  {:input  {:title (-> :input get-string i/plural)
+            :desc  (get-string :pw-input-brief)
+            :about (get-string :input-intro)}
+   :model  {:title (-> :model get-string)
+            :desc (get-string :pw-model-brief)
+            :about (get-string :model-intro)}
+   :output {:title (-> :output get-string i/plural)
+            :desc (get-string :pw-output-brief)
+            :about (get-string :output-intro)}})
 
 ;; There's probably a more elegant way to do this
 (defn next-action
@@ -74,7 +85,7 @@
             [:div.number
              [:h1 number]]
             [:div.action
-             [:h2 (-> valid-actions action last)]]
+             [:h2 (-> action-strings action :title)]]
             [:div.text
              [:h3 text]]])))
 
@@ -84,24 +95,13 @@
   (render [_]
           (html
            [:div#witan-pw-forecast-nav
-            (om/build forecast-box {:text (get-string :pw-input-brief)
-                                    :number 1
-                                    :action :input
-                                    :active? (= :input  action)
-                                    :id id
-                                    :version version} {:key :number})
-            (om/build forecast-box {:text (get-string :pw-model-brief)
-                                    :number 2
-                                    :action :model
-                                    :active? (= :model  action)
-                                    :id id
-                                    :version version} {:key :number})
-            (om/build forecast-box {:text (get-string :pw-output-brief)
-                                    :number 3
-                                    :action :output
-                                    :active? (= :output action)
-                                    :id id
-                                    :version version} {:key :number})])))
+            (for [[number faction] [[1 :input] [2 :model] [3 :output]]]
+              (om/build forecast-box {:text (-> action-strings faction :desc)
+                                      :number number
+                                      :action faction
+                                      :active? (= faction  action)
+                                      :id id
+                                      :version version} {:key :number}))])))
 
 (defmulti action-view
   (fn [[action cursor] owner] action))
@@ -127,9 +127,6 @@
           (html
            [:div#witan-pw-action-body-container
             {:key "model-container"}
-            [:p
-             {:key "model-intro"}
-             (get-string :model-intro)]
             [:div.pure-g#witan-pw-action-body
              {:key "model-intro-body"}
              [:div.pure-u-1-2.text-right
@@ -269,20 +266,25 @@
                     {:key "forecast-centre"}
                     (when forecast (om/build forecast-nav {:action kaction :id id :version version}))]]
 
-                  (if in-progress?
-                    (om/build in-progress-message {})
+                  [:div#witan-pw-body-content
+                   [:div.pure-u-1.text-center
+                    [:div.pure-u-1-2.text-left#witan-pw-stage-desc
+                     [:h2 (-> action-strings kaction :desc)]
+                     [:p (-> action-strings kaction :about)]]]
+                   (if in-progress?
+                     (om/build in-progress-message {})
 
-                    ;; only show edited if not in-progress?
-                    (when edited-forecast
-                      (if (empty? missing-required)
-                        (om/build edited-forecast-message {})
-                        (om/build missing-required-message {}))))
+                     ;; only show edited if not in-progress?
+                     (if edited-forecast
+                       (if (empty? missing-required)
+                         (om/build edited-forecast-message {})
+                         (om/build missing-required-message {}))))]
 
                   [:div.pure-g#witan-pw-area-container
                    {:key "witan-pw-area-container"}
                    (if-not (contains? (set (keys valid-actions)) kaction)
                      [:div.pure-u-1 [:span "Unknown forecast action"]]
-                     [:div.pure-u-1#witan-pw-area
+                     [:div.pure-u-3-4#witan-pw-area
                       {:key "witan-pw-area"}
                       [:div
                        (om/build action-view [kaction cursor])]])]]))))))
