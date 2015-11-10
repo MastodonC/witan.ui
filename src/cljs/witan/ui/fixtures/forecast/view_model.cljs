@@ -177,8 +177,7 @@
     (if (some->> inputs-ex
                  (map second)
                  (map val)
-                 (map :edited?)
-                 (some true?))
+                 (some :edited?))
       (om/update! cursor :edited-forecast with-input)
       (om/update! cursor :edited-forecast nil)))
     (update-required-inputs! cursor)
