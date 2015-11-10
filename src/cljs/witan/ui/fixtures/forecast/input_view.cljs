@@ -171,7 +171,7 @@
                ;;;;;;;;;;;;;;;
                ;; SEARCH
                ;;;;;;;;;;;;;;;
-               [:div.pure-u-1.pure-u-md-2-3.witan-pw-input-browser-content-search
+               [:div.pure-u-1.pure-u-md-3-5.witan-pw-input-browser-content-search
                 {:key "search"}
                 [:h3 {:key "subtitle"}
                  (str (get-string :search) " " (get-string :data-items))]
@@ -215,7 +215,7 @@
                ;;;;;;;;;;;;;;;
                ;; UPLOAD
                ;;;;;;;;;;;;;;;
-               [:div.pure-u-1.pure-u-md-1-3.witan-pw-input-browser-content-upload
+               [:div.pure-u-1.pure-u-md-2-5.witan-pw-input-browser-content-upload
                 {:key "upload"}
                 (om/build upload-widget state)]]]))))
 

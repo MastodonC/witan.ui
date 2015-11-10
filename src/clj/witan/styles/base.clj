@@ -416,10 +416,14 @@
        :box-shadow "inset 0px -2px 3px 0px #999999"}]
 
      [:#witan-pw-body-content
-      {:position :relative}]
+      {:position :relative
+       :border-bottom "1px solid silver"
+       :box-shadow "0px 0px 10px #999999"
+       :z-index 1}]
 
      [:#witan-pw-stage-desc
-      [:p {:line-height (em 1.4)}]
+      [:p {:line-height (em 1.4)
+           :min-width (px 635)}]
       [:h2 {:margin-top (em 0.4)
             :margin-bottom (em 0)
             :padding-bottom (em 0.4)
@@ -433,11 +437,12 @@
        :text-align    :center
        :overflow-y :auto
        :position :absolute
-       :top (px 505)
+       :top (px 508)
        :left (px 0)
        :bottom (px 0)
        :right (px 0)
-       :margin "0px auto"}
+       :margin "0px auto"
+       :padding-top (em 1)}
 
       [:h2
        {:color       colour/primary
