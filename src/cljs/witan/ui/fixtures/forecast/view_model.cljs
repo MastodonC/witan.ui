@@ -151,32 +151,38 @@
   (om/update! cursor :selected-data-item item))
 
 (defn is-new-input?
-  [new-data forecast]
+  [new-data inputs]
   (let [category    (:data/category new-data)
         data-id     (:data/data-id new-data)
-        existing-id (some #(if (= (:category %) category) (-> % :selected :data-id)) (:forecast/inputs forecast))
+        existing-id (some #(if (= (:category %) category) (or
+                                                           (-> % :selected :data-id)
+                                                           (-> % :default :data-id))) inputs)
         result      (not= data-id existing-id)]
-    (log/debug "1" data-id "2" existing-id result (:forecast/inputs forecast))
     result))
 
 (defmethod event-handler
   :select-input
   [owner _ _ cursor]
   (let [category        (-> @cursor :browsing-input :category)
+        model-inputs    (-> @cursor :model :model/input-data)
         new-data        (:selected-data-item @cursor)
         forecast        (:forecast @cursor)
-        other-forecast  (:edited-forecast @cursor)]
-    (if (is-new-input? new-data forecast)
-      (let [edited-forecast (or other-forecast forecast)
-            input-entry     (hash-map :category category :selected (util/map-remove-ns (assoc new-data :edited? true)))
-            model-inputs    (-> @cursor :model :model/input-data)
-            inputs          (util/squash-maps model-inputs (:forecast/inputs edited-forecast) :category)
-            inputs-ex       (util/squash-maps inputs [input-entry] :category)
-            with-input      (assoc edited-forecast :forecast/inputs inputs-ex)]
-        (om/update! cursor :edited-forecast with-input)
-        (update-required-inputs! cursor))
-      (comment (when other-forecast )))
-    (event-handler owner :toggle-browse-input nil cursor)))
+        other-forecast  (:edited-forecast @cursor)
+        edited?         (is-new-input? new-data (util/squash-maps model-inputs (:forecast/inputs forecast) :category))
+        edited-forecast (or other-forecast forecast)
+        input-entry     (hash-map :category category :selected (util/map-remove-ns (assoc new-data :edited? edited?)))
+        inputs          (util/squash-maps model-inputs (:forecast/inputs edited-forecast) :category)
+        inputs-ex       (util/squash-maps inputs [input-entry] :category)
+        with-input      (assoc edited-forecast :forecast/inputs inputs-ex)]
+    (if (some->> inputs-ex
+                 (map second)
+                 (map val)
+                 (map :edited?)
+                 (some true?))
+      (om/update! cursor :edited-forecast with-input)
+      (om/update! cursor :edited-forecast nil)))
+    (update-required-inputs! cursor)
+    (event-handler owner :toggle-browse-input nil cursor))
 
 (defmethod event-handler
   :create-forecast-version
