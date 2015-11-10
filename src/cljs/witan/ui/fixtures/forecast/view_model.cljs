@@ -150,19 +150,38 @@
   [owner _ item cursor]
   (om/update! cursor :selected-data-item item))
 
+(defn is-new-input?
+  [new-data inputs]
+  (let [category    (:data/category new-data)
+        data-id     (:data/data-id new-data)
+        existing-id (some #(if (= (:category %) category) (or
+                                                           (-> % :selected :data-id)
+                                                           (-> % :default :data-id))) inputs)
+        result      (not= data-id existing-id)]
+    result))
+
 (defmethod event-handler
   :select-input
   [owner _ _ cursor]
   (let [category        (-> @cursor :browsing-input :category)
-        edited-forecast (or (:edited-forecast @cursor) (:forecast @cursor))
-        input-entry     (hash-map :category category :selected (util/map-remove-ns (assoc (:selected-data-item @cursor) :edited? true)))
         model-inputs    (-> @cursor :model :model/input-data)
+        new-data        (:selected-data-item @cursor)
+        forecast        (:forecast @cursor)
+        other-forecast  (:edited-forecast @cursor)
+        edited?         (is-new-input? new-data (util/squash-maps model-inputs (:forecast/inputs forecast) :category))
+        edited-forecast (or other-forecast forecast)
+        input-entry     (hash-map :category category :selected (util/map-remove-ns (assoc new-data :edited? edited?)))
         inputs          (util/squash-maps model-inputs (:forecast/inputs edited-forecast) :category)
         inputs-ex       (util/squash-maps inputs [input-entry] :category)
         with-input      (assoc edited-forecast :forecast/inputs inputs-ex)]
-    (om/update! cursor :edited-forecast with-input)
+    (if (some->> inputs-ex
+                 (map second)
+                 (map val)
+                 (some :edited?))
+      (om/update! cursor :edited-forecast with-input)
+      (om/update! cursor :edited-forecast nil)))
     (update-required-inputs! cursor)
-    (event-handler owner :toggle-browse-input nil cursor)))
+    (event-handler owner :toggle-browse-input nil cursor))
 
 (defmethod event-handler
   :create-forecast-version
