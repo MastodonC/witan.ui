@@ -296,10 +296,6 @@
                  first-input (first inputs)
                  rest-inputs (rest inputs)]
              [:div#witan-pw-action-body
-              [:div
-               {:key "input-intro"}
-               [:div.pure-u-1
-                [:div.pure-u-3-5 (get-string :input-intro)]]]
 
               ;; first row
               [:div
