@@ -419,7 +419,8 @@
       {:position :relative
        :border-bottom "1px solid silver"
        :box-shadow "0px 0px 10px #999999"
-       :z-index 1}]
+       :z-index 1
+       :background-color colour/light-gray}]
 
      [:#witan-pw-stage-desc
       [:p {:line-height (em 1.4)
@@ -437,7 +438,7 @@
        :text-align    :center
        :overflow-y :auto
        :position :absolute
-       :top (px 508)
+       :top (px 440)
        :left (px 0)
        :bottom (px 0)
        :right (px 0)
@@ -454,10 +455,24 @@
        [:small
         {:display :block
          :line-height (px 10)}]
+       [:strong
+        {:display :block
+         :margin 0
+         :font-size (em 1.2)}]
+       [:.description
+        {:display :inline-block
+         :margin-bottom (em 1)
+         :font-size (em 0.8)
+         :line-height (em 1.4)}]
        [:.not-specified
         {:color colour/error}]
        [:.edited
-        {:color colour/forecast-changed}]]
+        {:color colour/forecast-changed}]
+       [:button
+        {:float :left
+         :margin-right (em 1)}]
+       [:tr
+        [:td {:vertical-align :bottom}]]]
 
       [:.witan-pw-browse-toggle
        {:width (px 40)
@@ -536,7 +551,10 @@
         [:.witan-pw-input-browser-content-upload
          {:text-align :left}
          [:.container
-          {:margin-left (em 1)}]
+          {:padding-left (em 1)
+           :margin-left (em 1)
+           :border-left [[(px 1) :solid 'silver]]
+           :height (px 300)}]
          [:.upload-button
           {:font-size (percent 100)
            :font-weight :bold
@@ -550,12 +568,12 @@
       [:.witan-pw-forecast-nav-box
        {:display :inline-block
         :width (em 16)
-        :height (em 12)
+        :height (em 8)
         :margin (em 1)
         :border-radius (px 4)
         :cursor :pointer
         :transition "box-shadow 0.3s"
-        :line-height (em 2)}
+        :line-height (em 0.6)}
        [:h1 :h2 :h3
         {:color colour/white
          :transition "color 0.5s"}]]

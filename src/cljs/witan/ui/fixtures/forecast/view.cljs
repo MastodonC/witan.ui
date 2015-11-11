@@ -83,7 +83,7 @@
                           (venue/navigate! :views/forecast {:id id :version version :action (name action)})
                           (.preventDefault %))}
             [:div.number
-             [:h1 number]]
+             [:h2 number]]
             [:div.action
              [:h2 (-> action-strings action :title)]]
             [:div.text
