@@ -74,18 +74,27 @@
                     (for [{:keys [name type context enum_values]} properties]
                       (let [params {:ref (str "mod-prop-" name) :key (str "mod-prop-input-" name)}]
                         [:div.pure-control-group
-                         {:key (str "mod-prop-" name)}
-                         [:label {:for (str "mod-prop-" name) :key (str "mod-prop-label-" name) :style {:width "auto"}} name] ;; FIXME
+                         {:key (str "mod-prop-" name)
+                          :style {:vertical-align "top"}}
+                         [:label {:for (str "mod-prop-" name)
+                                  :key (str "mod-prop-label-" name)
+                                  :style {:width "auto"
+                                          :vertical-align "top"
+                                          :margin-top "10px"}} name] ;; FIXME
                          (condp = type
                            "dropdown"
-                           [:select.pure-input-1-2
-                            params
-                            (for [opt enum_values]
-                              [:option {:key (str "mod-prop-opt-" opt)} opt])]
+                           [:div.pure-input-1-2
+                            {:style {:display "inline-block"}}
+                            [:select
+                             params
+                             (for [opt enum_values]
+                               [:option {:key (str "mod-prop-opt-" opt)} opt])]
+                            [:div [:small.text-gray {:style {:margin-left "1em"}} context]]]
                            "text"
                            [:input.pure-input-1-2 (merge params {:placeholder context :required true})]
                            "number"
-                           [:input.pure-input-1-2 params])]))]]
+                           [:input.pure-input-1-2 (merge params {:placeholder context :required true})])
+                         ]))]]
                   [:div
                    [:p [:small [:i (get-string :no-model-properties)]]]])
                 [:hr.medium]
