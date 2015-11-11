@@ -149,6 +149,9 @@
      [:.label-forecast-changed
       {:background-color colour/forecast-changed}]
 
+     [:.label-forecast-superseded
+      {:background-color colour/forecast-superseded}]
+
      [:.label-new
       {:background-color colour/new-forecast}]
 

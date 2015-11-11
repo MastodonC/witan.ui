@@ -45,7 +45,7 @@
 
 (defcomponent
   header
-  [{:keys [forecast/name forecast/version forecast/version-id forecast/in-progress? edited?]} owner]
+  [{:keys [forecast/name forecast/version forecast/version-id forecast/in-progress? edited? old? action]} owner]
   (render [_]
           (let [new? (zero? version)]
             (html
@@ -61,7 +61,10 @@
                  (when new?
                    [:span.label.label-new.label-small (get-string :new)])
                  (when edited?
-                   [:span.label.label-forecast-changed.label-small (get-string :changed)])]]]]))))
+                   [:span.label.label-forecast-changed.label-small (get-string :changed)])
+                 (when old?
+                   [:a {:href (venue/get-route :views/forecast {:id (:forecast-id old?) :version (:version old?) :action action})}
+                    [:span.label.label-forecast-superseded.label-small (get-string :superseded)]])]]]]))))
 
 (defcomponent
   forecast-box
@@ -228,13 +231,13 @@
 (defcomponent view
   [{:keys [id action forecast version edited-forecast error? model creating? missing-required] :as cursor} owner]
   (render [_]
-          (let [kaction (keyword action)
-                model-conf  {:action kaction
-                             :n-inputs (-> model :model/input-data count)
-                             :n-outputs [(-> model :model/output-data count)];; TODO add grps
-                             :stage-names (map (fn [[k v]] (last v)) valid-actions)}
-                next-action (next-action kaction)
-                prev-action (previous-action kaction)
+          (let [kaction      (keyword action)
+                model-conf   {:action kaction
+                              :n-inputs (-> model :model/input-data count)
+                              :n-outputs [(-> model :model/output-data count)];; TODO add grps
+                              :stage-names (map (fn [[k v]] (last v)) valid-actions)}
+                next-action  (next-action kaction)
+                prev-action  (previous-action kaction)
                 in-progress? (:forecast/in-progress? forecast)]
             (html
              (if error?
@@ -248,7 +251,10 @@
                  [:div.full-height
                   [:div#witan-pw-header-container
                    {:key "witan-pw-header-container"}
-                   (om/build header (assoc forecast :edited? (-> edited-forecast nil? not)))]
+                   (om/build header (assoc forecast
+                                           :edited? (-> edited-forecast nil? not)
+                                           :old?    (:forecast/descendant forecast)
+                                           :action  action))]
                   [:div.pure-g#witan-pw-body
                    {:key "witan-pw-body"}
                    [:div.pure-u-1#witan-pw-top-spacer

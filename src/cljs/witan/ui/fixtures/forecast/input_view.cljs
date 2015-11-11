@@ -221,7 +221,7 @@
 
 (defcomponent
   data-item-input-table-row
-  [{:keys [disabled data-item default? input browsing?]} owner]
+  [{:keys [locked? data-item default? input browsing?]} owner]
   (render [_]
           (let [processed-item (util/map-remove-ns data-item)
                 {:keys [name version created edited?]} processed-item
@@ -238,10 +238,11 @@
                   {:on-click #(do
                                 (venue/raise! owner :toggle-browse-input input)
                                 (.preventDefault %))
-                   :disabled disabled}
-                  (if browsing?
-                    [:i.fa.fa-caret-down]
-                    [:i.fa.fa-caret-right])]
+                   :disabled locked?}
+                  (cond
+                    locked?   [:i.fa.fa-lock]
+                    browsing? [:i.fa.fa-caret-down]
+                    :else     [:i.fa.fa-caret-right])]
                  [:div
                   {:class (if edited? "edited" (when-not data-item "not-specified"))}
                   (or name [:i (get-string :no-input-specified)])
@@ -254,7 +255,7 @@
 
 (defcomponent
   data-item-input-table
-  [{:keys [input top? browsing-input cursor]} owner]
+  [{:keys [input top? browsing-input cursor locked?]} owner]
   (render [_]
           (let [category (:category input)
                 prefix (partial str category)
@@ -277,7 +278,7 @@
                                                     :default? (nil? (:selected input))
                                                     :input input
                                                     :browsing? browsing?
-                                                    :disabled (-> cursor :forecast :forecast/in-progress?) } {:key :name})]
+                                                    :locked? locked? } {:key :name})]
 
               [:div.pure-u-1.witan-pw-input-browser-container
                {:style {:height (if browsing? browser-height "0px")}}
@@ -295,16 +296,26 @@
                                                   (util/squash-maps (:model/input-data model) current-forecast-inputs :category))
                  inputs                  (map #(assoc %1 :description (:description %2)) squashed-inputs model-inputs)
                  first-input             (first inputs)
-                 rest-inputs             (rest inputs)]
+                 rest-inputs             (rest inputs)
+                 locked?                 (or (-> cursor :forecast :forecast/in-progress?)
+                                             (-> cursor :forecast :forecast/descendant))]
              [:div#witan-pw-action-body
 
               ;; first row
               [:div
                {:key "input-first-row"}
-               (om/build data-item-input-table {:input first-input :top? true :browsing-input browsing-input :cursor cursor})]
+               (om/build data-item-input-table {:input first-input
+                                                :top? true
+                                                :browsing-input browsing-input
+                                                :cursor cursor
+                                                :locked? locked?})]
 
               ;; other rows
               (for [input rest-inputs]
                 [:div
                  {:key (str (:category input) "-input-row")}
-                 (om/build data-item-input-table {:input input :top? false :browsing-input browsing-input :cursor cursor})])]))))
+                 (om/build data-item-input-table {:input input
+                                                  :top? false
+                                                  :browsing-input browsing-input
+                                                  :cursor cursor
+                                                  :locked? locked?})])]))))
