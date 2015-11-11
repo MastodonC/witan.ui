@@ -165,7 +165,7 @@
                          has-selected? (contains? (set data-items) selected-data-item)]
              [:div.witan-pw-input-browser
               [:div.witan-pw-input-browser-content
-               [:span.text-gray {:key "title"} (get-string :browser-choose-data)]
+               [:strong {:key "title"} (get-string :browser-choose-data)]
                [:div.spacer {:key "spacer"}]
 
                ;;;;;;;;;;;;;;;
@@ -229,26 +229,26 @@
             (html
              [:table.pure-table.pure-table-horizontal.full-width
               {:key (key-prefix "table-body")}
-              [:tbody.witan-pw-input-data-row
-               {:style {:text-align "left"}}
-               [:td {:key (key-prefix "selector") :style {:width row-select-width}}
-                [:button.pure-button.witan-pw-browse-toggle
-                 {:on-click #(do
-                               (venue/raise! owner :toggle-browse-input input)
-                               (.preventDefault %))
-                  :disabled disabled}
-                 (if browsing?
-                   [:i.fa.fa-caret-down]
-                   [:i.fa.fa-caret-right])]]
+              [:tbody.witan-pw-input-data-row.text-left
                [:td {:key (key-prefix "name") :style {:width row-name-width}}
+                [:strong.category (-> input :category i/capitalize)]
+                [:span.description (or (-> input :description i/capitalize) (get-string :no-description-provided))]
                 [:div
-                 [:span
+                 [:button.pure-button.witan-pw-browse-toggle
+                  {:on-click #(do
+                                (venue/raise! owner :toggle-browse-input input)
+                                (.preventDefault %))
+                   :disabled disabled}
+                  (if browsing?
+                    [:i.fa.fa-caret-down]
+                    [:i.fa.fa-caret-right])]
+                 [:div
                   {:class (if edited? "edited" (when-not data-item "not-specified"))}
-                  (or name [:i (get-string :no-input-specified)])]
-                 (cond
-                   (and name default?) [:small.text-gray (get-string :default-brackets)]
-                   (not name) [:small.text-gray
-                               (get-string :please-select-data-input)])]]
+                  (or name [:i (get-string :no-input-specified)])
+                  (cond
+                    (and name default?) [:small.text-gray (get-string :default-brackets)]
+                    (not name) [:small.text-gray
+                                (get-string :please-select-data-input)])]]]
                [:td {:key (key-prefix "version") :style {:width row-version-width} :class (when edited? "edited")} version]
                [:td {:key (key-prefix "lastmodified") :style {:width row-lm-width} :class (when edited? "edited")} (util/humanize-time created)]]]))))
 
@@ -269,7 +269,7 @@
                 [:thead
                  {:key (prefix "-input-table-head")}
                  [:th {:key (prefix "-input-collapser") :style {:width header-select-width}}] ;; empty, for the tree icon
-                 [:th {:key (prefix "-input-name") :style {:width header-name-width}} (i/capitalize category)]
+                 [:th {:key (prefix "-input-name") :style {:width header-name-width}}]
                  [:th {:key (prefix "-input-version") :style {:width header-version-width}} (when top? (get-string :forecast-version))]
                  [:th {:key (prefix "-input-lastmodified") :style {:width header-lm-width}} (when top? (get-string :forecast-lastmodified))]]]
                [:hr {:key (prefix "-input-hr")}]
@@ -290,11 +290,12 @@
           (html
            (let [current-forecast-inputs (or (:forecast/inputs edited-forecast)
                                              (:forecast/inputs forecast))
-                 inputs     (sort-by
-                             :category
-                             (util/squash-maps (:model/input-data model) current-forecast-inputs :category))
-                 first-input (first inputs)
-                 rest-inputs (rest inputs)]
+                 model-inputs            (sort-by :category (:model/input-data model))
+                 squashed-inputs         (sort-by :category
+                                                  (util/squash-maps (:model/input-data model) current-forecast-inputs :category))
+                 inputs                  (map #(assoc %1 :description (:description %2)) squashed-inputs model-inputs)
+                 first-input             (first inputs)
+                 rest-inputs             (rest inputs)]
              [:div#witan-pw-action-body
 
               ;; first row

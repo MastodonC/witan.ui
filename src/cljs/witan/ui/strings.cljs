@@ -78,6 +78,7 @@
    :pw-input-brief                 "Choose your input data"
    :pw-model-brief                 "See how the model works"
    :pw-output-brief                "Download your new data"
+   :no-description-provided        "(No description has been provided.)"
    })
 
 (defn get-string
