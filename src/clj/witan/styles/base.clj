@@ -455,10 +455,24 @@
        [:small
         {:display :block
          :line-height (px 10)}]
+       [:strong
+        {:display :block
+         :margin 0
+         :font-size (em 1.2)}]
+       [:.description
+        {:display :inline-block
+         :margin-bottom (em 1)
+         :font-size (em 0.8)
+         :line-height (em 1.4)}]
        [:.not-specified
         {:color colour/error}]
        [:.edited
-        {:color colour/forecast-changed}]]
+        {:color colour/forecast-changed}]
+       [:button
+        {:float :left
+         :margin-right (em 1)}]
+       [:tr
+        [:td {:vertical-align :bottom}]]]
 
       [:.witan-pw-browse-toggle
        {:width (px 40)
@@ -537,7 +551,10 @@
         [:.witan-pw-input-browser-content-upload
          {:text-align :left}
          [:.container
-          {:margin-left (em 1)}]
+          {:padding-left (em 1)
+           :margin-left (em 1)
+           :border-left [[(px 1) :solid 'silver]]
+           :height (px 300)}]
          [:.upload-button
           {:font-size (percent 100)
            :font-weight :bold
