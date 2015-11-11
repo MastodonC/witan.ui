@@ -124,15 +124,11 @@
                          {:opts {:on-input #(venue/raise! %1 :event/filter-forecasts %2)}})
                [:ul.pure-menu-list
                 [:li.witan-menu-item.pure-menu-item
-                 [:a {:href (venue/get-route :views/new-forecast)}
-                  [:button.pure-button.button-success
-                   [:i.fa.fa-plus]]]]
-                (if (and (not-empty selected) is-top-level?)
-                  [:li.witan-menu-item.pure-menu-item
-                   [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "input"})}
-                    [:button.pure-button.button-error
-                     [:i.fa.fa-pencil]]]])
-                (if (seq selected)
+                 [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "input"})}
+                  [:button.pure-button.button-secondary
+                   {:title (get-string :view-edit-forecast)}
+                   [:i.fa.fa-search]]]]
+                (if (and false (seq selected))
                   [:li.witan-menu-item.pure-menu-item
                    [:a {:href "#"}
                     [:button.pure-button.button-warning
@@ -141,12 +137,18 @@
                   [:li.witan-menu-item.pure-menu-item
                    [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "output"})}
                     [:button.pure-button.button-primary
+                     {:title (get-string :pw-output-brief)}
                      [:i.fa.fa-download]]]])
-                (if (seq selected)
+                (if (and false (seq selected))
                   [:li.witan-menu-item.pure-menu-item
                    [:a {:href (venue/get-route :views/share {:id selected-id})}
                     [:button.pure-button.button-primary
-                     [:i.fa.fa-share-alt]]]])]]]))))
+                     [:i.fa.fa-share-alt]]]])
+                [:li.witan-menu-item.pure-menu-item
+                 [:a {:href (venue/get-route :views/new-forecast)}
+                  [:button.pure-button.button-success
+                   {:title (get-string :new-forecast)}
+                   [:i.fa.fa-plus]]]]]]]))))
 
 (defcomponent view
   [cursor owner]
@@ -175,6 +177,5 @@
                                (map #(as-forecast-tr cursor %) (:forecasts cursor))
                                {:key  :forecast/version-id
                                 :opts {:on-click        #(venue/raise! %1 %2 %3)
-                                       :on-double-click #(when-not (:forecast/descendant-id %2)
-                                                           (goto-window-location!
-                                                            (venue/get-route :views/forecast {:id (:forecast/forecast-id %2) :version (:forecast/version %2) :action "input"})))}})]]]]))))
+                                       :on-double-click #(goto-window-location!
+                                                          (venue/get-route :views/forecast {:id (:forecast/forecast-id %2) :version (:forecast/version %2) :action "input"}))}})]]]]))))

@@ -61,16 +61,7 @@
                  (when new?
                    [:span.label.label-new.label-small (get-string :new)])
                  (when edited?
-                   [:span.label.label-forecast-changed.label-small (get-string :changed)])]]
-               [:ul.pure-menu-list
-                [:li.witan-menu-item.pure-menu-item
-                 [:a {:href (venue/get-route :views/share {:id 123})}
-                  [:button.pure-button.button-success
-                   [:i.fa.fa-tag]]]]
-                [:li.witan-menu-item.pure-menu-item
-                 [:a {:href (venue/get-route :views/share {:id 123})}
-                  [:button.pure-button.button-primary
-                   [:i.fa.fa-share-alt]]]]]]]))))
+                   [:span.label.label-forecast-changed.label-small (get-string :changed)])]]]]))))
 
 (defcomponent
   forecast-box
