@@ -123,11 +123,13 @@
                                                             str/lower-case))
                          {:opts {:on-input #(venue/raise! %1 :event/filter-forecasts %2)}})
                [:ul.pure-menu-list
-                [:li.witan-menu-item.pure-menu-item
-                 [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "input"})}
-                  [:button.pure-button.button-secondary
-                   {:title (get-string :view-edit-forecast)}
-                   [:i.fa.fa-search]]]]
+
+                (if (and (not-empty selected))
+                  [:li.witan-menu-item.pure-menu-item
+                   [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "input"})}
+                    [:button.pure-button.button-secondary
+                     {:title (get-string :view-edit-forecast)}
+                     [:i.fa.fa-search]]]])
                 (if (and false (seq selected))
                   [:li.witan-menu-item.pure-menu-item
                    [:a {:href "#"}
