@@ -45,7 +45,7 @@
 
 (defcomponent
   header
-  [{:keys [forecast/name forecast/version forecast/version-id forecast/in-progress? edited? old? action]} owner]
+  [{:keys [forecast/name forecast/version forecast/version-id forecast/in-progress? edited? old?]} owner]
   (render [_]
           (let [new? (zero? version)]
             (html
@@ -256,8 +256,7 @@
                    {:key "witan-pw-header-container"}
                    (om/build header (assoc forecast
                                            :edited? (-> edited-forecast nil? not)
-                                           :old?    (-> forecast :forecast/latest? not)
-                                           :action  action))]
+                                           :old?    (-> forecast :forecast/latest? not)))]
                   [:div.pure-g#witan-pw-body
                    {:key "witan-pw-body"}
                    [:div.pure-u-1#witan-pw-top-spacer
