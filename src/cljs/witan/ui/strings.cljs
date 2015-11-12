@@ -80,6 +80,7 @@
    :pw-output-brief                "Download your data"
    :no-description-provided        "(No description has been provided.)"
    :view-edit-forecast             "View/Edit this projection"
+   :superseded                     "Superseded"
    })
 
 (defn get-string

@@ -149,11 +149,18 @@
      [:.label-forecast-changed
       {:background-color colour/forecast-changed}]
 
+     [:.label-forecast-superseded
+      {:background-color colour/forecast-superseded}]
+
      [:.label-new
       {:background-color colour/new-forecast}]
 
      [:.label-tag
       {:background-color colour/deep}]
+
+     [:.labels
+      [:a
+       {:text-decoration :none}]]
 
      [:.label
       {:display :inline
