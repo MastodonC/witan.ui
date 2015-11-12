@@ -158,6 +158,10 @@
      [:.label-tag
       {:background-color colour/deep}]
 
+     [:.labels
+      [:a
+       {:text-decoration :none}]]
+
      [:.label
       {:display :inline
        :padding ".2em .6em .3em"
