@@ -57,14 +57,18 @@
                 [:div.labels
                  {:key "witan-pw-header-labels"}
                  (when in-progress?
-                   [:span.label.label-in-progress.label-small (get-string :in-progress)])
+                   [:span.label.label-in-progress.label-small (get-string :in-progress " ")
+                    [:i.fa.fa-cog.fa-spin]])
                  (when new?
-                   [:span.label.label-new.label-small (get-string :new)])
+                   [:span.label.label-new.label-small (get-string :new " ")
+                    [:i.fa.fa-star]])
                  (when edited?
-                   [:span.label.label-forecast-changed.label-small (get-string :changed)])
+                   [:span.label.label-forecast-changed.label-small (get-string :changed " ")
+                    [:i.fa.fa-cog.fa-flash]])
                  (when old?
                    [:a {:href (venue/get-route :views/forecast {:id (:forecast-id old?) :version (:version old?) :action action})}
-                    [:span.label.label-forecast-superseded.label-small (get-string :superseded)]])]]]]))))
+                    [:span.label.label-forecast-superseded.label-small (get-string :superseded " ")
+                     [:i.fa.fa-external-link]]])]]]]))))
 
 (defcomponent
   forecast-box
