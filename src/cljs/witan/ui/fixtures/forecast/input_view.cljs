@@ -298,7 +298,7 @@
                  first-input             (first inputs)
                  rest-inputs             (rest inputs)
                  locked?                 (or (-> cursor :forecast :forecast/in-progress?)
-                                             (-> cursor :forecast :forecast/descendant))]
+                                             (-> cursor :forecast :forecast/latest? not))]
              [:div#witan-pw-action-body
 
               ;; first row

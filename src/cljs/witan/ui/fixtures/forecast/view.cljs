@@ -66,9 +66,8 @@
                    [:span.label.label-forecast-changed.label-small (get-string :changed " ")
                     [:i.fa.fa-cog.fa-flash]])
                  (when old?
-                   [:a {:href (venue/get-route :views/forecast {:id (:forecast-id old?) :version (:version old?) :action action})}
-                    [:span.label.label-forecast-superseded.label-small (get-string :superseded " ")
-                     [:i.fa.fa-external-link]]])]]]]))))
+                   [:span.label.label-forecast-superseded.label-small (get-string :superseded " ")
+                    [:i.fa.fa-hand-o-right]])]]]]))))
 
 (defcomponent
   forecast-box
@@ -257,7 +256,7 @@
                    {:key "witan-pw-header-container"}
                    (om/build header (assoc forecast
                                            :edited? (-> edited-forecast nil? not)
-                                           :old?    (:forecast/descendant forecast)
+                                           :old?    (-> forecast :forecast/latest? not)
                                            :action  action))]
                   [:div.pure-g#witan-pw-body
                    {:key "witan-pw-body"}
