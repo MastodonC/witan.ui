@@ -23,7 +23,7 @@
 
 (defcomponent
   data-output-table-row
-  [{:keys [name version created]} owner]
+  [{:keys [name version created s3-url]} owner]
   (render [_]
           (let [key-prefix (partial str (i/hyphenate name) "-")]
             (html
@@ -42,7 +42,7 @@
                 #_[:button.pure-button.download
                    [:i.fa.fa-file-excel-o] [:span " Excel "] [:i.fa.fa-check.text-success]]
                 ;; css
-                [:a {:href "http://google.com" :target "_blank"}
+                [:a {:href s3-url :target "_blank"}
                  [:button.pure-button.download
                   [:i.fa.fa-file-text-o] [:span " CSV "]]]
                 ;; zip
