@@ -23,10 +23,9 @@
 
 (defcomponent
   data-output-table-row
-  [{:keys [data-item output]} owner]
+  [{:keys [name version created]} owner]
   (render [_]
-          (let [{:keys [name version created]} data-item
-                key-prefix (partial str (i/hyphenate name) "-")]
+          (let [key-prefix (partial str (i/hyphenate name) "-")]
             (html
              [:table.pure-table.pure-table-horizontal.full-width
               {:key (key-prefix "table-body")}
@@ -41,21 +40,24 @@
                [:td {:key (key-prefix "downloads") :style {:width row-downloads-width}}
                 ;; excel
                 #_[:button.pure-button.download
-                 [:i.fa.fa-file-excel-o] [:span " Excel "] [:i.fa.fa-check.text-success]]
+                   [:i.fa.fa-file-excel-o] [:span " Excel "] [:i.fa.fa-check.text-success]]
                 ;; css
-                [:button.pure-button.download
-                 [:i.fa.fa-file-text-o] [:span " CSV "]]
+                [:a {:href "http://google.com" :target "_blank"}
+                 [:button.pure-button.download
+                  [:i.fa.fa-file-text-o] [:span " CSV "]]]
                 ;; zip
                 #_[:button.pure-button.download
-                 [:i.fa.fa-file-archive-o] [:span " ZIP "] [:i.fa.fa-times.text-error]]]]]))))
+                   [:i.fa.fa-file-archive-o] [:span " ZIP "] [:i.fa.fa-times.text-error]]]]]))))
 
 (defcomponent
   data-output-table
   [{:keys [output top?]} owner]
   (render [_]
-          (let [category (:category output)
+          (let [outputs (-> output first second)
+                category (-> outputs first :category)
                 prefix (partial str category)]
             (html
+
              [:div#witan-pw-action-body
               {:key (prefix "-output-div")}
               [:div.pure-u-4-5
@@ -67,11 +69,12 @@
                  [:th {:key (prefix "-output-name") :style {:width header-name-width}}
                   (i/capitalize category)]
                  [:th {:key (prefix "-output-created") :style {:width header-created-width}}
-                 (get-string :created)]
+                  (get-string :created)]
                  [:th {:key (prefix "-output-downloads") :style {:width header-downloads-width}}
                   (when top? (get-string :downloads))]]]
                [:hr {:key (prefix "-output-hr")}]
-               (om/build data-output-table-row {:data-item {:name "DUMMY DOWNLOAD" :created "2015-10-10T12:34:54"} :output output} {:key :name})]])))) ;; TODO should not be dummy
+               (for [row outputs]
+                 (om/build data-output-table-row row {:key :name}))]])))) ;; TODO should not be dummy
 
 (defcomponent view
   [[action {:keys [forecast model] :as cursor}] owner]
@@ -89,8 +92,9 @@
              :else
              [:div
               ;; first row
-              (let [first-output   (first (:model/output-data model))
-                    rest-outputs   (rest  (:model/output-data model))]
+              (let [outputs        (:forecast/outputs forecast)
+                    first-output   (first outputs)
+                    rest-outputs   (rest outputs)]
                 [:div
                  {:key "download-rows"}
                  [:div
