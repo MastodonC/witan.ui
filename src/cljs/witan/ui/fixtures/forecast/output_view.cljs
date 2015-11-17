@@ -73,8 +73,7 @@
                  [:th {:key (prefix "-output-downloads") :style {:width header-downloads-width}}
                   (when top? (get-string :downloads))]]]
                [:hr {:key (prefix "-output-hr")}]
-               (for [row outputs]
-                 (om/build data-output-table-row row {:key :name}))]])))) ;; TODO should not be dummy
+               (om/build-all data-output-table-row outputs {:key :name})]]))))
 
 (defcomponent view
   [[action {:keys [forecast model] :as cursor}] owner]
