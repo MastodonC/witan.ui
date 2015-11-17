@@ -527,7 +527,7 @@
           {:width (percent 100)
            :padding-bottom (em 0.5)}
           [:.search-input-inner
-           {:width (percent 80)
+           {:width (percent 65)
             :margin-right (em 1)}]
           [:form
            {:width (percent 100)
