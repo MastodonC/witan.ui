@@ -145,6 +145,12 @@
                              (fn [[k v]] (hash-map :category (:category v) :selected v)) %))))]
     (assoc forecast :inputs inputs)))
 
+(defn filter-top-level-forecasts-with-ancestors
+  [forecasts]
+  (->> forecasts
+       (filter :forecast/latest?)
+       (filter #(> (:forecast/version %) 1))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (wm/create-standard-service!)
@@ -157,7 +163,7 @@
   (let [forecasts (filter-forecasts (select-keys args [:expand :filter]))]
     (put! result-ch [:success {:forecasts forecasts
                                :has-ancestors (->>
-                                               (filter #(> (:forecast/version %) 1) forecasts)
+                                               (filter-top-level-forecasts-with-ancestors forecasts)
                                                (map #(vector (:db/id %) (:forecast/version-id %)))
                                                set)}])))
 
