@@ -16,6 +16,12 @@
   (reset! api-token token)
   (.set goog.net.cookies token-name token -1))
 
+(defn logout!
+  []
+  (log/info "Logging out...")
+  (save-token! nil)
+  (venue/publish! :api/user-logged-out))
+
 (defmulti response-handler
   (fn [result response cursor] result))
 
@@ -33,8 +39,11 @@
 
 (defn- handle-response
   [status event result-ch response]
-  (if (and (= status :failure) (not= event :token-test))
-    (log/severe "An API error occurred: " status event response))
+  (when (and (= status :failure) (not= event :token-test))
+    (log/severe "An API error occurred: " status event response)
+    (when (and @api-token (= (:status response) 401))
+      (log/info "Logging out due to 401.")
+      (logout!)))
   (let [result (api-response [event status] (clojure.walk/keywordize-keys response))]
     (when result-ch
       (put! result-ch [status result]))))
@@ -74,7 +83,8 @@
   (if (or (= event :login) @api-token)
     (service-m event args result-ch)
     (do
-      (log/warn "An API request was received but there is no token so the outbound call will not be made.")
+      (log/warn "An API request was received but there is no token so the outbound call will not be made and we'll log out...")
+      (logout!)
       (put! result-ch [:failure :no-token]))))
 
 (defn service
@@ -113,9 +123,7 @@
 (defmethod service-m
   :logout
   [event id result-ch]
-  (log/info "Logging out...")
-  (save-token! nil)
-  (venue/publish! :api/user-logged-out)
+  (logout!)
   (put! result-ch [:success nil]))
 
 (defmethod service-m
