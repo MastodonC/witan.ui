@@ -67,6 +67,7 @@
    :browser-upload-select-new      "Please enter a name for the new data item"
    :browser-upload-error           "An error occurred whilst trying to upload the file. Please try again and if this problem persists, contact us." ;; TODO wants email
    :downloads                      "Downloads"
+   :download                       "Download"
    :new-version-no-downloads       "Downloads are not yet available. After configuring and running the projection for the first time your downloads will appear in this section."
    :in-progress-no-downloads       "Downloads are not yet available because the model is still running. This can take several minutes so please check again shortly."
    :data-items                     "data items"
@@ -81,6 +82,7 @@
    :no-description-provided        "(No description has been provided.)"
    :view-edit-forecast             "View/Edit this projection"
    :superseded                     "Superseded"
+   :use-data-item                  "Use"
    })
 
 (defn get-string

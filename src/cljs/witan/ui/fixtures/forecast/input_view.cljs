@@ -190,7 +190,7 @@
                     :on-click #(do
                                  (venue/raise! owner :select-input)
                                  (.preventDefault %))}
-                   [:i.fa.fa-check]]
+                   [:i.fa.fa-check] (str " " (get-string :use-data-item))]
                   (let [url       (:data/s3-url selected-data-item)
                         disabled? (or (not has-selected?) (not url))]
                     [:a
@@ -198,7 +198,7 @@
                       :href (when-not disabled? url)}
                      [:button.pure-button.button-primary
                       {:disabled disabled?}
-                      [:i.fa.fa-download]]])]]
+                      [:i.fa.fa-download] (str " " (get-string :download))]])]]
                 [:div.spacer
                  {:key "spacer"}]
                 [:div.list
