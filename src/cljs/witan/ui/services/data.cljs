@@ -296,7 +296,7 @@
 (defmethod response-handler
   [:get-forecasts :success] ;;plural
   [owner _ forecasts result-ch]
-  (reset-db!) ;;
+  (reset-db!)
   (log/debug "Received" (count forecasts) "forecasts.")
   (doseq [f forecasts]
     (put-item-into-db! f :forecast))
