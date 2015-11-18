@@ -35,6 +35,7 @@
   [owner args cursor]
   (when (data/logged-in?)
     (om/update! cursor :refreshing? true)
+    (om/update! cursor :expanded #{})
     (venue/request! {:owner owner
                      :service :service/data
                      :request :fetch-forecasts
