@@ -76,9 +76,9 @@
           (html
            [:div.witan-pw-forecast-nav-box
             {:class (str (name action) (when active? " active"))
-             :on-click #(do
-                          (venue/navigate! :views/forecast {:id id :version version :action (name action)})
-                          (.preventDefault %))}
+             :on-click (fn [e]
+                         (venue/navigate! :views/forecast {:id id :version version :action (name action)})
+                         (.preventDefault e))}
             [:div.number
              [:h2 number]]
             [:div.action
@@ -184,9 +184,9 @@
               (get-string :forecast-in-progress-text)]
              [:button.pure-button#refresh
               {:key "witan-pw-in-prog-button-refresh"
-               :on-click #(do
-                            (venue/raise! owner :refresh-forecast)
-                            (.preventDefault %))}
+               :on-click (fn [e]
+                           (venue/raise! owner :refresh-forecast)
+                           (.preventDefault e))}
               [:span
                [:i.fa.fa-refresh {:key "witan-pw-in-prog-button-refresh-i"}]
                [:span {:key "witan-pw-in-prog-button-refresh-span"}
@@ -205,17 +205,18 @@
               (get-string :forecast-changes-text)]
              [:button.pure-button#create
               {:key "witan-pw-edits-button-create"
-               :on-click #(do (venue/raise! owner :create-forecast-version)
-                              (.preventDefault %))}
+               :on-click (fn [e]
+                           (venue/raise! owner :create-forecast-version)
+                           (.preventDefault e))}
               [:span
                [:i.fa.fa-thumbs-o-up {:key "witan-pw-edits-button-create-i"}]
                [:span {:key "witan-pw-edits-button-create-span"}
                 (str " " (get-string :create-new-forecast))]]]
              [:button.pure-button#revert
               {:key "witan-pw-edits-button-revert"
-               :on-click #(do
-                            (venue/raise! owner :revert-forecast)
-                            (.preventDefault %))}
+               :on-click (fn [e]
+                           (venue/raise! owner :revert-forecast)
+                           (.preventDefault e))}
               [:span
                [:i.fa.fa-undo {:key "witan-pw-edits-button-revert-i"}]
                [:span {:key "witan-pw-edits-button-revert-span"}
