@@ -4,7 +4,7 @@ machine:
 
 deployment:
   staging:
-    branch: master
+    tag: /release-.*/
     commands:
       - lein clean
       - lein garden once
