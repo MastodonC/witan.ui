@@ -239,7 +239,11 @@
       [:h1
        {:margin (em 0.15)
         :margin-left (em 0.7)
-        :display       :inline-block}]]
+        :display       :inline-block}]
+      [:em
+       {:font-size (em 1.8)
+        :font-weight :bold
+        :color colour/gray}]]
 
      [:.witan-dash-heading
 
@@ -310,11 +314,12 @@
        :padding       (em 0.5)
        :line-height   (em 1.6)
        :font-size     (em 1)
-       :height        (px 36)
+       :height        (px 48)
        :overflow      :hidden
        :position      :absolute
        :top           (px 0)
-       :width         (percent 100)}
+       :width         (percent 100)
+       :box-shadow    [[(px 0) (px 0) (px 10) colour/gray]]}
       [:button
        {:margin-left (em 1)
         :height (em 1.5)
@@ -330,7 +335,8 @@
       {:background-color colour/forecast-changed-light
        :border-color colour/forecast-changed}
       [:#witan-pw-edits-text
-       {:text-align :center}]]
+       {:text-align :center
+        :padding-right (em 1)}]]
 
      [:#witan-pw-in-prog
       {:background-color colour/in-progress-light
@@ -397,7 +403,9 @@
       [:.labels
        {:display     :inline
         :margin-left (em 0.5)
-        :font-size (percent 60)}]]
+        :font-size (percent 150)
+        :position :absolute
+        :top (px 15)}]]
 
      [:.witan-pw-nav-button
       {:text-align :center
@@ -431,7 +439,8 @@
 
      [:#witan-pw-stage-desc
       [:p {:line-height (em 1.4)
-           :min-width (px 635)}]
+           :margin-top (em 1.2)
+           :min-width (px 660)}]
       [:h2 {:margin-top (em 0.4)
             :margin-bottom (em 0)
             :padding-bottom (em 0.4)
@@ -527,7 +536,7 @@
           {:width (percent 100)
            :padding-bottom (em 0.5)}
           [:.search-input-inner
-           {:width (percent 65)
+           {:width (percent 50)
             :margin-right (em 1)}]
           [:form
            {:width (percent 100)
@@ -571,7 +580,8 @@
       {:padding (em 1)}]
 
      [:#witan-pw-forecast-nav
-      {:margin-bottom (em 1)}
+      {:margin-bottom (em 1)
+       :display :inline-flex}
       [:.witan-pw-forecast-nav-box
        {:display :inline-block
         :width (em 16)
@@ -581,18 +591,33 @@
         :cursor :pointer
         :transition "box-shadow 0.3s"
         :line-height (em 0.6)}
+       ["::selection"
+        {:background-color :transparent}]
        [:h1 :h2 :h3
         {:color colour/white
          :transition "color 0.5s"}]]
       [:.input  {:background-color colour/forecast-input-gs}]
       [:.model  {:background-color colour/forecast-model-gs}]
       [:.output {:background-color colour/forecast-output-gs}]
-      [:.active {:box-shadow "8px 8px 8px #888888"}
+      [:.active {:box-shadow "8px 8px 8px #777777"}
        [:h1 :h2 :h3
         {:color :initial}]
        [:.action
         [:h2
-         {:color "#444444"}]]]]
+         {:color "#444444"}]]]
+      [:.icon
+       [:h2 {:margin-top (em 0.4)}]]
+      ]
+
+     [:.witan-pw-output-data-row
+      [:span
+       {:font-size (em 1)}]
+      [:small
+       {:display :block
+        :line-height (em 0.8)
+        :font-style :italic
+        :font-size (em 0.8)
+        :color colour/gray}]]
 
      [:.view-overlay
       {:width      (percent 100)

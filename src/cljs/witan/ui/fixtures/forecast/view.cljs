@@ -51,23 +51,23 @@
             (html
              [:div.pure-menu.pure-menu-horizontal.witan-pw-header
               [:div.witan-page-heading
-               [:h1 name
-                [:em {:class (when new? "version-zero") :key "witan-pw-version"}
-                 (get-string :forecast-version " " version)]
-                [:div.labels
-                 {:key "witan-pw-header-labels"}
-                 (when in-progress?
-                   [:span.label.label-in-progress.label-small (get-string :in-progress " ")
-                    [:i.fa.fa-cog.fa-spin]])
-                 (when new?
-                   [:span.label.label-new.label-small (get-string :new " ")
-                    [:i.fa.fa-star]])
-                 (when edited?
-                   [:span.label.label-forecast-changed.label-small (get-string :changed " ")
-                    [:i.fa.fa-cog.fa-flash]])
-                 (when old?
-                   [:span.label.label-forecast-superseded.label-small (get-string :superseded " ")
-                    [:i.fa.fa-hand-o-right]])]]]]))))
+               [:h1 name]
+               [:em {:class (when new? "version-zero") :key "witan-pw-version"}
+                (get-string :forecast-version " " version)]
+               [:div.labels
+                {:key "witan-pw-header-labels"}
+                (when in-progress?
+                  [:span.label.label-in-progress.label-small (get-string :in-progress " ")
+                   [:i.fa.fa-cog.fa-spin]])
+                (when new?
+                  [:span.label.label-new.label-small (get-string :new " ")
+                   [:i.fa.fa-star]])
+                (when edited?
+                  [:span.label.label-forecast-changed.label-small (get-string :changed " ")
+                   [:i.fa.fa-cog.fa-flash]])
+                (when old?
+                  [:span.label.label-forecast-superseded.label-small (get-string :superseded " ")
+                   [:i.fa.fa-hand-o-right]])]]]))))
 
 (defcomponent
   forecast-box
@@ -79,8 +79,11 @@
              :on-click #(do
                           (venue/navigate! :views/forecast {:id id :version version :action (name action)})
                           (.preventDefault %))}
-            [:div.number
-             [:h2 number]]
+            [:div.icon
+             [:h2 (condp = action
+                    :input [:i.fa.fa-sign-in]
+                    :model [:i.fa.fa-cogs]
+                    :output [:i.fa.fa-bar-chart])]]
             [:div.action
              [:h2 (-> action-strings action :title)]]
             [:div.text
@@ -148,7 +151,7 @@
                    {:key "model-props-title"}
                    (get-string :properties)]
                   (for [{:keys [name value]} (:forecast/property-values forecast)]
-                    [:div {:key (str "model-prop-" name)} [:h3.model-value {:key "name"} name ": " [:small {:key "small" :style {:font-weight "normal"}} value]]])])]]
+                    [:div {:key (str "model-prop-" name)} [:h3.model-value {:key "name"} (i/capitalize name) ": " [:small {:key "small" :style {:font-weight "normal"}} value]]])])]]
              [:div.pure-u-1-2
               {:key "model-info-right"}
               [:div.padding-1.text-left
@@ -184,9 +187,9 @@
               (get-string :forecast-in-progress-text)]
              [:button.pure-button#refresh
               {:key "witan-pw-in-prog-button-refresh"
-               :on-click #(do
-                            (venue/raise! owner :refresh-forecast)
-                            (.preventDefault %))}
+               :on-click (fn [e]
+                           (venue/raise! owner :refresh-forecast)
+                           (.preventDefault e))}
               [:span
                [:i.fa.fa-refresh {:key "witan-pw-in-prog-button-refresh-i"}]
                [:span {:key "witan-pw-in-prog-button-refresh-span"}
@@ -205,17 +208,18 @@
               (get-string :forecast-changes-text)]
              [:button.pure-button#create
               {:key "witan-pw-edits-button-create"
-               :on-click #(do (venue/raise! owner :create-forecast-version)
-                              (.preventDefault %))}
+               :on-click (fn [e]
+                           (venue/raise! owner :create-forecast-version)
+                           (.preventDefault e))}
               [:span
                [:i.fa.fa-thumbs-o-up {:key "witan-pw-edits-button-create-i"}]
                [:span {:key "witan-pw-edits-button-create-span"}
                 (str " " (get-string :create-new-forecast))]]]
              [:button.pure-button#revert
               {:key "witan-pw-edits-button-revert"
-               :on-click #(do
-                            (venue/raise! owner :revert-forecast)
-                            (.preventDefault %))}
+               :on-click (fn [e]
+                           (venue/raise! owner :revert-forecast)
+                           (.preventDefault e))}
               [:span
                [:i.fa.fa-undo {:key "witan-pw-edits-button-revert-i"}]
                [:span {:key "witan-pw-edits-button-revert-span"}

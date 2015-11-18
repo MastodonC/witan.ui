@@ -23,7 +23,7 @@
 
 (defcomponent
   data-output-table-row
-  [{:keys [name version created s3-url]} owner]
+  [{:keys [name version created s3-url file-name]} owner]
   (render [_]
           (let [key-prefix (partial str (i/hyphenate name) "-")]
             (html
@@ -33,7 +33,9 @@
                {:style {:text-align "left"}}
                [:td {:key (key-prefix "name") :style {:width row-name-width}}
                 [:div.witan-pw-output-data-row
-                 [:span (i/capitalize name)]]]
+                 [:div
+                  [:span (i/capitalize name)
+                   [:small file-name]]]]]
                [:td {:key (key-prefix "created") :style {:width row-created-width}}
                 [:div.witan-pw-output-data-row
                  [:span (util/humanize-time created)]]]
