@@ -75,7 +75,7 @@
     (let [now  (t/now)
           time (tf/parse (:date-hour-minute-second tf/formatters) time-str)
           calfn (juxt t/day t/month t/year)
-          clock (tf/unparse (tf/formatter "HH:mm A") time)
+          clock (tf/unparse (tf/formatter "h:mm A") time)
           front (cond
                   (= (t/day time) (t/day now)) (get-string :today)
                   (= (calfn (t/yesterday)) (calfn time)) (get-string :yesterday)

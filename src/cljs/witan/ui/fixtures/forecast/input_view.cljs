@@ -209,7 +209,10 @@
                      :class (when (= data-item selected-data-item) "selected")
                      :on-click #(do
                                   (venue/raise! owner :select-data-item data-item)
-                                  (.preventDefault %))}
+                                  (.preventDefault %))
+                     :on-double-click #(do
+                                         (venue/raise! owner :select-input)
+                                         (.preventDefault %))}
                     [:span (str name " - v" version)]])]]
 
                ;;;;;;;;;;;;;;;
