@@ -57,9 +57,9 @@
                   (get-string :browser-upload-error)]
                  [:button.pure-button.button-warning
                   {:key "upload-error-reset"
-                   :on-click (fn [e]
-                               (venue/raise! owner :error-reset)
-                               (.preventDefault e))}
+                   :on-click #(do
+                                (venue/raise! owner :error-reset)
+                                (.preventDefault %))}
                   (get-string :back)]]
 
                 ;;;;;;;;;;;;;;;
@@ -101,12 +101,12 @@
 
                  [:form.pure-form.pure-form-stacked
                   {:key "upload-form-submit"
-                   :on-submit (fn [e]
-                                (let [node (om/get-node owner "upload-data-name")
-                                      idx (.-selectedIndex node) ;; if it has a selectedIndex it's a select input
-                                      result (if idx (.-value (aget (.-options node) idx)) (.-value node))]
-                                  (venue/raise! owner :upload-file result))
-                                (.preventDefault e))}
+                   :on-submit #(do
+                                 (let [node (om/get-node owner "upload-data-name")
+                                       idx (.-selectedIndex node) ;; if it has a selectedIndex it's a select input
+                                       result (if idx (.-value (aget (.-options node) idx)) (.-value node))]
+                                   (venue/raise! owner :upload-file result))
+                                 (.preventDefault %))}
 
                   ;;;;;;;;;;;;;;;
                   ;; UPLOAD TYPE SELECTOR
@@ -187,9 +187,9 @@
                   [:button.pure-button.button-success
                    {:key "use-button"
                     :disabled (not has-selected?)
-                    :on-click (fn [e]
-                                (venue/raise! owner :select-input)
-                                (.preventDefault e))}
+                    :on-click #(do
+                                 (venue/raise! owner :select-input)
+                                 (.preventDefault %))}
                    [:i.fa.fa-check] (str " " (get-string :use-data-item))]
                   (let [url       (:data/s3-url selected-data-item)
                         disabled? (or (not has-selected?) (not url))]
@@ -207,9 +207,9 @@
                    [:div.data-item
                     {:key (str "data-item-" data-id "-" version)
                      :class (when (= data-item selected-data-item) "selected")
-                     :on-click (fn [e]
-                                 (venue/raise! owner :select-data-item data-item)
-                                 (.preventDefault e))}
+                     :on-click #(do
+                                  (venue/raise! owner :select-data-item data-item)
+                                  (.preventDefault %))}
                     [:span (str name " - v" version)]])]]
 
                ;;;;;;;;;;;;;;;
@@ -235,9 +235,9 @@
                 [:span.description (or (-> input :description i/capitalize) (get-string :no-description-provided))]
                 [:div
                  [:button.pure-button.witan-pw-browse-toggle
-                  {:on-click (fn [e]
-                               (venue/raise! owner :toggle-browse-input input)
-                               (.preventDefault e))
+                  {:on-click #(do
+                                (venue/raise! owner :toggle-browse-input input)
+                                (.preventDefault %))
                    :disabled locked?}
                   (cond
                     locked?   [:i.fa.fa-lock]
