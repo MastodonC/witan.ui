@@ -2,9 +2,11 @@
     (:require [om.core :as om :include-macros true]
               [witan.ui.services.data :as data]
               [venue.core :as venue :include-macros true]
+              [cljs.core.async :refer [timeout <!]]
               [witan.ui.util :as util])
     (:require-macros [cljs-log.core :as log]
-                     [witan.ui.macros :as wm]))
+                     [witan.ui.macros :as wm]
+                     [cljs.core.async.macros :refer [go]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -206,7 +208,16 @@
                    :service :service/data
                    :request :fetch-model
                    :args    {:id (:forecast/model-id forecast)}
-                   :context cursor}))
+                   :context cursor})
+  ;; setup auto-refresh
+  (when (:forecast/in-progress? forecast)
+    (go
+      (<! (timeout 10000))
+      (venue/request! {:owner   owner
+                       :service :service/data
+                       :request :fetch-forecast
+                       :args    {:id (:forecast/forecast-id forecast) :version (:forecast/version forecast)}
+                       :context cursor}))))
 
 (defmethod response-handler
   [:fetch-forecast :failure]
@@ -260,7 +271,7 @@
 (defmethod response-handler
   [:add-forecast-version :success]
   [owner _ {:keys [forecast/forecast-id forecast/version]} cursor]
-  (venue/navigate! :views/forecast {:id forecast-id :version version :action "input"}))
+  (venue/navigate! :views/forecast {:id forecast-id :version version :action "model"}))
 
 (defmethod response-handler
   [:add-forecast-version :failure]
