@@ -440,7 +440,7 @@
      [:#witan-pw-stage-desc
       [:p {:line-height (em 1.4)
            :margin-top (em 1.2)
-           :min-width (px 635)}]
+           :min-width (px 660)}]
       [:h2 {:margin-top (em 0.4)
             :margin-bottom (em 0)
             :padding-bottom (em 0.4)
@@ -580,7 +580,8 @@
       {:padding (em 1)}]
 
      [:#witan-pw-forecast-nav
-      {:margin-bottom (em 1)}
+      {:margin-bottom (em 1)
+       :display :inline-flex}
       [:.witan-pw-forecast-nav-box
        {:display :inline-block
         :width (em 16)
