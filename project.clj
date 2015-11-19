@@ -22,8 +22,7 @@
   :plugins [[lein-cljsbuild "1.0.5"]
             [lein-figwheel "0.3.5"]
             [lein-garden "0.2.6"]
-            [lein-cljfmt "0.3.0"]
-            [lein-ring "0.9.6"]]
+            [lein-cljfmt "0.3.0"]]
 
   :source-paths ["src/clj"]
 
@@ -78,7 +77,6 @@
                                 ;; Compress the output?
                                 :pretty-print? false}
                      }]}
-  :ring {:handler witan.ring.handler/app}
   :profiles {:uberjar {:auto-clean false}}
   :uberjar-name "witan-ui.jar"
   :jvm-opts ["-Xmx2g"])
