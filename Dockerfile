@@ -20,7 +20,7 @@ chown -R www-data:www-data /var/lib/nginx
 WORKDIR /etc/nginx
 
 # move over files
-ADD build/ /var/www/witan-ui
+ADD target/build/ /var/www/witan-ui
 ADD start-nginx.sh /start-nginx
 
 # Define default command.

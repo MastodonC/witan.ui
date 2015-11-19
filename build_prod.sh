@@ -5,7 +5,9 @@ lein clean
 lein cljsbuild once prod
 lein garden once
 
-# move
-rm -rf build
-mkdir build
-cp -r resources/public/* build/
+# cp
+mkdir target/build
+cp -r resources/public/* target/build/
+
+#
+echo "Files written to target/build"
