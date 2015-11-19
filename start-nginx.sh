@@ -27,7 +27,7 @@ server {
 
         }
 
-        location /_elb_status {
+        location /monitoring/_elb_status {
             access_log /var/log/nginx/elb_status_access.log;
             proxy_pass http://${SERVER_ADDR}:${SERVER_PORT};
         }
