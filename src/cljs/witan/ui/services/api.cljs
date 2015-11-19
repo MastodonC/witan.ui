@@ -33,8 +33,7 @@
 
 (defn local-endpoint
   [method]
-  (let [env-url (cljs-env :api-url)
-        api-url (or env-url "http://localhost:3000")]
+  (let [api-url (cljs-env :witan-api-url)] ;; 'nil' is a valid api-url (will default to current hostname)
     (str api-url "/api" method)))
 
 (defn- handle-response
