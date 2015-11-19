@@ -28,7 +28,7 @@ To get an interactive development environment run:
 
 and open your browser at [localhost:3449](http://localhost:3449/). The
 environmental variable `WITAN_API_URL` is used to specify a location for [the API](https://github.com/MastodonC/witan.app).
-This will compile and send all changes to the browser without the
+This will auto compile and send all changes to the browser without the
 need to reload. After the compilation process is complete, you will
 get a Browser Connected REPL. An easy way to try it is:
 
