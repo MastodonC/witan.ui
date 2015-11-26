@@ -1,4 +1,5 @@
 (ns witan.ui.strings
+  (:require [clojure.string])
   (:require-macros
    [cljs-log.core :as log]))
 
