@@ -32,12 +32,17 @@ server {
             proxy_pass http://${SERVER_ADDR}:${SERVER_PORT};
         }
         
-        location /api-docs/ {
+        location ~* /api-docs/(.+) {
             real_ip_header X-Forwarded-For;
             set_real_ip_from 0.0.0.0/0;
 
-            rewrite ^.*$ / break;
-            proxy_pass http://${SERVER_ADDR}:${SERVER_PORT};
+            rewrite ^/api-docs/(.+)$ /$1 break;
+            proxy_pass http://${SERVER_ADDR}:${SERVER_PORT};        
+        }
+        location /api-docs/ {
+            real_ip_header X-Forwarded-For;
+            set_real_ip_from 0.0.0.0/0;
+            proxy_pass http://${SERVER_ADDR}:${SERVER_PORT}/index.html;
         }
 
         location / {
