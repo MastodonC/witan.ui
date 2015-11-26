@@ -56,7 +56,6 @@ server {
         }
 }
 EOF
-proxy_pass http://${SERVER_ADDR}:${SERVER_PORT}
 rm /etc/nginx/sites-enabled/*
 
 ln -sf ${PROXY_CONFIG_FILE} /etc/nginx/sites-enabled/default
