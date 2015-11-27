@@ -34,6 +34,7 @@
 (def forecast-group (rgb 253 26 68))
 (def forecast-changed (rgb 230 145 56))
 (def forecast-superseded (rgb 10 10 10))
+(def forecast-public normal)
 (def forecast-input-light  (color/lighten forecast-input 12))
 (def forecast-model-light  (color/lighten forecast-model 12))
 (def forecast-output-light (color/lighten forecast-output 12))

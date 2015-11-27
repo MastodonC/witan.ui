@@ -26,7 +26,8 @@
                 {:keys [is-selected-forecast?
                         has-ancestor?
                         is-expanded?
-                        has-descendant?]} forecast
+                        has-descendant?
+                        forecast/public?]} forecast
                         classes [[is-selected-forecast? "witan-forecast-table-row-selected"]
                                  [has-descendant? "witan-forecast-table-row-descendant"]]
                         version (:forecast/version forecast)
@@ -58,17 +59,21 @@
                                   has-ancestor? [:i.fa.fa-plus-square-o.tree-control])]
               [:td.first-round
                [:span.name (:forecast/name forecast)]
-               (when (or new? in-progress?)
-                 [:div.version-labels
-                  {:key "witan-forecast-table-labels-key"}
-                  (when in-progress?
-                    [:span.label.label-in-progress.label-small
-                     {:key "witan-forecast-table-labels-in-prog-key"}
-                     (get-string :in-progress)])
-                  (when new?
-                    [:span.label.label-new.label-small
-                     {:key "witan-forecast-table-label-new-key"}
-                     (get-string :new)])])]
+
+               [:div.version-labels
+                {:key "witan-forecast-table-labels-key"}
+                (when in-progress?
+                  [:span.label.label-in-progress.label-small
+                   {:key "witan-forecast-table-labels-in-prog-key"}
+                   (get-string :in-progress)])
+                (when new?
+                  [:span.label.label-new.label-small
+                   {:key "witan-forecast-table-label-new-key"}
+                   (get-string :new)])
+                (when public?
+                  [:span.label.label-forecast-public.label-small
+                   {:key "witan-forecast-table-label-forecast-public-key"}
+                   (get-string :public)])]]
               [:td.text-center
                [:span (:forecast/owner-name forecast)]]
               [:td

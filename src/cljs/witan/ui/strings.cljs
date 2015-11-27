@@ -21,6 +21,8 @@
    :forecast-version               "Version"
    :forecast-lastmodified          "Last Modified"
    :forecast-desc                  "Description"
+   :forecast-public?               "Public?"
+   :forecast-public?-explain       "Tick this box to make the Projection visible to everyone"
    :model-publisher                "Publisher"
    :optional                       "(optional)"
    :sign-in                        "Sign In"
@@ -84,6 +86,8 @@
    :view-edit-forecast             "View/Edit this projection"
    :superseded                     "Superseded"
    :use-data-item                  "Use"
+   :public                         "Public"
+
    })
 
 (defn get-string

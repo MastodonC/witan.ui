@@ -37,6 +37,7 @@
                                    {:keys [name version]} (parse-model-string (.-value (om/get-node owner "model-id")))
                                    fc {:name (.-value (om/get-node owner "model-name"))
                                        :description (.-value (om/get-node owner "model-desc"))
+                                       :public? (.-checked (om/get-node owner "model-public"))
                                        :model-name name
                                        :model-version version
                                        :model-props (when properties
@@ -60,8 +61,14 @@
                                        :ref "model-desc"
                                        :placeholder (get-string :new-forecast-desc-placeholder)}]]
                 [:div
+                 [:h3 (get-string :forecast-public?)]
+                 [:input.pure-input {:type "checkbox"
+                                     :ref "model-public"}]
+                 [:div [:small (get-string :forecast-public?-explain)]]
+                 ]
+                [:div
                  [:h3 (get-string :model)]
-                 [:select.pure-input-1-2
+                 [:select.pure-input-1
                   {:ref "model-id"
                    :on-change #(venue/raise! owner :event/select-model (parse-model-string (.-value (om/get-node owner "model-id"))))}
                   (for [model (:models cursor)]

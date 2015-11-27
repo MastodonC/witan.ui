@@ -45,7 +45,7 @@
 
 (defcomponent
   header
-  [{:keys [forecast/name forecast/version forecast/version-id forecast/in-progress? edited? old?]} owner]
+  [{:keys [forecast/name forecast/version forecast/version-id forecast/in-progress? forecast/public? edited? old?]} owner]
   (render [_]
           (let [new? (zero? version)]
             (html
@@ -67,7 +67,10 @@
                    [:i.fa.fa-cog.fa-flash]])
                 (when old?
                   [:span.label.label-forecast-superseded.label-small (get-string :superseded " ")
-                   [:i.fa.fa-hand-o-right]])]]]))))
+                   [:i.fa.fa-hand-o-right]])
+                (when public?
+                  [:span.label.label-forecast-public.label-small (get-string :public " ")
+                   [:i.fa.fa-users]])]]]))))
 
 (defcomponent
   forecast-box

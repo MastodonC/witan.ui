@@ -152,6 +152,9 @@
      [:.label-forecast-superseded
       {:background-color colour/forecast-superseded}]
 
+     [:.label-forecast-public
+      {:background-color colour/forecast-public}]
+
      [:.label-new
       {:background-color colour/new-forecast}]
 
@@ -278,7 +281,8 @@
         :cursor           :pointer}]
       [:.version-labels
        {:display :inline
-        :margin-left (em 0.5)}]
+        :margin-left (em 0.5)
+        :top (px 0)}]
       [:.tag-labels
        {:display :inline
         :margin-left (em -1)}]
