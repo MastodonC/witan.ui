@@ -220,11 +220,12 @@
 
 (defmethod request-handler
   :add-forecast
-  [owner event {:keys [model-name model-version model-props name description]} result-ch]
+  [owner event {:keys [model-name model-version model-props name description public?]} result-ch]
   (let [model-id (find-model-id-by-name-and-version model-name (js/parseInt model-version))]
     (if (not-empty model-id)
       (let [payload {:model-id (-> model-id first second)
-                     :name name}
+                     :name name
+                     :public? public?}
             payload (if (not-empty description) (assoc payload :description description) payload)
             payload (if (not-empty model-props) (assoc payload :model-properties (mapv format-model-prop  model-props)) payload)]
         (venue/request! {:owner   owner

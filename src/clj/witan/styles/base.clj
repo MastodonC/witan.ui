@@ -152,6 +152,9 @@
      [:.label-forecast-superseded
       {:background-color colour/forecast-superseded}]
 
+     [:.label-forecast-public
+      {:background-color colour/forecast-public}]
+
      [:.label-new
       {:background-color colour/new-forecast}]
 
