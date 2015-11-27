@@ -281,8 +281,7 @@
         :cursor           :pointer}]
       [:.version-labels
        {:display :inline
-        :margin-left (em 0.5)
-        :top (px 0)}]
+        :margin-left (em 0.5)}]
       [:.tag-labels
        {:display :inline
         :margin-left (em -1)}]
