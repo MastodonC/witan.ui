@@ -40,7 +40,8 @@
                          upload-error?
                          upload-success?
                          last-upload-filename
-                         data-items]} cursor]
+                         data-items]} cursor
+                         public-forecast? (-> @cursor :forecast :forecast/public?)]
              [:div.container
               [:h3 {:key "subtitle"}
                (get-string :upload-new-data)]
@@ -104,7 +105,13 @@
                    :on-submit (fn [e]
                                 (let [node (om/get-node owner "upload-data-name")
                                       idx (.-selectedIndex node) ;; if it has a selectedIndex it's a select input
-                                      result (if idx (.-value (aget (.-options node) idx)) (.-value node))]
+                                      name (if idx (.-value (aget (.-options node) idx)) (.-value node))
+                                      result {:name name
+                                              :public? (if public-forecast?
+                                                         true
+                                                         (if idx
+                                                           (some #(if (= (:data/name %) name) (:data/public? %)) data-items)
+                                                           (.-checked (om/get-node owner "upload-data-public"))))}]
                                   (venue/raise! owner :upload-file result))
                                 (.preventDefault e))}
 
@@ -136,9 +143,11 @@
                                   [:input.full-width {:key "input"
                                                       :ref "upload-data-name"
                                                       :type "text"
-                                                      :required true}]])
-                     [:div.spacer
-                      {:key "spacer"}]
+                                                      :required true}]
+                                  (if-not public-forecast?
+                                    [:small {} [:input.pure-input {:type "checkbox"
+                                                                   :ref "upload-data-public"}] " " (get-string :upload-data-public-explain)])])
+
                      [:button.pure-button.button-primary.upload-button {:key "button"} (get-string :upload)]]
 
                     ;;;;;;;;;;;;;;;
