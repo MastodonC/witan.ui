@@ -144,7 +144,7 @@
   :create-forecast-version
   [event forecast result-ch]
   (let [inputs (hash-map :inputs (into {} (map (fn [{:keys [category selected]}]
-                                                 (let [selected-req (select-keys selected [:file-name :name :s3-key])]
+                                                 (let [selected-req (select-keys selected [:file-name :name :s3-key :public?])]
                                                    (when (not-empty selected-req)
                                                      (hash-map category selected-req))))
                                                (:forecast/inputs forecast))))]

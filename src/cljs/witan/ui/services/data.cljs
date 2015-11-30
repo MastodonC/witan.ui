@@ -267,7 +267,7 @@
 (defmethod request-handler
   :add-forecast-version
   [owner event forecast result-ch]
-  (log/info "Creating a new version of forecast " (:name forecast))
+  (log/info "Creating a new version of forecast " (:forecast/name forecast))
   (venue/request! {:owner owner
                    :service :service/api
                    :request :create-forecast-version
