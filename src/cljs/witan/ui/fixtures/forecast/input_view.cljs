@@ -144,7 +144,8 @@
                                                       :ref "upload-data-name"
                                                       :type "text"
                                                       :required true}]
-                                  (if-not public-forecast?
+                                  (if public-forecast?
+                                    [:small (get-string :upload-data-public-warning)]
                                     [:small {} [:input.pure-input {:type "checkbox"
                                                                    :ref "upload-data-public"}] " " (get-string :upload-data-public-explain)])])
 
