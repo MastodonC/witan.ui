@@ -87,6 +87,7 @@
    :superseded                     "Superseded"
    :use-data-item                  "Use"
    :public                         "Public"
+   :upload-data-public-explain     "Tick this box to make the data visible to everyone (public)"
 
    })
 

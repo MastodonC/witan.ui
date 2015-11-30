@@ -382,6 +382,7 @@
         data-item {:category  category
                    :name      name
                    :file-name (-> context :args :filename)
+                   :public?   (-> context :args :public?)
                    :s3-key    s3-key
                    :created   (tf/unparse (tf/formatters :date-hour-minute-second) (t/now))
                    :version   version

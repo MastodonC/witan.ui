@@ -116,17 +116,18 @@
 
 (defmethod event-handler
   :upload-file
-  [owner _ data-item-name cursor]
+  [owner _ {:keys [name public?]} cursor]
   (log/info "Starting upload...")
   (om/update! cursor :uploading? true)
-  (om/update! cursor :last-upload-filename data-item-name)
+  (om/update! cursor :last-upload-filename name)
   (venue/request! {:owner   owner
                    :service :service/data
                    :request :upload-data
                    :args    {:category (-> @cursor :browsing-input :category)
                              :file     (:upload-file @cursor)
                              :filename (:upload-filename @cursor)
-                             :name     data-item-name
+                             :name     name
+                             :public?  public?
                              :id       (:id @cursor)
                              :version  (:version @cursor)}
                    :context cursor
