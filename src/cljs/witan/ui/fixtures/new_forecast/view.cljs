@@ -109,4 +109,14 @@
                  (if (:working? cursor)
                    [:span [:i.fa.fa-refresh.fa-spin]]
                    [:span [:i.fa.fa-line-chart] (str " " (get-string :create))])]]]]
-             [:div.pure-u-1-2]]])))
+             [:div.pure-u-1-2
+              [:div#model-information
+               [:h2 (get-string :about-model)]
+               [:h3 (-> cursor :selected-model :model/name)
+                [:div
+                 [:em.text-gray
+                  (get-string :forecast-version" " (-> cursor :selected-model :model/version))]]
+                [:p
+                 [:h4.text-gray {:key "model-desc-value"
+                                 :dangerouslySetInnerHTML
+                                 {:__html (-> cursor :selected-model :model/description)}}]]]]]]])))

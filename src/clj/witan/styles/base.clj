@@ -580,7 +580,9 @@
            :margin-top (px 5)}]]]]]
 
      [:#witan-new-forecast-container
-      {:padding (em 1)}]
+      {:padding (em 1)}
+      [:#model-information
+       {:padding [[(px 0) (px 30)]]}]]
 
      [:#witan-pw-forecast-nav
       {:margin-bottom (em 1)

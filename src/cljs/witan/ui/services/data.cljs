@@ -39,7 +39,6 @@
    (let [id (id-fn item)
          db-id (find-or-add-lookup ns id id-lookup id-counter)
          cleaned (->> item
-                      (filter second)
                       (filter (fn [[k v]] (if (coll? v) (-> v empty? not) true)))
                       (util/map-add-ns ns))
          with-db-id (assoc cleaned :db/id db-id)]
