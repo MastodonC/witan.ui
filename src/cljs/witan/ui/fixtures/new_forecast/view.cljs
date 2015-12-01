@@ -27,10 +27,13 @@
           (html
            [:div
             [:div.witan-page-heading
+             {:key "page-heading"}
              [:h1
               (get-string :new-forecast)]]
             [:div.pure-g#witan-new-forecast-container
+             {:key "container"}
              [:div.pure-u-1-2
+              {:key "left"}
               [:form.pure-form
                {:on-submit (fn [e]
                              (let [properties (-> cursor :selected-model :model/properties)
@@ -49,35 +52,49 @@
                              (.preventDefault e))}
                [:fieldset
                 [:div
-                 [:h3 (get-string :forecast-name)]
+                 {:key "forecast-name"}
+                 [:h3 {:key "title"}
+                  (get-string :forecast-name)]
                  [:input.pure-input-1 {:type "text"
                                        :ref "model-name"
+                                       :key "model-name"
                                        :required true
                                        :placeholder (get-string :new-forecast-name-placeholder)}]]
                 [:div
-                 [:h3 (get-string :forecast-desc)
+                 {:key "forecast-description"}
+                 [:h3 {:key "title"}
+                  (get-string :forecast-desc)
                   [:em (str " " (get-string :optional))]]
                  [:input.pure-input-1 {:type "text"
                                        :ref "model-desc"
+                                       :key "model-desc"
                                        :placeholder (get-string :new-forecast-desc-placeholder)}]]
                 [:div
-                 [:h3 (get-string :forecast-public?)]
+                 {:key "forecast-public"}
+                 [:h3 {:key "title"}
+                  (get-string :forecast-public?)]
                  [:input.pure-input {:type "checkbox"
-                                     :ref "model-public"}]
-                 [:div [:small (get-string :forecast-public?-explain)]]
-                 ]
+                                     :ref "model-public"
+                                     :key "model-public"}]
+                 [:div {:key "explanation"} [:small (get-string :forecast-public?-explain)]]]
                 [:div
+                 {:key "forecast-model"}
                  [:h3 (get-string :model)]
                  [:select.pure-input-1
                   {:ref "model-id"
+                   :key "model-id"
                    :on-change #(venue/raise! owner :event/select-model (parse-model-string (.-value (om/get-node owner "model-id"))))}
                   (for [model (:models cursor)]
                     (let [vstr (str (:model/name model) " - v" (:model/version model))]
                       [:option {:key (str vstr "-key") } vstr]))]]
                 (if-let [properties (-> cursor :selected-model :model/properties)]
                   [:div
-                   [:h3 {:key "mod-props-header"} (str (get-string :model) " " (get-string :properties))]
-                   [:div.pure-form-aligned {:key "mod-form-div"}
+                   {:key "forecast-model-properties"}
+                   [:h3
+                    {:key "mod-props-header"}
+                    (str (get-string :model) " " (get-string :properties))]
+                   [:div.pure-form-aligned
+                    {:key "mod-form-div"}
                     (for [{:keys [name type context enum_values]} properties]
                       (let [params {:ref (str "mod-prop-" name) :key (str "mod-prop-input-" name)}]
                         [:div.pure-control-group
@@ -91,32 +108,49 @@
                          (condp = type
                            "dropdown"
                            [:div.pure-input-1-2
-                            {:style {:display "inline-block"}}
+                            {:style {:display "inline-block"}
+                             :key (str "mod-prop-dropdown-" name)}
                             [:select
                              params
                              (for [opt enum_values]
-                               [:option {:key (str "mod-prop-opt-" opt)} opt])]
-                            [:div [:small.text-gray {:style {:margin-left "1em"}} context]]]
+                               [:option
+                                {:key (str "mod-prop-opt-" opt)}
+                                opt])]
+                            [:div
+                             {:key "context"}
+                             [:small.text-gray {:style {:margin-left "1em"}} context]]]
                            "text"
-                           [:input.pure-input-1-2 (merge params {:placeholder context :required true})]
+                           [:input.pure-input-1-2
+                            {:key (str "mod-prop-text-" name)}
+                            (merge params {:placeholder context :required true})]
                            "number"
-                           [:input.pure-input-1-2 (merge params {:placeholder context :required true})])
-                         ]))]]
+                           [:input.pure-input-1-2
+                            {:key (str "mod-prop-number-" name)}
+                            (merge params {:placeholder context :required true})])]))]]
                   [:div
+                   {:key "no-model-props"}
                    [:p [:small [:i (get-string :no-model-properties)]]]])
-                [:hr.medium]
-                [:button.pure-button.button-success {:type "submit"}
+                [:hr.medium
+                 {:key "spacer"}]
+                [:button.pure-button.button-success
+                 {:type "submit"
+                  :key "button"}
                  (if (:working? cursor)
                    [:span [:i.fa.fa-refresh.fa-spin]]
                    [:span [:i.fa.fa-line-chart] (str " " (get-string :create))])]]]]
              [:div.pure-u-1-2
+              {:key "right"}
               [:div#model-information
-               [:h2 (get-string :about-model)]
-               [:h3 (-> cursor :selected-model :model/name)
+               [:h2 {:key "title"}
+                (get-string :about-model)]
+               [:h3 {:key "name"}
+                (-> cursor :selected-model :model/name)
                 [:div
+                 {:key "versions"}
                  [:em.text-gray
                   (get-string :forecast-version" " (-> cursor :selected-model :model/version))]]
                 [:p
+                 {:key "description"}
                  [:h4.text-gray {:key "model-desc-value"
                                  :dangerouslySetInnerHTML
                                  {:__html (-> cursor :selected-model :model/description)}}]]]]]]])))
