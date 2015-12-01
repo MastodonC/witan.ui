@@ -146,7 +146,9 @@
                 {:key "model-desc"}
                 (get-string :forecast-desc)]
                [:h3.model-value
-                {:key "model-desc-value"} (:model/description model)]
+                {:key "model-desc-value"
+                 :dangerouslySetInnerHTML
+                 {:__html (:model/description model)}}]
                (when (not-empty (:forecast/property-values forecast))
                  [:div
                   {:key "model-props"}
