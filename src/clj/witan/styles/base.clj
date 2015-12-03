@@ -268,7 +268,9 @@
        :height (percent 100)}
       [:#container
        {:overflow-y :auto
-        :height (percent 85)}]
+        :position :absolute
+        :top (px 0)
+        :bottom (px 115)}]
       [:th :td
        {:border (px 0)}]
       [:th:first-child
