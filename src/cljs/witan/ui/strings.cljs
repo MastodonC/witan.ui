@@ -51,7 +51,7 @@
    :new                            "New"
    :upload                         "Upload"
    :upload-new-data                "Upload new data"
-   :forecast-changes-text          "Okay, we've recorded your changes. When you're ready, hit 'Run this projection' to generate your new outputs to download."
+   :forecast-changes-text          "Okay, we've recorded your changes. When you're ready, hit 'Run this projection' to generate your new outputs for download."
    :forecast-in-progress-text      "We're currently building a new version of this projection for you. You can download your data from the 'Output' section when this message disappears."
    :input                          "Input"
    :input-intro                    "To generate your projection, choose which data should go into your model from the options below. You can upload your own data, or choose from any datasets already in the system."
@@ -71,7 +71,7 @@
    :browser-upload-error           "An error occurred whilst trying to upload the file. Please try again and if this problem persists, contact us." ;; TODO wants email
    :downloads                      "Downloads"
    :download                       "Download"
-   :new-version-no-downloads       "Once you have run your first projection, your data will be available here. Start this at 'Inputs' section"
+   :new-version-no-downloads       "Once you have run your first projection, your data will be available here. Start this at the 'Inputs' section"
    :in-progress-no-downloads       "Sorry, we're still running the projection to generate your data. This can take several minutes so please check again shortly."
    :data-items                     "data items"
    :upload-success                 "Upload successful"
