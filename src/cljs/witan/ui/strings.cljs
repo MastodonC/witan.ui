@@ -37,7 +37,7 @@
    :thanks                         "Thanks"
    :signing-in                     "Signing in..."
    :sign-in-failure                "There was a problem with your details. Please try again."
-   :api-failure                    "Sorry, we're having a problem with the service. Please try again. If the problem persists, please contact us. at witan@mastodonc.com" ;; TODO add link?
+   :api-failure                    "Sorry, we're having a problem with the service. Please try again. If the problem persists, please contact us at witan@mastodonc.com" ;; TODO add link?
    :create                         "Create"
    :created                        "Created"
    :logout                         "Log Out"
