@@ -10,7 +10,7 @@
    :forecast                       "Projection"
    :new-forecast                   "Create New Projection"
    :new-forecast-name-placeholder  "Enter a name for this projection"
-   :new-forecast-desc-placeholder  "Enter a description for this projection"
+   :new-forecast-desc-placeholder  "What should this projection be used for? Who should use it?"
    :filter                         "Filter"
    :search                         "Search"
    :model                          "Model"
@@ -37,7 +37,7 @@
    :thanks                         "Thanks"
    :signing-in                     "Signing in..."
    :sign-in-failure                "There was a problem with your details. Please try again."
-   :api-failure                    "There was a problem with the service. Please try again. If the problem persists, please contact us." ;; TODO add link?
+   :api-failure                    "Sorry, we're having a problem with the service. Please try again. If the problem persists, please contact us. at witan@mastodonc.com" ;; TODO add link?
    :create                         "Create"
    :created                        "Created"
    :logout                         "Log Out"
@@ -51,8 +51,8 @@
    :new                            "New"
    :upload                         "Upload"
    :upload-new-data                "Upload new data"
-   :forecast-changes-text          "There are changes to this projection. If you're ready, you can now run this projection - the model will be processed with your selected inputs and new outputs will be generated."
-   :forecast-in-progress-text      "This version is currently being generated. During this time you will be unable to make changes or download results. This can take several minutes."
+   :forecast-changes-text          "Okay, we've recorded your changes. When you're ready, hit 'Run this projection' to generate your new outputs to download."
+   :forecast-in-progress-text      "We're currently building a new version of this projection for you. You can download your data from the 'Output' section when this message disappears."
    :input                          "Input"
    :input-intro                    "To generate your projection, choose which data should go into your model from the options below. You can upload your own data, or choose from any datasets already in the system."
    :model-intro                    "Your projection feeds your chosen input data into the model to below to generate your data. Download it at the next step."
@@ -71,8 +71,8 @@
    :browser-upload-error           "An error occurred whilst trying to upload the file. Please try again and if this problem persists, contact us." ;; TODO wants email
    :downloads                      "Downloads"
    :download                       "Download"
-   :new-version-no-downloads       "Downloads are not yet available. After configuring and running the projection for the first time your downloads will appear in this section."
-   :in-progress-no-downloads       "Downloads are not yet available because the model is still running. This can take several minutes so please check again shortly."
+   :new-version-no-downloads       "Once you have run your first projection, your data will be available here. Start this at 'Inputs' section"
+   :in-progress-no-downloads       "Sorry, we're still running the projection to generate your data. This can take several minutes so please check again shortly."
    :data-items                     "data items"
    :upload-success                 "Upload successful"
    :creating-forecast              "Please wait whilst we update this projection..."
@@ -89,9 +89,9 @@
    :public                         "Public"
    :upload-data-public-explain     "Tick this box to make the data visible to everyone (public)"
    :upload-data-public-warning     "As this is a public projection, any data you upload will also become public."
-   :about-model                    "About this model"
+   :about-model                    "About this model"})
 
-   })
+
 
 (defn get-string
   ""
