@@ -236,15 +236,13 @@
 
 (defmethod request-handler
   :upload-data
-  ;;This is a complex request-handler. Upon receiving an upload token, it
-  ;;requests that the upload service perform the upload and after that succeeds
-  ;;it uses the API service again to create the data item.
   [owner event args result-ch]
-  (venue/request! {:owner   owner
+  (venue/request! {:owner owner
                    :service :service/api
-                   :request :get-upload-token
-                   :context {:result-ch result-ch
-                             :args args}}))
+                   :request :upload-data
+                   :args args
+                   :context result-ch
+                   :timeout? false}))
 
 (defmethod request-handler
   :fetch-data-items
@@ -352,44 +350,18 @@
   [owner _ model result-ch]
   (put! result-ch [:success (put-item-into-db! model :model)]))
 
-(defmethod response-handler
-  [:get-upload-token :success]
-  [owner _ s3-beam-payload context]
-  (venue/request! {:owner owner
-                   :service :service/upload
-                   :request :upload-data
-                   :args {:s3-beam-payload s3-beam-payload
-                          :file            (-> context :args :file)}
-                   :context (assoc context :s3-key
-                                   (s3-key-from-url (:Action s3-beam-payload)))
-                   :timeout? false}))
-
 (defn data-id-db-workaround
   [{:keys [data-id version]}]
   (str data-id "-" version))
 
 (defmethod response-handler
   [:upload-data :success]
-  [owner _ response context]
-  ;; we create a local data-item. although it's uploaded to s3, witan.app
+  [owner _ raw-data-item result-ch]
   ;; doesn't hear about it until we send the key as part of a forecast update
-  (let [category  (-> context :args :category)
-        name      (-> context :args :name)
-        existing  (fetch-data-items {:category category :filter name})
-        version   (if (not-empty existing) (-> existing count inc) 1)
-        s3-key    (:s3-key context)
-        data-item {:category  category
-                   :name      name
-                   :file-name (-> context :args :filename)
-                   :public?   (-> context :args :public?)
-                   :s3-key    s3-key
-                   :created   (tf/unparse (tf/formatters :date-hour-minute-second) (t/now))
-                   :version   version
-                   :data-id   (str "local-" s3-key "-" version)
-                   :local?    true}]
+  (let [data-item (assoc raw-data-item :local? true)]
     (log/debug "Upload succeeded.")
     (put-item-into-db! data-item :data data-id-db-workaround)
-    (put! (:result-ch context) [:success (fetch-data-items {:category (-> context :args :category)})])))
+    (put! result-ch [:success (fetch-data-items {:category (:category data-item)})])))
 
 (defmethod response-handler
   [:upload-data :failure]

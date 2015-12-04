@@ -245,7 +245,9 @@
               [:tbody.witan-pw-input-data-row.text-left
                [:td {:key (key-prefix "name") :style {:width row-name-width}}
                 [:strong.category (-> input :category i/capitalize)]
-                [:span.description (or (-> input :description i/capitalize) (get-string :no-description-provided))]
+                [:span.description
+                 {:dangerouslySetInnerHTML
+                  {:__html (or (:description input) (get-string :no-description-provided))}}]
                 [:div
                  [:button.pure-button.witan-pw-browse-toggle
                   {:on-click (fn [e]

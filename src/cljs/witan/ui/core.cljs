@@ -5,8 +5,6 @@
               [witan.ui.services.api]
               [witan.ui.services.mock-api]
               [witan.ui.services.data]
-              [witan.ui.services.upload]
-              [witan.ui.services.mock-upload]
               ;;
               [witan.ui.fixtures.login.view]
               [witan.ui.fixtures.login.view-model]
@@ -111,12 +109,6 @@
 (venue/defservice!
   {:id :service/data
    :handler witan.ui.services.data/service})
-
-(venue/defservice!
-  {:id :service/upload
-   :handler (if (cljs-env :mock-api)
-              witan.ui.services.mock-upload/service
-              witan.ui.services.upload/service)})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

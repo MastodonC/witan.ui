@@ -127,9 +127,7 @@
                              :file     (:upload-file @cursor)
                              :filename (:upload-filename @cursor)
                              :name     name
-                             :public?  public?
-                             :id       (:id @cursor)
-                             :version  (:version @cursor)}
+                             :public?  public?}
                    :context cursor
                    :timeout? false}))
 
