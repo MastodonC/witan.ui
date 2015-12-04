@@ -263,7 +263,14 @@
      [:#witan-dash-forecast-list
       {:width      (percent 100)
        :border     (px 0)
-       :margin-top (em 0.5)}
+       :margin-top (em 0.5)
+       :position :absolute
+       :height (percent 100)}
+      [:#container
+       {:overflow-y :auto
+        :position :absolute
+        :top (px 0)
+        :bottom (px 115)}]
       [:th :td
        {:border (px 0)}]
       [:th:first-child

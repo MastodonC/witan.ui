@@ -171,18 +171,20 @@
                                       (remove :forecast/descendant-id)
                                       (map :forecast/version-id)
                                       set)])
-               [:table.pure-table.pure-table-horizontal#witan-dash-forecast-list
-                [:thead
-                 [:th {:key "forecast-tree"}] ;; empty, for the tree icon
-                 (for [[x width class] [[:forecast-name "35%"]
-                                        [:forecast-owner "25%" "text-center"]
-                                        [:forecast-version "20%"]
-                                        [:forecast-lastmodified "20%" "text-center"]]]
-                   [:th {:key (name x) :class class :style {:width width}} (get-string x)])]
-                [:tbody
-                 (om/build-all forecast-tr
-                               (map #(as-forecast-tr cursor %) (:forecasts cursor))
-                               {:key  :forecast/version-id
-                                :opts {:on-click        #(venue/raise! %1 %2 %3)
-                                       :on-double-click #(goto-window-location!
-                                                          (venue/get-route :views/forecast {:id (:forecast/forecast-id %2) :version (:forecast/version %2) :action "input"}))}})]]]]))))
+               [:div#witan-dash-forecast-list
+                [:div#container
+                 [:table.pure-table.pure-table-horizontal
+                  [:thead
+                   [:th {:key "forecast-tree"}] ;; empty, for the tree icon
+                   (for [[x width class] [[:forecast-name "35%"]
+                                          [:forecast-owner "25%" "text-center"]
+                                          [:forecast-version "20%"]
+                                          [:forecast-lastmodified "20%" "text-center"]]]
+                     [:th {:key (name x) :class class :style {:width width}} (get-string x)])]
+                  [:tbody
+                   (om/build-all forecast-tr
+                                 (map #(as-forecast-tr cursor %) (:forecasts cursor))
+                                 {:key  :forecast/version-id
+                                  :opts {:on-click        #(venue/raise! %1 %2 %3)
+                                         :on-double-click #(goto-window-location!
+                                                            (venue/get-route :views/forecast {:id (:forecast/forecast-id %2) :version (:forecast/version %2) :action "input"}))}})]]]]]]))))
