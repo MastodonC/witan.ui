@@ -47,6 +47,18 @@
     (when result-ch
       (put! result-ch [status result]))))
 
+(defn upload
+  [event method params result-ch]
+  (log/debug "POST (upload) " method params)
+  (let [form-data (js/FormData.)]
+    (doseq [[k v] params]
+      (.append form-data (name k) v))
+    (ajax/POST (local-endpoint method)
+               {:params form-data
+                :handler (partial handle-response :success event result-ch)
+                :error-handler (partial handle-response :failure event result-ch)
+                :headers {"Authorization" (str "Token " @api-token)}})))
+
 (defn POST
   [event method params result-ch]
   (log/debug "POST" method params)
@@ -144,7 +156,7 @@
   :create-forecast-version
   [event forecast result-ch]
   (let [inputs (hash-map :inputs (into {} (map (fn [{:keys [category selected]}]
-                                                 (let [selected-req (select-keys selected [:file-name :name :s3-key :public?])]
+                                                 (let [selected-req (select-keys selected [:data-id])]
                                                    (when (not-empty selected-req)
                                                      (hash-map category selected-req))))
                                                (:forecast/inputs forecast))))]
@@ -156,11 +168,6 @@
   (GET event (str "/models/" id) nil result-ch))
 
 (defmethod service-m
-  :get-upload-token
-  [event _ result-ch]
-  (GET event "/data/pre-sign" nil result-ch))
-
-(defmethod service-m
   :get-data-items
   [event category result-ch]
   (GET event (util/str-fmt-map "/data/{{category}}" {:category category}) nil result-ch))
@@ -169,6 +176,11 @@
   :create-data-item
   [event {:keys [id version category] :as args} result-ch]
   (POST event (str "/forecasts/" id "/" version "/input/" category) (dissoc args :id :version :category) result-ch))
+
+(defmethod service-m
+  :upload-data
+  [event args result-ch]
+  (upload event "/data" args result-ch))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
