@@ -374,8 +374,8 @@
 
 (defmethod response-handler
   [:upload-data :failure]
-  [owner _ response {:keys [result-ch]}]
-  (put! result-ch [:failure nil]))
+  [owner _ response result-ch]
+  (put! result-ch [:failure (:response response)]))
 
 (defmethod response-handler
   [:get-data-items :success]

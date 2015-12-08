@@ -54,6 +54,7 @@
            :uploading?           false
            :upload-error?        false
            :upload-success?      false
+           :upload-feedback      ""
            :last-upload-filename ""
            :data-items           nil
            :selected-data-item   nil
