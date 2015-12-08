@@ -71,6 +71,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod event-handler
+  :download-file
+  [owner _ url cursor]
+  (venue/request! {:owner   owner
+                   :service :service/data
+                   :request :download-file
+                   :args    url
+                   :context cursor}))
+
+(defmethod event-handler
   :revert-forecast
   [owner _ _ cursor]
   (om/update! cursor :edited-forecast nil))
@@ -276,3 +285,13 @@
   [:add-forecast-version :failure]
   [owner _ _ cursor]
   (venue/navigate! :views/dashboard))
+
+(defmethod response-handler
+  [:download-file :success]
+  [owner _ location cursor]
+  (set! (.-location js/window) location))
+
+(defmethod response-handler
+  [:download-file :failure]
+  [owner _ _ cursor]
+  (js/alert "Download failed."))

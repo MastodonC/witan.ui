@@ -24,7 +24,11 @@
 (defn str-fmt-map
   "String format with map using mustache delimiters, e.g. (str-fmt-map 'hello {{name}}' {:name 'foo'})"
   [s m]
-  (reduce (fn [x [k v]] (clojure.string/replace x (str "{{"(name k)"}}") (str v)) ) s m))
+  (let [matches (re-seq #"\{\{\s*([a-zA-Z_\.\-]+)\s*\}\}" s)
+        get-key (fn [s] (vec (map keyword (clojure.string/split s "."))))]
+    (reduce
+     (fn [a [match key]]
+       (clojure.string/replace a match (get-in m (get-key key)))) s matches)))
 
 (defn goto-window-location!
   "Sends the window to the specified location"

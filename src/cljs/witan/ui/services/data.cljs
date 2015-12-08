@@ -272,6 +272,15 @@
                    :context result-ch
                    :timeout 20000}))
 
+(defmethod request-handler
+  :download-file
+  [owner _ url result-ch]
+  (venue/request! {:owner   owner
+                   :service :service/api
+                   :request :download-file
+                   :args    url
+                   :context result-ch}))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod response-handler
@@ -392,6 +401,17 @@
 
 (defmethod response-handler
   [:create-forecast-version :failure]
+  [owner _ _ result-ch]
+  (put! result-ch [:failure nil]))
+
+(defmethod response-handler
+  [:download-file :success]
+  [owner _ response result-ch]
+  (log/info "Received redirect for download:" response)
+  (put! result-ch [:success (:location response)]))
+
+(defmethod response-handler
+  [:download-file :failure]
   [owner _ _ result-ch]
   (put! result-ch [:failure nil]))
 

@@ -232,13 +232,36 @@
                 {:key "upload"}
                 (om/build upload-widget state)]]]))))
 
+(defn hook-links
+  [owner]
+  (let [links (. js/document getElementsByTagName "a")]
+    (doseq [i (range (.-length links))]
+      (let [link (aget links i)
+            url (.-href link)
+            url-minus-host (str/replace url (.. js/document -location -origin) "")
+            requires-auth? (= (.indexOf url-minus-host "/data/public") 0)]
+        (when requires-auth?
+          (log/debug "Hooking link: " link)
+          (set! (.-onclick link)
+                (fn [e]
+                  (venue/raise! owner :download-file url-minus-host)
+                  (.preventDefault e))))))))
+
 (defcomponent
   data-item-input-table-row
-  [{:keys [locked? data-item default? input browsing?]} owner]
+  [{:keys [locked? data-item default? input browsing? forecast]} owner]
+  (did-mount [_]
+             (hook-links owner))
+  (did-update [_ _ _]
+              (hook-links owner))
   (render [_]
           (let [processed-item (util/map-remove-ns data-item)
                 {:keys [name version created edited?]} processed-item
-                key-prefix (partial str (i/hyphenate name) "-")]
+                key-prefix (partial str (i/hyphenate name) "-")
+                prep-property-values (->> (:forecast/property-values forecast)
+                                          (map #((juxt :name :value) %))
+                                          (map #(update % 0 keyword))
+                                          (into {}))]
             (html
              [:table.pure-table.pure-table-horizontal.full-width
               {:key (key-prefix "table-body")}
@@ -247,7 +270,8 @@
                 [:strong.category (-> input :category i/capitalize)]
                 [:span.description
                  {:dangerouslySetInnerHTML
-                  {:__html (or (:description input) (get-string :no-description-provided))}}]
+                  {:__html (or (util/str-fmt-map (:description input)
+                                                 {:model-properties prep-property-values}) (get-string :no-description-provided))}}]
                 [:div
                  [:button.pure-button.witan-pw-browse-toggle
                   {:on-click (fn [e]
@@ -289,11 +313,13 @@
                  [:th {:key (prefix "-input-version") :style {:width header-version-width}} (when top? (get-string :forecast-version))]
                  [:th {:key (prefix "-input-lastmodified") :style {:width header-lm-width}} (when top? (get-string :forecast-lastmodified))]]]
                [:hr {:key (prefix "-input-hr")}]
-               (om/build data-item-input-table-row {:data-item (or (:selected input) (:default input))
-                                                    :default? (nil? (:selected input))
-                                                    :input input
-                                                    :browsing? browsing?
-                                                    :locked? locked? } {:key :name})]
+               (om/build data-item-input-table-row
+                         {:data-item (or (:selected input) (:default input))
+                          :default? (nil? (:selected input))
+                          :input input
+                          :browsing? browsing?
+                          :locked? locked?
+                          :forecast (:forecast cursor)} {:key :name})]
 
               [:div.pure-u-1.witan-pw-input-browser-container
                {:style {:height (if browsing? browser-height "0px")}}
