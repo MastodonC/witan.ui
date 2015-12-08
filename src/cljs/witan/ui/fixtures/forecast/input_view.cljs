@@ -39,6 +39,7 @@
                          uploading?
                          upload-error?
                          upload-success?
+                         upload-feedback
                          last-upload-filename
                          data-items]} cursor
                          public-forecast? (-> @cursor :forecast :forecast/public?)]
@@ -56,6 +57,8 @@
                  [:h4
                   {:key "upload-error-title"}
                   (get-string :browser-upload-error)]
+                 [:h4.text-error
+                  (when-not (str/blank? upload-feedback) upload-feedback)]
                  [:button.pure-button.button-warning
                   {:key "upload-error-reset"
                    :on-click (fn [e]

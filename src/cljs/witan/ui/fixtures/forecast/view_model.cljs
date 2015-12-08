@@ -26,6 +26,7 @@
   (om/update! cursor :uploading?           false)
   (om/update! cursor :upload-error?        false)
   (om/update! cursor :upload-success?      false)
+  (om/update! cursor :upload-feedback      "")
   (om/update! cursor :last-upload-filename "")
   (om/update! cursor :data-items           nil)
   (om/update! cursor :selected-data-item   nil)
@@ -190,8 +191,8 @@
                  (some :edited?))
       (om/update! cursor :edited-forecast with-input)
       (om/update! cursor :edited-forecast nil)))
-    (update-required-inputs! cursor)
-    (event-handler owner :toggle-browse-input nil cursor))
+  (update-required-inputs! cursor)
+  (event-handler owner :toggle-browse-input nil cursor))
 
 (defmethod event-handler
   :create-forecast-version
@@ -254,7 +255,8 @@
   [:upload-data :failure]
   [owner _ response cursor]
   (om/update! cursor :uploading?    false)
-  (om/update! cursor :upload-error? true))
+  (om/update! cursor :upload-error? true)
+  (om/update! cursor :upload-feedback (:error response)))
 
 (defmethod response-handler
   [:fetch-data-items :success]
