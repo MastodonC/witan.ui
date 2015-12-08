@@ -182,6 +182,16 @@
   [event args result-ch]
   (upload event "/data" args result-ch))
 
+(defmethod service-m
+  :download-file
+  [event url result-ch]
+  (let [scrubbed-url (if-let [remove (let [idx (.indexOf url "?")]
+                                       (when (>= idx 0)
+                                         (.substring url idx)))]
+                       (.replace url remove "") url)
+        new-url (str scrubbed-url "?redirect=false")]
+    (GET event new-url nil result-ch)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- login!
