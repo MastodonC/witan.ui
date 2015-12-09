@@ -22,6 +22,11 @@
   [source pattern]
   (boolean (re-find (js/RegExp. pattern "i") source)))
 
+(defn select-values
+  "http://blog.jayfields.com/2011/01/clojure-select-keys-select-values-and.html"
+  [m ks]
+  (reduce #(if-let [v (m %2)] (conj %1 v) %1) [] ks))
+
 (defn escape-html
   "Change special characters into HTML character entities."
   [text]
@@ -34,13 +39,19 @@
 (defn str-fmt-map
   "String format with map using mustache delimiters, e.g. (str-fmt-map 'hello {{name}}' {:name 'foo'})"
   [s m]
-  (let [matches (re-seq #"\{\{\s*([a-zA-Z_\.\-]+)\s*\}\}" s)
-        get-key (fn [s] (vec (map keyword (clojure.string/split s "."))))]
+  (let [matches (re-seq #"\{\{\s*([a-zA-Z_\.\-|]+)\s*\}\}" s)
+        get-key (fn [s] (vec (map keyword (str/split s "."))))
+        filter-fns {"nowhitespace" (fn [s] (str/replace s #"\s+" ""))}
+        run-filters (fn [s fs] ((apply comp (select-values filter-fns fs)) s))]
     (reduce
      (fn [a [match key]]
-       (clojure.string/replace a match (some-> m
-                                               (get-in (get-key key))
-                                               (escape-html)))) s matches)))
+       (let [split-key (str/split key "|")
+             good-key (first split-key)
+             filters (rest split-key)]
+         (str/replace a match (some-> m
+                                      (get-in (get-key good-key))
+                                      (escape-html)
+                                      (run-filters filters))))) s matches)))
 
 (defn goto-window-location!
   "Sends the window to the specified location"
