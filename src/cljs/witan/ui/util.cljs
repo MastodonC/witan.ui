@@ -3,6 +3,7 @@
               [venue.core :as venue]
               [cljs-time.core :as t]
               [cljs-time.format :as tf]
+              [clojure.string :as str]
               [witan.ui.strings :refer [get-string]])
     (:require-macros [cljs.core.async.macros :as am :refer [go go-loop alt!]]
                      [cljs-log.core :as log]))
@@ -21,6 +22,15 @@
   [source pattern]
   (boolean (re-find (js/RegExp. pattern "i") source)))
 
+(defn escape-html
+  "Change special characters into HTML character entities."
+  [text]
+  (-> text
+      (str/replace "&"  "&amp;")
+      (str/replace "<"  "&lt;")
+      (str/replace ">"  "&gt;")
+      (str/replace "\"" "&quot;")))
+
 (defn str-fmt-map
   "String format with map using mustache delimiters, e.g. (str-fmt-map 'hello {{name}}' {:name 'foo'})"
   [s m]
@@ -28,7 +38,9 @@
         get-key (fn [s] (vec (map keyword (clojure.string/split s "."))))]
     (reduce
      (fn [a [match key]]
-       (clojure.string/replace a match (get-in m (get-key key)))) s matches)))
+       (clojure.string/replace a match (some-> m
+                                               (get-in (get-key key))
+                                               (escape-html)))) s matches)))
 
 (defn goto-window-location!
   "Sends the window to the specified location"
