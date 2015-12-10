@@ -39,7 +39,7 @@
 (defn str-fmt-map
   "String format with map using mustache delimiters, e.g. (str-fmt-map 'hello {{name}}' {:name 'foo'})"
   [s m]
-  (let [matches (re-seq #"\{\{\s*([a-zA-Z_\.\-|]+)\s*\}\}" s)
+  (let [matches (re-seq #"\{\{\s*([0-9a-zA-Z_\.\-|]+)\s*\}\}" s)
         get-key (fn [s] (vec (map keyword (str/split s "."))))
         filter-fns {"nowhitespace" (fn [s] (str/replace s #"\s+" ""))}
         run-filters (fn [s fs] ((apply comp (select-values filter-fns fs)) s))]
