@@ -95,7 +95,7 @@
                     (str (get-string :model) " " (get-string :properties))]
                    [:div.pure-form-aligned
                     {:key "mod-form-div"}
-                    (for [{:keys [name type context enum_values]} properties]
+                    (for [{:keys [name display type context enum_values]} properties]
                       (let [params {:ref (str "mod-prop-" name) :key (str "mod-prop-input-" name)}]
                         [:div.pure-control-group
                          {:key (str "mod-prop-" name)
@@ -104,7 +104,7 @@
                                   :key (str "mod-prop-label-" name)
                                   :style {:width "auto"
                                           :vertical-align "top"
-                                          :margin-top "10px"}} name] ;; FIXME
+                                          :margin-top "10px"}} (or display name)] ;; FIXME alignment
                          (condp = type
                            "dropdown"
                            [:div.pure-input-1-2
