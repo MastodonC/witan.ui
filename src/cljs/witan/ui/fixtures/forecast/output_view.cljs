@@ -93,7 +93,7 @@
              (:forecast/error forecast)
              [:div
               [:h3 {:key "error"} "An error occurred in the model"]
-              [:h3 {:key "error-message"} (:forecast/error forecast)]
+              [:h4 {:key "error-message"} (:forecast/error forecast)]
               [:h3 {:key "sad-face"} [:i.fa.fa-frown-o.fa-2x]]]
              :else
              [:div
