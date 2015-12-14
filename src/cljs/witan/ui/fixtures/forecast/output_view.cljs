@@ -90,6 +90,11 @@
              [:div
               [:h3 {:key "in-progress-no-downloads"} (get-string :in-progress-no-downloads)]
               [:h3 {:key "coffee"} [:i.fa.fa-coffee.fa-2x]]]
+             (:forecast/error forecast)
+             [:div
+              [:h3 {:key "error"} "An error occurred in the model"]
+              [:h3 {:key "error-message"} (:forecast/error forecast)]
+              [:h3 {:key "sad-face"} [:i.fa.fa-frown-o.fa-2x]]]
              :else
              [:div
               ;; first row
