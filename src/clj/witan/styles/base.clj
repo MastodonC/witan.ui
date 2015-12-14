@@ -146,6 +146,9 @@
      [:.label-in-progress
       {:background-color colour/in-progress}]
 
+     [:.label-error
+      {:background-color colour/model-error}]
+
      [:.label-forecast-changed
       {:background-color colour/forecast-changed}]
 
