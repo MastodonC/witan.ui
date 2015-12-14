@@ -21,9 +21,9 @@
         "path": "/",
         "protocol": "HTTP",
         "gracePeriodSeconds": 600,
-        "intervalSeconds": 30,
+        "intervalSeconds": 60,
         "portIndex": 0,
-        "timeoutSeconds": 10,
+        "timeoutSeconds": 20,
         "maxConsecutiveFailures": 3
   }]
 }
