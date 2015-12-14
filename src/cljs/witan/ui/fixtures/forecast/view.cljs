@@ -45,7 +45,7 @@
 
 (defcomponent
   header
-  [{:keys [forecast/name forecast/version forecast/version-id forecast/in-progress? forecast/public? edited? old?]} owner]
+  [{:keys [forecast/name forecast/version forecast/version-id forecast/in-progress? forecast/public? forecast/error edited? old?]} owner]
   (render [_]
           (let [new? (zero? version)]
             (html
@@ -59,6 +59,8 @@
                 (when in-progress?
                   [:span.label.label-in-progress.label-small (get-string :in-progress " ")
                    [:i.fa.fa-cog.fa-spin]])
+                (when error
+                  [:span.label.label-error.label-small (get-string :error " ")])
                 (when new?
                   [:span.label.label-new.label-small (get-string :new " ")
                    [:i.fa.fa-star]])

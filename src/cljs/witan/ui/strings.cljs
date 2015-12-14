@@ -46,6 +46,7 @@
    :create-new-forecast            "Run this projection"
    :revert-forecast                "Revert changes"
    :in-progress                    "In-Progress"
+   :error                          "Error"
    :changed                        "Changed"
    :refresh-now                    "Refresh"
    :new                            "New"
