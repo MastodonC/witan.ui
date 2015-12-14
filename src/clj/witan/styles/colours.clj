@@ -92,6 +92,7 @@
 ;; themes
 (def in-progress (rgb 84 13 110))
 (def in-progress-light (color/lighten in-progress 20))
+(def model-error (rgb 255 0 0))
 
 (def new-forecast (rgb 244 122 126))
 (def input-browser (rgb 204 224 241))
