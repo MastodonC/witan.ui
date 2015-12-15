@@ -91,7 +91,9 @@
                   [:button.pure-button.button-secondary
                    {:key "button"
                     :style {:margin "0" :padding "0" :height "2em"}
-                    :on-click #(.stopPropagation %)}
+                    :on-click (fn [e]
+                                (.click (.getElementById js/document "upload-filename"))
+                                (.preventDefault e))}
                    [:label {:for "upload-filename" :style {:padding "2em"}} "Choose file"]]
                   [:input.hidden-file-input {:key "input"
                                              :id "upload-filename"
