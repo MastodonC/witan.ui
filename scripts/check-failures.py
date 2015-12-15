@@ -16,9 +16,8 @@ proc = subprocess.Popen(["grep",
 
 # regex
 line_regex = re.compile(ur'^(.*.cljs):\[(:[a-z-]+)\s:(success|failure)')
-results = []
-for line in iter(proc.stdout.readline,''):
-    results.append(re.search (line_regex , line.rstrip().replace(SRC_DIR, '')).groups ())
+results = [re.search (line_regex , line.rstrip().replace(SRC_DIR, '')).groups ()
+                  for line in iter(proc.stdout.readline,'')]
 
 groups = {}
 for entry in results:
