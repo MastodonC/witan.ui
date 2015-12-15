@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import os
+import sys
 import subprocess
 import re
 
@@ -36,9 +37,13 @@ for entry in groups:
             pairs[entry].append(check)
 
 # print
-print "Results - the following calls do NOT have complete :success/:failure pairs:"
-print "--------------------------------------------------------"
-for key in pairs:
-    print key
-    for handles in pairs[key]:
-        print " - ", handles
+if len(pairs) != 0:
+    print "Results - the following calls do NOT have complete :success/:failure pairs:"
+    print "--------------------------------------------------------"
+    for key in pairs:
+        print key
+        for handles in pairs[key]:
+            print " - ", handles
+    sys.exit(1)
+else:
+    sys.exit(0)
