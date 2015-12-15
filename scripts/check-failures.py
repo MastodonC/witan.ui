@@ -26,22 +26,21 @@ for entry in results:
     groups[entry[0]].append(entry[1:])
 
 pairs = {}
-for entry in groups:
-    handles = groups[entry]
+for key, handles in groups.iteritems():
     for handle, status in handles:
         check = [x for x in handles if x[0] == handle]
         if len(check) != 2:
-            if not pairs.has_key(entry):
-                pairs[entry] = []
-            pairs[entry].append(check)
+            if not pairs.has_key(key):
+                pairs[key] = []
+            pairs[key].append(check)
 
 # print
 if len(pairs) != 0:
     print "Results - the following calls do NOT have complete :success/:failure pairs:"
     print "--------------------------------------------------------"
-    for key in pairs:
+    for key, values in pairs.iteritems():
         print key
-        for handles in pairs[key]:
+        for handles in values:
             print " - ", handles
     sys.exit(1)
 else:
