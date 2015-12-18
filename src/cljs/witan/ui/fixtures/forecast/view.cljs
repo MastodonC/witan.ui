@@ -43,6 +43,10 @@
       (get kaction)
       first))
 
+(defn model-name-to-display
+  [model name]
+  (some #(when (= name (:name %)) (:display %)) (:model/properties model)))
+
 (defcomponent
   header
   [{:keys [forecast/name forecast/version forecast/version-id forecast/in-progress? forecast/public? forecast/error edited? old?]} owner]
@@ -158,7 +162,9 @@
                    {:key "model-props-title"}
                    (get-string :properties)]
                   (for [{:keys [name value]} (:forecast/property-values forecast)]
-                    [:div {:key (str "model-prop-" name)} [:h3.model-value {:key "name"} (i/capitalize name) ": " [:small {:key "small" :style {:font-weight "normal"}} value]]])])]]
+                    [:div {:key (str "model-prop-" name)}
+                     [:h3.model-value {:key "name"}
+                      (model-name-to-display model name) ": " [:small {:key "small" :style {:font-weight "normal"}} value]]])])]]
              [:div.pure-u-1-2
               {:key "model-info-right"}
               [:div.padding-1.text-left
