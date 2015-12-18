@@ -45,7 +45,7 @@
 
 (defn model-name-to-display
   [model name]
-  (some #(if (= name (:name %)) (:display %)) (:model/properties model)))
+  (some #(when (= name (:name %)) (:display %)) (:model/properties model)))
 
 (defcomponent
   header
