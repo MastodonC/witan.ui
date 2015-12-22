@@ -10,7 +10,7 @@ deployment:
     tag: /release-.*/
     commands:
       - ./build_prod.sh
-      - docker build --build-arg NGINX_SERVER_ADDR=$NGINX_SERVER_ADDR -t mastodonc/witan.ui .
+      - docker build --build-arg NGINX_SERVER_ADDR=$NGINX_SERVER_ADDR --build-arg DEPLOY_ADDR=$DEPLOY_ADDR -t mastodonc/witan.ui .
       - docker tag -f mastodonc/witan.ui mastodonc/witan.ui:latest
       - docker tag -f mastodonc/witan.ui mastodonc/witan.ui:git-$(echo $CIRCLE_SHA1 | cut -c1-12)
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
