@@ -22,6 +22,8 @@ WORKDIR /etc/nginx
 # env var
 ARG NGINX_SERVER_ADDR
 ENV NGINX_SERVER_ADDR $NGINX_SERVER_ADDR
+ARG DEPLOY_ADDR
+ENV DEPLOY_ADDR $DEPLOY_ADDR
 
 # move over files
 ADD target/build/ /var/www/witan-ui
