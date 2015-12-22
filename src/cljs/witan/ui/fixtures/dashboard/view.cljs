@@ -32,6 +32,7 @@
                                  [has-descendant? "witan-forecast-table-row-descendant"]]
                         version (:forecast/version forecast)
                         in-progress? (:forecast/in-progress? forecast)
+                        has-error? (:forecast/error forecast)
                         new? (zero? version)
                         tag (:forecast/tag forecast)]
             (html
@@ -62,10 +63,14 @@
 
                [:div.version-labels
                 {:key "witan-forecast-table-labels-key"}
-                (when in-progress?
-                  [:span.label.label-in-progress.label-small
+                (if has-error?
+                  [:span.label.label-error.label-small
                    {:key "witan-forecast-table-labels-in-prog-key"}
-                   (get-string :in-progress)])
+                   (get-string :error)]
+                  (when in-progress?
+                    [:span.label.label-in-progress.label-small
+                     {:key "witan-forecast-table-labels-in-prog-key"}
+                     (get-string :in-progress)]))
                 (when new?
                   [:span.label.label-new.label-small
                    {:key "witan-forecast-table-label-new-key"}
