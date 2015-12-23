@@ -42,12 +42,11 @@ server {
             proxy_pass http://${SERVER_ADDR}:${SERVER_PORT};
         }
 
-        location ~* /deploy/(.*) {
-            access_log /var/log/nginx/deploy_access.log;
+        location ~* /deploy/(.+) {
             real_ip_header X-Forwarded-For;
             set_real_ip_from 0.0.0.0/0;
 
-            rewrite ^/deploy/(.*)$ /\$1 break;
+            rewrite ^/deploy/(.+)$ /\$1 break;
             proxy_pass http://${DEPLOY_ADDR}:${DEPLOY_PORT};
         }
 
