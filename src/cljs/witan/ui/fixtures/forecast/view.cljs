@@ -86,7 +86,7 @@
            [:div.witan-pw-forecast-nav-box
             {:class (str (name action) (when active? " active"))
              :on-click #(do
-                          (venue/navigate! :views/forecast {:id id :version version :action (name action)})
+                          (venue/navigate! :views/forecast {:id id :version version :action (name action)} {:no-history true})
                           (.preventDefault %))}
             [:div.icon
              [:h2 (condp = action
