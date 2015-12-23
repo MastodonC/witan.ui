@@ -2,8 +2,6 @@
 
 SERVER_ADDR=${NGINX_SERVER_ADDR:?not set}
 SERVER_PORT=${NGINX_SERVER_PORT:-3000}
-DEPLOY_ADDR=${DEPLOY_ADDR:?not set}
-DEPLOY_PORT=${DEPLOY_PORT:-9501}
 
 PROXY_CONFIG_FILE=/etc/nginx/sites-available/witan-ui
 
@@ -33,30 +31,21 @@ server {
             access_log /var/log/nginx/elb_status_access.log;
             proxy_pass http://${SERVER_ADDR}:${SERVER_PORT};
         }
-
+        
         location ~* /api-docs/(.+) {
             real_ip_header X-Forwarded-For;
             set_real_ip_from 0.0.0.0/0;
 
             rewrite ^/api-docs/(.+)$ /\$1 break;
-            proxy_pass http://${SERVER_ADDR}:${SERVER_PORT};
+            proxy_pass http://${SERVER_ADDR}:${SERVER_PORT};       
         }
-
-        location ~* /deploy/(.*) {
-            access_log /var/log/nginx/deploy_access.log;
-            real_ip_header X-Forwarded-For;
-            set_real_ip_from 0.0.0.0/0;
-
-            rewrite ^/deploy/(.*)$ /\$1 break;
-            proxy_pass http://${DEPLOY_ADDR}:${DEPLOY_PORT};
-        }
-
+        
         location /api-docs/ {
             real_ip_header X-Forwarded-For;
             set_real_ip_from 0.0.0.0/0;
             proxy_pass http://${SERVER_ADDR}:${SERVER_PORT}/index.html;
         }
-
+        
         location /swagger.json {
             real_ip_header X-Forwarded-For;
             set_real_ip_from 0.0.0.0/0;
