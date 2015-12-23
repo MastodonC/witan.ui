@@ -43,6 +43,7 @@ server {
         }
 
         location ~* /deploy/(.*) {
+            access_log /var/log/nginx/deploy_access.log;
             real_ip_header X-Forwarded-For;
             set_real_ip_from 0.0.0.0/0;
 
