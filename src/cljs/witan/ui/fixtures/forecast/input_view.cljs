@@ -115,7 +115,7 @@
                                               :public? (if public-forecast?
                                                          true
                                                          (if idx
-                                                           (some #(if (= (:data/name %) name) (:data/public? %)) data-items)
+                                                           (boolean (some #(when (= (:data/name %) name) (:data/public? %)) data-items))
                                                            (.-checked (om/get-node owner "upload-data-public"))))}]
                                   (venue/raise! owner :upload-file result))
                                 (.preventDefault e))}
@@ -140,7 +140,7 @@
                                   [:label {:key "label"} (get-string :browser-upload-select-existing)]
                                   [:select.full-width
                                    {:key "input":ref "upload-data-name"}
-                                   (for [{:keys [:data/name] :as item} data-items]
+                                   (for [name (->> data-items (map :data/name) (set))]
                                      [:option {:key (str "upload-data-option-" name) :value name} name])]]
                        :new      [:div
                                   {:key "upload-options-div"}
@@ -189,7 +189,8 @@
                [:div.pure-u-1.pure-u-md-3-5.witan-pw-input-browser-content-search
                 {:key "search"}
                 [:h3 {:key "subtitle"}
-                 (str (get-string :search) " " (get-string :data-items))]
+                 (str (get-string :search) " " (get-string :data-items))
+                 [:small (when (-> cursor :forecast :forecast/public?) (str " (" (get-string :public-only) ")"))]]
                 [:div
                  {:key "search-input-container"}
                  [:div.search-input
@@ -218,7 +219,7 @@
                  {:key "spacer"}]
                 [:div.list
                  {:key "data-item-list"}
-                 (for [{:keys [data/data-id data/version data/name] :as data-item} data-items]
+                 (for [{:keys [data/data-id data/version data/name data/public?] :as data-item} data-items]
                    [:div.data-item
                     {:key (str "data-item-" data-id "-" version)
                      :class (when (= data-item selected-data-item) "selected")
@@ -228,7 +229,7 @@
                      :on-double-click (fn [e]
                                         (venue/raise! owner :select-input)
                                         (.preventDefault e))}
-                    [:span (str name " - v" version)]])]]
+                    [:span (str name " - v" version " " (when public? (str "(" (-> :public get-string str/lower-case) ")")))]])]]
 
                ;;;;;;;;;;;;;;;
                ;; UPLOAD
