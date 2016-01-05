@@ -90,7 +90,8 @@
    :public                         "Public"
    :upload-data-public-explain     "Tick this box to make the data visible to everyone (public)"
    :upload-data-public-warning     "As this is a public projection, any data you upload will also become public."
-   :about-model                    "About this model"})
+   :about-model                    "About this model"
+   :public-only                    "Public only"})
 
 
 

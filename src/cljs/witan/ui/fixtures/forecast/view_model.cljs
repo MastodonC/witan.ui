@@ -69,6 +69,10 @@
         (om/update! cursor :missing-required (clojure.set/difference categories f-categories)))
       (om/update! cursor :missing-required #{}))))
 
+(defn sort-data-items
+  [data-items]
+  (sort-by #(str (:data/name %) (:data/version %)) data-items))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod event-handler
@@ -244,12 +248,13 @@
 
 (defmethod response-handler
   [:upload-data :success]
-  [owner _ data-items cursor]
+  [owner _ {:keys [data-items new-data-item]} cursor]
   (om/update! cursor :uploading?      false)
   (om/update! cursor :upload-file     nil)
   (om/update! cursor :upload-filename "")
   (om/update! cursor :upload-success? true)
-  (om/update! cursor :data-items data-items))
+  (om/update! cursor :data-items (sort-data-items data-items))
+  (om/update! cursor :selected-data-item new-data-item))
 
 (defmethod response-handler
   [:upload-data :failure]
@@ -261,7 +266,8 @@
 (defmethod response-handler
   [:fetch-data-items :success]
   [owner _ data-items cursor]
-  (om/update! cursor :data-items data-items))
+  (om/update! cursor :data-items (sort-data-items
+                                  (if (-> @cursor :forecast :forecast/public?) (filter :data/public? data-items) data-items))))
 
 (defmethod response-handler
   [:fetch-data-items :failure]
@@ -271,12 +277,7 @@
 (defmethod response-handler
   [:filter-data-items :success]
   [owner _ data-items cursor]
-  (om/update! cursor :data-items data-items))
-
-(defmethod response-handler
-  [:filter-data-items :success]
-  [owner _ data-items cursor]
-  (om/update! cursor :data-items data-items))
+  (om/update! cursor :data-items (sort-data-items data-items)))
 
 (defmethod response-handler
   [:add-forecast-version :success]

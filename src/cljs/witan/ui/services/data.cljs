@@ -369,8 +369,9 @@
   ;; doesn't hear about it until we send the key as part of a forecast update
   (let [data-item (assoc raw-data-item :local? true)]
     (log/debug "Upload succeeded.")
-    (put-item-into-db! data-item :data data-id-db-workaround)
-    (put! result-ch [:success (fetch-data-items {:category (:category data-item)})])))
+    (let [new-data-item (put-item-into-db! data-item :data data-id-db-workaround)]
+      (put! result-ch [:success {:data-items (fetch-data-items {:category (:category data-item)})
+                                 :new-data-item new-data-item}]))))
 
 (defmethod response-handler
   [:upload-data :failure]
