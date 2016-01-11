@@ -7,19 +7,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(wm/create-standard-view-model!)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn select-model!
-  [cursor model]
-  (om/update! cursor :selected-model model))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn on-initialise
-  [owner cursor])
-
 (defn on-activate
   [owner args cursor]
   (om/update! cursor :working? false)
@@ -29,7 +16,15 @@
                      :request :fetch-models
                      :context cursor})))
 
-;;;
+(wm/create-standard-view-model! {:on-activate on-activate})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn select-model!
+  [cursor model]
+  (om/update! cursor :selected-model model))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod event-handler
   :event/create-forecast

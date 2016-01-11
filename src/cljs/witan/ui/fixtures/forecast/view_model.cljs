@@ -2,17 +2,13 @@
     (:require [om.core :as om :include-macros true]
               [witan.ui.services.data :as data]
               [venue.core :as venue :include-macros true]
-              [cljs.core.async :refer [timeout <!]]
+              [cljs.core.async :refer [timeout <! chan put!]]
               [witan.ui.util :as util])
     (:require-macros [cljs-log.core :as log]
                      [witan.ui.macros :as wm]
-                     [cljs.core.async.macros :refer [go]]))
+                     [cljs.core.async.macros :refer [go alt!]]))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(wm/create-standard-view-model!)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(def page-exit-ch (chan))
 
 (defn reset-cursor!
   [cursor]
@@ -32,8 +28,7 @@
   (om/update! cursor :selected-data-item   nil)
   (om/update! cursor :creating?            false))
 
-(defn on-initialise
-  [owner cursor])
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-activate
   [owner {:keys [id action version]} cursor]
@@ -49,6 +44,16 @@
     (om/update! cursor :id      id)
     (om/update! cursor :action  (or (not-empty action) "input"))
     (om/update! cursor :version version)))
+
+(defn on-deactivate
+  [owner cursor]
+  (log/debug "Deactivating forecast VM")
+  (put! page-exit-ch true))
+
+(wm/create-standard-view-model! {:on-activate on-activate
+                                 :on-deactivate on-deactivate})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn update-required-inputs!
   "Updates `:missing-required` based on forecast and model input difference"
@@ -225,12 +230,13 @@
   ;; setup auto-refresh
   (when (:forecast/in-progress? forecast)
     (go
-      (<! (timeout 10000))
-      (venue/request! {:owner   owner
-                       :service :service/data
-                       :request :fetch-forecast
-                       :args    {:id (:forecast/forecast-id forecast) :version (:forecast/version forecast)}
-                       :context cursor}))))
+      (alt!
+        (timeout 10000) (venue/request! {:owner   owner
+                                         :service :service/data
+                                         :request :fetch-forecast
+                                         :args    {:id (:forecast/forecast-id forecast) :version (:forecast/version forecast)}
+                                         :context cursor})
+        page-exit-ch (log/warn "Auto-refresh was cancelled by page exit")))))
 
 (defmethod response-handler
   [:fetch-forecast :failure]

@@ -8,25 +8,22 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(wm/create-standard-view-model!)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn on-initialise
-  [owner cursor])
-
 (defn on-activate
   [owner args cursor]
   (om/update! cursor :logged-in? (data/logged-in?)))
+
+(wm/create-standard-view-model! {:on-activate on-activate})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod event-handler
   :event/reset-password
   [owner _ email cursor]
   (.open js/window
          (str
-         "mailto:support@mastodonc.com?subject=[Witan Password Reset Request]"
-         "&body=Please reset the password for the following email address: "
-         email)))
+          "mailto:support@mastodonc.com?subject=[Witan Password Reset Request]"
+          "&body=Please reset the password for the following email address: "
+          email)))
 
 (defmethod event-handler
   :event/show-password-reset
