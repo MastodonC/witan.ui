@@ -7,17 +7,11 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(wm/create-standard-view-model!)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (defn fetch-user! [owner cursor]
   (venue/request! {:owner owner
                    :service :service/data
                    :request :fetch-user
                    :context cursor}))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-initialise
   [owner cursor]
@@ -25,8 +19,7 @@
    :api/user-logged-in
    #(fetch-user! owner cursor)))
 
-(defn on-activate
-  [owner args cursor])
+(wm/create-standard-view-model! {:on-initialise on-initialise})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

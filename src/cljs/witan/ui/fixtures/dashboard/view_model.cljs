@@ -24,13 +24,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(wm/create-standard-view-model!)
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn on-initialise
-  [owner cursor])
-
 (defn on-activate
   [owner args cursor]
   (when (data/logged-in?)
@@ -40,6 +33,8 @@
                      :service :service/data
                      :request :fetch-forecasts
                      :context cursor})))
+
+(wm/create-standard-view-model! {:on-activate on-activate})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

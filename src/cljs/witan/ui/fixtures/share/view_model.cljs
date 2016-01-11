@@ -6,12 +6,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(wm/create-standard-view-model!)
+(wm/create-standard-view-model! {})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defn on-initialise
-  [owner cursor])
-
-(defn on-activate
-  [owner args cursor])
