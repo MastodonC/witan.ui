@@ -105,70 +105,72 @@
                    {:key "filename"}
                    [:small (if upload-file upload-filename (get-string :browser-no-file-selected))]]]
 
-                 [:form.pure-form.pure-form-stacked
-                  {:key "upload-form-submit"
-                   :on-submit (fn [e]
-                                (let [node (om/get-node owner "upload-data-name")
-                                      idx (.-selectedIndex node) ;; if it has a selectedIndex it's a select input
-                                      name (if idx (.-value (aget (.-options node) idx)) (.-value node))
-                                      result {:name name
-                                              :public? (if public-forecast?
-                                                         true
-                                                         (if idx
-                                                           (boolean (some #(when (= (:data/name %) name) (:data/public? %)) data-items))
-                                                           (.-checked (om/get-node owner "upload-data-public"))))}]
-                                  (venue/raise! owner :upload-file result))
-                                (.preventDefault e))}
-
-                  ;;;;;;;;;;;;;;;
-                  ;; UPLOAD TYPE SELECTOR
-                  ;;;;;;;;;;;;;;;
-                  [:select {:key "upload-select"
-                            :disabled (if-not upload-file "disabled")
-                            :value upload-type
-                            :on-change #(venue/raise! owner :pending-upload-type (.. % -target -value))}
-                   [:option {:key "existing" :value "existing"} (get-string :browser-upload-option-existing) ]
-                   [:option {:key "new" :value "new" } (get-string :browser-upload-option-new)]]
-
-                  (cond
-                    (and upload-file browsing?)
-                    [:div
-                     {:key "upload-options"}
-                     (condp = upload-type
-                       :existing [:div
-                                  {:key "upload-options-div"}
-                                  [:label {:key "label"} (get-string :browser-upload-select-existing)]
-                                  [:select.full-width
-                                   {:key "input":ref "upload-data-name"}
-                                   (for [name (->> data-items (map :data/name) (set))]
-                                     [:option {:key (str "upload-data-option-" name) :value name} name])]]
-                       :new      [:div
-                                  {:key "upload-options-div"}
-                                  [:label {:key "label"} (get-string :browser-upload-select-new)]
-                                  [:input.full-width {:key "input"
-                                                      :ref "upload-data-name"
-                                                      :type "text"
-                                                      :required true}]
-                                  (if public-forecast?
-                                    [:small (get-string :upload-data-public-warning)]
-                                    [:small {} [:input.pure-input {:type "checkbox"
-                                                                   :ref "upload-data-public"}] " " (get-string :upload-data-public-explain)])])
-
-                     [:button.pure-button.button-primary.upload-button {:key "button"} (get-string :upload)]]
+                 (let [data-item-names (->> data-items (map :data/name) (set))
+                       [upload-type lock-selector] (if (empty? data-item-names) [:new true] [upload-type false])]
+                   [:form.pure-form.pure-form-stacked
+                    {:key "upload-form-submit"
+                     :on-submit (fn [e]
+                                  (let [node (om/get-node owner "upload-data-name")
+                                        idx (.-selectedIndex node) ;; if it has a selectedIndex it's a select input
+                                        name (if idx (.-value (aget (.-options node) idx)) (.-value node))
+                                        result {:name name
+                                                :public? (if public-forecast?
+                                                           true
+                                                           (if idx
+                                                             (boolean (some #(when (= (:data/name %) name) (:data/public? %)) data-items))
+                                                             (.-checked (om/get-node owner "upload-data-public"))))}]
+                                    (venue/raise! owner :upload-file result))
+                                  (.preventDefault e))}
 
                     ;;;;;;;;;;;;;;;
-                    ;; SUCCESS MESSAGE
+                    ;; UPLOAD TYPE SELECTOR
                     ;;;;;;;;;;;;;;;
-                    upload-success?
-                    [:div
-                     {:key "upload-success"}
-                     [:div.spacer
-                      {:key "spacer"}]
-                     [:p
-                      {:key "paragraph"}
-                      [:i.fa.fa-check.text-success
-                       {:key "upload-tick" :style {:margin-right "0.5em"}}]
-                      [:span {:key "label"} (get-string :upload-success ":" last-upload-filename)]]])]])]))))
+                    [:select {:key "upload-select"
+                              :disabled (if (or lock-selector (not upload-file)) "disabled")
+                              :value upload-type
+                              :on-change #(venue/raise! owner :pending-upload-type (.. % -target -value))}
+                     [:option {:key "existing" :value "existing"} (get-string :browser-upload-option-existing) ]
+                     [:option {:key "new" :value "new" } (get-string :browser-upload-option-new)]]
+
+                    (cond
+                      (and upload-file browsing?)
+                      [:div
+                       {:key "upload-options"}
+                       (condp = upload-type
+                         :existing [:div
+                                    {:key "upload-options-div"}
+                                    [:label {:key "label"} (get-string :browser-upload-select-existing)]
+                                    [:select.full-width
+                                     {:key "input":ref "upload-data-name"}
+                                     (for [name data-item-names]
+                                       [:option {:key (str "upload-data-option-" name) :value name} name])]]
+                         :new      [:div
+                                    {:key "upload-options-div"}
+                                    [:label {:key "label"} (get-string :browser-upload-select-new)]
+                                    [:input.full-width {:key "input"
+                                                        :ref "upload-data-name"
+                                                        :type "text"
+                                                        :required true}]
+                                    (if public-forecast?
+                                      [:small [:strong (get-string :upload-data-public-warning)]]
+                                      [:small {} [:input.pure-input {:type "checkbox"
+                                                                     :ref "upload-data-public"}] " " (get-string :upload-data-public-explain)])])
+
+                       [:button.pure-button.button-primary.upload-button {:key "button"} (get-string :upload)]]
+
+                      ;;;;;;;;;;;;;;;
+                      ;; SUCCESS MESSAGE
+                      ;;;;;;;;;;;;;;;
+                      upload-success?
+                      [:div
+                       {:key "upload-success"}
+                       [:div.spacer
+                        {:key "spacer"}]
+                       [:p
+                        {:key "paragraph"}
+                        [:i.fa.fa-check.text-success
+                         {:key "upload-tick" :style {:margin-right "0.5em"}}]
+                        [:span {:key "label"} (get-string :upload-success ":" last-upload-filename)]]])])])]))))
 
 (defcomponent
   input-browser
