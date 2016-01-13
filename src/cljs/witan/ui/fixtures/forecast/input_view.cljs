@@ -181,18 +181,28 @@
                          selected-data-item]} cursor
                          has-selected? (contains? (set data-items) selected-data-item)]
              [:div.witan-pw-input-browser
+              {:key "outer"}
               [:div.witan-pw-input-browser-content
-               [:strong {:key "title"} (get-string :browser-choose-data)]
-               [:div.spacer {:key "spacer"}]
+               {:key "content"}
+               [:strong
+                {:key "title"}
+                (get-string :browser-choose-data)]
+               [:div.spacer
+                {:key "spacer"}]
 
                ;;;;;;;;;;;;;;;
                ;; SEARCH
                ;;;;;;;;;;;;;;;
                [:div.pure-u-1.pure-u-md-3-5.witan-pw-input-browser-content-search
                 {:key "search"}
-                [:h3 {:key "subtitle"}
-                 (str (get-string :search) " " (get-string :data-items))
-                 [:small (when (-> cursor :forecast :forecast/public?) (str " (" (get-string :public-only) ")"))]]
+                [:h3
+                 {:key "subtitle"}
+                 [:span
+                  {:key "text"}
+                  (str (get-string :search) " " (get-string :data-items))]
+                 [:small
+                  {:key "public-reminder"}
+                  (when (-> cursor :forecast :forecast/public?) (str " (" (get-string :public-only) ")"))]]
                 [:div
                  {:key "search-input-container"}
                  [:div.search-input
@@ -208,7 +218,11 @@
                     :on-click (fn [e]
                                 (venue/raise! owner :select-input)
                                 (.preventDefault e))}
-                   [:i.fa.fa-check] (str " " (get-string :use-data-item))]
+                   [:i.fa.fa-check
+                    {:key "check"}]
+                   [:span
+                    {:key "text"}
+                    (str " " (get-string :use-data-item))]]
                   (let [url       (:data/s3-url selected-data-item)
                         disabled? (or (not has-selected?) (not url))]
                     [:a
@@ -216,7 +230,11 @@
                       :href (when-not disabled? url)}
                      [:button.pure-button.button-primary
                       {:disabled disabled?}
-                      [:i.fa.fa-download] (str " " (get-string :download))]])]]
+                      [:i.fa.fa-download
+                       {:key "download"}]
+                      [:span
+                       {:key "text"}
+                       (str " " (get-string :download))]]])]]
                 [:div.spacer
                  {:key "spacer"}]
                 [:div.list
@@ -231,7 +249,9 @@
                      :on-double-click (fn [e]
                                         (venue/raise! owner :select-input)
                                         (.preventDefault e))}
-                    [:span (str name " - v" version " " (when public? (str "(" (-> :public get-string str/lower-case) ")")))]])]]
+                    [:span
+                     {:key "data-item-name"}
+                     (str name " - v" version " " (when public? (str "(" (-> :public get-string str/lower-case) ")")))]])]]
 
                ;;;;;;;;;;;;;;;
                ;; UPLOAD
@@ -275,12 +295,16 @@
               {:key (key-prefix "table-body")}
               [:tbody.witan-pw-input-data-row.text-left
                [:td {:key (key-prefix "name") :style {:width row-name-width}}
-                [:strong.category (-> input :category i/capitalize)]
+                [:strong.category
+                 {:key (str (key-prefix "name-") "category")}
+                 (-> input :category i/capitalize)]
                 [:span.description
-                 {:dangerouslySetInnerHTML
+                 {:key (str (key-prefix "name-") "description")
+                  :dangerouslySetInnerHTML
                   {:__html (or (util/str-fmt-map (:description input)
                                                  {:model-properties prep-property-values}) (get-string :no-description-provided))}}]
                 [:div
+                 {:key (str (key-prefix "name-") "button")}
                  [:button.pure-button.witan-pw-browse-toggle
                   {:on-click (fn [e]
                                (venue/raise! owner :toggle-browse-input input)
@@ -330,9 +354,9 @@
                           :forecast (:forecast cursor)} {:key :name})]
 
               [:div.pure-u-1.witan-pw-input-browser-container
-               {:style {:height (if browsing? browser-height "0px")}}
-               (om/build input-browser {:cursor cursor :browsing? browsing?})]
-              ]))))
+               {:style {:height (if browsing? browser-height "0px")}
+                :key (prefix "-input-browser-container")}
+               (om/build input-browser {:cursor cursor :browsing? browsing?})]]))))
 
 (defcomponent view
   [[action {:keys [edited-forecast forecast model browsing-input] :as cursor}] owner]
