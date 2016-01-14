@@ -7,31 +7,15 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn fetch-user! [owner cursor]
-  (venue/request! {:owner owner
-                   :service :service/data
-                   :request :fetch-user
-                   :context cursor}))
-
 (defn on-initialise
   [owner cursor]
   (util/inline-subscribe!
-   :api/user-logged-in
-   #(fetch-user! owner cursor)))
+   :api/user-identified
+   #(om/update! cursor :user %)))
 
 (wm/create-standard-view-model! {:on-initialise on-initialise})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defmethod response-handler
-  [:fetch-user :success]
-  [owner _ user cursor]
-  (om/update! cursor :user user))
-
-(defmethod response-handler
-  [:fetch-user :failure]
-  [owner _ _ cursor]
-  (log/debug "fetch-user failure"))
 
 (defmethod response-handler
   [:logout :success]

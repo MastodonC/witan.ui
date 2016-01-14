@@ -16,11 +16,14 @@
 
 (defmulti do-login (fn [l response] l))
 (defmethod do-login true
-  [_ response]
+  [_ {:keys [id username name]}]
   (log-event "Switching ON Intercom")
-  (log/debug "RESPONSE" response)
   (.Intercom js/window "boot"
-             (clj->js {:app_id "hwl3xxh2" :user_id (:id response)})))
+             (clj->js {:app_id "hwl3xxh2"
+                       :user_id id
+                       :email username
+                       :name name
+                       :widget {:activator "#IntercomDefaultWidget"}})))
 
 (defmethod do-login false
   [_ _]
@@ -28,7 +31,7 @@
   (.Intercom js/window "shutdown"))
 
 (util/inline-subscribe!
- :api/user-logged-in
+ :api/user-identified
  #(do-login true %))
 
 (util/inline-subscribe!
