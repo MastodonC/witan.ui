@@ -2,7 +2,7 @@
 
 # build
 lein clean
-lein cljsbuild once prod
+LOG_LEVEL=2 lein cljsbuild once prod
 lein garden once
 
 # cp
