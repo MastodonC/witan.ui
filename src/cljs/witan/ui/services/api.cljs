@@ -127,11 +127,6 @@
   (GET event (str "/forecasts/" id) nil result-ch))
 
 (defmethod service-m
-  :get-user
-  [event id result-ch]
-  (GET event "/me" nil result-ch))
-
-(defmethod service-m
   :logout
   [event id result-ch]
   (logout!)
@@ -194,14 +189,33 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn- identify-user
+  []
+  (let [result-ch (chan)]
+    (go
+      (GET :post-login-get-user "/me" nil result-ch)
+      (let [[result response] (<! result-ch)]
+        (if (= result :success)
+          ;; id success
+          (do
+            (log/info "User was identified:" (:name response) " - " (:username response))
+            (venue/publish! :api/user-identified response))
+          ;; id fail
+          (do
+            (log/severe "Failed to identify this user - logging out...")
+            (logout!)))))))
+
 (defn- login!
   [response]
   (if-let [token (:token response)]
+    ;; login success
     (do
       (log/info "Login success.")
       (save-token! token)
-      (venue/publish! :api/user-logged-in)
+      (venue/publish! :api/user-logged-in {:id (:id response)})
+      (identify-user)
       true)
+    ;; login fail
     (do
       (log/info "Login failed.")
       (log/debug "Response:" response)
