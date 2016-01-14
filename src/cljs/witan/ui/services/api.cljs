@@ -200,7 +200,7 @@
     (do
       (log/info "Login success.")
       (save-token! token)
-      (venue/publish! :api/user-logged-in)
+      (venue/publish! :api/user-logged-in response)
       true)
     (do
       (log/info "Login failed.")
