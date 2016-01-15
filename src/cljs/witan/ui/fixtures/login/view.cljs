@@ -72,7 +72,12 @@
                                           (set! (.-innerText (. js/document (getElementById "reset-button"))) (get-string :thanks))
                                           (set! (.-disabled (. js/document (getElementById "reset-button"))) true)
                                           (set! (.-disabled (. js/document (getElementById "reset-input"))) true))
-                                 (venue/raise! owner :event/reset-password (.-value (om/get-node owner "reset-email")))
+                                 (.open js/window
+                                        (str
+                                         "mailto:witan@mastodonc.com?subject=[Witan Password Reset Request]"
+                                         "&body=Please reset the password for the following email address: "
+                                         (.-value (om/get-node owner "reset-email"))) "resetEmailWindow" "height=400,width=600,left=10,top=10")
+                                 #_(venue/raise! owner :event/reset-password (.-value (om/get-node owner "reset-email")))
                                  (.preventDefault e))}
              [:input {:tab-index 1
                       :ref "reset-email"
