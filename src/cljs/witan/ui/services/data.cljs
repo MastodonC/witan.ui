@@ -160,7 +160,13 @@
   :filter-forecasts
   [owner event args result-ch]
   (let [forecasts (filter-forecasts (select-keys args [:expand :filter]))]
-    (put! result-ch [:success {:forecasts forecasts
+    (put! result-ch [:success {:forecasts (->> forecasts
+                                               (group-by :forecast/name)
+                                               (sort-by key)
+                                               (map second)
+                                               (mapcat #(->> %
+                                                             (sort-by :forecast/version)
+                                                             (reverse))))
                                :has-ancestors (->>
                                                (filter-top-level-forecasts-with-ancestors forecasts)
                                                (map #(vector (:db/id %) (:forecast/version-id %)))
