@@ -21,9 +21,9 @@
   [owner _ email cursor]
   (.open js/window
          (str
-          "mailto:support@mastodonc.com?subject=[Witan Password Reset Request]"
+          "mailto:witan@mastodonc.com?subject=[Witan Password Reset Request]"
           "&body=Please reset the password for the following email address: "
-          email)))
+          email) "resetEmailWindow" "height=400,width=600,left=10,top=10"))
 
 (defmethod event-handler
   :event/show-password-reset
