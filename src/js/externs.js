@@ -1,0 +1,1 @@
+window.Intercom = function() {};

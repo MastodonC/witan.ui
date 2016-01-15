@@ -35,6 +35,7 @@
                                    :main witan.ui.core
                                    :optimizations :advanced
                                    :pretty-print false
+                                   :externs ["../js/externs.js"]
                                    :warnings {:single-segment-namespace false}}}
                        {:id "dev"
                         :source-paths ["src/cljs"]
