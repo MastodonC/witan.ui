@@ -19,11 +19,11 @@
 (defmethod event-handler
   :event/reset-password
   [owner _ email cursor]
-  (.open js/window
-         (str
-          "mailto:witan@mastodonc.com?subject=[Witan Password Reset Request]"
-          "&body=Please reset the password for the following email address: "
-          email) "resetEmailWindow" "height=400,width=600,left=10,top=10"))
+  #_(.open js/window
+           (str
+            "mailto:witan@mastodonc.com?subject=[Witan Password Reset Request]"
+            "&body=Please reset the password for the following email address: "
+            email) "resetEmailWindow" "height=400,width=600,left=10,top=10"))
 
 (defmethod event-handler
   :event/show-password-reset
