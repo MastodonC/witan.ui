@@ -97,6 +97,8 @@
               [:h3 {:key "sad-face"} [:i.fa.fa-frown-o.fa-2x]]]
              :else
              [:div
+              [:div.pure-u-2-3
+               [:h4 (get-string :output-extra-info)]]
               ;; first row
               (let [outputs        (:forecast/outputs forecast)
                     first-output   (first outputs)
