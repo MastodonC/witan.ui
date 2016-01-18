@@ -47,7 +47,9 @@
 
 (defn on-deactivate
   [owner cursor]
-  (log/debug "Deactivating forecast VM")
+  (log/debug "Deactivating forecast VM" cursor)
+  (om/update! cursor :id      nil)
+  (om/update! cursor :version nil) ;; reset these
   (put! page-exit-ch true))
 
 (wm/create-standard-view-model! {:on-activate on-activate
