@@ -47,7 +47,7 @@
 
 (defn on-deactivate
   [owner cursor]
-  (log/debug "Deactivating forecast VM" cursor)
+  (log/debug "Deactivating forecast VM")
   (om/update! cursor :id      nil)
   (om/update! cursor :version nil) ;; reset these
   (put! page-exit-ch true))

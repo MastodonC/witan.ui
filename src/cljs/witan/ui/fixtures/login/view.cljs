@@ -16,9 +16,59 @@
   [cursor owner]
   (render [_]
           (html [:div
-                 [:h3 (get-string :signing-in)]
+                 [:h3 (get-string (:waiting-msg cursor))]
                  [:div#loading
                   [:i.fa.fa-refresh.fa-2x.fa-spin]]])))
+
+(defcomponentmethod
+  login-state-view
+  :sign-up
+  [cursor owner]
+  (render [_]
+          (html [:div
+                 [:h3 (get-string :create-account)]
+                 [:span#error-message (:message cursor)]
+                 [:form {:class "pure-form pure-form-stacked"
+                         :on-submit (fn [e]
+                                      (venue/raise! owner :event/attempt-sign-up {:email [(.-value (om/get-node owner "email"))
+                                                                                          (.-value (om/get-node owner "confirm-email"))]
+                                                                                  :password [(.-value (om/get-node owner "password"))
+                                                                                             (.-value (om/get-node owner "confirm-password"))]
+                                                                                  :token (.-value (om/get-node owner "token"))})
+                                      (.preventDefault e))}
+                  [:input {:tab-index 1
+                           :ref "token"
+                           :type "text"
+                           :id "token"
+                           :placeholder (get-string :sign-up-token)
+                           :required :required}]
+                  [:input {:tab-index 2
+                           :ref "email"
+                           :type "email"
+                           :id "login-email"
+                           :placeholder (get-string :email)
+                           :required :required}]
+                  [:input {:tab-index 3
+                           :ref "confirm-email"
+                           :type "email"
+                           :id "confirm-email"
+                           :placeholder (get-string :confirm-email)
+                           :required :required}]
+                  [:input {:tab-index 4
+                           :ref "password"
+                           :type "password"
+                           :id "password"
+                           :placeholder (get-string :password)
+                           :required :required}]
+                  [:input {:tab-index 5
+                           :ref "confirm-password"
+                           :type "password"
+                           :id "confirm-password"
+                           :placeholder (get-string :confirm-password)
+                           :require :required}]
+                  [:button {:tab-index 6
+                            :type "submit"
+                            :class "pure-button pure-button-primary"} (get-string :create-account)]]])))
 
 (defcomponentmethod
   login-state-view
@@ -26,7 +76,7 @@
   [cursor owner]
   (did-mount [_]
              (when-let [node (.getElementById js/document "login-email")]
-                  (set! (.-value node) (:email @cursor))))
+               (set! (.-value node) (:email @cursor))))
   (render [_]
           (html
            [:div
@@ -54,7 +104,14 @@
              [:a {:id "forgotten-link"
                   :on-click (fn [e]
                               (venue/raise! owner :event/show-password-reset true)
-                              (.preventDefault e))} (str "(" (get-string :forgotten-question) ")")]]])))
+                              (.preventDefault e))} (str "(" (get-string :forgotten-question) ")")]]
+            [:h3 (get-string :create-account-header)]
+            [:p
+             [:small.text-white (get-string :create-account-info)]]
+            [:button.pure-button.pure-button-success
+             {:on-click (fn [e]
+                          (venue/raise! owner :event/goto-sign-up)
+                          (.preventDefault e))} (get-string :create-account)]])))
 
 (defcomponentmethod
   login-state-view
