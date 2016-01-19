@@ -37,6 +37,7 @@
    :confirm-password               "Confirm password"
    :email-no-match                 "The provided email addresses do not match."
    :password-no-match              "The provided passwords do not match."
+   :password-under-length          "The provided password is too short. Please make passwords at least 8 characters long."
    :processing-account             "Creating account..."
    :forgotten-question             "forgotten your password?"
    :forgotten-password             "Forgotten Password"

@@ -58,15 +58,17 @@
       (om/update! cursor :message (s/get-string :email-no-match))
       (if-not (= password confirm-password)
         (om/update! cursor :message (s/get-string :password-no-match))
-        (do
-          (om/update! cursor :phase :waiting)
-          (om/update! cursor :waiting-msg :processing-account)
-          (venue/request! {:owner owner
-                           :service :service/api
-                           :request :sign-up
-                           :args (merge {:username email :password password}
-                                        (select-keys args [:invite-token :name]))
-                           :context cursor}))))))
+        (if-not (>= (count password) 8)
+          (om/update! cursor :message (s/get-string :password-under-length))
+          (do
+            (om/update! cursor :phase :waiting)
+            (om/update! cursor :waiting-msg :processing-account)
+            (venue/request! {:owner owner
+                             :service :service/api
+                             :request :sign-up
+                             :args (merge {:username email :password password}
+                                          (select-keys args [:invite-token :name]))
+                             :context cursor})))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

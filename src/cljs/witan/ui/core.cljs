@@ -92,7 +92,6 @@
            :message    nil
            :logged-in? false
            :email      nil
-           :password   nil
            :waiting-msg :signing-in}})
 
 (venue/defstatic!
