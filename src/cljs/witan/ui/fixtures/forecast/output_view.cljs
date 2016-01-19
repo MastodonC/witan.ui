@@ -44,7 +44,10 @@
                 #_[:button.pure-button.download
                    [:i.fa.fa-file-excel-o] [:span " Excel "] [:i.fa.fa-check.text-success]]
                 ;; css
-                [:a {:href s3-url :target "_blank"}
+                [:a {:on-click (fn [e]
+                                 (venue/raise! owner :download-output {:type :csv :url s3-url})
+                                 (.open js/window s3-url "_blank")
+                                 (.preventDefault e))}
                  [:button.pure-button.download
                   [:i.fa.fa-file-text-o] [:span " CSV "]]]
                 ;; zip
