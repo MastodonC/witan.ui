@@ -51,7 +51,7 @@
 
 (defmethod event-handler
   :event/attempt-sign-up
-  [owner _ {:keys [email password token] :as args} cursor]
+  [owner _ {:keys [email password] :as args} cursor]
   (let [[email confirm-email]       email
         [password confirm-password] password]
     (if-not (= email confirm-email)
@@ -61,12 +61,11 @@
         (do
           (om/update! cursor :phase :waiting)
           (om/update! cursor :waiting-msg :processing-account)
-          (om/update! cursor :email email)
-          (om/update! cursor :password password)
           (venue/request! {:owner owner
                            :service :service/api
                            :request :sign-up
-                           :args (select-keys args [:email :password :token])
+                           :args (merge {:username email :password password}
+                                        (select-keys args [:invite-token :name]))
                            :context cursor}))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

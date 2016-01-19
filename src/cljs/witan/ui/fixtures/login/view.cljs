@@ -34,7 +34,8 @@
                                                                                           (.-value (om/get-node owner "confirm-email"))]
                                                                                   :password [(.-value (om/get-node owner "password"))
                                                                                              (.-value (om/get-node owner "confirm-password"))]
-                                                                                  :token (.-value (om/get-node owner "token"))})
+                                                                                  :invite-token (.-value (om/get-node owner "token"))
+                                                                                  :name (.-value (om/get-node owner "name"))})
                                       (.preventDefault e))}
                   [:input {:tab-index 1
                            :ref "token"
@@ -43,30 +44,36 @@
                            :placeholder (get-string :sign-up-token)
                            :required :required}]
                   [:input {:tab-index 2
+                           :ref "name"
+                           :type "text"
+                           :id "name"
+                           :placeholder (get-string :name)
+                           :required :required}]
+                  [:input {:tab-index 3
                            :ref "email"
                            :type "email"
                            :id "login-email"
                            :placeholder (get-string :email)
                            :required :required}]
-                  [:input {:tab-index 3
+                  [:input {:tab-index 4
                            :ref "confirm-email"
                            :type "email"
                            :id "confirm-email"
                            :placeholder (get-string :confirm-email)
                            :required :required}]
-                  [:input {:tab-index 4
+                  [:input {:tab-index 5
                            :ref "password"
                            :type "password"
                            :id "password"
                            :placeholder (get-string :password)
                            :required :required}]
-                  [:input {:tab-index 5
+                  [:input {:tab-index 6
                            :ref "confirm-password"
                            :type "password"
                            :id "confirm-password"
                            :placeholder (get-string :confirm-password)
                            :require :required}]
-                  [:button {:tab-index 6
+                  [:button {:tab-index 7
                             :type "submit"
                             :class "pure-button pure-button-primary"} (get-string :create-account)]]])))
 

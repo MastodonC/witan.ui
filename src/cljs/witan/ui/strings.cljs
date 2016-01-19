@@ -26,7 +26,8 @@
    :model-publisher                "Publisher"
    :optional                       "(optional)"
    :sign-in                        "Sign In"
-   :sign-up-token                  "Sign-up Token"
+   :sign-up-token                  "Invite token"
+   :name                           "Name"
    :create-account-header          "Need an account?"
    :create-account                 "Create Account"
    :create-account-info            "If you've been invited and have received your sign-up token, you can create your Witan account by clicking the button below."
@@ -45,7 +46,7 @@
    :back                           "Back"
    :thanks                         "Thanks"
    :signing-in                     "Signing in..."
-   :sign-up-failure                "There was a problem signing-up with the provided details. Please check your sign-up token and try again."
+   :sign-up-failure                "There was a problem signing-up with the provided details. Please check your invite token and try again."
    :sign-in-failure                "There was a problem with your details. Please try again."
    :api-failure                    "Sorry, we're having a problem with the service. Please try again. If the problem persists, please contact us at witan@mastodonc.com" ;; TODO add link?
    :create                         "Create"
