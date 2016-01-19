@@ -53,7 +53,7 @@
   [{:keys [target id args] :as view-event}]
   (when (and (= target :app) (not= (:view-event @analytics-state) view-event))
     (swap! analytics-state #(assoc % :view-event view-event))
-    (.Intercom js/window "trackEvent" "pageChange")))
+    (.Intercom js/window "trackEvent" "pageChange" (clj->js {:target target :id id :args (str args)}))))
 
 ;;;;;;;;;;;;;;;;;;;;;
 
