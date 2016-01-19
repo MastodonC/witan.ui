@@ -97,6 +97,15 @@
   (om/update! cursor :edited-forecast nil))
 
 (defmethod event-handler
+  :download-output
+  [owner _ args cursor]
+  (log/info "Downloading an output:" args)
+  (venue/request! {:owner   owner
+                   :service :service/analytics
+                   :request :track-output-download
+                   :args    args}))
+
+(defmethod event-handler
   :refresh-forecast
   [owner _ _ cursor]
   (.reload (.-location js/window)))
@@ -306,3 +315,7 @@
   [:download-file :failure]
   [owner _ _ cursor]
   (js/alert "Download failed."))
+
+(defmethod response-handler
+  [:track-output-download :success]
+  [owner _ _ cursor])

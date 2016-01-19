@@ -24,11 +24,38 @@
   (.setInterval js/window do-update (* 1000 60 4))) ;; every 4 mins
 
 (defmulti request-handler
-  (fn [event args result-ch] event))
+  (fn [event args result-ch]
+    (log-event (str event " - " args))
+    event))
 
 (defmethod request-handler
-  :create-projection
+  :track-create-forecast
   [event args result-ch]
+  (.Intercom js/window "trackEvent" "createForecast" (clj->js args))
+  (put! result-ch [:success nil]))
+
+(defmethod request-handler
+  :track-create-forecast-version
+  [event args result-ch]
+  (.Intercom js/window "trackEvent" "createForecastVersion" (clj->js args))
+  (put! result-ch [:success nil]))
+
+(defmethod request-handler
+  :track-public-download
+  [event args result-ch]
+  (.Intercom js/window "trackEvent" "publicDownload" (clj->js args))
+  (put! result-ch [:success nil]))
+
+(defmethod request-handler
+  :track-output-download
+  [event args result-ch]
+  (.Intercom js/window "trackEvent" "outputDownload" (clj->js args))
+  (put! result-ch [:success nil]))
+
+(defmethod request-handler
+  :track-upload
+  [event args result-ch]
+  (.Intercom js/window "trackEvent" "upload" (clj->js (update args :response str)))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler

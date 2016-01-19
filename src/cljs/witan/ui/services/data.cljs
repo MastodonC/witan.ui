@@ -328,13 +328,20 @@
   (put-item-into-db! new-forecast :forecast)
   (venue/request! {:owner   owner
                    :service :service/analytics
-                   :request :create-projection
-                   :args :success})
+                   :request :track-create-forecast
+                   :args {:status :success
+                          :name (:name new-forecast)
+                          :version-id (:version-id new-forecast)
+                          :forecast-id (:forecast-id new-forecast)}})
   (put! result-ch [:success (select-keys new-forecast [:forecast-id :version])]))
 
 (defmethod response-handler
   [:create-forecast :failure]
-  [owner _ new-forecast result-ch]
+  [owner _ _ result-ch]
+  (venue/request! {:owner   owner
+                   :service :service/analytics
+                   :request :track-create-forecast
+                   :args {:status :failure}})
   (put! result-ch [:failure nil]))
 
 (defmethod response-handler
@@ -363,6 +370,10 @@
   ;; doesn't hear about it until we send the key as part of a forecast update
   (let [data-item (assoc raw-data-item :local? true)]
     (log/debug "Upload succeeded.")
+    (venue/request! {:owner   owner
+                     :service :service/analytics
+                     :request :track-upload
+                     :args (merge raw-data-item {:status :success})})
     (let [new-data-item (put-item-into-db! data-item :data data-id-db-workaround)]
       (put! result-ch [:success {:data-items (fetch-data-items {:category (:category data-item)})
                                  :new-data-item new-data-item}]))))
@@ -370,6 +381,10 @@
 (defmethod response-handler
   [:upload-data :failure]
   [owner _ response result-ch]
+  (venue/request! {:owner   owner
+                   :service :service/analytics
+                   :request :track-upload
+                   :args (merge response {:status :failure})})
   (put! result-ch [:failure (:response response)]))
 
 (defmethod response-handler
@@ -392,22 +407,42 @@
         ancestors (fetch-forecasts-by-forecast-id (:forecast-id fixed))]
     (doseq [f ancestors]
       (d/transact! db-conn [[:db/add (:db/id f) :forecast/descendant-id (:version-id fixed)]]))
+    (venue/request! {:owner   owner
+                     :service :service/analytics
+                     :request :track-create-forecast-version
+                     :args {:status :success
+                            :name (:name forecast)
+                            :forecast-id (:forecast-id forecast)
+                            :version-id (:version-id forecast)
+                            :version (:version forecast)}})
     (put! result-ch [:success (put-item-into-db! fixed :forecast)])))
 
 (defmethod response-handler
   [:create-forecast-version :failure]
   [owner _ _ result-ch]
+  (venue/request! {:owner   owner
+                   :service :service/analytics
+                   :request :track-create-forecast-version
+                   :args {:status :failure}})
   (put! result-ch [:failure nil]))
 
 (defmethod response-handler
   [:download-file :success]
   [owner _ response result-ch]
   (log/info "Received redirect for download:" response)
+  (venue/request! {:owner   owner
+                   :service :service/analytics
+                   :request :track-public-download
+                   :args (merge response {:status :success})})
   (put! result-ch [:success (:location response)]))
 
 (defmethod response-handler
   [:download-file :failure]
   [owner _ _ result-ch]
+  (venue/request! {:owner   owner
+                   :service :service/analytics
+                   :request :track-public-download
+                   :args {:status :failure}})
   (put! result-ch [:failure nil]))
 
 ;;;;;;;;;;;;;;;;;;;;;
@@ -426,3 +461,23 @@
 (util/inline-subscribe!
  :api/user-logged-out
  #(do-login! false))
+
+;;;;;;;;;;;;;;;;;;;;;
+;; Empties - we don't want to handle a response
+;;;;;;;;;;;;;;;;;;;;
+
+(defmethod response-handler
+  [:track-create-forecast :success]
+  [_ _ _ _])
+
+(defmethod response-handler
+  [:track-create-forecast-version :success]
+  [_ _ _ _])
+
+(defmethod response-handler
+  [:track-public-download :success]
+  [_ _ _ _])
+
+(defmethod response-handler
+  [:track-upload :success]
+  [_ _ _ _])
