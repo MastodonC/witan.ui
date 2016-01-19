@@ -31,31 +31,31 @@
 (defmethod request-handler
   :track-create-forecast
   [event args result-ch]
-  (.Intercom js/window "trackEvent" "createForecast" (clj->js args))
+  (.Intercom js/window "trackEvent" "forecastCreate" (clj->js args))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler
   :track-create-forecast-version
   [event args result-ch]
-  (.Intercom js/window "trackEvent" "createForecastVersion" (clj->js args))
+  (.Intercom js/window "trackEvent" "forecastCreateVersion" (clj->js args))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler
   :track-public-download
   [event args result-ch]
-  (.Intercom js/window "trackEvent" "publicDownload" (clj->js args))
+  (.Intercom js/window "trackEvent" "publicFileDownload" (clj->js args))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler
   :track-output-download
   [event args result-ch]
-  (.Intercom js/window "trackEvent" "outputDownload" (clj->js args))
+  (.Intercom js/window "trackEvent" "outputFileDownload" (clj->js args))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler
   :track-upload
   [event args result-ch]
-  (.Intercom js/window "trackEvent" "upload" (clj->js (update args :response str)))
+  (.Intercom js/window "trackEvent" "localFileUpload" (clj->js (update args :response str)))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler
