@@ -1,4 +1,4 @@
-(defproject witan.ui "0.3.1"
+(defproject witan.ui "0.3.1-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -80,7 +80,14 @@
                      }]}
   :profiles {:uberjar {:auto-clean false}}
   :uberjar-name "witan-ui.jar"
-  :jvm-opts ["-Xmx2g"])
+  :jvm-opts ["-Xmx2g"]
+  :release-tasks [["change" "version"
+                   "leiningen.release/bump-version" "release"]
+                  ["vcs" "commit"]
+                  ["vcs" "tag" "release-v"]
+                  ["change" "version" "leiningen.release/bump-version"]
+                  ["vcs" "commit"]
+                  ["vcs" "push"]])
 
 (comment
   (do (use 'figwheel-sidecar.repl-api)

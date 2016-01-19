@@ -187,6 +187,11 @@
         new-url (str scrubbed-url "?redirect=false")]
     (GET event new-url nil result-ch)))
 
+(defmethod service-m
+  :sign-up
+  [event args result-ch]
+  (POST event "/user" args result-ch))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn- identify-user
@@ -223,6 +228,11 @@
 
 (defmethod api-response
   [:login :success]
+  [_ response]
+  (login! response))
+
+(defmethod api-response
+  [:sign-up :success]
   [_ response]
   (login! response))
 

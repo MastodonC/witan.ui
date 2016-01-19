@@ -91,7 +91,8 @@
    :state {:phase      :prompt
            :message    nil
            :logged-in? false
-           :email      nil}})
+           :email      nil
+           :waiting-msg :signing-in}})
 
 (venue/defstatic!
   {:target "menu"

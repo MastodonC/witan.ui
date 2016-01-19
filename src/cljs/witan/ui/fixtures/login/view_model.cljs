@@ -36,12 +36,39 @@
   :event/attempt-login
   [owner _ {:keys [email pass]} cursor]
   (om/update! cursor :phase :waiting)
+  (om/update! cursor :waiting-msg :signing-in)
   (om/update! cursor :email email)
   (venue/request! {:owner owner
                    :service :service/api
                    :request :login
                    :args [email pass]
                    :context cursor}))
+
+(defmethod event-handler
+  :event/goto-sign-up
+  [owner _ _ cursor]
+  (om/update! cursor :phase :sign-up))
+
+(defmethod event-handler
+  :event/attempt-sign-up
+  [owner _ {:keys [email password] :as args} cursor]
+  (let [[email confirm-email]       email
+        [password confirm-password] password]
+    (if-not (= email confirm-email)
+      (om/update! cursor :message (s/get-string :email-no-match))
+      (if-not (= password confirm-password)
+        (om/update! cursor :message (s/get-string :password-no-match))
+        (if-not (>= (count password) 8)
+          (om/update! cursor :message (s/get-string :password-under-length))
+          (do
+            (om/update! cursor :phase :waiting)
+            (om/update! cursor :waiting-msg :processing-account)
+            (venue/request! {:owner owner
+                             :service :service/api
+                             :request :sign-up
+                             :args (merge {:username email :password password}
+                                          (select-keys args [:invite-token :name]))
+                             :context cursor})))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -60,3 +87,14 @@
   [owner _ response cursor]
   (om/update! cursor :message (s/get-string :api-failure))
   (om/update! cursor :phase :prompt))
+
+(defmethod response-handler
+  [:sign-up :failure]
+  [owner _ response cursor]
+  (om/update! cursor :message (s/get-string :sign-up-failure))
+  (om/update! cursor :phase :sign-up))
+
+(defmethod response-handler
+  [:sign-up :success]
+  [owner _ response cursor]
+  (om/update! cursor :phase :signed-up))
