@@ -1,6 +1,6 @@
 (ns witan.ui.services.analytics
   (:require [witan.ui.util :as util]
-            [cljs.core.async :refer [close!]]
+            [cljs.core.async :refer [close! put!]]
             [venue.core :as venue]
             [cljs-time.core :as t]
             [cljs-time.format :as tf])
@@ -13,13 +13,29 @@
   [message]
   (log/debug "Analytics:" message))
 
+(defn do-update
+  []
+  (log/debug "Intercom update")
+  (.Intercom js/window "update"))
+
 (defn on-initialise
   []
-  (log-event "System initialised."))
+  (log-event "System initialised.")
+  (.setInterval js/window do-update (* 1000 60 4))) ;; every 4 mins
 
-(defn request-handler
+(defmulti request-handler
+  (fn [event args result-ch] event))
+
+(defmethod request-handler
+  :create-projection
   [event args result-ch]
-  (close! result-ch))
+  (put! result-ch [:success nil]))
+
+(defmethod request-handler
+  :default
+  [event args result-ch]
+  (log/warn "Ignoring request to track event:" event)
+  (put! result-ch [:failure nil]))
 
 (defn service
   []

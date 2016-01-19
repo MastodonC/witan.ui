@@ -326,7 +326,16 @@
   [:create-forecast :success]
   [owner _ new-forecast result-ch]
   (put-item-into-db! new-forecast :forecast)
+  (venue/request! {:owner   owner
+                   :service :service/analytics
+                   :request :create-projection
+                   :args :success})
   (put! result-ch [:success (select-keys new-forecast [:forecast-id :version])]))
+
+(defmethod response-handler
+  [:create-forecast :failure]
+  [owner _ new-forecast result-ch]
+  (put! result-ch [:failure nil]))
 
 (defmethod response-handler
   [:get-forecast :success]
