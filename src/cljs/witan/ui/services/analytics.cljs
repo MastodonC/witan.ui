@@ -110,4 +110,4 @@
 
 (util/inline-subscribe!
  :venue/view-activated
- #(change-view %))
+ change-view)
