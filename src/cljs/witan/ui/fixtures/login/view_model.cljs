@@ -26,11 +26,19 @@
             email) "resetEmailWindow" "height=400,width=600,left=10,top=10"))
 
 (defmethod event-handler
-  :event/show-password-reset
-  [owner _ show cursor]
-  (if show
-    (om/update! cursor :phase :reset)
-    (om/update! cursor :phase :prompt)))
+  :event/goto-login
+  [owner _ _ cursor]
+  (om/update! cursor :phase :prompt))
+
+(defmethod event-handler
+  :event/goto-password-reset
+  [owner _ _ cursor]
+  (om/update! cursor :phase :reset))
+
+(defmethod event-handler
+  :event/goto-sign-up
+  [owner _ _ cursor]
+  (om/update! cursor :phase :sign-up))
 
 (defmethod event-handler
   :event/attempt-login
@@ -43,11 +51,6 @@
                    :request :login
                    :args [email pass]
                    :context cursor}))
-
-(defmethod event-handler
-  :event/goto-sign-up
-  [owner _ _ cursor]
-  (om/update! cursor :phase :sign-up))
 
 (defmethod event-handler
   :event/attempt-sign-up

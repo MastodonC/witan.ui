@@ -25,7 +25,7 @@
   :sign-up
   [cursor owner]
   (render [_]
-          (html [:div
+          (html [:div.sub-page-div
                  [:h3 (get-string :create-account)]
                  [:span#error-message (:message cursor)]
                  [:form {:class "pure-form pure-form-stacked"
@@ -73,9 +73,14 @@
                            :id "confirm-password"
                            :placeholder (get-string :confirm-password)
                            :require :required}]
-                  [:button {:tab-index 7
-                            :type "submit"
-                            :class "pure-button pure-button-primary"} (get-string :create-account)]]])))
+                  [:div [:button {:tab-index 7
+                                  :type "submit"
+                                  :class "pure-button pure-button-primary"} (get-string :create-account)]
+                   [:button {:id "back-button"
+                             :class "pure-button"
+                             :on-click (fn [e]
+                                         (venue/raise! owner :event/goto-login)
+                                         (.preventDefault e))} (get-string :back)]]]])))
 
 (defcomponentmethod
   login-state-view
@@ -110,7 +115,7 @@
                        :class "pure-button pure-button-primary"} (get-string :sign-in)]
              [:a {:id "forgotten-link"
                   :on-click (fn [e]
-                              (venue/raise! owner :event/show-password-reset true)
+                              (venue/raise! owner :event/goto-password-reset)
                               (.preventDefault e))} (str "(" (get-string :forgotten-question) ")")]]
             [:h3 (get-string :create-account-header)]
             [:p
@@ -126,7 +131,7 @@
   [cursor owner]
   (render [_]
           (html
-           [:div {:class "forgotten-div"}
+           [:div.sub-page-div
             [:h3 (get-string :forgotten-password)]
             [:p
              [:span {:id "reset-instructions"} (get-string :forgotten-instruction)]]
@@ -156,7 +161,7 @@
               [:button {:id "back-button"
                         :class "pure-button"
                         :on-click (fn [e]
-                                    (venue/raise! owner :event/show-password-reset false)
+                                    (venue/raise! owner :event/goto-login)
                                     (.preventDefault e))} (get-string :back)]]]])))
 
 (defcomponent view
