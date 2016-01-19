@@ -8,7 +8,7 @@
                      [witan.ui.macros :as wm]
                      [cljs.core.async.macros :refer [go alt!]]))
 
-(def page-exit-ch (chan))
+(defonce page-exit-ch (chan))
 
 (defn reset-cursor!
   [cursor]
