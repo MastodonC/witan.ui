@@ -273,7 +273,8 @@
        {:overflow-y :auto
         :position :absolute
         :top (px 0)
-        :bottom (px 115)}]
+        :bottom (px 115)
+        :width (percent 100)}]
       [:th :td
        {:border (px 0)}]
       [:th:first-child
