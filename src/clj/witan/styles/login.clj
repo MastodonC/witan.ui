@@ -87,7 +87,7 @@
       :float          :right
       :color          colour/link
       :cursor         :pointer}]
-    [:.forgotten-div
+    [:.sub-page-div
      [:#back-button
       {:float :right}]]
     [:#witan-copy
