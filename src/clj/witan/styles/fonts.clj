@@ -3,16 +3,9 @@
 
 (def font-face-definitions
   [(gs/at-font-face
-    {:font-family "Asap"
-     :font-weight 400
-     ;;:src "url (\"../fonts/asap/Asap-regular.eot\")"
-     ;;:src "url (\"../fonts/asap/Asap-regular.eot?\") format (\"eot\")"
-     :src "url (\"../fonts/asap/Asap-regular.woff\") format (\"woff\")"})
+    {:font-family "'Fira Sans', sans-serif"})
    (gs/at-font-face
-    {:font-family "Asap"
-     :font-weight 700
-     ;;:src "url (\"../fonts/asap/Asap-700.eot\")"
-     ;;:src "url (\"../fonts/asap/Asap-700.eot?\") format (\"eot\")"
-     :src "url (\"../fonts/asap/Asap-700.woff\") format (\"woff\")"})])
+    {:font-family "'Kadwa', serif"})])
 
-(def base-fonts ["Asap" "Helvetica Neue" "Helvetica" "Arial" "sans-serif"])
+(def base-fonts  ["'Fira Sans'" "Helvetica Neue" "Helvetica" "Arial" "sans-serif"])
+(def title-fonts ["'Kadwa'" "Helvetica Neue" "Helvetica" "Arial" "sans-serif"])

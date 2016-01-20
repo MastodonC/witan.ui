@@ -42,17 +42,17 @@
                [:td {:key (key-prefix "downloads") :style {:width row-downloads-width}}
                 ;; excel
                 #_[:button.pure-button.download
-                   [:i.fa.fa-file-excel-o] [:span " Excel "] [:i.fa.fa-check.text-success]]
+                   [:span " Excel "]]
                 ;; css
                 [:a {:on-click (fn [e]
                                  (venue/raise! owner :download-output {:type :csv :url s3-url})
                                  (.open js/window s3-url "_blank")
                                  (.preventDefault e))}
-                 [:button.pure-button.download
-                  [:i.fa.fa-file-text-o] [:span " CSV "]]]
+                 [:button.pure-button.download.button-success
+                  [:span " CSV "]]]
                 ;; zip
                 #_[:button.pure-button.download
-                   [:i.fa.fa-file-archive-o] [:span " ZIP "] [:i.fa.fa-times.text-error]]]]]))))
+                   [:span " ZIP "]]]]]))))
 
 (defcomponent
   data-output-table
@@ -88,20 +88,20 @@
              (-> forecast :forecast/version zero?)
              [:div
               [:h3 {:key "new-version-no-downloads"} (get-string :new-version-no-downloads)]
-              [:h3 {:key "sad-face"} [:i.fa.fa-frown-o.fa-2x]]]
+              [:h3 {:key "sad-face"} [:i.material-icons.md-xl "play_for_work"]]]
              (:forecast/in-progress? forecast)
              [:div
               [:h3 {:key "in-progress-no-downloads"} (get-string :in-progress-no-downloads)]
-              [:h3 {:key "coffee"} [:i.fa.fa-coffee.fa-2x]]]
+              [:h3 {:key "coffee"} [:i.material-icons.md-xl "free_breakfast"]]]
              (:forecast/error forecast)
              [:div
               [:h3 {:key "error"} "An error occurred in the model"]
-              [:h4 {:key "error-message"} (:forecast/error forecast)]
-              [:h3 {:key "sad-face"} [:i.fa.fa-frown-o.fa-2x]]]
+              [:strong {:key "error-message"} (:forecast/error forecast)]
+              [:h3 {:key "sad-face"} [:i.material-icons.md-xl.text-error "error"]]]
              :else
              [:div
               [:div.pure-u-2-3
-               [:h4 (get-string :output-extra-info)]]
+               [:p [:strong (get-string :output-extra-info)]]]
               ;; first row
               (let [outputs        (:forecast/outputs forecast)
                     first-output   (first outputs)

@@ -30,7 +30,7 @@
              {:key "page-heading"}
              [:h1
               (get-string :new-forecast)]]
-            [:div.pure-g#witan-new-forecast-container
+            [:div.pure-g.witan-page-content#witan-new-forecast-container
              {:key "container"}
              [:div.pure-u-1-2
               {:key "left"}
@@ -102,12 +102,13 @@
                           :style {:vertical-align "top"}}
                          [:label {:for (str "mod-prop-" name)
                                   :key (str "mod-prop-label-" name)
-                                  :style {:width "auto"
+                                  :style {:min-width "15%"
                                           :vertical-align "top"
+                                          :text-align "left"
                                           :margin-top "10px"}} (or display name)] ;; FIXME alignment
                          (condp = type
                            "dropdown"
-                           [:div.pure-input-1-2
+                           [:div
                             {:style {:display "inline-block"}
                              :key (str "mod-prop-dropdown-" name)}
                             [:select
@@ -120,11 +121,11 @@
                              {:key "context"}
                              [:small.text-gray {:style {:margin-left "1em"}} context]]]
                            "text"
-                           [:input.pure-input-1-2
+                           [:input
                             {:key (str "mod-prop-text-" name)}
                             (merge params {:placeholder context :required true})]
                            "number"
-                           [:input.pure-input-1-2
+                           [:input
                             {:key (str "mod-prop-number-" name)}
                             (merge params {:placeholder context :required true})])]))]]
                   [:div
@@ -136,8 +137,8 @@
                  {:type "submit"
                   :key "button"}
                  (if (:working? cursor)
-                   [:span [:i.fa.fa-refresh.fa-spin]]
-                   [:span [:i.fa.fa-line-chart] (str " " (get-string :create))])]]]]
+                   [:span [:i.material-icons.md-s.anim-spin "settings"]]
+                   [:span [:i.material-icons "add_to_photos"] (str " " (get-string :create))])]]]]
              [:div.pure-u-1-2
               {:key "right"}
               [:div#model-information

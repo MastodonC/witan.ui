@@ -17,13 +17,13 @@
 (def header-select-width  "3%")
 (def header-name-width    "auto")
 (def header-version-width "10%")
-(def header-lm-width      "31%")
+(def header-lm-width      "21%")
 
 ;; row
 (def row-select-width  "3%")
 (def row-name-width    "auto")
 (def row-version-width "10%")
-(def row-lm-width      "30%")
+(def row-lm-width      "20%")
 
 ;; browser
 (def browser-height "375px")
@@ -78,7 +78,7 @@
                   (get-string :browser-upload-completes)]
                  [:div
                   {:key "uploading-spinner"}
-                  [:i.fa.fa-refresh.fa-spin.fa-4x.text-primary]]]
+                  [:i.material-icons.md-xl.anim-spin "settings"]]]
 
                 ;;;;;;;;;;;;;;;
                 ;; FORM
@@ -94,7 +94,8 @@
                     :on-click (fn [e]
                                 (.click (.getElementById js/document "upload-filename"))
                                 (.preventDefault e))}
-                   [:label {:for "upload-filename" :style {:padding "2em"}} "Choose file"]]
+                   [:label {:for "upload-filename" :style {:padding "2em"}}
+                    [:span (get-string :choose-file)]]]
                   [:input.hidden-file-input {:key "input"
                                              :id "upload-filename"
                                              :type "file"
@@ -156,7 +157,10 @@
                                       [:small {} [:input.pure-input {:type "checkbox"
                                                                      :ref "upload-data-public"}] " " (get-string :upload-data-public-explain)])])
 
-                       [:button.pure-button.button-primary.upload-button {:key "button"} (get-string :upload)]]
+                       [:button.pure-button.button-primary.upload-button
+                        {:key "button"}
+                        [:i.material-icons.md-s "file_upload"]
+                        [:span (get-string :upload)]]]
 
                       ;;;;;;;;;;;;;;;
                       ;; SUCCESS MESSAGE
@@ -168,8 +172,8 @@
                         {:key "spacer"}]
                        [:p
                         {:key "paragraph"}
-                        [:i.fa.fa-check.text-success
-                         {:key "upload-tick" :style {:margin-right "0.5em"}}]
+                        [:i.material-icons.md-l.text-success
+                         {:key "upload-tick" :style {:margin-right "0.5em"}} "done"]
                         [:span {:key "label"} (get-string :upload-success ":" last-upload-filename)]]])])])]))))
 
 (defcomponent
@@ -218,8 +222,9 @@
                     :on-click (fn [e]
                                 (venue/raise! owner :select-input)
                                 (.preventDefault e))}
-                   [:i.fa.fa-check
-                    {:key "check"}]
+                   [:i.material-icons.md-s
+                    {:key "check"}
+                    "done"]
                    [:span
                     {:key "text"}
                     (str " " (get-string :use-data-item))]]
@@ -230,17 +235,32 @@
                       :href (when-not disabled? url)}
                      [:button.pure-button.button-primary
                       {:disabled disabled?}
-                      [:i.fa.fa-download
-                       {:key "download"}]
+                      [:i.material-icons.md-s
+                       {:key "download"}
+                       "file_download"]
                       [:span
                        {:key "text"}
                        (str " " (get-string :download))]]])]]
                 [:div.spacer
                  {:key "spacer"}]
+                [:div.headings.pure-g
+                 {:key "headings"}
+                 [:span.pure-u-1-3
+                  {:key "heading-name"}
+                  (get-string :forecast-name)]
+                 [:span.pure-u-1-4
+                  {:key "heading-publisher"}
+                  (get-string :model-publisher)]
+                 [:span.pure-u-1-6
+                  {:key "heading-version"}
+                  (get-string :forecast-version)]
+                 [:span.pure-u-1-4
+                  {:key "heading-date"}
+                  (get-string :created)]]
                 [:div.list
                  {:key "data-item-list"}
-                 (for [{:keys [data/data-id data/version data/name data/public?] :as data-item} data-items]
-                   [:div.data-item
+                 (for [{:keys [data/data-id data/version data/name data/public? data/created data/publisher-name] :as data-item} data-items]
+                   [:div.data-item.pure-g
                     {:key (str "data-item-" data-id "-" version)
                      :class (when (= data-item selected-data-item) "selected")
                      :on-click (fn [e]
@@ -249,9 +269,15 @@
                      :on-double-click (fn [e]
                                         (venue/raise! owner :select-input)
                                         (.preventDefault e))}
-                    [:span
+                    [:span.pure-u-1-3
                      {:key "data-item-name"}
-                     (str name " - v" version " " (when public? (str "(" (-> :public get-string str/lower-case) ")")))]])]]
+                     (str name (when public? (str " (" (-> :public get-string str/lower-case) ")")))]
+                    [:span.pure-u-1-4
+                     {:key "data-item-publisher"} publisher-name]
+                    [:span.pure-u-1-6
+                     {:key "data-item-version"} version]
+                    [:span.pure-u-1-4
+                     {:key "data-item-date"} (util/humanize-time created)]])]]
 
                ;;;;;;;;;;;;;;;
                ;; UPLOAD
@@ -311,16 +337,17 @@
                                (.preventDefault e))
                    :disabled locked?}
                   (cond
-                    locked?   [:i.fa.fa-lock]
-                    browsing? [:i.fa.fa-caret-down]
-                    :else     [:i.fa.fa-caret-right])]
+                    locked?   [:i.material-icons "lock"]
+                    browsing? [:i.material-icons "arrow_drop_up"]
+                    :else     [:i.material-icons "arrow_drop_down"])]
                  [:div
                   {:class (if edited? "edited" (when-not data-item "not-specified"))}
                   (or name [:i (get-string :no-input-specified)])
                   (cond
                     (and name default?) [:small.text-gray (get-string :default-brackets)]
                     (not name) [:small.text-gray
-                                (get-string :please-select-data-input)])]]]
+                                (get-string :please-select-data-input)]
+                    :else [:small (get-string :forecast-version " " version)])]]]
                [:td {:key (key-prefix "version") :style {:width row-version-width} :class (when edited? "edited")} version]
                [:td {:key (key-prefix "lastmodified") :style {:width row-lm-width} :class (when edited? "edited")} (util/humanize-time created)]]]))))
 
