@@ -7,8 +7,6 @@
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.macros :as wm]))
 
-(def analytics-state (atom {}))
-
 (defn log-event
   [message]
   (log/debug "Analytics:" message))
@@ -31,31 +29,31 @@
 (defmethod request-handler
   :track-create-forecast
   [event args result-ch]
-  (.Intercom js/window "trackEvent" "forecastCreate" (clj->js args))
+  (.Intercom js/window "trackEvent" "created a forecast" (clj->js args))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler
   :track-create-forecast-version
   [event args result-ch]
-  (.Intercom js/window "trackEvent" "forecastCreateVersion" (clj->js args))
+  (.Intercom js/window "trackEvent" "updated a forecast" (clj->js args))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler
   :track-public-download
   [event args result-ch]
-  (.Intercom js/window "trackEvent" "publicFileDownload" (clj->js args))
+  (.Intercom js/window "trackEvent" "downloaded a public file" (clj->js args))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler
   :track-output-download
   [event args result-ch]
-  (.Intercom js/window "trackEvent" "outputFileDownload" (clj->js args))
+  (.Intercom js/window "trackEvent" "downloaded a model output file" (clj->js args))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler
   :track-upload
   [event args result-ch]
-  (.Intercom js/window "trackEvent" "localFileUpload" (clj->js (update args :response str)))
+  (.Intercom js/window "trackEvent" "uploaded a file" (clj->js (update args :response str)))
   (put! result-ch [:success nil]))
 
 (defmethod request-handler
@@ -92,12 +90,6 @@
   (log-event "Switching OFF Intercom")
   (.Intercom js/window "shutdown"))
 
-(defn change-view
-  [{:keys [target id args] :as view-event}]
-  (when (and (= target :app) (not= (:view-event @analytics-state) view-event))
-    (swap! analytics-state assoc :view-event view-event)
-    (.Intercom js/window "trackEvent" "pageChange" (clj->js {:target target :id id :args (str args)}))))
-
 ;;;;;;;;;;;;;;;;;;;;;
 
 (util/inline-subscribe!
@@ -107,7 +99,3 @@
 (util/inline-subscribe!
  :api/user-logged-out
  #(do-login false))
-
-(util/inline-subscribe!
- :venue/view-activated
- change-view)
