@@ -31,6 +31,7 @@
   "Change special characters into HTML character entities."
   [text]
   (-> text
+      (str)
       (str/replace "&"  "&amp;")
       (str/replace "<"  "&lt;")
       (str/replace ">"  "&gt;")

@@ -124,7 +124,7 @@
 (defmethod service-m
   :get-forecast-versions
   [event id result-ch]
-  (GET event (str "/forecasts/" id) nil result-ch))
+  (GET event (util/str-fmt-map "/forecasts/{{id}}" {:id id}) nil result-ch))
 
 (defmethod service-m
   :logout
@@ -140,7 +140,7 @@
 (defmethod service-m
   :get-forecast
   [event {:keys [id version]} result-ch]
-  (GET event (str "/forecasts/" id "/" version) nil result-ch))
+  (GET event (util/str-fmt-map "/forecasts/{{id}}/{{version}}" {:id id :version version}) nil result-ch))
 
 (defmethod service-m
   :create-forecast
@@ -160,7 +160,7 @@
 (defmethod service-m
   :get-model
   [event {:keys [id]} result-ch]
-  (GET event (str "/models/" id) nil result-ch))
+  (GET event (util/str-fmt-map "/models/{{id}}" {:id id}) nil result-ch))
 
 (defmethod service-m
   :get-data-items
@@ -170,7 +170,7 @@
 (defmethod service-m
   :create-data-item
   [event {:keys [id version category] :as args} result-ch]
-  (POST event (str "/forecasts/" id "/" version "/input/" category) (dissoc args :id :version :category) result-ch))
+  (POST event (util/str-fmt-map "/forecasts/{{id}}/{{version}}/input/{{category}}" args) (dissoc args :id :version :category) result-ch))
 
 (defmethod service-m
   :upload-data
