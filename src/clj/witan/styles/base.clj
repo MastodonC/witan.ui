@@ -338,7 +338,9 @@
        {:border (px 0)
         :padding-left (em 0.5)}]
       [:th:first-child
-       {:width (px 1)}]]
+       {:width (px 1)}]
+      [:table
+       {:width (percent 99)}]]
 
      [:.witan-forecast-table-row
       {:border-bottom "1px solid #ddd"
@@ -347,8 +349,7 @@
        {:color       colour/gray
         :margin-left (em 0.5)}]
       [:.tree-control
-       {:background-color colour/white
-        :padding 0
+       {:padding 0
         :padding-right (px 4)}]
       [:&:hover
        {:background-color colour/row-highlight
