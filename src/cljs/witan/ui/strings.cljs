@@ -62,6 +62,8 @@
    :changed                        "Changed"
    :refresh-now                    "Refresh"
    :new                            "New"
+   :view                           "View"
+   :choose-file                    "Choose file"
    :upload                         "Upload"
    :upload-new-data                "Upload new data"
    :forecast-changes-text          "Okay, we've recorded your changes. When you're ready, hit 'Run this projection' to generate your new outputs for download."
@@ -104,7 +106,9 @@
    :upload-data-public-explain     "Tick this box to make the data visible to everyone (public)"
    :upload-data-public-warning     "As this is a public projection, any data you upload will also become public."
    :about-model                    "About this model"
-   :public-only                    "Public only"})
+   :public-only                    "Public only"
+   :settings                       "Settings"
+   :help                           "Help"})
 
 
 

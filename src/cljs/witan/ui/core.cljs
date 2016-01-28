@@ -17,8 +17,8 @@
               [witan.ui.fixtures.new-forecast.view-model]
               [witan.ui.fixtures.share.view]
               [witan.ui.fixtures.share.view-model]
-              [witan.ui.fixtures.menu.view]
-              [witan.ui.fixtures.menu.view-model])
+              [witan.ui.fixtures.sidebar.view]
+              [witan.ui.fixtures.sidebar.view-model])
     (:require-macros [cljs-log.core :as log]
                      [witan.ui.env :as env :refer [cljs-env]]))
 
@@ -95,10 +95,10 @@
            :waiting-msg :signing-in}})
 
 (venue/defstatic!
-  {:target "menu"
-   :id :statics/menu
-   :view witan.ui.fixtures.menu.view/view
-   :view-model witan.ui.fixtures.menu.view-model/view-model
+  {:target "side"
+   :id :statics/side
+   :view witan.ui.fixtures.sidebar.view/view
+   :view-model witan.ui.fixtures.sidebar.view-model/view-model
    :state {}})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

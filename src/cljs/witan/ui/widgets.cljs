@@ -20,8 +20,9 @@
               {:key "search-filter-form"}
               [:div.witan-search-input
                {:key "search-filter-inner-div"}
-               [:i.fa.fa-search
-                {:key "icon"}]
+               [:i.material-icons.md-dark
+                {:key "icon"}
+                "search"]
                [:input {:key "filter-input"
                         :id "filter-input"
                         :type "text"

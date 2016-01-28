@@ -2,7 +2,8 @@
     (:require [om.core :as om :include-macros true]
               [venue.core :as venue]
               [witan.ui.services.data :as data]
-              [witan.ui.strings :as s])
+              [witan.ui.strings :as s]
+              [witan.ui.util :as util])
     (:require-macros [cljs-log.core :as log]
                      [witan.ui.macros :as wm]))
 
@@ -101,3 +102,10 @@
   [:sign-up :success]
   [owner _ response cursor]
   (om/update! cursor :phase :signed-up))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(util/inline-subscribe!
+ :api/user-logged-in
+ #(let [login-div (.getElementById js/document "login")]
+    (aset login-div "style" "visibility" "hidden")))

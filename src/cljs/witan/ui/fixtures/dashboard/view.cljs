@@ -56,8 +56,8 @@
                                                                (.preventDefault e))}
 
               [:td.tree-control (cond
-                                  is-expanded? [:i.fa.fa-minus-square-o.tree-control]
-                                  has-ancestor? [:i.fa.fa-plus-square-o.tree-control])]
+                                  is-expanded? [:i.material-icons.md-s.md-dark.tree-control "signal_cellular_null"]
+                                  has-ancestor? [:i.material-icons.md-s.md-dark.tree-control "signal_cellular_4_bar"])]
               [:td.first-round
                [:span.name (:forecast/name forecast)]
 
@@ -79,7 +79,7 @@
                   [:span.label.label-forecast-public.label-small
                    {:key "witan-forecast-table-label-forecast-public-key"}
                    (get-string :public)])]]
-              [:td.text-center
+              [:td
                [:span (:forecast/owner-name forecast)]]
               [:td
                {:style {:padding-left "2em"}}
@@ -139,35 +139,39 @@
                    [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "input"})}
                     [:button.pure-button.button-secondary
                      {:title (get-string :view-edit-forecast)}
-                     [:i.fa.fa-search]]]])
+                     [:i.material-icons.md-s "search"]
+                     [:span (get-string :view)]]]])
                 (if (and false (seq selected))
                   [:li.witan-menu-item.pure-menu-item
                    [:a {:href "#"}
                     [:button.pure-button.button-warning
-                     [:i.fa.fa-copy]]]])
+                     [:i.material-icons.md-s "content_copy"]]]])
                 (if (seq selected)
                   [:li.witan-menu-item.pure-menu-item
                    [:a {:href (venue/get-route :views/forecast {:id selected-forecast-id :version selected-version :action "output"})}
                     [:button.pure-button.button-primary
                      {:title (get-string :pw-output-brief)}
-                     [:i.fa.fa-download]]]])
+                     [:i.material-icons.md-s "file_download"]
+                     [:span (i/plural (get-string :output))]]]])
                 (if (and false (seq selected))
                   [:li.witan-menu-item.pure-menu-item
                    [:a {:href (venue/get-route :views/share {:id selected-id})}
                     [:button.pure-button.button-primary
-                     [:i.fa.fa-share-alt]]]])
+                     [:i.material-icons.md-s "share"]]]])
                 [:li.witan-menu-item.pure-menu-item
                  [:a {:href (venue/get-route :views/new-forecast)}
                   [:button.pure-button.button-success
                    {:title (get-string :new-forecast)}
-                   [:i.fa.fa-plus]]]]]]]))))
+                   [:i.material-icons.md-s "add_to_photos"]
+                   [:span (get-string :create)]]]]]]]))))
 
 (defcomponent view
   [cursor owner]
   (render [_]
           (html
            (if (:refreshing? cursor)
-             [:div.view-overlay [:i.fa.fa-cog.fa-spin.fa-4x]]
+             [:div.view-overlay
+              [:i.material-icons.md-dark.md-xl.anim-spin "settings"]]
              [:div
               [:div#forecasts-view
                (om/build header [(get-selected-forecast cursor)
@@ -176,14 +180,14 @@
                                       (remove :forecast/descendant-id)
                                       (map :forecast/version-id)
                                       set)])
-               [:div#witan-dash-forecast-list
+               [:div.witan-page-content#witan-dash-forecast-list
                 [:div#container
-                 [:table.pure-table.pure-table-horizontal
+                 [:table.pure-table.pure-table-horizontal.full-width
                   [:thead
                    [:th {:key "forecast-tree"}] ;; empty, for the tree icon
-                   (for [[x width class] [[:forecast-name "35%"]
-                                          [:forecast-owner "25%" "text-center"]
-                                          [:forecast-version "20%"]
+                   (for [[x width class] [[:forecast-name "40%"]
+                                          [:forecast-owner "25%"]
+                                          [:forecast-version "15%"]
                                           [:forecast-lastmodified "20%" "text-center"]]]
                      [:th {:key (name x) :class class :style {:width width}} (get-string x)])]
                   [:tbody

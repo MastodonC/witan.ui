@@ -18,7 +18,7 @@
      :left       (px 0)
      :width      (percent 100)
      :height     (percent 100)
-     :z-index    15
+     :z-index    55
      :background "url ('../img/login-bg.jpg') no-repeat center center fixed"
      :filter     "progid:DXImageTransform.Microsoft.AlphaImageLoader (src='.myBackground.jpg', sizingMethod='scale')"
      :-ms-filter "progid:DXImageTransform.Microsoft.AlphaImageLoader(src='myBackground.jpg', sizingMethod='scale')"}
@@ -41,22 +41,24 @@
     [:h1
      {:font-size   (em 5)
       :font-weight 700
-      :padding     "0px 0px 0px 20px"
-      :margin      "10px 0px"
-      :color       colour/white}]
+      :padding     "20px 0px 0px 20px"
+      :margin      "0px 0px 20px 0px"
+      :color       colour/white
+      :line-height (em 1)}]
     [:h2
      {:font-size   (em 4)
       :font-weight 400
       :padding     "0px 20px 10px 20px"
       :margin      (px 0)
-      :color       colour/white}]]
+      :color       colour/white
+      :line-height (em 1)}]]
 
    [:#content-container
     {:position :absolute
      :top      (px 0)
      :left     (px 0)
      :width    (percent 100)
-     :z-index    16}]
+     :z-index    56}]
 
    [:#relative-container
     {:position :relative
@@ -85,7 +87,7 @@
       :vertical-align :text-top
       :text-align     :right
       :float          :right
-      :color          colour/link
+      :color          "#0078e7"
       :cursor         :pointer}]
     [:.sub-page-div
      [:#back-button
@@ -94,4 +96,6 @@
      {:margin-top    (px 20)
       :margin-bottom (px 20)}]
     [:#reset-instructions
-     {:color colour/white}]]])
+     {:color colour/white}]
+    [:.pure-button
+     {:box-shadow "0px 0px 0px #fff"}]]])

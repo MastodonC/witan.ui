@@ -28,8 +28,7 @@
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
 
-  :cljsbuild {
-              :builds [{:id "prod"
+  :cljsbuild {:builds [{:id "prod"
                         :source-paths ["src/cljs"]
                         :compiler {:output-to "resources/public/js/compiled/witan-ui.js"
                                    :main witan.ui.core
@@ -48,36 +47,21 @@
                                    :source-map-timestamp true
                                    :warnings {:single-segment-namespace false}}}]}
 
-  :figwheel {
-             ;; :http-server-root "public" ;; default and assumes "resources"
-             ;; :server-port 3449 ;; default
-             ;; :server-ip "127.0.0.1"
-
-             :css-dirs ["resources/public/css"] ;; watch and update CSS
-
-             ;; Start an nREPL server into the running figwheel process
-             :nrepl-port 7888
-
-             ;; Server Ring Handler (optional)
-             ;; if you want to embed a ring handler into the figwheel http-kit
-             ;; server, this is for simple ring servers, if this
-             ;; doesn't work for you just run your own server :)
-             ;; :ring-handler hello_world.server/handler
-             }
+  :figwheel {:css-dirs ["resources/public/css"] ;; watch and update CSS
+             :nrepl-port 7888}
 
   :garden {:builds [{;; Optional name of the build:
                      :id "ui"
                      ;; Source paths where the stylesheet source code is
-                     :source-paths ["src/clj/styles"]
+                     :source-paths ["src/clj/witan/styles"]
                      ;; The var containing your stylesheet:
                      :stylesheet witan.styles.base/base
                      ;; Compiler flags passed to `garden.core/css`:
                      :compiler {;; Where to save the file:
-                                :vendors [:moz :webkit :o]
+                                :vendors [:moz :webkit :o :ms]
                                 :output-to "resources/public/css/style.css"
                                 ;; Compress the output?
-                                :pretty-print? false}
-                     }]}
+                                :pretty-print? false}}]}
   :profiles {:uberjar {:auto-clean false}}
   :uberjar-name "witan-ui.jar"
   :jvm-opts ["-Xmx2g"]
