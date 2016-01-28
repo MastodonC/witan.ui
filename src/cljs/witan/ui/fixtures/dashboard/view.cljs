@@ -55,10 +55,10 @@
                                                                  (on-double-click owner forecast e))
                                                                (.preventDefault e))}
 
-              [:td.tree-control (cond
-                                  is-expanded? [:i.material-icons.md-s.md-dark.tree-control "signal_cellular_null"]
-                                  has-ancestor? [:i.material-icons.md-s.md-dark.tree-control "signal_cellular_4_bar"])]
-              [:td.first-round
+              [:td.tree-control.first-round (cond
+                                              is-expanded? [:i.material-icons.md-s.md-dark.tree-control "signal_cellular_null"]
+                                              has-ancestor? [:i.material-icons.md-s.md-dark.tree-control "signal_cellular_4_bar"])]
+              [:td
                [:span.name (:forecast/name forecast)]
 
                [:div.version-labels
@@ -182,7 +182,7 @@
                                       set)])
                [:div.witan-page-content#witan-dash-forecast-list
                 [:div#container
-                 [:table.pure-table.pure-table-horizontal.full-width
+                 [:table.pure-table.pure-table-horizontal
                   [:thead
                    [:th {:key "forecast-tree"}] ;; empty, for the tree icon
                    (for [[x width class] [[:forecast-name "40%"]

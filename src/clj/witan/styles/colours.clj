@@ -111,7 +111,7 @@
 
 ;; row highlight
 (def row-selected color-secondary-1-2)
-(def row-highlight (color/lighten gray 46))
+(def row-highlight (color/lighten gray 42))
 
 ;; themes
 (def in-progress color-primary-0)
