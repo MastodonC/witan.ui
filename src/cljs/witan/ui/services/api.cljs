@@ -91,7 +91,7 @@
 
 (defn request-handler
   [event args result-ch]
-  (if (or (= event :login) @api-token)
+  (if (or (contains? #{:login :sign-up} event) @api-token)
     (service-m event args result-ch)
     (do
       (log/warn "An API request was received but there is no token so the outbound call will not be made and we'll log out...")
