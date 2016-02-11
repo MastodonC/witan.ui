@@ -26,3 +26,4 @@ deployment:
       - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push mastodonc/witan.ui
       - ./deploy.sh $DEPLOY_STAGING_IP
+      - ./deploy.sh $DEPLOY_NEW_PRODUCTION_IP
