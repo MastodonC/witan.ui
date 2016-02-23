@@ -1,4 +1,4 @@
-(defproject witan.ui "0.3.5"
+(defproject witan.ui "0.3.6-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
