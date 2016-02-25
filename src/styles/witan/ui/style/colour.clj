@@ -54,3 +54,10 @@
 
 ;; dash
 (def dash-heading-bg (color/lighten color-primary-1 20))
+
+;; table header
+(def table-header-text 'gray)
+(def table-row-hover-bg (color/lighten color-secondary-1-1 10))
+(def table-row-hover-text 'white)
+(def table-row-selected-bg color-secondary-1-2)
+(def table-row-selected-text 'white)

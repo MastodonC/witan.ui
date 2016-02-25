@@ -4,7 +4,8 @@
             ;;
             [witan.ui.icons :as icons])
   (:require-macros
-   [devcards.core :as dc :refer [defcard]]))
+   [devcards.core :as dc :refer [defcard]]
+   [cljs-log.core :as log]))
 
 (defn search-filter
   [placeholder on-input]
@@ -23,6 +24,32 @@
                    (if (fn? on-input)
                      (on-input (.. e -target -value)))
                    (.preventDefault e))}]]]])
+
+(defn table
+  [{:keys [headers content selected-fn]} select-fn]
+  [:div.shared-table
+   [:div.box-shadow
+    [:table.pure-table.pure-table-horizontal
+     [:thead
+      [:tr
+       (for [{:keys [title weight]} headers]
+         (let [percent (str (* 100 weight) "%")]
+           [:th {:style {:width percent}} title]))]]]]
+   [:table.pure-table.pure-table-horizontal
+    [:tbody
+     (for [row content]
+       [:tr
+        {:class (when (selected-fn row) "selected")}
+        (for [{:keys [content-fn title weight]} headers]
+          (let [percent (str (* 100 weight) "%")]
+            [:td {:style {:width percent}
+                  :on-click (fn [e] (when select-fn
+                                      (select-fn row)))}
+             (content-fn row)]))])]]])
+
+
+
+
 
 ;;
 
@@ -46,6 +73,25 @@
       (sab/html
        (search-filter "This is a placeholder" filter-fn))))
   {:result ""}
+  {:inspect-data true
+   :frame true
+   :history false})
+
+(defcard table
+  (fn [data _]
+    (let [table-data {:headers [{:content-fn :name     :title "Name"          :weight 0.6}
+                                {:content-fn :owner    :title "Owner"         :weight 0.2}
+                                {:content-fn :modified :title "Last Modified" :weight 0.2}]
+                      :content [{:name "Workspace for Camden Population"   :id 1 :owner "Bob"     :modified "Yesterday, 2pm"}
+                                {:name "Workspace for Hounslow Population" :id 2 :owner "Alice"   :modified "4th Jan, 4.15pm"}
+                                {:name "Workspace for Barnet Population"   :id 3 :owner "Charles" :modified "12th Jan, 10.24am"}]
+                      :selected-fn #(= (:id %) (:selected-id @data))}
+          select-fn #(swap! data assoc :selected-id (:id %))]
+      (sab/html
+       [:div
+        {:style {:width "100%"}}
+        (table table-data select-fn)])))
+  {:selected-id 1}
   {:inspect-data true
    :frame true
    :history false})
