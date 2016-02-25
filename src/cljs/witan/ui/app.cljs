@@ -21,10 +21,10 @@
           (map om/factory (vals route->component))))
 
 (def route-patterns
-  ["/" {"" nil
-        "dashboard/" {"data"      :app/data-dash
-                      "workspace" :app/workspace-dash}
-        ["workspace/" :id]        :app/workspace}])
+  ["/app/" {"" nil
+            "dashboard/" {"data"      :app/data-dash
+                          "workspace" :app/workspace-dash}
+            ["workspace/" :id]        :app/workspace}])
 
 (defn path-exists?
   [path]
@@ -62,3 +62,7 @@
   (render [this]
           (let [{:keys [app/route route/data]} (om/props this)]
             ((route->factory route) (assoc data :ref route)))))
+
+;;;;;
+
+(dispatch-path! (.. js/document -location -pathname))
