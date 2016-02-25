@@ -10,7 +10,7 @@
                              [:button :settings])
                :side/lower '([:button :help]
                              [:button :logout])}
-    :app/route :app/workspace-dash
+    :app/route nil
     :app/route-params nil
     :app/workspace {:workspace/min-size 200}
     :app/workspace-dash {:home/title "Workspace dash"

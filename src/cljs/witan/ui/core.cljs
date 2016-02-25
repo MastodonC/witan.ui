@@ -11,8 +11,7 @@
   (do
     (accountant/configure-navigation! {:nav-handler app/dispatch-path!
                                        :path-exists? app/path-exists?})
-    (when-not (= (app/path) "/")
-      (app/dispatch-path! (app/path)))
+    (app/dispatch-path! (app/path))
     (om/add-root! (data/make-reconciler) app/Main node)))
 
 (if-let [node (gdom/getElement "side")]

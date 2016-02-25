@@ -40,7 +40,9 @@
 
 (defn dispatch-path!
   [path]
-  (let [route (bidi/match-route route-patterns path)]
+  (let [route (if (= "/" path)
+                {:handler :app/workspace-dash} ;; default
+                (bidi/match-route route-patterns path))]
     (if route
       (let [{:keys [handler route-params]} route]
         (log/debug "Dispatching to route:" path "=>" handler)
