@@ -11,6 +11,10 @@
             [witan.ui.data :as data])
   (:require-macros [cljs-log.core :as log]))
 
+(defn path
+  []
+  (.. js/document -location -pathname))
+
 (def route->component
   {:app/workspace-dash workspace-dash/Main
    :app/data-dash      data-dash/Main
@@ -51,18 +55,20 @@
        (log/severe "No path was found for route" route args)))))
 
 (defui Main
+  static om/IQueryParams
+  (params [this]
+          {:route/data []})
   static om/IQuery
   (query [this]
-         (let [subq-ref (if (om/component? this)
-                          (-> (om/props this) :app/route)
-                          :app/workspace-dash)
-               subq-class (get route->component subq-ref)]
-           [:app/route {:route/data (om/subquery this subq-ref subq-class)}]))
+         (if (om/component? this)
+           `[:app/route {:route/data ~(-> this om/props :app/route route->component om/get-query)}]
+           `[:app/route {:route/data ?route/data}]))
   Object
+  (componentWillMount [this]
+                      (let [{:keys [app/route]} (om/props this)
+                            initial-query (om/get-query (route->component route))]
+                        (om/set-query! this {:params {:route/data initial-query}})))
   (render [this]
-          (let [{:keys [app/route route/data]} (om/props this)]
-            ((route->factory route) (assoc data :ref route)))))
-
-;;;;;
-
-(dispatch-path! (.. js/document -location -pathname))
+          (let [{:keys [app/route route/data]} (om/props this)
+                active-component (get route->factory route)]
+            (active-component data))))
