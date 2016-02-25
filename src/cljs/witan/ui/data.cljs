@@ -68,6 +68,6 @@
 (defmethod mutate 'change/route!
   [{:keys [state]} _ {:keys [route route-params]}]
   {:value {:keys [:app/route]}
-   :action #(let [current-route (:app/route @state)]
-              (swap! state assoc :app/route route)
-              (swap! state assoc :app/route-params route-params))})
+   :action (fn [_]
+             (swap! state assoc :app/route route)
+             (swap! state assoc :app/route-params route-params))})

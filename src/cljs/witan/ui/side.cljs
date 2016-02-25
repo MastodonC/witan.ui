@@ -8,7 +8,8 @@
             [witan.ui.strings :refer [get-string]]
             [witan.ui.app :as app])
   (:require-macros
-   [devcards.core :as dc :refer [defcard]]))
+   [devcards.core :as dc :refer [defcard]]
+   [cljs-log.core :as log]))
 
 (defn get-icon
   [id]
@@ -33,7 +34,7 @@
    id))
 
 (defn add-side-elements!
-  [this element-list]
+  [this element-list current-route]
   (for [[element-type element-key] element-list]
     [:div.side-element
      {:key element-key}
@@ -41,8 +42,8 @@
        :button
        (let [{:keys [route tooltip]} (get-details element-key)]
          [:div.side-link
-          {;:on-click #(om/transact! this `[(change/route! {:route ~route})])
-           :on-click #(app/navigate! route {:id 123})
+          {:on-click #(when-not (= route current-route)
+                        (app/navigate! route {:id 123}))
            :data-ot (get-string tooltip)
            :data-ot-style "dark"
            :data-ot-tip-joint "left"
@@ -56,17 +57,17 @@
 (defui Main
   static om/IQuery
   (query [this]
-         [{:app/side [:side/upper :side/lower]}])
+         [{:app/side [:side/upper :side/lower]} :app/route])
   Object
   (render [this]
-          (let [{:keys [side/upper side/lower]} (->> [:app/side]
-                                                     (get-in (om/props this)))]
+          (let [{:keys [app/route app/side]} (om/props this)
+                {:keys [side/upper side/lower]} side]
             (sab/html [:div#side-container
                        [:div#side-upper
-                        (add-side-elements! this upper)]
+                        (add-side-elements! this upper route)]
                        [:div#side-lower
                         {:align "center"}
-                        (add-side-elements! this lower)]]))))
+                        (add-side-elements! this lower route)]]))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -3,7 +3,8 @@
             [sablono.core :as sab]
             ;;
             [witan.ui.shared :as shared]
-            [witan.ui.utils :as utils]))
+            [witan.ui.utils :as utils])
+  (:require-macros [cljs-log.core :as log]))
 
 (defui Main
   static om/IQuery

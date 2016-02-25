@@ -1,5 +1,6 @@
 (ns witan.ui.app
-  (:require [om.next :as om :refer-macros [defui]]
+  (:require [cljs.core.async :refer [<! chan put! timeout]]
+            [om.next :as om :refer-macros [defui]]
             [sablono.core :as sab]
             [bidi.bidi :as bidi]
             [accountant.core :as accountant]
@@ -9,11 +10,14 @@
             [witan.ui.split :as split]
             [witan.ui.utils :as utils]
             [witan.ui.data :as data])
-  (:require-macros [cljs-log.core :as log]))
+  (:require-macros [cljs-log.core :as log]
+                   [cljs.core.async.macros :as am :refer [go go-loop alt!]]))
 
 (defn path
   []
   (.. js/document -location -pathname))
+
+(def app-route-chan (chan))
 
 (def route->component
   {:app/workspace-dash workspace-dash/Main
@@ -40,7 +44,8 @@
     (if route
       (let [{:keys [handler route-params]} route]
         (log/debug "Dispatching to route:" path "=>" handler)
-        (om/transact! (data/make-reconciler) `[(change/route! {:route ~handler :route-params ~route-params})]))
+        (om/transact! (data/make-reconciler) `[(change/route! {:route ~handler :route-params ~route-params})])
+        (put! app-route-chan handler))
       (log/severe "Couldn't match a route to this path:" path))))
 
 (defn navigate!
@@ -60,14 +65,14 @@
           {:route/data []})
   static om/IQuery
   (query [this]
-         (if (om/component? this)
-           `[:app/route {:route/data ~(-> this om/props :app/route route->component om/get-query)}]
-           `[:app/route {:route/data ?route/data}]))
+         '[:app/route {:route/data ?route/data}])
   Object
   (componentWillMount [this]
-                      (let [{:keys [app/route]} (om/props this)
-                            initial-query (om/get-query (route->component route))]
-                        (om/set-query! this {:params {:route/data initial-query}})))
+                      (go-loop []
+                        (let [current-route (<! app-route-chan)
+                              initial-query (om/get-query (route->component current-route))]
+                          (om/set-query! this {:params {:route/data initial-query}}))
+                        (recur)))
   (render [this]
           (let [{:keys [app/route route/data]} (om/props this)
                 active-component (get route->factory route)]
