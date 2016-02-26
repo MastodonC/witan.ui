@@ -31,6 +31,13 @@
 (def color-complement-3  "#64200F")
 (def color-complement-4  "#350B00")
 
+;; NEW COLORS from
+
+(def lol-color-1 "#F16B6F")
+(def lol-color-2 "#C5C6B6")
+(def lol-color-3 "#AACD6E")
+(def lol-color-4 "#3C3530")
+
 ;;
 (def error   color-complement-0)
 (def warning color-secondary-2-0)
@@ -47,17 +54,27 @@
 (def button-primary   normal)
 (def button-secondary (color/lighten button-primary 10))
 
+;; background
+(def body-bg (color/lighten lol-color-2 20))
+
+;; fonts
+(def title-fonts-colour lol-color-4)
+(def icon-colour lol-color-4)
+
 ;; side
-(def side-bg color-primary-2)
+(def side-bg lol-color-4)
 (def side-text 'white)
 (def side-icons-inactive "#ccc")
 
 ;; dash
-(def dash-heading-bg (color/lighten color-primary-1 20))
+(def dash-heading-bg lol-color-3)
 
 ;; table header
 (def table-header-text 'gray)
-(def table-row-hover-bg (color/lighten color-secondary-1-1 10))
-(def table-row-hover-text 'white)
-(def table-row-selected-bg color-secondary-1-2)
+(def table-row-hover-bg lol-color-2)
+(def table-row-hover-text 'black)
+(def table-row-selected-bg color-secondary-1-1)
 (def table-row-selected-text 'white)
+
+;; split
+(def switcher-bg lol-color-2)

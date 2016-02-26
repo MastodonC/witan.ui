@@ -6,17 +6,18 @@
 (defonce app-state
   (atom
    {:app/side {:side/upper '([:button :workspaces]
-                             [:button :data]
-                             [:button :settings])
+                             [:button :data])
                :side/lower '([:button :help]
                              [:button :logout])}
     :app/route nil
     :app/route-params nil
-    :app/workspace {:workspace/min-size 200}
-    :app/workspace-dash {:home/title "Workspace dash"
-                         :home/content "This is the homepage. There isn't a lot to see here."}
-    :app/data-dash {:about/title "Data dashboard"
-                    :about/content "This is the about page, the place where one might write things about their own self."}}))
+    :app/workspace {:workspace/primary
+                    {:primary/view-selected 0}
+                    :workspace/secondary
+                    {:secondary/view-selected 0}}
+
+    :app/workspace-dash {:wd/selected-id nil}
+    :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}}))
 
 (def conn (d/create-conn {}))
 
@@ -47,6 +48,11 @@
   [{:keys [state query]} _ _]
   {:value (select-keys (:app/side @state) query)})
 
+(defmethod read :app/workspace
+  [{:keys [state query]} _ _]
+  (log/debug "Q :app/workspace" query)
+  {:value (select-keys (:app/workspace @state) query)})
+
 (defmethod read :app/counter
   [{:keys [state query]} _ _]
   #_(println "query" query)
@@ -71,3 +77,15 @@
    :action (fn [_]
              (swap! state assoc :app/route route)
              (swap! state assoc :app/route-params route-params))})
+
+(defmethod mutate 'wd/select-row!
+  [{:keys [state]} _ {:keys [id]}]
+  {:value {:keys [:route/data]}
+   :action (fn [_]
+             (swap! state assoc-in [:app/workspace-dash :wd/selected-id] id))})
+
+(defmethod mutate 'change/primary-view!
+  [{:keys [state]} _ {:keys [idx]}]
+  {:value {:keys [:app/workspace]}
+   :action (fn [_]
+             (swap! state assoc-in [:app/workspace :workspace/primary :primary/view-selected] idx))})

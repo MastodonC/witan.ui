@@ -6,7 +6,7 @@
             ;;
             [witan.ui.icons :as icons]
             [witan.ui.strings :refer [get-string]]
-            [witan.ui.app :as app])
+            [witan.ui.route :as route])
   (:require-macros
    [devcards.core :as dc :refer [defcard]]
    [cljs-log.core :as log]))
@@ -43,7 +43,7 @@
        (let [{:keys [route tooltip]} (get-details element-key)]
          [:div.side-link
           {:on-click #(when-not (= route current-route)
-                        (app/navigate! route {:id 123}))
+                        (route/navigate! route))
            :data-ot (get-string tooltip)
            :data-ot-style "dark"
            :data-ot-tip-joint "left"

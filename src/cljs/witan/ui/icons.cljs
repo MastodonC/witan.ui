@@ -63,6 +63,18 @@
   [& args]
   (apply create-key "search" args))
 
+(defn person
+  [& args]
+  (apply create-key "person" args))
+
+(defn visualisation
+  [& args]
+  (apply create-key "show_chart" args))
+
+(defn topology
+  [& args]
+  (apply create-key "transform" args))
+
 ;;
 
 (defcard loading
@@ -89,7 +101,9 @@
                     ["data"      data]
                     ["help"      help]
                     ["logout"    logout]
-                    ["search"    search]]]
+                    ["search"    search]
+                    ["visualisation" visualisation]
+                    ["person" person]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:hr

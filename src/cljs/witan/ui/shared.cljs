@@ -26,32 +26,31 @@
                    (.preventDefault e))}]]]])
 
 (defn table
-  [{:keys [headers content selected-fn]} select-fn]
+  [{:keys [headers content selected?-fn on-select on-double-click]}]
   [:div.shared-table
-   [:div.box-shadow
-    [:table.pure-table.pure-table-horizontal
-     [:thead
-      [:tr
-       (for [{:keys [title weight]} headers]
-         (let [percent (str (* 100 weight) "%")]
-           [:th {:style {:width percent}} title]))]]]]
+   [:table.pure-table.pure-table-horizontal
+    [:thead
+     [:tr
+      (for [{:keys [title weight]} headers]
+        (let [percent (str (* 100 weight) "%")]
+          [:th {:style {:width percent}} title]))]]]
    [:table.pure-table.pure-table-horizontal
     [:tbody
      (for [row content]
        [:tr
-        {:class (when (selected-fn row) "selected")}
+        {:class (when (and selected?-fn (selected?-fn row)) "selected")}
         (for [{:keys [content-fn title weight]} headers]
           (let [percent (str (* 100 weight) "%")]
             [:td {:style {:width percent}
-                  :on-click (fn [e] (when select-fn
-                                      (select-fn row)))}
-             (content-fn row)]))])]]])
+                  :on-click (fn [e] (when on-select
+                                      (on-select row)))
+                  :on-double-click (fn [e] (when on-double-click
+                                             (on-double-click row)))}
+             (when content-fn (content-fn row))]))])]]])
 
-
-
-
-
-;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; DEVCARDS
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defcard headings
   (let [example-text "Welcome to Witan"]
@@ -79,19 +78,21 @@
 
 (defcard table
   (fn [data _]
-    (let [table-data {:headers [{:content-fn :name     :title "Name"          :weight 0.6}
-                                {:content-fn :owner    :title "Owner"         :weight 0.2}
-                                {:content-fn :modified :title "Last Modified" :weight 0.2}]
-                      :content [{:name "Workspace for Camden Population"   :id 1 :owner "Bob"     :modified "Yesterday, 2pm"}
-                                {:name "Workspace for Hounslow Population" :id 2 :owner "Alice"   :modified "4th Jan, 4.15pm"}
-                                {:name "Workspace for Barnet Population"   :id 3 :owner "Charles" :modified "12th Jan, 10.24am"}]
-                      :selected-fn #(= (:id %) (:selected-id @data))}
-          select-fn #(swap! data assoc :selected-id (:id %))]
-      (sab/html
-       [:div
-        {:style {:width "100%"}}
-        (table table-data select-fn)])))
-  {:selected-id 1}
+    (sab/html
+     [:div
+      {:style {:width "100%"}}
+      (table {:headers [{:content-fn #(icons/person :dark) :title ""  :weight 0.05}
+                        {:content-fn :name     :title "Name"          :weight 0.55}
+                        {:content-fn :owner    :title "Owner"         :weight 0.2}
+                        {:content-fn :modified :title "Last Modified" :weight 0.2}]
+              :content [{:name "Workspace for Camden Population"   :id 1 :owner "Bob"     :modified "Yesterday, 2pm"}
+                        {:name "Workspace for Hounslow Population" :id 2 :owner "Alice"   :modified "4th Jan, 4.15pm"}
+                        {:name "Workspace for Barnet Population"   :id 3 :owner "Charles" :modified "12th Jan, 10.24am"}]
+              :selected?-fn #(= (:id %) (:selected-id @data))
+              :on-select #(swap! data assoc :selected-id (:id %))
+              :on-double-click #(swap! data assoc :last-dbl-click-id (:id %))})]))
+  {:selected-id nil
+   :last-dbl-click-id nil}
   {:inspect-data true
    :frame true
    :history false})

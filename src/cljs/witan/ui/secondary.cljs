@@ -7,3 +7,5 @@
   (render [this]
           (sab/html
            [:h1 "Secondary"])))
+
+(def secondary-split-view (om/factory Main))

@@ -5,13 +5,14 @@
             ;;
             [witan.ui.data      :as data]
             [witan.ui.side      :as side]
-            [witan.ui.app       :as app]))
+            [witan.ui.app       :as app]
+            [witan.ui.route     :as route]))
 
 (if-let [node (gdom/getElement "app")]
   (do
-    (accountant/configure-navigation! {:nav-handler app/dispatch-path!
-                                       :path-exists? app/path-exists?})
-    (app/dispatch-path! (app/path))
+    (accountant/configure-navigation! {:nav-handler route/dispatch-path!
+                                       :path-exists? route/path-exists?})
+    (route/dispatch-path! (app/path))
     (om/add-root! (data/make-reconciler) app/Main node)))
 
 (if-let [node (gdom/getElement "side")]

@@ -11,12 +11,13 @@
                :padding-left (px 15)
                :box-shadow "0px 2px 4px #888"
                :position :relative
+               :height values/app-peripheral-height
                :z-index 50}
               [:h1
                {:padding (px 0)
-                :margin (px 0)
+                :margin-top (px (/ values/app-peripheral-height-value 6))
                 :display :inline-block
-                :width (em 8)}]
+                :width (em 6)}]
               [:.shared-search-input
                {:display :inline-flex
                 :font-size (px 14)

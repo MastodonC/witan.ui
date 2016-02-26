@@ -13,16 +13,20 @@
               {:padding-left (px 30)
                :width        (percent 100)}]]
 
+            ;;;;;;;;;;;;;;
+
             [:.shared-table
+             ^:prefix {:user-select :none}
              [:.pure-table.pure-table-horizontal
               {:width (percent 100)}]
              [:th
               {:color colour/table-header-text
-               :font-weight :normal}]
-             [:.box-shadow
-              {:box-shadow "0px 2px 4px #888"}]
+               :font-weight :normal
+               :cursor :default}]
              [:tbody
               [:tr
+               {:transition "background-color 0.15s, color 0.15s"
+                :height (em 3)}
                [:&:hover
                 {:background-color colour/table-row-hover-bg
                  :color colour/table-row-hover-text

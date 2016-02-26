@@ -110,9 +110,11 @@
    :string/browser-upload-completes       "Please wait whilst your upload completes..."
    :string/superseded                     "Superseded"
    :string/tooltip-workspace              "Browse your workspaces"
-   :string/tooltip-data                   "Browse your data sets"})
-
-
+   :string/tooltip-data                   "Browse your data sets"
+   :string/workspace-dash-title           "Workspaces"
+   :string/data-dash-title                "Data Sets"
+   :string/workspace-dash-filter          "Filter your workspaces"
+   :string/data-dash-filter               "Filter your data sets"})
 
 (defn get-string
   ""
