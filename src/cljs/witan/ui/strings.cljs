@@ -114,7 +114,10 @@
    :string/workspace-dash-title           "Workspaces"
    :string/data-dash-title                "Data Sets"
    :string/workspace-dash-filter          "Filter your workspaces"
-   :string/data-dash-filter               "Filter your data sets"})
+   :string/data-dash-filter               "Filter your data sets"
+   :string/workspace-data-view            "Data"
+   :string/workspace-config-view          "Settings"
+   :string/workspace-history-view         "History"})
 
 (defn get-string
   ""

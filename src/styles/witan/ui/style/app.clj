@@ -59,4 +59,16 @@
                 :top (px 0)
                 :transition "margin-left 0.1s"}]]
              [:.indicator-offset-1
-              {:margin-left (px (+ (* switcher-padding 2) switcher-icon-dx))}]]])
+              {:margin-left (px (+ (* switcher-padding 2) switcher-icon-dx))}]]
+
+            [:.secondary-switcher
+             [:button
+              {:border-radius 0
+               :background-color colour/switcher-bg
+               :margin 0
+               :border-left [[(px 1) 'solid colour/side-bg]]
+               :box-shadow "0px 2px 4px #888"
+               :font-weight :bold}]
+             [:.selected
+              {:background-color colour/switcher-button-selected
+               :pointer-events :none}]]])

@@ -1,5 +1,6 @@
 (ns witan.ui.ext-style.splitjs
   (:require [witan.ui.style.util :as util]
+            [witan.ui.style.colour :as colour]
             [garden.units :refer [percent]]))
 
 (def style [[:body
@@ -9,7 +10,7 @@
               :overflow-x :hidden}
              ^:prefix {:box-sizing :border-box}]
             [:.gutter
-             {:background-color "#eee"
+             {:background-color colour/gutter
               :background-repeat :no-repeat
               :background-position (percent 50)}
              [:&.gutter-vertical

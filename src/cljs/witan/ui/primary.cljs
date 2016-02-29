@@ -4,7 +4,6 @@
             ;;
             [witan.ui.icons :as icons])
   (:require-macros
-   [devcards.core :as dc :refer [defcard]]
    [cljs-log.core :as log]))
 
 (defn switcher
@@ -26,12 +25,11 @@
 (defui Main
   static om/IQuery
   (query [this]
-         [{:app/workspace {:workspace/primary [:primary/view-selected]}}])
+         [:primary/view-selected])
   Object
   (render [this]
-          (log/debug "primary props" (om/props this))
           (let [{:keys [primary/view-selected]
-                 :or {primary/view-selected 0}} (get (om/props this) :app/workspace)]
+                 :or {primary/view-selected 0}} (om/props this)]
             (sab/html
              [:div#primary
               [:div#overlay
@@ -41,19 +39,3 @@
                           :on-select #(om/transact! this `[(change/primary-view! {:idx ~%})])})]]))))
 
 (def primary-split-view (om/factory Main))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; DEVCARDS
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(defcard switcher
-  (fn [data _]
-    (sab/html
-     (switcher {:icon-0 (partial icons/topology :dark :medium)
-                :icon-1 (partial icons/visualisation :dark :medium)
-                :selected-idx (:selected-idx @data)
-                :on-select (partial swap! data assoc :selected-idx)})))
-  {:selected-idx 0}
-  {:inspect-data true
-   :frame true
-   :history false})

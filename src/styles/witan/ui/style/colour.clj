@@ -56,6 +56,7 @@
 
 ;; background
 (def body-bg (color/lighten lol-color-2 20))
+(def gutter (color/lighten lol-color-4 30))
 
 ;; fonts
 (def title-fonts-colour lol-color-4)
@@ -78,3 +79,4 @@
 
 ;; split
 (def switcher-bg lol-color-2)
+(def switcher-button-selected lol-color-1)

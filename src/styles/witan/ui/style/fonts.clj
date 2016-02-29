@@ -11,7 +11,7 @@
     {:font-family "'Lato', sans-serif"})
    (gs/at-font-face
     {:font-family "'Merriweather', serif"})
-   [:body :p :table
+   [:body :p :table :button :.pure-button
     {:font-family base-fonts
      :font-size (px 12.4)}]
    [:h1 :h2 :h3 :h4 :h5
