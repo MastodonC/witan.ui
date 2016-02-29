@@ -90,3 +90,6 @@
 ;; buttons
 (def button-create lol-color-4)
 (def button-view   lol-color-2)
+
+;; login
+(def login-subtitles "#777")

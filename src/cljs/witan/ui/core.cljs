@@ -6,6 +6,7 @@
             [witan.ui.data      :as data]
             [witan.ui.side      :as side]
             [witan.ui.app       :as app]
+            [witan.ui.login     :as login]
             [witan.ui.route     :as route]))
 
 (if-let [node (gdom/getElement "app")]
@@ -17,3 +18,6 @@
 
 (if-let [node (gdom/getElement "side")]
   (om/add-root! (data/make-reconciler) side/Main node))
+
+(if-let [node (gdom/getElement "login")]
+  (om/add-root! (data/make-reconciler) login/Main node))

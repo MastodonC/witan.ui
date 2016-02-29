@@ -9,6 +9,10 @@
                              [:button :data])
                :side/lower '([:button :help]
                              [:button :logout])}
+    :app/login {:login/success? false
+                :login/token nil
+                :login/phase :prompt}
+    :app/user {:user/name nil}
     :app/route nil
     :app/route-params nil
     :app/workspace {:workspace/primary   {:primary/view-selected 0}
@@ -33,6 +37,11 @@
   [{:keys [state query]} k _]
   (let [st @state]
     {:value (get st k)}))
+
+(defmethod read :app/login
+  [{:keys [state query]} k _]
+  (let [st @state]
+    {:value (select-keys (get st k) query)}))
 
 (defmethod read :app/route-params
   [{:keys [state query]} k _]
@@ -73,7 +82,7 @@
   [{:keys [state query]} _ _]
   {:value (select-keys (:app/side @state) query)})
 
-;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmethod mutate 'change/route!
   [{:keys [state]} _ {:keys [route route-params]}]
@@ -99,3 +108,9 @@
   {:value {:keys [:route/data]}
    :action (fn [_]
              (swap! state assoc-in [:app/workspace :workspace/secondary :secondary/view-selected] idx))})
+
+(defmethod mutate 'login/goto-phase!
+  [{:keys [state]} _ {:keys [phase]}]
+  {:value {:keys [:app/login]}
+   :action (fn [_]
+             (swap! state assoc-in [:app/login :login/phase] phase))})
