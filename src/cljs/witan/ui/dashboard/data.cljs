@@ -3,6 +3,7 @@
             [sablono.core :as sab]
             ;;
             [witan.ui.shared :as shared]
+            [witan.ui.dashboard.shared  :as shared-dash]
             [witan.ui.utils :as utils]
             [witan.ui.strings :refer [get-string]]))
 
@@ -14,9 +15,9 @@
   (render [this]
           (let [{:keys [about/content]} (om/props this)]
             (sab/html [:div.dashboard
-                       [:div.heading
-                        [:h1 (get-string :string/data-dash-title)]
-                        (shared/search-filter (get-string :string/data-dash-filter) nil)]
+                       (shared-dash/header {:title :string/data-dash-title
+                                            :filter-txt :string/data-dash-filter
+                                            :filter-fn nil})
                        [:div.content
                         [:ul
                          (for [x (range 100)]

@@ -37,6 +37,11 @@
 (def lol-color-2 "#C5C6B6")
 (def lol-color-3 "#AACD6E")
 (def lol-color-4 "#3C3530")
+;;
+(def lol-color-5 "#5CC557")
+(def lol-color-6 "#F3A86C")
+(def lol-color-7 "#429491")
+
 
 ;;
 (def error   color-complement-0)
@@ -57,6 +62,7 @@
 ;; background
 (def body-bg (color/lighten lol-color-2 20))
 (def gutter (color/lighten lol-color-4 30))
+(def box-shadow "#888")
 
 ;; fonts
 (def title-fonts-colour lol-color-4)
@@ -80,3 +86,7 @@
 ;; split
 (def switcher-bg lol-color-2)
 (def switcher-button-selected lol-color-1)
+
+;; buttons
+(def button-create lol-color-4)
+(def button-view   lol-color-2)

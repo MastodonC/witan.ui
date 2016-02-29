@@ -75,6 +75,14 @@
   [& args]
   (apply create-key "transform" args))
 
+(defn plus
+  [& args]
+  (apply create-key "add" args))
+
+(defn open
+  [& args]
+  (apply create-key "open_in_browser" args))
+
 ;;
 
 (defcard loading
@@ -93,17 +101,19 @@
                       [:medium]
                       [:large]
                       [:x-large])
-         all-icons [["cog"       cog]
-                    ["upload"    upload]
-                    ["padlock"   padlock]
-                    ["star"      star]
-                    ["workspace" workspace]
-                    ["data"      data]
-                    ["help"      help]
-                    ["logout"    logout]
-                    ["search"    search]
+         all-icons [["cog"           cog]
+                    ["upload"        upload]
+                    ["padlock"       padlock]
+                    ["star"          star]
+                    ["workspace"     workspace]
+                    ["data"          data]
+                    ["help"          help]
+                    ["logout"        logout]
+                    ["search"        search]
                     ["visualisation" visualisation]
-                    ["person" person]]]
+                    ["person"        person]
+                    ["plus"          plus]
+                    ["open"          open]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:hr

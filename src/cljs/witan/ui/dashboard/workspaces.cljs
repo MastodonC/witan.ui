@@ -3,6 +3,7 @@
             [sablono.core :as sab]
             ;;
             [witan.ui.shared  :as shared]
+            [witan.ui.dashboard.shared  :as shared-dash]
             [witan.ui.utils   :as utils]
             [witan.ui.icons   :as icons]
             [witan.ui.route   :as route]
@@ -16,11 +17,15 @@
   Object
   (render [this]
           (let [{:keys [wd/selected-id]} (om/props this)
-                icon-fn #(vector :div.text-center (icons/workspace :dark))]
+                icon-fn #(vector :div.text-center (icons/workspace :dark))
+                buttons (concat (when selected-id [{:id :view :icon icons/open :txt :string/view :class "workspace-view"}])
+                                [{:id :create :icon icons/plus :txt :string/create :class "workspace-create"}])]
             (sab/html [:div.dashboard
-                       [:div.heading
-                        [:h1 (get-string :string/workspace-dash-title)]
-                        (shared/search-filter (get-string :string/workspace-dash-filter) nil)]
+                       (shared-dash/header {:title :string/workspace-dash-title
+                                            :filter-txt :string/workspace-dash-filter
+                                            :filter-fn nil
+                                            :buttons buttons
+                                            :on-button-click #(condp = % :view (route/navigate! :app/workspace {:id selected-id}))})
                        [:div.content
                         (shared/table {:headers [{:content-fn icon-fn   :title ""              :weight 0.03}
                                                  {:content-fn :name     :title "Name"          :weight 0.57}

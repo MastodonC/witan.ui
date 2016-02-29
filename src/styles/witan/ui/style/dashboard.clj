@@ -15,9 +15,11 @@
                :z-index 50}
               [:h1
                {:padding (px 0)
-                :margin-top (px (/ values/app-peripheral-height-value 6))
+                :margin [[(px (/ values/app-peripheral-height-value 4)) (px 0) (px 0) (px 0)]]
+                :line-height (em 1)
                 :display :inline-block
-                :width (em 6)}]
+                :width (em 6)
+                :font-weight 700}]
               [:.shared-search-input
                {:display :inline-flex
                 :font-size (px 14)
@@ -25,6 +27,7 @@
                 :margin-left (em 1)}
                [:form
                 {:width (em 36)}]]]
+
              [:.content
               {:position :absolute
                :top values/app-peripheral-height
@@ -34,4 +37,24 @@
                :overflow-y :auto
                :overflow-x :hidden}
               [:#container
-               {:width (percent 99)}]]]])
+               {:width (percent 99)}]]
+
+             [:.buttons
+              {:float :right
+               :display :flex
+               :justify-content :center
+               :height (percent 100)
+               :padding-right (px 10)}
+              [:.button-container
+               {:align-self :center}
+               [:.material-icons
+                {:vertical-align :middle}]
+               [:button
+                {:margin-left (em 0.5)
+                 :box-shadow [[(px 2) (px 2) (px 4) colour/box-shadow]]}
+                [:i
+                 {:margin [[(px -3) (px 5) (px 0) (px 0)]]}]]
+               [:.workspace-create
+                {:background-color colour/button-create :color colour/body-bg}]
+               [:.workspace-view
+                {:background-color colour/button-view}]]]]])
