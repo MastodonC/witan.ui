@@ -111,6 +111,8 @@
    :string/superseded                     "Superseded"
    :string/tooltip-workspace              "Browse your workspaces"
    :string/tooltip-data                   "Browse your data sets"
+   :string/tooltip-logout                 "Log out from your account"
+   :string/tooltip-help                   "Get help"
    :string/workspace-dash-title           "Workspaces"
    :string/data-dash-title                "Data Sets"
    :string/workspace-dash-filter          "Filter your workspaces"

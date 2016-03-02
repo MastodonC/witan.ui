@@ -1,7 +1,8 @@
 (ns witan.ui.controller
   (:require [witan.ui.controllers.user :as user]
             [cljs.core.async :refer [<! chan put!]])
-  (:require-macros [cljs.core.async.macros :as am :refer [go-loop]]))
+  (:require-macros [cljs.core.async.macros :as am :refer [go-loop]]
+                   [cljs-log.core :as log]))
 
 (defn event->handler
   [event]
@@ -19,5 +20,9 @@
   (recur))
 
 (defn raise!
-  [owner event args]
-  (put! event-chan {:owner owner :event event :args args}))
+  ([owner event]
+   (raise! owner event {}))
+  ([owner event args]
+   (let [payload (merge {:owner owner :event event} (when (not-empty args) {:args args}))]
+     (log/debug "Raising event" event args)
+     (put! event-chan payload))))

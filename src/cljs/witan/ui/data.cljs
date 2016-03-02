@@ -81,7 +81,11 @@
 (defn save-data!
   []
   (log/debug "Saving app state to cookie")
-  (.set goog.net.cookies cookie-name (-> @app-state (dissoc :om.next/queries) pr-str b64/encodeString) -1))
+  (.set goog.net.cookies
+        cookie-name
+        (-> @app-state (dissoc :om.next/queries) pr-str b64/encodeString)
+        -1
+        "/"))
 
 (defn load-data!
   []
@@ -91,6 +95,13 @@
       (log/debug "Restored app state from cookie")
       (publish-topic :data/app-state-restored))
     (log/debug "(No existing token was found.)")))
+
+(defn delete-data!
+  []
+  (log/debug "Deleting contents of cookie")
+  (.remove goog.net.cookies
+           cookie-name
+           "/"))
 
 (load-data!)
 
@@ -183,6 +194,8 @@
    :action (fn [_]
              (swap! state assoc-in [:app/workspace :workspace/secondary :secondary/view-selected] idx))})
 
+;;
+
 (defmethod mutate 'login/goto-phase!
   [{:keys [state]} _ {:keys [phase]}]
   {:value {:keys [:app/login]}
@@ -200,5 +213,4 @@
   {:value {:keys [:app/login]}
    :action (fn [_]
              (swap! state assoc-in [:app/login :login/id] id)
-             (swap! state assoc-in [:app/login :login/token] token)
-             (save-data!))})
+             (swap! state assoc-in [:app/login :login/token] token))})

@@ -27,6 +27,7 @@
   (if token
     (do
       (om/transact! owner `[(login/complete! ~response)])
+      (data/save-data!)
       (kill-login-screen!))
     (om/transact! owner '[(login/set-message! {:message :string/sign-in-failure})])))
 
@@ -50,6 +51,11 @@
     (POST "/login" {:id event
                     :params (s/validate Login args)
                     :result-cb (route-api-response event owner)})))
+
+(defmethod handle :logout
+  [event owner {:keys [email pass]}]
+  (data/delete-data!)
+  (.replace js/location "/" true))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

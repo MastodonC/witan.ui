@@ -6,7 +6,8 @@
             ;;
             [witan.ui.icons :as icons]
             [witan.ui.strings :refer [get-string]]
-            [witan.ui.route :as route])
+            [witan.ui.route :as route]
+            [witan.ui.controller :as controller])
   (:require-macros
    [devcards.core :as dc :refer [defcard]]
    [cljs-log.core :as log]))
@@ -18,19 +19,22 @@
      (get
       {:workspaces  icons/workspace
        :data        icons/data
-       :settings    icons/cog
        :help        icons/help
        :logout      icons/logout}
       id) props)))
 
+(defn navigate!
+  [route _ current-route]
+  (when-not (= route current-route)
+    (route/navigate! route)))
+
 (defn get-details
   [id]
   (get
-   {:workspaces {:route :app/workspace-dash :tooltip :string/tooltip-workspace}
-    :data       {:route :app/data-dash      :tooltip :string/tooltip-data}
-    :settings   {:route :app/workspace      :tooltip :string/tooltip-workspace}
-    :help       {:route :app/workspace-dash :tooltip :string/tooltip-data}
-    :logout     {:route :app/data-dash      :tooltip :string/tooltip-workspace}}
+   {:workspaces {:fnc (partial navigate! :app/workspace-dash) :tooltip :string/tooltip-workspace}
+    :data       {:fnc (partial navigate! :app/data-dash)      :tooltip :string/tooltip-data}
+    :help       {:fnc nil                                     :tooltip :string/tooltip-help}
+    :logout     {:fnc #(controller/raise! %1 :user/logout)    :tooltip :string/tooltip-logout}}
    id))
 
 (defn add-side-elements!
@@ -40,10 +44,10 @@
      {:key element-key}
      (condp = element-type
        :button
-       (let [{:keys [route tooltip]} (get-details element-key)]
+       (let [{:keys [route tooltip fnc]} (get-details element-key)]
          [:div.side-link
-          {:on-click #(when-not (= route current-route)
-                        (route/navigate! route))
+          {:on-click #(when fnc
+                        (fnc this current-route))
            :data-ot (get-string tooltip)
            :data-ot-style "dark"
            :data-ot-tip-joint "left"
@@ -85,7 +89,6 @@
              :height "100%"}}
     (side-bar {:app/side {:side/upper '([:button :workspaces]
                                         [:button :data]
-                                        [:hr]
-                                        [:button :settings])
+                                        [:hr])
                           :side/lower '([:button :help]
                                         [:button :logout])}})]))
