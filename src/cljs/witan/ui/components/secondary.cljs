@@ -1,4 +1,4 @@
-(ns witan.ui.secondary
+(ns witan.ui.components.secondary
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :as sab]
             [witan.ui.strings :refer [get-string]]))

@@ -1,8 +1,8 @@
-(ns witan.ui.primary
+(ns witan.ui.components.primary
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :as sab]
             ;;
-            [witan.ui.icons :as icons])
+            [witan.ui.components.icons :as icons])
   (:require-macros
    [cljs-log.core :as log]))
 

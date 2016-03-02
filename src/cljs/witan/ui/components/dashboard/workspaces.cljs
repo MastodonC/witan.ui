@@ -1,14 +1,25 @@
-(ns witan.ui.dashboard.workspaces
+(ns witan.ui.components.dashboard.workspaces
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :as sab]
             ;;
-            [witan.ui.shared  :as shared]
-            [witan.ui.dashboard.shared  :as shared-dash]
+            [witan.ui.components.shared  :as shared]
+            [witan.ui.components.dashboard.shared  :as shared-dash]
             [witan.ui.utils   :as utils]
-            [witan.ui.icons   :as icons]
+            [witan.ui.components.icons   :as icons]
             [witan.ui.route   :as route]
             [witan.ui.strings :refer [get-string]])
   (:require-macros [cljs-log.core :as log]))
+
+(defmulti button-press
+  (fn [_ event] event))
+
+(defmethod button-press :view
+  [selected-id _]
+  (route/navigate! :app/workspace {:id selected-id}))
+
+(defmethod button-press :create
+  [_ _]
+  (route/navigate! :app/create-workspace))
 
 (defui Main
   static om/IQuery
@@ -25,7 +36,7 @@
                                             :filter-txt :string/workspace-dash-filter
                                             :filter-fn nil
                                             :buttons buttons
-                                            :on-button-click #(condp = % :view (route/navigate! :app/workspace {:id selected-id}))})
+                                            :on-button-click (partial button-press selected-id)})
                        [:div.content
                         (shared/table {:headers [{:content-fn icon-fn   :title ""              :weight 0.03}
                                                  {:content-fn :name     :title "Name"          :weight 0.57}

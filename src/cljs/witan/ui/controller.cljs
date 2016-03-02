@@ -1,5 +1,6 @@
 (ns witan.ui.controller
   (:require [witan.ui.controllers.user :as user]
+            [witan.ui.controllers.workspace :as workspace]
             [cljs.core.async :refer [<! chan put!]])
   (:require-macros [cljs.core.async.macros :as am :refer [go-loop]]
                    [cljs-log.core :as log]))
@@ -7,7 +8,8 @@
 (defn event->handler
   [event]
   (let [nsp (namespace event)]
-    (get {"user" user/handle}
+    (get {"user"      user/handle
+          "workspace" workspace/handle}
          nsp)))
 
 (defonce event-chan (chan))

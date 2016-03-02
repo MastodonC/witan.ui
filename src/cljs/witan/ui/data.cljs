@@ -42,13 +42,15 @@
                :login/token (s/maybe s/Str)
                :login/id (s/maybe s/Str)
                :login/message (s/maybe s/Str)}
-   :app/user {:user/name (s/maybe s/Str)}
+   :app/user {:user/name (s/maybe s/Str)
+              :user/groups-by-id [s/Int]}
    :app/route (s/maybe s/Keyword)
    :app/route-params (s/maybe s/Any)
    :app/workspace  {:workspace/primary   {:primary/view-selected s/Int}
                     :workspace/secondary {:secondary/view-selected s/Int}}
    :app/workspace-dash {:wd/selected-id (s/maybe s/Int)}
-   :app/data-dash (s/maybe s/Any)})
+   :app/data-dash (s/maybe s/Any)
+   :app/create-workspace (s/maybe s/Any)})
 
 ;; default app-state
 (defonce app-state
@@ -62,13 +64,15 @@
                 :login/token nil
                 :login/id nil
                 :login/message nil}
-    :app/user {:user/name nil}
+    :app/user {:user/name nil
+               :user/groups-by-id []}
     :app/route nil
     :app/route-params nil
     :app/workspace {:workspace/primary   {:primary/view-selected 0}
                     :workspace/secondary {:secondary/view-selected 0}}
     :app/workspace-dash {:wd/selected-id nil}
-    :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}}
+    :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}
+    :app/create-workspace {:about/content "This is the about page, the place where one might write things about their own self."}}
    (s/validate AppStateSchema)
    (atom)))
 
@@ -87,21 +91,24 @@
         -1
         "/"))
 
-(defn load-data!
-  []
-  (if-let [data (.get goog.net.cookies cookie-name)]
-    (let [unencoded (->> data b64/decodeString cljs.reader/read-string (s/validate AppStateSchema))]
-      (reset! app-state unencoded)
-      (log/debug "Restored app state from cookie")
-      (publish-topic :data/app-state-restored))
-    (log/debug "(No existing token was found.)")))
-
 (defn delete-data!
   []
   (log/debug "Deleting contents of cookie")
   (.remove goog.net.cookies
            cookie-name
            "/"))
+
+(defn load-data!
+  []
+  (if-let [data (.get goog.net.cookies cookie-name)]
+    (let [unencoded (->> data b64/decodeString cljs.reader/read-string)]
+      (try (reset! app-state (s/validate AppStateSchema unencoded))
+           (log/debug "Restored app state from cookie")
+           (publish-topic :data/app-state-restored)
+           (catch js/Object e
+             (log/warn "Failed to restore app state from cookie.")
+             (delete-data!))))
+    (log/debug "(No existing token was found.)")))
 
 (load-data!)
 
@@ -165,6 +172,10 @@
 (defmethod read :app/side
   [{:keys [state query]} _ _]
   {:value (select-keys (:app/side @state) query)})
+
+(defmethod read :user/groups
+  [{:keys [state query]} _ _]
+  {:value :not-found})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; mutatations

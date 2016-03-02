@@ -119,7 +119,13 @@
    :string/data-dash-filter               "Filter your data sets"
    :string/workspace-data-view            "Data"
    :string/workspace-config-view          "Settings"
-   :string/workspace-history-view         "History"})
+   :string/workspace-history-view         "History"
+   :string/create-workspace-title         "Create a new workspace"
+   :string/create-workspace-subtitle      "A workspace contains models and visualisations, configured how you want them"
+   :string/create-workspace-name          "Workspace name"
+   :string/create-workspace-name-ph       "Enter a name for this workspace"
+   :string/create-workspace-desc          "Description"
+   :string/create-workspace-desc-ph       "What will this workspace be used for?"})
 
 (defn get-string
   ""

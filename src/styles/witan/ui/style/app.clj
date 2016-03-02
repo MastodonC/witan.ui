@@ -1,5 +1,5 @@
 (ns witan.ui.style.app
-  (:require [garden.units :refer [px percent]]
+  (:require [garden.units :refer [px percent em]]
             [witan.ui.style.colour :as colour]))
 
 (def pc100 (percent 100))
@@ -8,6 +8,37 @@
 
 (def style [[:#app
              {:background-color colour/body-bg}
+
+             ;; GENERAL
+             [:button.pure-button
+              {:align-self :center
+               :box-shadow [[(px 2) (px 2) (px 4) colour/box-shadow]]}
+              [:.material-icons
+               {:vertical-align :middle}]
+              [:i
+               {:margin [[(px -3) (px 5) (px 0) (px 0)]]}]]
+
+             [:hr
+              {:height 0
+               :margin [[(px 15) (px 0)]]
+               :overflow :hidden
+               :background :transparent
+               :border 0
+               :border-bottom [[(px 1) 'solid "#ddd"]]}]
+
+             [:#create-workspace
+              [:#content
+               {:padding [[(em 0) (em 1)]]
+                :width (px 700)}
+               [:h2
+                [:em
+                 {:font-size (px 12)
+                  :margin-left (px 5)
+                  :font-style :normal
+                  :color 'gray}]]
+               [:button
+                {:background-color colour/button-create
+                 :color colour/body-bg}]]]
 
              [:#split
               {:height pc100

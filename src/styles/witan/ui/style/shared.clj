@@ -1,6 +1,7 @@
 (ns witan.ui.style.shared
   (:require [garden.units :refer [px em percent]]
             [witan.ui.style.colour :as colour]
+            [witan.ui.style.fonts  :as fonts]
             [witan.ui.style.values :as values]))
 
 (def style [[:.shared-search-input
@@ -34,4 +35,29 @@
                [:&.selected
                 {:background-color colour/table-row-selected-bg
                  :color colour/table-row-selected-text
-                 :cursor :pointer}]]]]])
+                 :cursor :pointer}]]]]
+
+            ;;;;;;;;;;;;;;
+
+            [:.shared-heading
+             {:background-color colour/dash-heading-bg
+              :box-shadow "0px 2px 4px #888"
+              :position :relative
+              :height values/app-peripheral-height
+              :z-index 50
+              :display :flex
+              :align-items :center
+              :justify-content :flex-start}
+             [:h1 :h2
+              {:position :relative
+               :float :left
+               :padding (px 0)
+               :margin-left (px 10)}]
+             [:h1
+              {:line-height (em 1)
+               :font-weight 700}]
+             [:h2
+              {:font-family fonts/base-fonts
+
+               :font-weight 500
+               :font-size (em 1.2)}]]])

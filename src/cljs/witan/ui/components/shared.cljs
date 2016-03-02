@@ -1,8 +1,9 @@
-(ns witan.ui.shared
+(ns witan.ui.components.shared
   (:require [om.next :as om]
             [sablono.core :as sab :include-macros true]
             ;;
-            [witan.ui.icons :as icons])
+            [witan.ui.strings :refer [get-string]]
+            [witan.ui.components.icons :as icons])
   (:require-macros
    [devcards.core :as dc :refer [defcard]]
    [cljs-log.core :as log]))
@@ -47,6 +48,15 @@
                   :on-double-click (fn [e] (when on-double-click
                                              (on-double-click row)))}
              (when content-fn (content-fn row))]))])]]])
+
+(defn header
+  ([title]
+   (header title nil))
+  ([title subtitle]
+   [:div.shared-heading
+    [:h1 (get-string title)]
+    (when subtitle
+      [:h2 (get-string subtitle)])]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS

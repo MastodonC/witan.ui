@@ -9,7 +9,7 @@
               :color colour/side-text
               :width values/app-peripheral-width}
              [:.side-element
-              {:margin (em 1)}
+              {:margin [[(em 1.2) (em 0)]]}
               [:.side-link
                {:cursor :pointer
                 :color colour/side-icons-inactive}

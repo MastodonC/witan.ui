@@ -1,10 +1,10 @@
-(ns witan.ui.side
+(ns witan.ui.components.side
   (:require [cljs.test :refer-macros [is async]]
             [goog.dom :as gdom]
             [om.next :as om :refer-macros [defui]]
             [sablono.core :as sab :include-macros true]
             ;;
-            [witan.ui.icons :as icons]
+            [witan.ui.components.icons :as icons]
             [witan.ui.strings :refer [get-string]]
             [witan.ui.route :as route]
             [witan.ui.controller :as controller])

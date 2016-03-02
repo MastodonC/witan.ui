@@ -1,4 +1,4 @@
-(ns witan.ui.primary.topology
+(ns witan.ui.components.primary.topology
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :as sab]))
 

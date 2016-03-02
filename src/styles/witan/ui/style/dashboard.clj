@@ -55,6 +55,7 @@
                 [:i
                  {:margin [[(px -3) (px 5) (px 0) (px 0)]]}]]
                [:.workspace-create
-                {:background-color colour/button-create :color colour/body-bg}]
+                {:background-color colour/button-create
+                 :color colour/body-bg}]
                [:.workspace-view
                 {:background-color colour/button-view}]]]]])

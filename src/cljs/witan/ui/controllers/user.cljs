@@ -17,6 +17,11 @@
   (let [login-div (.getElementById js/document "login")]
     (aset login-div "style" "visibility" "hidden")))
 
+(defn local-endpoint
+  [method]
+  (let [api-url (cljs-env :witan-api-url)] ;; 'nil' is a valid api-url (will default to current hostname)
+    (str api-url "/api" method)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti api-response
@@ -48,9 +53,10 @@
 (defmethod handle :login
   [event owner {:keys [email pass]}]
   (let [args {:username email :password pass}]
-    (POST "/login" {:id event
-                    :params (s/validate Login args)
-                    :result-cb (route-api-response event owner)})))
+    (POST (local-endpoint "/login")
+          {:id event
+           :params (s/validate Login args)
+           :result-cb (route-api-response event owner)})))
 
 (defmethod handle :logout
   [event owner {:keys [email pass]}]

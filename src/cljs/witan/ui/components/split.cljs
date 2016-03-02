@@ -1,11 +1,11 @@
-(ns witan.ui.split
+(ns witan.ui.components.split
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :as sab]
             ;;
-            [witan.ui.primary :as primary]
-            [witan.ui.secondary :as secondary]
+            [witan.ui.components.primary :as primary]
+            [witan.ui.components.secondary :as secondary]
             [witan.ui.utils :as utils]
-            [witan.ui.icons :as icons])
+            [witan.ui.components.icons :as icons])
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))
 

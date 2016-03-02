@@ -1,12 +1,6 @@
 (ns witan.ui.ajax
   (:require [ajax.core :as ajax])
-  (:require-macros [cljs-log.core :as log]
-                   [witan.ui.env :as env :refer [cljs-env]]))
-
-(defn local-endpoint
-  [method]
-  (let [api-url (cljs-env :witan-api-url)] ;; 'nil' is a valid api-url (will default to current hostname)
-    (str api-url "/api" method)))
+  (:require-macros [cljs-log.core :as log]))
 
 (defn- handle-response
   [status id result-cb response]
@@ -28,11 +22,11 @@
 (defn GET
   [method {:keys [params] :as args}]
   (log/debug "GET" method params)
-  (request (partial ajax/GET (local-endpoint method)) args))
+  (request (partial ajax/GET method) args))
 
 (defn POST
   [method {:keys [params] :as args}]
   (log/debug "POST" method params)
-  (request (partial ajax/POST (local-endpoint method)) args))
+  (request (partial ajax/POST method) args))
 
 ;; {"Authorization" (str "Token " @api-token)}

@@ -1,9 +1,9 @@
-(ns witan.ui.dashboard.data
+(ns witan.ui.components.dashboard.data
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :as sab]
             ;;
-            [witan.ui.shared :as shared]
-            [witan.ui.dashboard.shared  :as shared-dash]
+            [witan.ui.components.shared :as shared]
+            [witan.ui.components.dashboard.shared  :as shared-dash]
             [witan.ui.utils :as utils]
             [witan.ui.strings :refer [get-string]]))
 

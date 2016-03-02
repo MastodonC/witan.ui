@@ -1,4 +1,4 @@
-(ns witan.ui.icons
+(ns witan.ui.components.icons
   (:require [sablono.core :as sab :include-macros true])
   (:require-macros
    [devcards.core :as dc :refer [defcard]]))

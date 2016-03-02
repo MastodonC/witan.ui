@@ -1,4 +1,4 @@
-(ns witan.ui.secondary-data-search
+(ns witan.ui.components.secondary-data-search
   (:require [cljs.test :refer-macros [is async]]
             [om.dom :as dom :include-macros true]
             [om.next :as om :refer-macros [defui]]

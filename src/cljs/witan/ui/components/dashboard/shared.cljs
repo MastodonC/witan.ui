@@ -1,9 +1,9 @@
-(ns witan.ui.dashboard.shared
+(ns witan.ui.components.dashboard.shared
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :as sab]
             ;;
-            [witan.ui.shared :as shared]
-            [witan.ui.icons :as icons]
+            [witan.ui.components.shared :as shared]
+            [witan.ui.components.icons :as icons]
             [witan.ui.strings :refer [get-string]])
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))

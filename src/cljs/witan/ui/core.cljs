@@ -3,11 +3,11 @@
             [om.next :as om :refer-macros [defui]]
             [accountant.core :as accountant]
             ;;
-            [witan.ui.data      :as data]
-            [witan.ui.side      :as side]
-            [witan.ui.app       :as app]
-            [witan.ui.login     :as login]
-            [witan.ui.route     :as route]))
+            [witan.ui.components.login :as login]
+            [witan.ui.components.side  :as side]
+            [witan.ui.components.app   :as app]
+            [witan.ui.data             :as data]
+            [witan.ui.route            :as route]))
 
 (if-let [node (gdom/getElement "app")]
   (do

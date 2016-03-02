@@ -1,10 +1,11 @@
-(ns witan.ui.app
+(ns witan.ui.components.app
   (:require [om.next :as om :refer-macros [defui]]
             [sablono.core :as sab]
             ;;
-            [witan.ui.dashboard.workspaces :as workspace-dash]
-            [witan.ui.dashboard.data :as data-dash]
-            [witan.ui.split :as split]
+            [witan.ui.components.dashboard.workspaces :as workspace-dash]
+            [witan.ui.components.dashboard.data :as data-dash]
+            [witan.ui.components.split :as split]
+            [witan.ui.components.create-workspace :as createws]
             [witan.ui.utils :as utils]
             [witan.ui.data :as data]
             [witan.ui.route :as route])
@@ -16,9 +17,11 @@
   (.. js/document -location -pathname))
 
 (def route->component
-  {:app/workspace-dash workspace-dash/Main
-   :app/data-dash      data-dash/Main
-   :app/workspace      split/Main})
+  {:app/workspace-dash   workspace-dash/Main
+   :app/data-dash        data-dash/Main
+   :app/workspace        split/Main
+   :app/create-workspace createws/Main
+   })
 
 (def route->factory
   (zipmap (keys route->component)

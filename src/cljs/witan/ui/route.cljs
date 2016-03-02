@@ -12,7 +12,8 @@
   ["/app/" {"" nil
             "dashboard/" {"data"      :app/data-dash
                           "workspace" :app/workspace-dash}
-            ["workspace/" :id]        :app/workspace}])
+            "workspace/" {"create"    :app/create-workspace
+                          ["id/" :id] :app/workspace}}])
 
 (defn path-exists?
   [path]
