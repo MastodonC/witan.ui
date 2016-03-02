@@ -1,6 +1,5 @@
 (ns witan.ui.ajax
-  (:require [ajax.core :as ajax]
-            [cljs.core.async :refer [put! take! chan <! close!]])
+  (:require [ajax.core :as ajax])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
@@ -10,18 +9,20 @@
     (str api-url "/api" method)))
 
 (defn- handle-response
-  [status id result-ch response]
+  [status id result-cb response]
   (when (and (= status :failure) (not= id :token-test))
     (log/severe "An API error occurred: " status id response))
-  (when result-ch
-    (put! result-ch [status (clojure.walk/keywordize-keys response)])))
+  (when result-cb
+    (result-cb status response)))
 
 (defn- request
-  [method-fn {:keys [id params result-ch auth]}]
+  [method-fn {:keys [id params result-cb auth]}]
   (method-fn {:params params
-              :handler (partial handle-response :success id result-ch)
-              :error-handler (partial handle-response :failure id result-ch)
+              :handler (partial handle-response :success id result-cb)
+              :error-handler (partial handle-response :failure id result-cb)
               :format :json
+              :response-format :json
+              :keywords? true
               :headers auth}))
 
 (defn GET

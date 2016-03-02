@@ -88,12 +88,14 @@
 (defmethod
   login-state-view
   :prompt
-  [_ owner data]
+  [_ owner {:keys [message]}]
   [:div
    [:h3 (get-string :string/sign-in)]
-   [:span#error-message (:message data)]
+   (when message
+     [:span#error-message (get-string message)])
    [:form {:class "pure-form pure-form-stacked"
            :on-submit (fn [e]
+                        (om/transact! owner '[(login/set-message! {:message nil})])
                         (controller/raise! owner :user/login {:email (.-value (. js/document (getElementById "login-email")))
                                                               :pass (.-value (. js/document (getElementById "login-password")))})
                         (.preventDefault e))}
@@ -165,10 +167,10 @@
 (defui Main
   static om/IQuery
   (query [this]
-         [{:app/login [:login/phase :login/success?]}])
+         [{:app/login [:login/phase :login/success? :login/message]}])
   Object
   (render [this]
-          (let [{:keys [login/phase]} (get-in (om/props this) [:app/login])]
+          (let [{:keys [login/phase login/message]} (get-in (om/props this) [:app/login])]
             (sab/html [:div
                        [:div#login-bg {:key "login-bg"}
                         [:span#bg-attribution.trans-bg
@@ -182,4 +184,4 @@
                           [:h1 {:key "login-title-main"} (get-string :string/witan) ]
                           [:h2 {:key "login-title-sub"} (get-string :string/witan-tagline)]]
                          [:div#witan-login.trans-bg {:key "login-state"}
-                          (login-state-view phase this {})]]]]))))
+                          (login-state-view phase this {:message message})]]]]))))

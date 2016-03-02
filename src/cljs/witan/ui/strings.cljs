@@ -40,7 +40,7 @@
    :string/no-input-specified             "No data input specified."
    :string/download                       "Download"
    :string/forecast-changes-text          "Okay, we've recorded your changes. When you're ready, hit 'Run this projection' to generate your new outputs for download."
-   :string/sign-up-failur                 "There was a problem signing-up with the provided details. Please check your invite token and try again."
+   :string/sign-up-failure                "There was a problem signing-up with the provided details. Please check your invite token and try again."
    :string/output-extra-info              "The high level of precision of the figures in this data should not be mistaken for a declaration of accuracy. Users should be aware that significant levels of uncertainty exist in all of the outputs of these models. When publishing data for public use, it is recommended that numbers should be rounded and age groups should be aggregated."
    :string/forecast-lastmodified          "Last Modified"
    :string/please-select-data-input       "Please select a data input for this category."
