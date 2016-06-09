@@ -83,6 +83,10 @@
   [& args]
   (apply create-key "open_in_browser" args))
 
+(defn error
+  [& args]
+  (apply create-key "error" args))
+
 ;;
 
 (defcard loading

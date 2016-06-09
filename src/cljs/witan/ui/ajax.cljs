@@ -2,6 +2,10 @@
   (:require [ajax.core :as ajax])
   (:require-macros [cljs-log.core :as log]))
 
+(def endpoint
+  ;; TODO add env override
+  "http://localhost:30015")
+
 (defn- handle-response
   [status id result-cb response]
   (when (and (= status :failure) (not= id :token-test))

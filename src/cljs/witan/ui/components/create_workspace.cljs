@@ -11,10 +11,12 @@
 (defui Main
   static om/IQuery
   (query [this]
-         [{:user/groups [:group/name :group/id]}])
+         [{:user/groups [:group/name :group/id]}
+          {:app/create-workspace [:cw/message]}])
   Object
   (render [this]
-          (let [models (:models/list (om/props this))]
+          (let [message (get-in (om/props this) [:app/create-workspace :cw/message])]
+            (log/debug "MESSAGE=" message)
             (sab/html [:div#create-workspace
                        (shared/header :string/create-workspace-title :string/create-workspace-subtitle)
                        [:div#content
@@ -43,8 +45,9 @@
                                                     :key "desc"
                                                     :placeholder (get-string :string/create-workspace-desc-ph)}]]
                           [:hr]
+                          (when message
+                            [:h3 (icons/error) (get-string message)])
                           [:button.pure-button.button-success
                            {:type "submit"
                             :key "button"}
-                           (icons/plus) (get-string :string/create)]]]
-                        ]]))))
+                           (icons/plus) (get-string :string/create)]]]]]))))

@@ -1,5 +1,5 @@
 (ns witan.ui.controllers.workspace
-  (:require [witan.ui.ajax :refer [GET POST]]
+  (:require [witan.ui.ajax :refer [GET POST endpoint]]
             [schema.core :as s]
             [om.next :as om]
             [witan.ui.data :as data])
@@ -23,7 +23,8 @@
 
 (defmethod api-response [:create :failure]
   [{:keys [owner]} response]
-  (log/debug "CREATE FAILED"))
+  (log/debug "Failed to create workspace")
+  (om/transact! owner '[(cw/set-message! {:message :string/sign-in-failure})]))
 
 (defn route-api-response
   [event owner]
@@ -34,7 +35,7 @@
 
 (defn method
   [method]
-  (str "http://localhost:4000/workspaces/" method))
+  (str endpoint "/workspaces/" method))
 
 (defmulti handle
   (fn [event owner args] event))

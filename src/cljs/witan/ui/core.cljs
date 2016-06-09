@@ -7,7 +7,8 @@
             [witan.ui.components.side  :as side]
             [witan.ui.components.app   :as app]
             [witan.ui.data             :as data]
-            [witan.ui.route            :as route]))
+            [witan.ui.route            :as route])
+  (:require-macros [cljs-log.core :as log]))
 
 (if-let [node (gdom/getElement "app")]
   (do
@@ -21,3 +22,9 @@
 
 (if-let [node (gdom/getElement "login")]
   (om/add-root! (data/make-reconciler) login/Main node))
+
+;;
+
+(defn on-js-reload
+  []
+  (log/debug "!!!!! reload "))
