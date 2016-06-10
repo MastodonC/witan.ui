@@ -89,12 +89,18 @@
 
 ;;
 
-(defcard loading
+(defn loading
+  [& args]
+  (apply cog :spin :dark args))
+
+;;
+
+(defcard loading-card
   (sab/html [:div
              (cog :large :spin)
              (cog :spin :x-large)]))
 
-(defcard icons
+(defcard icons-card
   (sab/html
    (let [variations '([]
                       [:dark]

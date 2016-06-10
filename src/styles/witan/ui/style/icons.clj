@@ -1,7 +1,8 @@
 (ns witan.ui.style.icons
   (:require [garden.color :refer [rgba]]
             [garden.units :refer [px]]
-            [witan.ui.style.colour :refer [icon-colour]]))
+            [witan.ui.style.colour :refer [icon-colour
+                                           error]]))
 
 (def style
   [[:.material-icons
@@ -21,4 +22,11 @@
    [:.material-icons.md-light
     {:color (rgba 255 255 255 1)}]
    [:.material-icons.md-light.md-inactive
-    {:color (rgba 255 255 255 0.3)}]])
+    {:color (rgba 255 255 255 0.3)}]
+
+   ;;
+
+   [:.icon-and-text
+    [:span
+     {:vertical-align :super
+      :margin-left (px 6)}]]])

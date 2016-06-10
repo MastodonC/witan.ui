@@ -15,15 +15,16 @@
           {:app/create-workspace [:cw/message]}])
   Object
   (render [this]
-          (let [message (get-in (om/props this) [:app/create-workspace :cw/message])]
-            (log/debug "MESSAGE=" message)
+          (let [message (get-in (om/props this) [:app/create-workspace :cw/message])
+                pending? (get-in (om/props this) [:app/create-workspace :cw/pending?])]
             (sab/html [:div#create-workspace
                        (shared/header :string/create-workspace-title :string/create-workspace-subtitle)
                        [:div#content
                         [:form.pure-form
                          {:on-submit (fn [e]
-                                       (controller/raise! this :workspace/create {:name (.-value (. js/document (getElementById "new-workspace-name")))
-                                                                                  :desc (.-value (. js/document (getElementById "new-workspace-desc")))})
+                                       (when-not pending?
+                                         (controller/raise! this :workspace/create {:name (.-value (. js/document (getElementById "new-workspace-name")))
+                                                                                    :desc (.-value (. js/document (getElementById "new-workspace-desc")))}))
                                        (.preventDefault e))}
                          [:fieldset
                           [:div
@@ -46,8 +47,11 @@
                                                     :placeholder (get-string :string/create-workspace-desc-ph)}]]
                           [:hr]
                           (when message
-                            [:h3 (icons/error) (get-string message)])
-                          [:button.pure-button.button-success
-                           {:type "submit"
-                            :key "button"}
-                           (icons/plus) (get-string :string/create)]]]]]))))
+                            [:h3.icon-and-text.error (icons/error) (get-string message)])
+                          (when-not pending?
+                            [:button.pure-button.button-success
+                             {:type "submit"
+                              :key "button"}
+                             (icons/plus) (get-string :string/create)])
+                          (when pending?
+                            (icons/loading))]]]]))))

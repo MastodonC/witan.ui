@@ -55,7 +55,8 @@
                                                   :workspace/owner-name s/Str
                                                   :workspace/modified s/Str}])}
    :app/data-dash (s/maybe s/Any)
-   :app/create-workspace {:cw/message (s/maybe s/Str)}})
+   :app/create-workspace {:cw/message (s/maybe s/Str)
+                          :cw/pending? s/Bool}})
 
 ;; default app-state
 (defonce app-state
@@ -78,7 +79,8 @@
     :app/workspace-dash {:wd/selected-id nil
                          :wd/workspaces nil}
     :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}
-    :app/create-workspace {:cw/message nil}}
+    :app/create-workspace {:cw/message nil
+                           :cw/pending? false}}
    (s/validate AppStateSchema)
    (atom)))
 
@@ -128,7 +130,7 @@
     :parser (om/parser {:read read :mutate mutate})}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; reads
+;; READS
 
 (defmethod read :app/route
   [{:keys [state query]} k _]
@@ -260,7 +262,7 @@
 
 (defmethod mutate 'wd/select-row!
   [{:keys [state]} _ {:keys [id]}]
-  {:value {:keys [:route/data]}
+  {:value {:keys [:app/workspace-dash]}
    :action (fn [_]
              (swap! state assoc-in [:app/workspace-dash :wd/selected-id] id))})
 
@@ -269,6 +271,12 @@
 
 (defmethod mutate 'cw/set-message!
   [{:keys [state]} _ {:keys [message]}]
-  {:value {:keys [:app/login]}
+  {:value {:keys [:app/create-workspace]}
    :action (fn [_]
              (swap! state assoc-in [:app/create-workspace :cw/message] message))})
+
+(defmethod mutate 'cw/set-pending!
+  [{:keys [state]} _ {:keys [pending?]}]
+  {:value {:keys [:app/create-workspace]}
+   :action (fn [_]
+             (swap! state assoc-in [:app/create-workspace :cw/pending?] pending?))})

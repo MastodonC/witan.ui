@@ -60,4 +60,9 @@
               {:font-family fonts/base-fonts
 
                :font-weight 500
-               :font-size (em 1.2)}]]])
+               :font-size (em 1.2)}]]
+
+            ;;;;;;;;;;;;;;
+
+            [:.error
+             {:color colour/error}]])
