@@ -6,23 +6,22 @@
 
   :min-lein-version "2.5.3"
 
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [org.clojure/clojurescript "1.7.228"]
-                 [org.clojure/core.async "0.2.374" :exclusions [org.clojure/tools.reader]]
+  :dependencies [[org.clojure/clojure "1.8.0"]
+                 [org.clojure/core.async "0.2.385" :exclusions [org.clojure/tools.reader]]
+                 [org.clojure/clojurescript "1.9.36" :scope "provided"]
                  [devcards "0.2.1-6"]
                  [sablono "0.6.2"]
-                 [org.omcljs/om "1.0.0-alpha30"]
-                 [cljsjs/react "0.14.3-0"]
-                 [cljsjs/react-dom "0.14.3-1"]
-                 [cljsjs/react-dom-server "0.14.3-0"]
+                 [reagent "0.6.0-rc"]
                  [datascript "0.15.0"]
                  [cljs-log "0.2.2"]
+                 [jarohen/chord "0.7.0"]
+                 [clj-time "0.12.0"]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [bidi "2.0.0"]
                  [venantius/accountant "0.1.7"]
                  [environ "1.0.2"]
                  [cljs-ajax "0.5.3"]
-                 [prismatic/schema "1.0.5"]]
+                 [prismatic/schema "1.1.2"]]
 
   :plugins [[lein-figwheel "0.5.0-6" :exclusions [org.clojure/tools.reader]]
             [lein-cljsbuild "1.1.2" :exclusions [[org.clojure/clojure]]]
@@ -46,7 +45,7 @@
                 :figwheel { :devcards true } ;; <- note this
                 :compiler {:main       witan.ui.core
                            :asset-path "/js/compiled/devcards_out"
-                           :output-to  "resources/public/js/compiled/om_devcards_devcards.js"
+                           :output-to  "resources/public/js/compiled/devcards_devcards.js"
                            :output-dir "resources/public/js/compiled/devcards_out"
                            :source-map-timestamp true }}
                {:id "dev"
