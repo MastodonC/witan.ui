@@ -83,14 +83,24 @@
   [& args]
   (apply create-key "open_in_browser" args))
 
+(defn error
+  [& args]
+  (apply create-key "error" args))
+
 ;;
 
-(defcard loading
+(defn loading
+  [& args]
+  (apply cog :spin :dark args))
+
+;;
+
+(defcard loading-card
   (sab/html [:div
              (cog :large :spin)
              (cog :spin :x-large)]))
 
-(defcard icons
+(defcard icons-card
   (sab/html
    (let [variations '([]
                       [:dark]

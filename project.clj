@@ -52,7 +52,7 @@
                 :source-paths ["src/cljs"]
 
                 ;; If no code is to be run, set :figwheel true for continued automagical reloading
-                :figwheel true ;{:on-jsload "witan.ui.core/on-js-reload"}
+                :figwheel {:on-jsload "witan.ui.core/on-js-reload"}
 
                 :compiler {:main witan.ui.core
                            :asset-path "/js/compiled/out"

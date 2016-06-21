@@ -110,7 +110,9 @@
              :type "password"
              :id "login-password"
              :placeholder (get-string :string/password)
-             :require :required}]
+             :require :required
+             :pattern ".{6,}"
+             :title "6 characters minimum"}]
     [:button {:tab-index 3
               :type "submit"
               :class "pure-button pure-button-primary"} (get-string :string/sign-in)]

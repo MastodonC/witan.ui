@@ -17,6 +17,12 @@
   (let [login-div (.getElementById js/document "login")]
     (aset login-div "style" "visibility" "hidden")))
 
+(defn login-success!
+  [owner response]
+  (om/transact! owner `[(login/complete! ~response)])
+  (data/save-data!)
+  (kill-login-screen!))
+
 (defn local-endpoint
   [method]
   (let [api-url (cljs-env :witan-api-url)] ;; 'nil' is a valid api-url (will default to current hostname)
@@ -27,18 +33,18 @@
 (defmulti api-response
   (fn [{:keys [event status]} response] [event status]))
 
-(defmethod api-response [:login :success]
+(defmethod api-response
+  [:login :success]
   [{:keys [owner]} {:keys [token] :as response}]
   (if token
-    (do
-      (om/transact! owner `[(login/complete! ~response)])
-      (data/save-data!)
-      (kill-login-screen!))
+    (login-success! owner response)
     (om/transact! owner '[(login/set-message! {:message :string/sign-in-failure})])))
 
-(defmethod api-response [:login :failure]
+(defmethod api-response
+  [:login :failure]
   [{:keys [owner]} response]
-  (om/transact! owner '[(login/set-message! {:message :string/api-failure})]))
+  (login-success! owner response)
+  #_(om/transact! owner '[(login/set-message! {:message :string/api-failure})]))
 
 (defn route-api-response
   [event owner]

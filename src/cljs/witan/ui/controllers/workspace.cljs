@@ -1,5 +1,5 @@
 (ns witan.ui.controllers.workspace
-  (:require [witan.ui.ajax :refer [GET POST]]
+  (:require [witan.ui.ajax :refer [command! query validate-receipt!]]
             [schema.core :as s]
             [om.next :as om]
             [witan.ui.data :as data])
@@ -19,11 +19,14 @@
 
 (defmethod api-response [:create :success]
   [{:keys [owner]} response]
-  (log/debug "CREATE SUCCESS"))
+  (validate-receipt! response (fn [status receipt]
+                                (log/debug "OMG!!!" status receipt))))
 
 (defmethod api-response [:create :failure]
   [{:keys [owner]} response]
-  (log/debug "CREATE FAILED"))
+  (log/debug "Failed to create workspace")
+  (om/transact! owner '[(cw/set-pending! {:pending? false})
+                        (cw/set-message! {:message :string/create-workspace-error})]))
 
 (defn route-api-response
   [event owner]
@@ -32,17 +35,14 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn method
-  [method]
-  (str "http://localhost:4000/workspaces/" method))
-
 (defmulti handle
   (fn [event owner args] event))
 
 (defmethod handle :create
   [event owner {:keys [name desc]}]
+  (om/transact! owner '[(cw/set-pending! {:pending? true})])
   (let [args (merge {:name name} (when desc {:description desc}))]
-    (POST (method "create")
-          {:id event
-           :params (s/validate CreateWorkspace args)
-           :result-cb (route-api-response event owner)})))
+    (command! "workspace/create" "1.0"
+              {:id event
+               :params (s/validate CreateWorkspace args)
+               :result-cb (route-api-response event owner)})))

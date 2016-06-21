@@ -48,9 +48,15 @@
    :app/route-params (s/maybe s/Any)
    :app/workspace  {:workspace/primary   {:primary/view-selected s/Int}
                     :workspace/secondary {:secondary/view-selected s/Int}}
-   :app/workspace-dash {:wd/selected-id (s/maybe s/Int)}
+   :app/workspace-dash {:wd/selected-id (s/maybe s/Int)
+                        :wd/workspaces (s/maybe [{:workspace/name s/Str
+                                                  :workspace/id s/Int
+                                                  :workspace/owner-id s/Int
+                                                  :workspace/owner-name s/Str
+                                                  :workspace/modified s/Str}])}
    :app/data-dash (s/maybe s/Any)
-   :app/create-workspace (s/maybe s/Any)})
+   :app/create-workspace {:cw/message (s/maybe s/Str)
+                          :cw/pending? s/Bool}})
 
 ;; default app-state
 (defonce app-state
@@ -70,9 +76,11 @@
     :app/route-params nil
     :app/workspace {:workspace/primary   {:primary/view-selected 0}
                     :workspace/secondary {:secondary/view-selected 0}}
-    :app/workspace-dash {:wd/selected-id nil}
+    :app/workspace-dash {:wd/selected-id nil
+                         :wd/workspaces nil}
     :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}
-    :app/create-workspace {:about/content "This is the about page, the place where one might write things about their own self."}}
+    :app/create-workspace {:cw/message nil
+                           :cw/pending? false}}
    (s/validate AppStateSchema)
    (atom)))
 
@@ -122,7 +130,7 @@
     :parser (om/parser {:read read :mutate mutate})}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; reads
+;; READS
 
 (defmethod read :app/route
   [{:keys [state query]} k _]
@@ -177,8 +185,36 @@
   [{:keys [state query]} _ _]
   {:value :not-found})
 
+(defmethod read :wd/workspaces
+  [{:keys [state query]} k _]
+  (let [st @state]
+    {:value (map #(select-keys % query)
+                 [{:workspace/name "Workspace for Foo Population"
+                   :workspace/id 1
+                   :workspace/owner-name "Bob"
+                   :workspace/owner-id 1
+                   :workspace/modified "Yesterday, 2pm"}
+                  {:workspace/name "Workspace for Bar Population"
+                   :workspace/id 2
+                   :workspace/owner-name "Alice"
+                   :workspace/owner-id 2
+                   :workspace/modified "4th Jan, 4.15pm"}
+                  {:workspace/name "Workspace for Baz Population"
+                   :workspace/id 3
+                   :workspace/owner-name "Charles"
+                   :workspace/owner-id 3
+                   :workspace/modified "12th Jan, 10.24am"}])}))
+
+(defmethod read :app/create-workspace
+  [{:keys [state query]} k _]
+  (let [st @state]
+    {:value (get st k)}))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; mutatations
+;; MUTATIONS
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; route/view changes
 
 (defmethod mutate 'change/route!
   [{:keys [state]} _ {:keys [route route-params]}]
@@ -186,12 +222,6 @@
    :action (fn [_]
              (swap! state assoc :app/route route)
              (swap! state assoc :app/route-params route-params))})
-
-(defmethod mutate 'wd/select-row!
-  [{:keys [state]} _ {:keys [id]}]
-  {:value {:keys [:route/data]}
-   :action (fn [_]
-             (swap! state assoc-in [:app/workspace-dash :wd/selected-id] id))})
 
 (defmethod mutate 'change/primary-view!
   [{:keys [state]} _ {:keys [idx]}]
@@ -205,7 +235,8 @@
    :action (fn [_]
              (swap! state assoc-in [:app/workspace :workspace/secondary :secondary/view-selected] idx))})
 
-;;
+;;;;;;;;;;;;;;;;;;;;;;;
+;; login state changes
 
 (defmethod mutate 'login/goto-phase!
   [{:keys [state]} _ {:keys [phase]}]
@@ -225,3 +256,27 @@
    :action (fn [_]
              (swap! state assoc-in [:app/login :login/id] id)
              (swap! state assoc-in [:app/login :login/token] token))})
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; workspace dash changes
+
+(defmethod mutate 'wd/select-row!
+  [{:keys [state]} _ {:keys [id]}]
+  {:value {:keys [:app/workspace-dash]}
+   :action (fn [_]
+             (swap! state assoc-in [:app/workspace-dash :wd/selected-id] id))})
+
+;;;;;;;;;;;;;;;;;;;;;;;
+;; workspace creation
+
+(defmethod mutate 'cw/set-message!
+  [{:keys [state]} _ {:keys [message]}]
+  {:value {:keys [:app/create-workspace]}
+   :action (fn [_]
+             (swap! state assoc-in [:app/create-workspace :cw/message] message))})
+
+(defmethod mutate 'cw/set-pending!
+  [{:keys [state]} _ {:keys [pending?]}]
+  {:value {:keys [:app/create-workspace]}
+   :action (fn [_]
+             (swap! state assoc-in [:app/create-workspace :cw/pending?] pending?))})

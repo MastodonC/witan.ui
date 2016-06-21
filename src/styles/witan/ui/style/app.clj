@@ -9,7 +9,9 @@
 (def style [[:#app
              {:background-color colour/body-bg}
 
-             ;; GENERAL
+             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+             ;; General
+
              [:button.pure-button
               {:align-self :center
                :box-shadow [[(px 2) (px 2) (px 4) colour/box-shadow]]}
@@ -25,6 +27,9 @@
                :background :transparent
                :border 0
                :border-bottom [[(px 1) 'solid "#ddd"]]}]
+
+             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+             ;; Create Workspace
 
              [:#create-workspace
               [:#content

@@ -125,7 +125,8 @@
    :string/create-workspace-name          "Workspace name"
    :string/create-workspace-name-ph       "Enter a name for this workspace"
    :string/create-workspace-desc          "Description"
-   :string/create-workspace-desc-ph       "What will this workspace be used for?"})
+   :string/create-workspace-desc-ph       "What will this workspace be used for?"
+   :string/create-workspace-error         "An error occurred whilst trying to create this workspace. Please try again."})
 
 (defn get-string
   ""

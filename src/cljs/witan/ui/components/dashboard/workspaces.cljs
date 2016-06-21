@@ -24,10 +24,11 @@
 (defui Main
   static om/IQuery
   (query [this]
-         [:wd/selected-id])
+         [:wd/selected-id
+          {:wd/workspaces [:workspace/name :workspace/id :workspace/owner-id :workspace/owner-name :workspace/modified]}])
   Object
   (render [this]
-          (let [{:keys [wd/selected-id]} (om/props this)
+          (let [{:keys [wd/selected-id wd/workspaces]} (om/props this)
                 icon-fn #(vector :div.text-center (icons/workspace :dark))
                 buttons (concat (when selected-id [{:id :view :icon icons/open :txt :string/view :class "workspace-view"}])
                                 [{:id :create :icon icons/plus :txt :string/create :class "workspace-create"}])]
@@ -38,13 +39,11 @@
                                             :buttons buttons
                                             :on-button-click (partial button-press selected-id)})
                        [:div.content
-                        (shared/table {:headers [{:content-fn icon-fn   :title ""              :weight 0.03}
-                                                 {:content-fn :name     :title "Name"          :weight 0.57}
-                                                 {:content-fn :owner    :title "Owner"         :weight 0.2}
-                                                 {:content-fn :modified :title "Last Modified" :weight 0.2}]
-                                       :content [{:name "Workspace for Camden Population"   :id 1 :owner "Bob"     :modified "Yesterday, 2pm"}
-                                                 {:name "Workspace for Hounslow Population" :id 2 :owner "Alice"   :modified "4th Jan, 4.15pm"}
-                                                 {:name "Workspace for Barnet Population"   :id 3 :owner "Charles" :modified "12th Jan, 10.24am"}]
-                                       :selected?-fn #(= (:id %) selected-id)
-                                       :on-select #(om/transact! this `[(wd/select-row! {:id ~(:id %)})])
-                                       :on-double-click #(route/navigate! :app/workspace {:id (:id %)})})]]))))
+                        (shared/table {:headers [{:content-fn icon-fn               :title ""              :weight 0.03}
+                                                 {:content-fn :workspace/name       :title "Name"          :weight 0.57}
+                                                 {:content-fn :workspace/owner-name :title "Owner"         :weight 0.2}
+                                                 {:content-fn :workspace/modified   :title "Last Modified" :weight 0.2}]
+                                       :content workspaces
+                                       :selected?-fn #(= (:workspace/id %) selected-id)
+                                       :on-select #(om/transact! this `[(wd/select-row! {:id ~(:workspace/id %)})])
+                                       :on-double-click #(route/navigate! :app/workspace {:id (:workspace/id %)})})]]))))
