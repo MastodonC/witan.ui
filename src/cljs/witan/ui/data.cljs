@@ -1,5 +1,6 @@
 (ns witan.ui.data
-  (:require [datascript.core :as d]
+  (:require ;;[datascript.core :as d]
+            [reagent.core :as r]
             [goog.net.cookies :as cookies]
             [goog.crypt.base64 :as b64]
             [schema.core :as s]
@@ -32,6 +33,10 @@
       (cb (<! subscriber))
       (recur))))
 
+(defn atomize-map
+  [m]
+  (reduce-kv (fn [a k v] (assoc a k (r/atom v))) {} m))
+
 ;; app state schema
 (def AppStateSchema
   {:app/side {:side/upper [[s/Keyword]]
@@ -43,8 +48,8 @@
                :login/message (s/maybe s/Str)}
    :app/user {:user/name (s/maybe s/Str)
               :user/groups-by-id [s/Int]}
-   :app/route (s/maybe s/Keyword)
-   :app/route-params (s/maybe s/Any)
+   :app/route {:route/path (s/maybe s/Keyword)
+               :route/params (s/maybe s/Any)}
    :app/workspace  {:workspace/primary   {:primary/view-selected s/Int}
                     :workspace/secondary {:secondary/view-selected s/Int}}
    :app/workspace-dash {:wd/selected-id (s/maybe s/Int)
@@ -71,8 +76,8 @@
                 :login/message nil}
     :app/user {:user/name nil
                :user/groups-by-id []}
-    :app/route nil
-    :app/route-params nil
+    :app/route {:route/path nil
+                :route/params nil}
     :app/workspace {:workspace/primary   {:primary/view-selected 0}
                     :workspace/secondary {:secondary/view-selected 0}}
     :app/workspace-dash {:wd/selected-id nil
@@ -81,11 +86,15 @@
     :app/create-workspace {:cw/message nil
                            :cw/pending? false}}
    (s/validate AppStateSchema)
-   (atom)))
+   (atomize-map)))
+
+(defn get-app-state
+  [k]
+  (deref (get app-state k)))
 
 ;; database
-(def conn (d/create-conn {}))
-(d/transact! conn [{:db/id -1
+#_(def conn (d/create-conn {}))
+#_(d/transact! conn [{:db/id -1
                     :app/count 3}])
 
 ;; cookies
@@ -122,60 +131,64 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; writes
 
+(defn app-state-swap!
+  [k & symbs]
+  (update app-state k #(apply swap! % symbs)))
+
 (defmulti mutate
-  (fn [_ f _] f))
+  (fn [f _] f))
 
 (defmethod mutate 'change/route!
-  [{:keys [state]} _ {:keys [route route-params]}]
-  (swap! state assoc :app/route route)
-  (swap! state assoc :app/route-params route-params))
+  [_ {:keys [route route-params]}]
+  (app-state-swap! :app/route assoc-in [:route/path]   route)
+  (app-state-swap! :app/route assoc-in [:route/params] route-params))
 
 (defmethod mutate 'wd/select-row!
-  [{:keys [state]} _ {:keys [id]}]
-  (swap! state assoc-in [:app/workspace-dash :wd/selected-id] id))
+  [_ {:keys [id]}]
+  (app-state-swap :app/workspace-dash assoc-in [:wd/selected-id] id))
 
 (defmethod mutate 'change/primary-view!
-  [{:keys [state]} _ {:keys [idx]}]
-  (swap! state assoc-in [:app/workspace :workspace/primary :primary/view-selected] idx))
+  [_ {:keys [idx]}]
+  (app-state-swap! :app/workspace assoc-in [:workspace/primary :primary/view-selected] idx))
 
 (defmethod mutate 'change/secondary-view!
-  [{:keys [state]} _ {:keys [idx]}]
-  (swap! state assoc-in [:app/workspace :workspace/secondary :secondary/view-selected] idx))
+  [_ {:keys [idx]}]
+  (app-state-swap! :app/workspace assoc-in [:workspace/secondary :secondary/view-selected] idx))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; login state changes
 
 (defmethod mutate 'login/goto-phase!
-  [{:keys [state]} _ {:keys [phase]}]
-  (swap! state assoc-in [:app/login :login/phase] phase))
+  [_ {:keys [phase]}]
+  (app-state-swap! :app/login assoc-in [:login/phase] phase))
 
 (defmethod mutate 'login/set-message!
-  [{:keys [state]} _ {:keys [message]}]
-  (swap! state assoc-in [:app/login :login/message] message))
+  [_ {:keys [message]}]
+  (app-state-swap! :app/login assoc-in [:login/message] message))
 
 (defmethod mutate 'login/complete!
-  [{:keys [state]} _ {:keys [token id]}]
-  (swap! state assoc-in [:app/login :login/id] id)
-  (swap! state assoc-in [:app/login :login/token] token))
+  [_ {:keys [token id]}]
+  (app-state-swap! :app/login assoc-in [:login/id] id)
+  (app-state-swap! :app/login assoc-in [:login/token] token))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; workspace dash changes
 
 (defmethod mutate 'wd/select-row!
-  [{:keys [state]} _ {:keys [id]}]
-  (swap! state assoc-in [:app/workspace-dash :wd/selected-id] id))
+  [_ {:keys [id]}]
+  (app-state-swap! :app/workspace-dash assoc-in [:wd/selected-id] id))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; workspace creation
 
 (defmethod mutate 'cw/set-message!
-  [{:keys [state]} _ {:keys [message]}]
-  (swap! state assoc-in [:app/create-workspace :cw/message] message))
+  [_ {:keys [message]}]
+  (app-state-swap! :app/create-workspace assoc-in [:cw/message] message))
 
 (defmethod mutate 'cw/set-pending!
-  [{:keys [state]} _ {:keys [pending?]}]
-  (swap! state assoc-in [:app/create-workspace :cw/pending?] pending?))
+  [_ {:keys [pending?]}]
+  (app-state-swap! :app/create-workspace assoc-in [:cw/pending?] pending?))
 
 (defn transact!
-  [owner f args]
-  (mutate owner f args))
+  [f args]
+  (mutate f args))

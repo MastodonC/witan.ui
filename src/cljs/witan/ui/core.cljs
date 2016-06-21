@@ -12,17 +12,17 @@
 
 (defonce init
   (do
-    (if-let [node (gdom/getElement "app")]
-      (accountant/configure-navigation! {:nav-handler route/dispatch-path!
-                                         :path-exists? route/path-exists?})
-      (route/dispatch-path! (app/path))
-      (r/render [app/root-view] node))
+    #_(if-let [node (gdom/getElement "app")]
+        (accountant/configure-navigation! {:nav-handler route/dispatch-path!
+                                           :path-exists? route/path-exists?})
+        (route/dispatch-path! (app/path))
+        (r/render [app/root-view] node))
 
-    (if-let [node (gdom/getElement "side")]
-    (r/render [side/root-view] node))
+    #_(if-let [node (gdom/getElement "side")]
+        (r/render [side/root-view] node))
 
     (if-let [node (gdom/getElement "login")]
-    (r/render [side/root-view] node))))
+      (r/render [login/root-view] node))))
 
 ;;
 

@@ -1,5 +1,5 @@
 (ns witan.ui.components.app
-  (:require [om.next :as om :refer-macros [defui]]
+  (:require [reagent.core :as r]
             [sablono.core :as sab]
             ;;
             [witan.ui.components.dashboard.workspaces :as workspace-dash]
@@ -17,31 +17,16 @@
   (.. js/document -location -pathname))
 
 (def route->component
-  {:app/workspace-dash   workspace-dash/Main
-   :app/data-dash        data-dash/Main
-   :app/workspace        split/Main
-   :app/create-workspace createws/Main
-   })
+  {:app/workspace-dash   workspace-dash/view
+   :app/data-dash        data-dash/view
+   :app/workspace        split/view
+   :app/create-workspace createws/view})
 
-(def route->factory
-  (zipmap (keys route->component)
-          (map om/factory (vals route->component))))
-
-(defui Main
-  static om/IQueryParams
-  (params [this]
-          {:route/data []})
-  static om/IQuery
-  (query [this]
-         '[:app/route {:route/data ?route/data}])
-  Object
-  (componentWillMount [this]
-                      (go-loop []
-                        (let [current-route (<! route/app-route-chan)
-                              initial-query (om/get-query (route->component current-route))]
-                          (om/set-query! this {:params {:route/data initial-query}}))
-                        (recur)))
-  (render [this]
-          (let [{:keys [app/route route/data]} (om/props this)
-                active-component (get route->factory route)]
-            (active-component data))))
+(defn root-view
+  []
+  (r/create-class
+   {:reagent-render
+    (fn [this]
+      (let [{:keys [app/route route/data]} this
+            active-component (get route->component route)]
+        (active-component data)))}))

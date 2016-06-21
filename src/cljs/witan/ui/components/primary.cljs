@@ -1,8 +1,6 @@
 (ns witan.ui.components.primary
-  (:require [om.next :as om :refer-macros [defui]]
-            [sablono.core :as sab]
-            ;;
-            [witan.ui.components.icons :as icons])
+  (:require [witan.ui.components.icons :as icons]
+            [witan.ui.data :as data])
   (:require-macros
    [cljs-log.core :as log]))
 
@@ -22,20 +20,13 @@
       :on-click #(when on-select (on-select 1))}
      (icon-1)]]])
 
-(defui Main
-  static om/IQuery
-  (query [this]
-         [:primary/view-selected])
-  Object
-  (render [this]
-          (let [{:keys [primary/view-selected]
-                 :or {primary/view-selected 0}} (om/props this)]
-            (sab/html
-             [:div#primary
-              [:div#overlay
-               (switcher {:icon-0 (partial icons/topology :dark :medium)
-                          :icon-1 (partial icons/visualisation :dark :medium)
-                          :selected-idx view-selected
-                          :on-select #(om/transact! this `[(change/primary-view! {:idx ~%})])})]]))))
-
-(def primary-split-view (om/factory Main))
+(defn view
+  [this]
+  (let [{:keys [primary/view-selected]
+         :or {primary/view-selected 0}} this]
+    [:div#primary
+     [:div#overlay
+      (switcher {:icon-0 (partial icons/topology :dark :medium)
+                 :icon-1 (partial icons/visualisation :dark :medium)
+                 :selected-idx view-selected
+                 :on-select #(data/transact! this 'change/primary-view! {:idx ~%})})]]))

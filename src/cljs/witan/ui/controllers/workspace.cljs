@@ -24,8 +24,8 @@
 (defmethod api-response [:create :failure]
   [{:keys [owner]} response]
   (log/debug "Failed to create workspace")
-  (om/transact! owner '[(cw/set-pending! {:pending? false})
-                        (cw/set-message! {:message :string/create-workspace-error})]))
+  (data/transact! owner 'cw/set-pending! {:pending? false})
+  (data/transact! owner 'cw/set-message! {:message :string/create-workspace-error}))
 
 (defn route-api-response
   [event owner]
@@ -39,7 +39,7 @@
 
 (defmethod handle :create
   [event owner {:keys [name desc]}]
-  (om/transact! owner '[(cw/set-pending! {:pending? true})])
+  (data/transact! owner 'cw/set-pending! {:pending? true})
   (let [args (merge {:name name} (when desc {:description desc}))]
     (command! "workspace/create" "1.0"
               {:id event

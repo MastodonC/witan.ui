@@ -1,24 +1,21 @@
 (ns witan.ui.components.login
-  (:require [om.next :as om :refer-macros [defui]]
-            [sablono.core :as sab]
+  (:require [reagent.core :as r]
             ;;
-            [witan.ui.components.primary :as primary]
-            [witan.ui.components.secondary :as secondary]
-            [witan.ui.utils :as utils]
             [witan.ui.components.icons :as icons]
             [witan.ui.strings :refer [get-string]]
             ;;
-            [witan.ui.controller :as controller])
+            [witan.ui.controller :as controller]
+            [witan.ui.data :as data])
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))
 
 (defmulti login-state-view
-  (fn [phase owner data] phase))
+  (fn [phase data] phase))
 
 (defmethod
   login-state-view
   :waiting
-  [_ owner data]
+  [_ data]
   [:div
    [:h3 (get-string :string/waiting-msg)]
    [:div#loading
@@ -27,7 +24,7 @@
 (defmethod
   login-state-view
   :sign-up
-  [_ owner data]
+  [_ data]
   [:div.sub-page-div
    [:h3 (get-string :string/create-account)]
    [:span#error-message (:message data)]
@@ -82,22 +79,22 @@
      [:button {:id "back-button"
                :class "pure-button"
                :on-click (fn [e]
-                           (om/transact! owner '[(login/goto-phase! {:phase :prompt}) :login/phase])
+                           (data/transact! 'login/goto-phase! {:phase :prompt})
                            (.preventDefault e))} (get-string :string/back)]]]])
 
 (defmethod
   login-state-view
   :prompt
-  [_ owner {:keys [message]}]
+  [_ {:keys [message]}]
   [:div
    [:h3 (get-string :string/sign-in)]
    (when message
      [:span#error-message (get-string message)])
    [:form {:class "pure-form pure-form-stacked"
            :on-submit (fn [e]
-                        (om/transact! owner '[(login/set-message! {:message nil})])
-                        (controller/raise! owner :user/login {:email (.-value (. js/document (getElementById "login-email")))
-                                                              :pass (.-value (. js/document (getElementById "login-password")))})
+                        (data/transact! 'login/set-message! {:message nil})
+                        (controller/raise! :user/login {:email (.-value (. js/document (getElementById "login-email")))
+                                                        :pass (.-value (. js/document (getElementById "login-password")))})
                         (.preventDefault e))}
     [:input {:tab-index 1
              :ref "email"
@@ -118,20 +115,20 @@
               :class "pure-button pure-button-primary"} (get-string :string/sign-in)]
     [:a {:id "forgotten-link"
          :on-click (fn [e]
-                     (om/transact! owner '[(login/goto-phase! {:phase :reset}) :login/phase])
+                     (data/transact! 'login/goto-phase! {:phase :reset})
                      (.preventDefault e))} (str "(" (get-string :string/forgotten-question) ")")]]
    [:h3 (get-string :string/create-account-header)]
    [:p
     [:span.text-white (get-string :string/create-account-info)]]
    [:button.pure-button.pure-button-success
     {:on-click (fn [e]
-                 (om/transact! owner '[(login/goto-phase! {:phase :sign-up}) :login/phase])
+                 (data/transact! 'login/goto-phase! {:phase :sign-up})
                  (.preventDefault e))} (get-string :string/create-account)]])
 
 (defmethod
   login-state-view
   :reset
-  [_ owner data]
+  [_ data]
   [:div.sub-page-div
    [:h3 (get-string :string/forgotten-password)]
    [:p
@@ -162,28 +159,27 @@
      [:button {:id "back-button"
                :class "pure-button"
                :on-click (fn [e]
-                           (om/transact! owner '[(login/goto-phase! {:phase :prompt}) :login/phase])
+                           (data/transact! 'login/goto-phase! {:phase :prompt})
                            (.preventDefault e))} (get-string :string/back)]]]])
 
 
-(defui Main
-  static om/IQuery
-  (query [this]
-         [{:app/login [:login/phase :login/success? :login/message]}])
-  Object
-  (render [this]
-          (let [{:keys [login/phase login/message]} (get-in (om/props this) [:app/login])]
-            (sab/html [:div
-                       [:div#login-bg {:key "login-bg"}
-                        [:span#bg-attribution.trans-bg
-                         "Photo by "
-                         [:a {:href "https://www.flickr.com/photos/fico86/" :target "_blank" :key "photo-attr1"}
-                          "Binayak Dasgupta"] " - "
-                         [:a {:href "https://creativecommons.org/licenses/by/2.0/" :target "_blank" :key "photo-attr2"} "CC BY 2.0"]]]
-                       [:div#content-container {:key "login-content"}
-                        [:div#relative-container
-                         [:div.login-title.trans-bg {:key "login-title"}
-                          [:h1 {:key "login-title-main"} (get-string :string/witan) ]
-                          [:h2 {:key "login-title-sub"} (get-string :string/witan-tagline)]]
-                         [:div#witan-login.trans-bg {:key "login-state"}
-                          (login-state-view phase this {:message message})]]]]))))
+(defn root-view
+  []
+  (r/create-class
+   {:reagent-render
+    (fn []
+      (let [{:keys [login/phase login/message]} (data/get-app-state :app/login)]
+        [:div
+         [:div#login-bg {:key "login-bg"}
+          [:span#bg-attribution.trans-bg
+           "Photo by "
+           [:a {:href "https://www.flickr.com/photos/fico86/" :target "_blank" :key "photo-attr1"}
+            "Binayak Dasgupta"] " - "
+           [:a {:href "https://creativecommons.org/licenses/by/2.0/" :target "_blank" :key "photo-attr2"} "CC BY 2.0"]]]
+         [:div#content-container {:key "login-content"}
+          [:div#relative-container
+           [:div.login-title.trans-bg {:key "login-title"}
+            [:h1 {:key "login-title-main"} (get-string :string/witan) ]
+            [:h2 {:key "login-title-sub"} (get-string :string/witan-tagline)]]
+           [:div#witan-login.trans-bg {:key "login-state"}
+            [login-state-view phase {:message message}]]]]]))}))

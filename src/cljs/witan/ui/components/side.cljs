@@ -1,7 +1,7 @@
 (ns witan.ui.components.side
   (:require [cljs.test :refer-macros [is async]]
             [goog.dom :as gdom]
-            [om.next :as om :refer-macros [defui]]
+            [reagent.core :as r]
             [sablono.core :as sab :include-macros true]
             ;;
             [witan.ui.components.icons :as icons]
@@ -58,26 +58,23 @@
           (get-icon element-key)])
        :hr [:hr])]))
 
-(defui Main
-  static om/IQuery
-  (query [this]
-         [{:app/side [:side/upper :side/lower]} :app/route])
-  Object
-  (render [this]
-          (let [{:keys [app/route app/side]} (om/props this)
-                {:keys [side/upper side/lower]} side]
-            (sab/html [:div#side-container
-                       [:div#side-upper
-                        (add-side-elements! this upper route)]
-                       [:div#side-lower
-                        {:align "center"}
-                        (add-side-elements! this lower route)]]))))
+(defn root-view
+  []
+  (r/create-class
+   {:reagent-render
+    (fn [this]
+      (let [{:keys [app/route app/side]} this
+            {:keys [side/upper side/lower]} side]
+        [:div#side-container
+         [:div#side-upper
+          (add-side-elements! this upper route)]
+         [:div#side-lower
+          {:align "center"}
+          (add-side-elements! this lower route)]]))}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 
-
-(def side-bar (om/factory Main))
 
 (defcard side-bar
   (sab/html

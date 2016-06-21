@@ -1,7 +1,6 @@
 (ns witan.ui.components.secondary
-  (:require [om.next :as om :refer-macros [defui]]
-            [sablono.core :as sab]
-            [witan.ui.strings :refer [get-string]]))
+  (:require [witan.ui.strings :refer [get-string]]
+            [witan.ui.data :as data]))
 
 (defn switcher
   [{:keys [titles selected-idx on-select]}]
@@ -13,21 +12,14 @@
        :on-click #(when on-select (on-select idx))}
       title])])
 
-(defui Main
-  static om/IQuery
-  (query [this]
-         [:secondary/view-selected])
-  Object
-  (render [this]
-          (let [{:keys [secondary/view-selected]
-                 :or {secondary/view-selected 0}} (om/props this)]
-            (sab/html
-             [:div#primary
-              [:div#switcher
-               (switcher {:titles [(get-string :string/workspace-data-view)
-                                   (get-string :string/workspace-config-view)
-                                   (get-string :string/workspace-history-view)]
-                          :selected-idx view-selected
-                          :on-select #(om/transact! this `[(change/secondary-view! {:idx ~%})])})]]))))
-
-(def secondary-split-view (om/factory Main))
+(defn view
+  [this]
+  (let [{:keys [secondary/view-selected]
+         :or {secondary/view-selected 0}} (om/props this)]
+    [:div#primary
+     [:div#switcher
+      (switcher {:titles [(get-string :string/workspace-data-view)
+                          (get-string :string/workspace-config-view)
+                          (get-string :string/workspace-history-view)]
+                 :selected-idx view-selected
+                 :on-select #(data/transact! this 'change/secondary-view! {:idx %})})]]))

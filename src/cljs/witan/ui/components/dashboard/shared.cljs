@@ -1,6 +1,5 @@
 (ns witan.ui.components.dashboard.shared
-  (:require [om.next :as om :refer-macros [defui]]
-            [sablono.core :as sab]
+  (:require [sablono.core :as sab]
             ;;
             [witan.ui.components.shared :as shared]
             [witan.ui.components.icons :as icons]

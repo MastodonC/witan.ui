@@ -22,9 +22,9 @@
   (recur))
 
 (defn raise!
-  ([owner event]
+  ([event]
    (raise! owner event {}))
-  ([owner event args]
-   (let [payload (merge {:owner owner :event event} (when (not-empty args) {:args args}))]
+  ([event args]
+   (let [payload (merge {:event event} (when (not-empty args) {:args args}))]
      (log/debug "Raising event" event args)
      (put! event-chan payload))))

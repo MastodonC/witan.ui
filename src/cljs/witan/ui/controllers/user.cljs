@@ -18,7 +18,7 @@
 
 (defn login-success!
   [owner response]
-  (om/transact! owner `[(login/complete! ~response)])
+  (data/transact! owner 'login/complete! response)
   (data/save-data!)
   (kill-login-screen!))
 
@@ -42,7 +42,6 @@
 (defmethod api-response
   [:login :failure]
   [{:keys [owner]} response]
-  >>>>>>> Stashed changes
   (login-success! owner response)
   #_(data/transact! owner 'login/set-message! {:message :string/api-failure}))
 

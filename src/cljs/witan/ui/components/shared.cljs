@@ -1,6 +1,5 @@
 (ns witan.ui.components.shared
-  (:require [om.next :as om]
-            [sablono.core :as sab :include-macros true]
+  (:require [sablono.core :as sab :include-macros true]
             ;;
             [witan.ui.strings :refer [get-string]]
             [witan.ui.components.icons :as icons])

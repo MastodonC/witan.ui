@@ -12,7 +12,6 @@
                  [devcards "0.2.1-6"]
                  [sablono "0.6.2"]
                  [reagent "0.6.0-rc"]
-                 [datascript "0.15.0"]
                  [cljs-log "0.2.2"]
                  [jarohen/chord "0.7.0"]
                  [clj-time "0.12.0"]
