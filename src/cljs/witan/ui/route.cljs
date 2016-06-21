@@ -1,6 +1,5 @@
 (ns witan.ui.route
   (:require [cljs.core.async :refer [<! chan put!]]
-            [om.next :as om]
             [bidi.bidi :as bidi]
             [witan.ui.data :as data]
             [accountant.core :as accountant])
@@ -27,7 +26,8 @@
     (if route
       (let [{:keys [handler route-params]} route]
         (log/debug "Dispatching to route:" path "=>" handler)
-        (om/transact! (data/make-reconciler) `[(change/route! {:route ~handler :route-params ~route-params})])
+        (log/error "FIX ME")
+        #_(om/transact! (data/make-reconciler) `[(change/route! {:route ~handler :route-params ~route-params})])
         (put! app-route-chan handler))
       (log/severe "Couldn't match a route to this path:" path))))
 

@@ -23,7 +23,7 @@
                  [cljs-ajax "0.5.3"]
                  [prismatic/schema "1.1.2"]]
 
-  :plugins [[lein-figwheel "0.5.0-6" :exclusions [org.clojure/tools.reader]]
+  :plugins [[lein-figwheel "0.5.4-2" :exclusions [org.clojure/tools.reader]]
             [lein-cljsbuild "1.1.2" :exclusions [[org.clojure/clojure]]]
             [lein-garden "0.2.6"]]
 
@@ -31,24 +31,21 @@
              :dev {:dependencies [[com.cemerick/piggieback "0.2.1"]
                                   [org.clojure/tools.nrepl "0.2.12"]
                                   [ring/ring-defaults "0.1.5"]
-                                  [compojure "1.4.0"]]
+                                  [compojure "1.4.0"]
+                                  [figwheel "0.5.4-2"]
+                                  [figwheel-sidecar "0.5.4-2"]]
+                   :source-paths ["dev-src"]
                    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}}
 
   :source-paths ["src/clj"]
+
+  :repl-options {:init-ns user}
 
   :clean-targets ^{:protect false} ["resources/public/js/compiled"
                                     "target"]
 
   :cljsbuild {:builds
-              [{:id "devcards"
-                :source-paths ["src/cljs"]
-                :figwheel { :devcards true } ;; <- note this
-                :compiler {:main       witan.ui.core
-                           :asset-path "/js/compiled/devcards_out"
-                           :output-to  "resources/public/js/compiled/devcards_devcards.js"
-                           :output-dir "resources/public/js/compiled/devcards_out"
-                           :source-map-timestamp true }}
-               {:id "dev"
+              [{:id "dev"
                 :source-paths ["src/cljs"]
 
                 ;; If no code is to be run, set :figwheel true for continued automagical reloading
@@ -60,6 +57,14 @@
                            :output-dir "resources/public/js/compiled/out"
                            :source-map-timestamp true
                            :warnings {:single-segment-namespace false}}}
+               {:id "devcards"
+                :source-paths ["src/cljs"]
+                :figwheel { :devcards true } ;; <- note this
+                :compiler {:main       witan.ui.core
+                           :asset-path "/js/compiled/devcards_out"
+                           :output-to  "resources/public/js/compiled/devcards_devcards.js"
+                           :output-dir "resources/public/js/compiled/devcards_out"
+                           :source-map-timestamp true }}
                {:id "prod"
                 :source-paths ["src/cljs"]
                 :compiler {:output-to "resources/public/js/compiled/witan.ui.js"

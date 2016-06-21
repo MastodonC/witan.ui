@@ -1,6 +1,5 @@
 (ns witan.ui.data
   (:require [datascript.core :as d]
-            [om.next :as om]
             [goog.net.cookies :as cookies]
             [goog.crypt.base64 :as b64]
             [schema.core :as s]
@@ -95,7 +94,7 @@
   (log/debug "Saving app state to cookie")
   (.set goog.net.cookies
         cookie-name
-        (-> @app-state (dissoc :om.next/queries) pr-str b64/encodeString)
+        (-> @app-state pr-str b64/encodeString)
         -1
         "/"))
 
@@ -120,163 +119,63 @@
 
 (load-data!)
 
-;; reconciler
-(defmulti read om/dispatch)
-(defmulti mutate om/dispatch)
-
-(defn make-reconciler []
-  (om/reconciler
-   {:state app-state
-    :parser (om/parser {:read read :mutate mutate})}))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; READS
+;; writes
 
-(defmethod read :app/route
-  [{:keys [state query]} k _]
-  (let [st @state]
-    {:value (get st k)}))
-
-(defmethod read :app/login
-  [{:keys [state query]} k _]
-  (let [st @state]
-    {:value (select-keys (get st k) query)}))
-
-(defmethod read :app/route-params
-  [{:keys [state query]} k _]
-  (log/debug ":app/route-params state" state )
-  (let [st @state]
-    {:value (get st k)}))
-
-(defmethod read :workspace/primary
-  [{:keys [state query] :as foo} k params]
-  (let [st @state]
-    {:value (select-keys (get-in st [:app/workspace k]) query)}))
-
-(defmethod read :workspace/secondary
-  [{:keys [state query]} k _]
-  (let [st @state]
-    {:value (select-keys (get-in st [:app/workspace k]) query)}))
-
-(defmethod read :route/data
-  [{:keys [state query parser] :as env} key params]
-  (let [st @state]
-    (let [result (get st (get st :app/route))
-          with-route-params (assoc result :app/route-params (get st :app/route-params))
-          embedded-queries (filter map? query)
-          recursive-results (map #(parser {:state state} (vector %)) embedded-queries)]
-      {:value (reduce merge (select-keys with-route-params query) recursive-results)})))
-
-(defmethod read :app/workspace-dash
-  [{:keys [state query]} k _]
-  (let [st @state]
-    {:value (get st k)}))
-
-(defmethod read :app/data-dash
-  [{:keys [state query]} k _]
-  (let [st @state]
-    {:value (get st k)}))
-
-(defmethod read :app/side
-  [{:keys [state query]} _ _]
-  {:value (select-keys (:app/side @state) query)})
-
-(defmethod read :user/groups
-  [{:keys [state query]} _ _]
-  {:value :not-found})
-
-(defmethod read :wd/workspaces
-  [{:keys [state query]} k _]
-  (let [st @state]
-    {:value (map #(select-keys % query)
-                 [{:workspace/name "Workspace for Foo Population"
-                   :workspace/id 1
-                   :workspace/owner-name "Bob"
-                   :workspace/owner-id 1
-                   :workspace/modified "Yesterday, 2pm"}
-                  {:workspace/name "Workspace for Bar Population"
-                   :workspace/id 2
-                   :workspace/owner-name "Alice"
-                   :workspace/owner-id 2
-                   :workspace/modified "4th Jan, 4.15pm"}
-                  {:workspace/name "Workspace for Baz Population"
-                   :workspace/id 3
-                   :workspace/owner-name "Charles"
-                   :workspace/owner-id 3
-                   :workspace/modified "12th Jan, 10.24am"}])}))
-
-(defmethod read :app/create-workspace
-  [{:keys [state query]} k _]
-  (let [st @state]
-    {:value (get st k)}))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; MUTATIONS
-
-;;;;;;;;;;;;;;;;;;;;;;;
-;; route/view changes
+(defmulti mutate
+  (fn [_ f _] f))
 
 (defmethod mutate 'change/route!
   [{:keys [state]} _ {:keys [route route-params]}]
-  {:value {:keys [:app/route]}
-   :action (fn [_]
-             (swap! state assoc :app/route route)
-             (swap! state assoc :app/route-params route-params))})
+  (swap! state assoc :app/route route)
+  (swap! state assoc :app/route-params route-params))
+
+(defmethod mutate 'wd/select-row!
+  [{:keys [state]} _ {:keys [id]}]
+  (swap! state assoc-in [:app/workspace-dash :wd/selected-id] id))
 
 (defmethod mutate 'change/primary-view!
   [{:keys [state]} _ {:keys [idx]}]
-  {:value {:keys [:route/data]}
-   :action (fn [_]
-             (swap! state assoc-in [:app/workspace :workspace/primary :primary/view-selected] idx))})
+  (swap! state assoc-in [:app/workspace :workspace/primary :primary/view-selected] idx))
 
 (defmethod mutate 'change/secondary-view!
   [{:keys [state]} _ {:keys [idx]}]
-  {:value {:keys [:route/data]}
-   :action (fn [_]
-             (swap! state assoc-in [:app/workspace :workspace/secondary :secondary/view-selected] idx))})
+  (swap! state assoc-in [:app/workspace :workspace/secondary :secondary/view-selected] idx))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; login state changes
 
 (defmethod mutate 'login/goto-phase!
   [{:keys [state]} _ {:keys [phase]}]
-  {:value {:keys [:app/login]}
-   :action (fn [_]
-             (swap! state assoc-in [:app/login :login/phase] phase))})
+  (swap! state assoc-in [:app/login :login/phase] phase))
 
 (defmethod mutate 'login/set-message!
   [{:keys [state]} _ {:keys [message]}]
-  {:value {:keys [:app/login]}
-   :action (fn [_]
-             (swap! state assoc-in [:app/login :login/message] message))})
+  (swap! state assoc-in [:app/login :login/message] message))
 
 (defmethod mutate 'login/complete!
   [{:keys [state]} _ {:keys [token id]}]
-  {:value {:keys [:app/login]}
-   :action (fn [_]
-             (swap! state assoc-in [:app/login :login/id] id)
-             (swap! state assoc-in [:app/login :login/token] token))})
+  (swap! state assoc-in [:app/login :login/id] id)
+  (swap! state assoc-in [:app/login :login/token] token))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; workspace dash changes
 
 (defmethod mutate 'wd/select-row!
   [{:keys [state]} _ {:keys [id]}]
-  {:value {:keys [:app/workspace-dash]}
-   :action (fn [_]
-             (swap! state assoc-in [:app/workspace-dash :wd/selected-id] id))})
+  (swap! state assoc-in [:app/workspace-dash :wd/selected-id] id))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; workspace creation
 
 (defmethod mutate 'cw/set-message!
   [{:keys [state]} _ {:keys [message]}]
-  {:value {:keys [:app/create-workspace]}
-   :action (fn [_]
-             (swap! state assoc-in [:app/create-workspace :cw/message] message))})
+  (swap! state assoc-in [:app/create-workspace :cw/message] message))
 
 (defmethod mutate 'cw/set-pending!
   [{:keys [state]} _ {:keys [pending?]}]
-  {:value {:keys [:app/create-workspace]}
-   :action (fn [_]
-             (swap! state assoc-in [:app/create-workspace :cw/pending?] pending?))})
+  (swap! state assoc-in [:app/create-workspace :cw/pending?] pending?))
+
+(defn transact!
+  [owner f args]
+  (mutate owner f args))

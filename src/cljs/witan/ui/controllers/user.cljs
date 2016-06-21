@@ -1,7 +1,6 @@
 (ns witan.ui.controllers.user
   (:require [witan.ui.ajax :refer [GET POST]]
             [schema.core :as s]
-            [om.next :as om]
             [witan.ui.data :as data])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
@@ -38,13 +37,14 @@
   [{:keys [owner]} {:keys [token] :as response}]
   (if token
     (login-success! owner response)
-    (om/transact! owner '[(login/set-message! {:message :string/sign-in-failure})])))
+    (data/transact! owner 'login/set-message! {:message :string/sign-in-failure})))
 
 (defmethod api-response
   [:login :failure]
   [{:keys [owner]} response]
+  >>>>>>> Stashed changes
   (login-success! owner response)
-  #_(om/transact! owner '[(login/set-message! {:message :string/api-failure})]))
+  #_(data/transact! owner 'login/set-message! {:message :string/api-failure}))
 
 (defn route-api-response
   [event owner]

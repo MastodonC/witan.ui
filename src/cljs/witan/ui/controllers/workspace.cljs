@@ -1,7 +1,6 @@
 (ns witan.ui.controllers.workspace
   (:require [witan.ui.ajax :refer [command! query validate-receipt!]]
             [schema.core :as s]
-            [om.next :as om]
             [witan.ui.data :as data])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
