@@ -225,8 +225,11 @@
           (on-connect)
           (go-loop []
             (let [{:keys [message]} (<! ws-channel)]
-              (handle-server-message message))
-            (recur)))
+              (if message
+                (do
+                  (handle-server-message message)
+                  (recur))
+                (log/warn "Websocket connection lost")))))
         (js/console.log "Error:" (pr-str error))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
