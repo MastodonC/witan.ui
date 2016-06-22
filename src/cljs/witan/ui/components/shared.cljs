@@ -33,11 +33,13 @@
      [:tr
       (for [{:keys [title weight]} headers]
         (let [percent (str (* 100 weight) "%")]
-          [:th {:style {:width percent}} title]))]]]
+          [:th {:key title
+                :style {:width percent}} title]))]]]
    [:table.pure-table.pure-table-horizontal
     [:tbody
      (for [row content]
        [:tr
+        {:key (apply str content)}
         {:class (when (and selected?-fn (selected?-fn row)) "selected")}
         (for [{:keys [content-fn title weight]} headers]
           (let [percent (str (* 100 weight) "%")]
