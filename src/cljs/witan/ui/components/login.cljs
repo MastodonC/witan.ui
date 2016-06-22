@@ -9,6 +9,10 @@
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))
 
+(def password-validation
+  {:pattern ".{8,}"
+   :title "8 characters minimum"})
+
 (defmulti login-state-view
   (fn [phase data] phase))
 
@@ -29,6 +33,7 @@
    [:h3 (get-string :string/create-account)]
    [:span#error-message (:message data)]
    [:form {:class "pure-form pure-form-stacked"
+           :key "sign-up"
            :on-submit (fn [e]
                         #_(venue/raise! owner :event/attempt-sign-up {:email [(.-value (om/get-node owner "email"))
                                                                               (.-value (om/get-node owner "confirm-email"))]
@@ -61,18 +66,20 @@
              :id "confirm-email"
              :placeholder (get-string :string/confirm-email)
              :required :required}]
-    [:input {:tab-index 5
-             :ref "password"
-             :type "password"
-             :id "password"
-             :placeholder (get-string :string/password)
-             :required :required}]
-    [:input {:tab-index 6
-             :ref "confirm-password"
-             :type "password"
-             :id "confirm-password"
-             :placeholder (get-string :string/confirm-password)
-             :require :required}]
+    [:input (merge password-validation
+                   {:tab-index 5
+                    :ref "password"
+                    :type "password"
+                    :id "password"
+                    :placeholder (get-string :string/password)
+                    :required :required})]
+    [:input (merge password-validation
+                   {:tab-index 6
+                    :ref "confirm-password"
+                    :type "password"
+                    :id "confirm-password"
+                    :placeholder (get-string :string/confirm-password)
+                    :require :required})]
     [:div [:button {:tab-index 7
                     :type "submit"
                     :class "pure-button pure-button-primary"} (get-string :string/create-account)]
@@ -91,6 +98,7 @@
    (when message
      [:span#error-message (get-string message)])
    [:form {:class "pure-form pure-form-stacked"
+           :key "prompt"
            :on-submit (fn [e]
                         (data/transact! 'login/set-message! {:message nil})
                         (controller/raise! :user/login {:email (.-value (. js/document (getElementById "login-email")))
@@ -102,14 +110,14 @@
              :id "login-email"
              :placeholder (get-string :string/email)
              :required :required}]
-    [:input {:tab-index 2
-             :ref "password"
-             :type "password"
-             :id "login-password"
-             :placeholder (get-string :string/password)
-             :require :required
-             :pattern ".{6,}"
-             :title "6 characters minimum"}]
+    [:input (merge password-validation
+                   {:tab-index 2
+                    :ref "password"
+                    :type "password"
+                    :id "login-password"
+                    :placeholder (get-string :string/password)
+                    :require :required
+                    })]
     [:button {:tab-index 3
               :type "submit"
               :class "pure-button pure-button-primary"} (get-string :string/sign-in)]

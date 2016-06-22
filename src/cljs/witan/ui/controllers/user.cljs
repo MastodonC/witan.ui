@@ -7,7 +7,7 @@
 
 (def Login
   {:username s/Str
-   :password (s/constrained s/Str #(> (count %) 5))})
+   :password (s/constrained s/Str #(> (count %) 7))})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -17,10 +17,13 @@
     (aset login-div "style" "visibility" "hidden")))
 
 (defn login-success!
-  [owner response]
-  (data/transact! 'login/complete! response)
-  (data/save-data!)
-  (kill-login-screen!))
+  [{:keys [id token] :as response}]
+  (when response
+    (data/app-state-swap! :app/login assoc-in [:login/id] id)
+    (data/app-state-swap! :app/login assoc-in [:login/token] token)
+    (data/save-data!))
+  (kill-login-screen!)
+  (data/connect! {:on-connect #((data/publish-topic :data/user-logged-in))}))
 
 (defn local-endpoint
   [method]
@@ -36,13 +39,13 @@
   [:login :success]
   [{:keys [owner]} {:keys [token] :as response}]
   (if token
-    (login-success! owner response)
+    (login-success! response)
     (data/transact! 'login/set-message! {:message :string/sign-in-failure})))
 
 (defmethod api-response
   [:login :failure]
   [{:keys [owner]} response]
-  (login-success! owner response)
+  (login-success! response)
   #_(data/transact! 'login/set-message! {:message :string/api-failure}))
 
 (defn route-api-response
@@ -70,6 +73,4 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(data/subscribe-topic
- :data/app-state-restored
- #(kill-login-screen!))
+(data/subscribe-topic :data/app-state-restored login-success!)

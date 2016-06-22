@@ -1,20 +1,26 @@
 (ns witan.ui.data
-  (:require ;;[datascript.core :as d]
-   [reagent.core :as r]
-   [goog.net.cookies :as cookies]
-   [goog.crypt.base64 :as b64]
-   [schema.core :as s]
-   [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all]]
-   [cljs.reader :as reader]   )
+  (:require [reagent.core :as r]
+            [goog.net.cookies :as cookies]
+            [goog.crypt.base64 :as b64]
+            [schema.core :as s]
+            [chord.client :refer [ws-ch]]
+            [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all put! close!]]
+            [cljs.reader :as reader]   )
   (:require-macros [cljs-log.core :as log]
-                   [cljs.core.async.macros :refer [go go-loop]]))
+                   [cljs.core.async.macros :refer [go go-loop]]
+                   [witan.ui.env :as env :refer [cljs-env]]))
 
-(def cookie-name "_data_")
+(def config {:gateway/address (or (cljs-env :witan-api-url) "localhost:30015")})
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; PubSub
+
 (def publisher (chan))
 (def publication (pub publisher #(:topic %)))
 
 (def topics
-  #{:data/app-state-restored})
+  #{:data/app-state-restored
+    :data/user-logged-in})
 
 (defn publish-topic
   ([topic]
@@ -33,6 +39,9 @@
     (go-loop []
       (cb (<! subscriber))
       (recur))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; App State
 
 (defn atomize-map
   [m]
@@ -63,9 +72,7 @@
                                                   :workspace/owner-id s/Int
                                                   :workspace/owner-name s/Str
                                                   :workspace/modified s/Str}])}
-   :app/data-dash (s/maybe s/Any)
-   :app/create-workspace {:cw/message (s/maybe s/Str)
-                          :cw/pending? s/Bool}})
+   :app/data-dash (s/maybe s/Any)})
 
 ;; default app-state
 (defonce app-state
@@ -88,9 +95,7 @@
                     :workspace/secondary {:secondary/view-selected 0}}
     :app/workspace-dash {:wd/selected-id nil
                          :wd/workspaces nil}
-    :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}
-    :app/create-workspace {:cw/message nil
-                           :cw/pending? false}}
+    :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}}
    (s/validate AppStateSchema)
    (atomize-map)))
 
@@ -106,12 +111,12 @@
   [k value]
   (update app-state k #(reset! % value)))
 
-;; database
-#_(def conn (d/create-conn {}))
-#_(d/transact! conn [{:db/id -1
-                    :app/count 3}])
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Cookies
 
-;; cookies
+(def cookie-name "_data_")
+(defonce wants-to-load? (atom true))
+
 (defn save-data!
   []
   (log/debug "Saving app state to cookie")
@@ -134,21 +139,98 @@
 (defn load-data!
   []
   (if-let [data (.get goog.net.cookies cookie-name)]
-    (let [unencoded (->> data b64/decodeString reader/read-string)]
-      (try
-        (do
-          (run! (fn [[k v]] (app-state-reset! k v)) unencoded)
-          (log/debug "Restored app state from cookie")
-          (publish-topic :data/app-state-restored))
-        (catch js/Object e
-          (log/warn "Failed to restore app state from cookie:" (str e))
-          (delete-data!))))
+    (when @wants-to-load?
+      (reset! wants-to-load? false)
+      (let [unencoded (->> data b64/decodeString reader/read-string)]
+        (try
+          (do
+            (run! (fn [[k v]] (app-state-reset! k v)) unencoded)
+            (log/debug "Restored app state from cookie")
+            (publish-topic :data/app-state-restored))
+          (catch js/Object e
+            (log/warn "Failed to restore app state from cookie:" (str e))
+            (delete-data!)))))
     (log/debug "(No existing token was found.)")))
 
 (load-data!)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; writes
+;; Websocket
+
+(defonce ws-conn (atom nil))
+(defonce message-id (atom 0))
+(defonce events (atom []))
+(def query-responses (atom {}))
+
+(defn query
+  [query cb]
+  (if (vector? query)
+    (let [id (swap! message-id inc)
+          m {:message/type :query
+             :query/id id
+             :query/edn query}]
+      (log/debug "Sending query:" m)
+      (swap! query-responses assoc id cb)
+      (go (>! @ws-conn m)))
+    (throw (js/Error. "Query needs to be a vector"))))
+
+(defn command!
+  [command-key version params]
+  (let [m {:message/type :command
+           :command/key command-key
+           :command/version version
+           :command/id (swap! message-id inc)
+           :command/params params}]
+    (log/debug "Sending command:" m)
+    (go (>! @ws-conn m))))
+
+;;
+
+(defmulti handle-server-message
+  (fn [{:keys [message/type]}] type))
+
+(defmethod handle-server-message
+  :default
+  [msg]
+  (println "Unknown message:" msg))
+
+(defmethod handle-server-message
+  :command-receipt
+  [msg])
+
+(defmethod handle-server-message
+  :query-response
+  [{:keys [query/id query/results]}]
+  (doseq [{:keys [query/result]} results]
+    (log/debug "TODO got query result in data")
+    #_(run! (fn [[k r]] (receive-data! k r)) result)))
+
+(defmethod handle-server-message
+  :event
+  [event]
+  (println "Got event" event)
+  (swap! events conj event))
+
+;;
+
+(defn connect!
+  [{:keys [on-connect]}]
+  (go
+    (let [{:keys [ws-channel error]} (<! (ws-ch (str "ws://"
+                                                     (get config :gateway/address)
+                                                     "/ws")))]
+      (if-not error
+        (do
+          (reset! ws-conn ws-channel)
+          (on-connect)
+          (go-loop []
+            (let [{:keys [message]} (<! ws-channel)]
+              (handle-server-message message))
+            (recur)))
+        (js/console.log "Error:" (pr-str error))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Data Mutations - we should remove as many of these are possible
 
 (defmulti mutate
   (fn [f _] f))
@@ -157,10 +239,6 @@
   [_ {:keys [route route-params]}]
   (app-state-swap! :app/route assoc-in [:route/path]   route)
   (app-state-swap! :app/route assoc-in [:route/params] route-params))
-
-(defmethod mutate 'wd/select-row!
-  [_ {:keys [id]}]
-  (app-state-swap! :app/workspace-dash assoc-in [:wd/selected-id] id))
 
 (defmethod mutate 'change/primary-view!
   [_ {:keys [idx]}]
@@ -175,34 +253,23 @@
 
 (defmethod mutate 'login/goto-phase!
   [_ {:keys [phase]}]
+  (log/debug "Remove me!!")
   (app-state-swap! :app/login assoc-in [:login/phase] phase))
 
 (defmethod mutate 'login/set-message!
   [_ {:keys [message]}]
+  (log/debug "Remove me!!")
   (app-state-swap! :app/login assoc-in [:login/message] message))
-
-(defmethod mutate 'login/complete!
-  [_ {:keys [token id]}]
-  (app-state-swap! :app/login assoc-in [:login/id] id)
-  (app-state-swap! :app/login assoc-in [:login/token] token))
 
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; workspace dash changes
 
 (defmethod mutate 'wd/select-row!
   [_ {:keys [id]}]
+  (log/debug "Remove me!!")
   (app-state-swap! :app/workspace-dash assoc-in [:wd/selected-id] id))
 
-;;;;;;;;;;;;;;;;;;;;;;;
-;; workspace creation
-
-(defmethod mutate 'cw/set-message!
-  [_ {:keys [message]}]
-  (app-state-swap! :app/create-workspace assoc-in [:cw/message] message))
-
-(defmethod mutate 'cw/set-pending!
-  [_ {:keys [pending?]}]
-  (app-state-swap! :app/create-workspace assoc-in [:cw/pending?] pending?))
+;;;;
 
 (defn transact!
   [f args]

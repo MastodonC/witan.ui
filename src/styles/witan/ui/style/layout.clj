@@ -6,7 +6,8 @@
 
 (def style
   [[:body {:width (percent 100)
-           :height (percent 100)}]
+           :height (percent 100)
+           :overflow :hidden}]
 
    [:#login {:position :absolute
              :top 0
