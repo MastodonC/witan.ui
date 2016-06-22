@@ -97,8 +97,9 @@
 
 (defcard loading-card
   (sab/html [:div
-             (cog :large :spin)
-             (cog :spin :x-large)]))
+             (loading :small)
+             (loading :large )
+             (loading :x-large)]))
 
 (defcard icons-card
   (sab/html
@@ -126,11 +127,12 @@
                     ["open"          open]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
-        [:hr
-         [:div
-          [:h2 title]
-          (for [v variations]
-            (let [icon (apply icon-fn v)]
-              [:div
-               icon
-               [:span {:style {:float "right"}} (dc/edn icon)]]))]])])))
+        [:div
+         {:key title}
+         [:h2 title]
+         (for [v variations]
+           (let [icon (apply icon-fn v)]
+             [:div
+              {:key (str title icon)}
+              icon
+              [:span {:style {:float "right"}} (dc/edn icon)]]))])])))

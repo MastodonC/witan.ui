@@ -14,19 +14,18 @@
   []
   (.. js/document -location -pathname))
 
-(defonce init
-  (do
-    (accountant/configure-navigation! {:nav-handler route/dispatch-path!
-                                       :path-exists? route/path-exists?})
-    (route/dispatch-path! (path))))
-
-(if-let [node (gdom/getElement "app")]
+(when-let [node (gdom/getElement "app")]
+  (defonce init
+    (do
+      (accountant/configure-navigation! {:nav-handler route/dispatch-path!
+                                         :path-exists? route/path-exists?})
+      (route/dispatch-path! (path))))
   (r/render [app/root-view] node))
 
-(if-let [node (gdom/getElement "side")]
+(when-let [node (gdom/getElement "side")]
   (r/render [side/root-view] node))
 
-(if-let [node (gdom/getElement "login")]
+(when-let [node (gdom/getElement "login")]
   (r/render [login/root-view] node))
 
 ;;

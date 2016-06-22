@@ -7,7 +7,14 @@
 (set! *warn-on-reflection* true)
 (set! *unchecked-math* :warn-on-boxed)
 
-(defn run []
-  (figwheel/start-figwheel!))
+(defn go []
+  (figwheel/start-figwheel! :dev))
 
-(def browser-repl figwheel/cljs-repl)
+(defn go-devcards []
+  (figwheel/start-figwheel! :dev :devcards))
+
+(defn stop []
+  (figwheel/stop-figwheel!))
+
+(def browser-repl
+  figwheel/cljs-repl)

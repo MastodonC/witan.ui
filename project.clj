@@ -22,7 +22,7 @@
                  [cljs-ajax "0.5.3"]
                  [prismatic/schema "1.1.2"]]
 
-  :plugins [[lein-figwheel "0.5.4-2" :exclusions [org.clojure/tools.reader]]
+  :plugins [[lein-figwheel "0.5.4-3" :exclusions [org.clojure/tools.reader]]
             [lein-cljsbuild "1.1.2" :exclusions [[org.clojure/clojure]]]
             [lein-garden "0.2.6"]]
 
@@ -31,8 +31,8 @@
                                   [org.clojure/tools.nrepl "0.2.12"]
                                   [ring/ring-defaults "0.1.5"]
                                   [compojure "1.4.0"]
-                                  [figwheel "0.5.4-2"]
-                                  [figwheel-sidecar "0.5.4-2"]]
+                                  [figwheel "0.5.4-3"]
+                                  [figwheel-sidecar "0.5.4-3"]]
                    :source-paths ["dev-src"]
                    :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}}}
 
@@ -97,7 +97,3 @@
                   ["change" "version" "leiningen.release/bump-version"]
                   ["vcs" "commit"]
                   ["vcs" "push"]])
-
-(comment
-  (do (use 'figwheel-sidecar.repl-api)
-      (cljs-repl)))

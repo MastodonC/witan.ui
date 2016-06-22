@@ -63,18 +63,22 @@
           (get-icon element-key)])
        :hr [:hr])]))
 
+(defn side-bar
+  [{:keys [side/upper side/lower]} path]
+  [:div#side-container
+   [:div#side-upper
+    (add-side-elements! upper path)]
+   [:div#side-lower
+    (add-side-elements! lower path)]])
+
 (defn root-view
   []
   (r/create-class
    {:reagent-render
     (fn []
       (let [{:keys [route/path]} (data/get-app-state :app/route)
-            {:keys [side/upper side/lower]} (data/get-app-state :app/side)]
-        [:div#side-container
-         [:div#side-upper
-          (add-side-elements! upper path)]
-         [:div#side-lower
-          (add-side-elements! lower path)]]))}))
+            side (data/get-app-state :app/side)]
+        (side-bar side path)))}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -88,8 +92,8 @@
              :bottom "0"
              :left "0"
              :height "100%"}}
-    (side-bar {:app/side {:side/upper '([:button :workspaces]
-                                        [:button :data]
-                                        [:hr])
-                          :side/lower '([:button :help]
-                                        [:button :logout])}})]))
+    (side-bar {:side/upper '([:button :workspaces]
+                             [:button :data]
+                             [:hr])
+               :side/lower '([:button :help]
+                             [:button :logout])} :app/foo)]))

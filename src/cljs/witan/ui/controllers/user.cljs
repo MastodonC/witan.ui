@@ -13,7 +13,7 @@
 
 (defn kill-login-screen!
   []
-  (let [login-div (.getElementById js/document "login")]
+  (when-let [login-div (.getElementById js/document "login")]
     (aset login-div "style" "visibility" "hidden")))
 
 (defn login-success!
