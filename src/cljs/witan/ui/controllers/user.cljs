@@ -23,7 +23,7 @@
     (data/app-state-swap! :app/login assoc-in [:login/token] token)
     (data/save-data!))
   (kill-login-screen!)
-  (data/connect! {:on-connect #((data/publish-topic :data/user-logged-in))}))
+  (data/connect! {:on-connect #(data/publish-topic :data/user-logged-in)}))
 
 (defn local-endpoint
   [method]
