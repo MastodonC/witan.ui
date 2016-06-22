@@ -15,8 +15,8 @@
       [:form.pure-form
        {:on-submit (fn [e]
                      (when-not pending?
-                       (controller/raise! this :workspace/create {:name (.-value (. js/document (getElementById "new-workspace-name")))
-                                                                  :desc (.-value (. js/document (getElementById "new-workspace-desc")))}))
+                       (controller/raise! :workspace/create {:name (.-value (. js/document (getElementById "new-workspace-name")))
+                                                             :desc (.-value (. js/document (getElementById "new-workspace-desc")))}))
                      (.preventDefault e))}
        [:fieldset
         [:div

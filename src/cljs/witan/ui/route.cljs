@@ -26,8 +26,7 @@
     (if route
       (let [{:keys [handler route-params]} route]
         (log/debug "Dispatching to route:" path "=>" handler)
-        (log/severe "FIX ME")
-        #_(om/transact! (data/make-reconciler) `[(change/route! {:route ~handler :route-params ~route-params})])
+        (data/transact!  'change/route! {:route handler :route-params route-params})
         (put! app-route-chan handler))
       (log/severe "Couldn't match a route to this path:" path))))
 

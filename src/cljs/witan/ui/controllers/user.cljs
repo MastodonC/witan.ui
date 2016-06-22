@@ -18,7 +18,7 @@
 
 (defn login-success!
   [owner response]
-  (data/transact! owner 'login/complete! response)
+  (data/transact! 'login/complete! response)
   (data/save-data!)
   (kill-login-screen!))
 
@@ -37,13 +37,13 @@
   [{:keys [owner]} {:keys [token] :as response}]
   (if token
     (login-success! owner response)
-    (data/transact! owner 'login/set-message! {:message :string/sign-in-failure})))
+    (data/transact! 'login/set-message! {:message :string/sign-in-failure})))
 
 (defmethod api-response
   [:login :failure]
   [{:keys [owner]} response]
   (login-success! owner response)
-  #_(data/transact! owner 'login/set-message! {:message :string/api-failure}))
+  #_(data/transact! 'login/set-message! {:message :string/api-failure}))
 
 (defn route-api-response
   [event owner]

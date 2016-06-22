@@ -4,6 +4,7 @@
             [reagent.core :as r]
             [sablono.core :as sab :include-macros true]
             ;;
+            [witan.ui.data :as data]
             [witan.ui.components.icons :as icons]
             [witan.ui.strings :refer [get-string]]
             [witan.ui.route :as route]
@@ -24,21 +25,25 @@
       id) props)))
 
 (defn navigate!
-  [route _ current-route]
+  [route current-route]
   (when-not (= route current-route)
     (route/navigate! route)))
 
 (defn get-details
   [id]
   (get
-   {:workspaces {:fnc (partial navigate! :app/workspace-dash) :tooltip :string/tooltip-workspace}
-    :data       {:fnc (partial navigate! :app/data-dash)      :tooltip :string/tooltip-data}
-    :help       {:fnc nil                                     :tooltip :string/tooltip-help}
-    :logout     {:fnc #(controller/raise! %1 :user/logout)    :tooltip :string/tooltip-logout}}
+   {:workspaces {:fnc (partial navigate! :app/workspace-dash)
+                 :tooltip :string/tooltip-workspace}
+    :data       {:fnc (partial navigate! :app/data-dash)
+                 :tooltip :string/tooltip-data}
+    :help       {:fnc nil
+                 :tooltip :string/tooltip-help}
+    :logout     {:fnc #(controller/raise! :user/logout)
+                 :tooltip :string/tooltip-logout}}
    id))
 
 (defn add-side-elements!
-  [this element-list current-route]
+  [element-list current-route]
   (for [[element-type element-key] element-list]
     [:div.side-element
      {:key element-key}
@@ -47,7 +52,7 @@
        (let [{:keys [route tooltip fnc]} (get-details element-key)]
          [:div.side-link
           {:on-click #(when fnc
-                        (fnc this current-route))
+                        (fnc current-route))
            :data-ot (get-string tooltip)
            :data-ot-style "dark"
            :data-ot-tip-joint "left"
@@ -62,15 +67,14 @@
   []
   (r/create-class
    {:reagent-render
-    (fn [this]
-      (let [{:keys [app/route app/side]} this
-            {:keys [side/upper side/lower]} side]
+    (fn []
+      (let [{:keys [route/path]} (data/get-app-state :app/route)
+            {:keys [side/upper side/lower]} (data/get-app-state :app/side)]
         [:div#side-container
          [:div#side-upper
-          (add-side-elements! this upper route)]
+          (add-side-elements! upper path)]
          [:div#side-lower
-          {:align "center"}
-          (add-side-elements! this lower route)]]))}))
+          (add-side-elements! lower path)]]))}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;

@@ -38,5 +38,5 @@
                                {:content-fn :workspace/modified   :title "Last Modified" :weight 0.2}]
                      :content workspaces
                      :selected?-fn #(= (:workspace/id %) selected-id)
-                     :on-select #(data/transact! this 'wd/select-row! {:id (:workspace/id %)})
+                     :on-select #(data/transact! 'wd/select-row! {:id (:workspace/id %)})
                      :on-double-click #(route/navigate! :app/workspace {:id (:workspace/id %)})})]]))

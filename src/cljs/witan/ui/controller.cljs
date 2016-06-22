@@ -23,7 +23,7 @@
 
 (defn raise!
   ([event]
-   (raise! owner event {}))
+   (raise! event {}))
   ([event args]
    (let [payload (merge {:event event} (when (not-empty args) {:args args}))]
      (log/debug "Raising event" event args)

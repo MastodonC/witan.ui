@@ -15,11 +15,11 @@
 (defn view
   [this]
   (let [{:keys [secondary/view-selected]
-         :or {secondary/view-selected 0}} (om/props this)]
+         :or {secondary/view-selected 0}}  this]
     [:div#primary
      [:div#switcher
       (switcher {:titles [(get-string :string/workspace-data-view)
                           (get-string :string/workspace-config-view)
                           (get-string :string/workspace-history-view)]
                  :selected-idx view-selected
-                 :on-select #(data/transact! this 'change/secondary-view! {:idx %})})]]))
+                 :on-select #(data/transact! 'change/secondary-view! {:idx %})})]]))

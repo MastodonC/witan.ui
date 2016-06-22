@@ -12,10 +12,6 @@
   (:require-macros [cljs-log.core :as log]
                    [cljs.core.async.macros :as am :refer [go-loop]]))
 
-(defn path
-  []
-  (.. js/document -location -pathname))
-
 (def route->component
   {:app/workspace-dash   workspace-dash/view
    :app/data-dash        data-dash/view
@@ -26,7 +22,8 @@
   []
   (r/create-class
    {:reagent-render
-    (fn [this]
-      (let [{:keys [app/route route/data]} this
-            active-component (get route->component route)]
+    (fn []
+      (let [{:keys [route/path]} (data/get-app-state :app/route)
+            data (data/get-app-state path)
+            active-component (get route->component path)]
         (active-component data)))}))

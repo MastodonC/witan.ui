@@ -29,4 +29,4 @@
       (switcher {:icon-0 (partial icons/topology :dark :medium)
                  :icon-1 (partial icons/visualisation :dark :medium)
                  :selected-idx view-selected
-                 :on-select #(data/transact! this 'change/primary-view! {:idx ~%})})]]))
+                 :on-select #(data/transact! 'change/primary-view! {:idx ~%})})]]))

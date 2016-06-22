@@ -1,10 +1,11 @@
 (ns witan.ui.data
   (:require ;;[datascript.core :as d]
-            [reagent.core :as r]
-            [goog.net.cookies :as cookies]
-            [goog.crypt.base64 :as b64]
-            [schema.core :as s]
-            [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all]])
+   [reagent.core :as r]
+   [goog.net.cookies :as cookies]
+   [goog.crypt.base64 :as b64]
+   [schema.core :as s]
+   [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all]]
+   [cljs.reader :as reader]   )
   (:require-macros [cljs-log.core :as log]
                    [cljs.core.async.macros :refer [go go-loop]]))
 
@@ -36,6 +37,10 @@
 (defn atomize-map
   [m]
   (reduce-kv (fn [a k v] (assoc a k (r/atom v))) {} m))
+
+(defn deatomize-map
+  [m]
+  (reduce-kv (fn [a k v] (assoc a k (deref v))) {} m))
 
 ;; app state schema
 (def AppStateSchema
@@ -78,6 +83,7 @@
                :user/groups-by-id []}
     :app/route {:route/path nil
                 :route/params nil}
+    ;; component data
     :app/workspace {:workspace/primary   {:primary/view-selected 0}
                     :workspace/secondary {:secondary/view-selected 0}}
     :app/workspace-dash {:wd/selected-id nil
@@ -92,6 +98,14 @@
   [k]
   (deref (get app-state k)))
 
+(defn app-state-swap!
+  [k & symbs]
+  (update app-state k #(apply swap! % symbs)))
+
+(defn app-state-reset!
+  [k value]
+  (update app-state k #(reset! % value)))
+
 ;; database
 #_(def conn (d/create-conn {}))
 #_(d/transact! conn [{:db/id -1
@@ -103,7 +117,10 @@
   (log/debug "Saving app state to cookie")
   (.set goog.net.cookies
         cookie-name
-        (-> @app-state pr-str b64/encodeString)
+        (-> app-state
+            deatomize-map
+            pr-str
+            b64/encodeString)
         -1
         "/"))
 
@@ -117,23 +134,21 @@
 (defn load-data!
   []
   (if-let [data (.get goog.net.cookies cookie-name)]
-    (let [unencoded (->> data b64/decodeString cljs.reader/read-string)]
-      (try (reset! app-state (s/validate AppStateSchema unencoded))
-           (log/debug "Restored app state from cookie")
-           (publish-topic :data/app-state-restored)
-           (catch js/Object e
-             (log/warn "Failed to restore app state from cookie.")
-             (delete-data!))))
+    (let [unencoded (->> data b64/decodeString reader/read-string)]
+      (try
+        (do
+          (run! (fn [[k v]] (app-state-reset! k v)) unencoded)
+          (log/debug "Restored app state from cookie")
+          (publish-topic :data/app-state-restored))
+        (catch js/Object e
+          (log/warn "Failed to restore app state from cookie:" (str e))
+          (delete-data!))))
     (log/debug "(No existing token was found.)")))
 
 (load-data!)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; writes
-
-(defn app-state-swap!
-  [k & symbs]
-  (update app-state k #(apply swap! % symbs)))
 
 (defmulti mutate
   (fn [f _] f))
@@ -145,7 +160,7 @@
 
 (defmethod mutate 'wd/select-row!
   [_ {:keys [id]}]
-  (app-state-swap :app/workspace-dash assoc-in [:wd/selected-id] id))
+  (app-state-swap! :app/workspace-dash assoc-in [:wd/selected-id] id))
 
 (defmethod mutate 'change/primary-view!
   [_ {:keys [idx]}]
