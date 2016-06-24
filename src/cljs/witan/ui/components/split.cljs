@@ -4,6 +4,7 @@
              [witan.ui.components.primary :as primary]
              [witan.ui.components.secondary :as secondary]
              [witan.ui.utils :as utils]
+             [witan.ui.data :as data]
              [witan.ui.components.icons :as icons])
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))
@@ -21,13 +22,14 @@
                  :minSize 200
                  :cursor "row-resize"})))
     :reagent-render
-    (fn [this]
-      (let [{:keys [app/route-params workspace/primary workspace/secondary]} this]
+    (fn []
+      (let [{:keys [workspace/primary workspace/secondary]}
+            (data/get-app-state :app/workspace)]
         [:div#split
          [:div#primary
-          (primary/view primary)]
+          #_(primary/view primary)]
          [:div#secondary
-          (secondary/view secondary)]
+          #_(secondary/view secondary)]
          #_[:div#loading
             [:div
              (icons/cog :x-large :spin :dark)]]]))}))

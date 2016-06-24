@@ -1,5 +1,6 @@
 (ns witan.ui.components.dashboard.workspaces
-  (:require [witan.ui.components.shared  :as shared]
+  (:require [reagent.core :as r]
+            [witan.ui.components.shared  :as shared]
             [witan.ui.components.dashboard.shared  :as shared-dash]
             [witan.ui.utils   :as utils]
             [witan.ui.data :as data]
@@ -20,23 +21,28 @@
   (route/navigate! :app/create-workspace))
 
 (defn view
-  [this]
-  (let [{:keys [wd/selected-id wd/workspaces]} this
-        icon-fn #(vector :div.text-center (icons/workspace :dark))
-        buttons (concat (when selected-id [{:id :view :icon icons/open :txt :string/view :class "workspace-view"}])
-                        [{:id :create :icon icons/plus :txt :string/create :class "workspace-create"}])]
-    [:div.dashboard
-     (shared-dash/header {:title :string/workspace-dash-title
-                          :filter-txt :string/workspace-dash-filter
-                          :filter-fn nil
-                          :buttons buttons
-                          :on-button-click (partial button-press selected-id)})
-     [:div.content
-      (shared/table {:headers [{:content-fn icon-fn               :title ""              :weight 0.03}
-                               {:content-fn :workspace/name       :title "Name"          :weight 0.57}
-                               {:content-fn :workspace/owner-name :title "Owner"         :weight 0.2}
-                               {:content-fn :workspace/modified   :title "Last Modified" :weight 0.2}]
-                     :content workspaces
-                     :selected?-fn #(= (:workspace/id %) selected-id)
-                     :on-select #(data/transact! 'wd/select-row! {:id (:workspace/id %)})
-                     :on-double-click #(route/navigate! :app/workspace {:id (:workspace/id %)})})]]))
+  []
+  (let [selected-id (r/atom nil)]
+    (fn []
+      (let [{:keys [wd/workspaces]} (data/get-app-state :app/workspace-dash)
+            selected-id' @selected-id
+            icon-fn #(vector :div.text-center (icons/workspace :dark))
+            modified-fn #(vector :div
+                                 (utils/iso-time-as-moment (:workspace/modified %)))
+            buttons (concat (when selected-id [{:id :view :icon icons/open :txt :string/view :class "workspace-view"}])
+                            [{:id :create :icon icons/plus :txt :string/create :class "workspace-create"}])]
+        [:div.dashboard
+         (shared-dash/header {:title :string/workspace-dash-title
+                              :filter-txt :string/workspace-dash-filter
+                              :filter-fn nil
+                              :buttons buttons
+                              :on-button-click (partial button-press selected-id)})
+         [:div.content
+          (shared/table {:headers [{:content-fn icon-fn               :title ""              :weight 0.03}
+                                   {:content-fn :workspace/name       :title "Name"          :weight 0.57}
+                                   {:content-fn :workspace/owner-name :title "Owner"         :weight 0.2}
+                                   {:content-fn modified-fn   :title "Last Modified" :weight 0.2}]
+                         :content workspaces
+                         :selected?-fn #(= (:workspace/id %) selected-id')
+                         :on-select #(reset! selected-id (:workspace/id %))
+                         :on-double-click #(route/navigate! :app/workspace {:id (:workspace/id %)})})]]))))

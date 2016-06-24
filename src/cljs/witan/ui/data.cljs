@@ -3,6 +3,7 @@
             [goog.net.cookies :as cookies]
             [goog.crypt.base64 :as b64]
             [schema.core :as s]
+            [witan.gateway.schema :as wgs]
             [chord.client :refer [ws-ch]]
             [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all put! close!]]
             [cljs.reader :as reader]   )
@@ -20,6 +21,7 @@
 
 (def topics
   #{:data/app-state-restored
+    :data/route-changed
     :data/user-logged-in})
 
 (defn publish-topic
@@ -65,13 +67,13 @@
    :app/route {:route/path (s/maybe s/Keyword)
                :route/params (s/maybe s/Any)}
    :app/workspace  {:workspace/primary   {:primary/view-selected s/Int}
-                    :workspace/secondary {:secondary/view-selected s/Int}}
+                    :workspace/secondary {:secondary/view-selected s/Int}
+                    :workspace/functions (s/maybe [{:function/name s/Str
+                                                    :function/id s/Uuid
+                                                    :function/version s/Str}])
+                    :workspace/current (s/maybe (get wgs/Workspace "1.0"))}
    :app/workspace-dash {:wd/selected-id (s/maybe s/Int)
-                        :wd/workspaces (s/maybe [{:workspace/name s/Str
-                                                  :workspace/id s/Int
-                                                  :workspace/owner-id s/Int
-                                                  :workspace/owner-name s/Str
-                                                  :workspace/modified s/Str}])}
+                        :wd/workspaces (s/maybe [(get wgs/Workspace "1.0")])}
    :app/data-dash (s/maybe s/Any)})
 
 ;; default app-state
@@ -92,7 +94,9 @@
                 :route/params nil}
     ;; component data
     :app/workspace {:workspace/primary   {:primary/view-selected 0}
-                    :workspace/secondary {:secondary/view-selected 0}}
+                    :workspace/secondary {:secondary/view-selected 0}
+                    :workspace/functions nil
+                    :workspace/current nil}
     :app/workspace-dash {:wd/selected-id nil
                          :wd/workspaces nil}
     :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}}
@@ -144,6 +148,7 @@
       (let [unencoded (->> data b64/decodeString reader/read-string)]
         (try
           (do
+            (s/validate AppStateSchema unencoded)
             (run! (fn [[k v]] (app-state-reset! k v)) unencoded)
             (log/debug "Restored app state from cookie")
             (publish-topic :data/app-state-restored))
@@ -152,8 +157,6 @@
             (delete-data!)))))
     (log/debug "(No existing token was found.)")))
 
-(load-data!)
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Websocket
 
@@ -161,6 +164,23 @@
 (defonce message-id (atom 0))
 (defonce events (atom []))
 (def query-responses (atom {}))
+(def query-buffer (atom []))
+
+(defn- send-query
+  [m]
+  (log/debug "Sending query:" m)
+  (go (>! @ws-conn m)))
+
+(defn- buffer-query
+  [m]
+  (log/debug "Buffering query:" m)
+  (swap! query-buffer conj m))
+
+(defn- drain-buffered-queries
+  []
+  (log/debug "Draining buffered queries")
+  (run! send-query @query-buffer)
+  (reset! query-buffer []))
 
 (defn query
   [query cb]
@@ -169,9 +189,10 @@
           m {:message/type :query
              :query/id id
              :query/edn query}]
-      (log/debug "Sending query:" m)
       (swap! query-responses assoc id cb)
-      (go (>! @ws-conn m)))
+      (if @ws-conn
+        (send-query m)
+        (buffer-query m)))
     (throw (js/Error. "Query needs to be a vector"))))
 
 (defn command!
@@ -192,7 +213,7 @@
 (defmethod handle-server-message
   :default
   [msg]
-  (println "Unknown message:" msg))
+  (log/warn "Unknown message:" msg))
 
 (defmethod handle-server-message
   :command-receipt
@@ -201,9 +222,15 @@
 (defmethod handle-server-message
   :query-response
   [{:keys [query/id query/results]}]
-  (doseq [{:keys [query/result]} results]
-    (log/debug "TODO got query result in data")
-    #_(run! (fn [[k r]] (receive-data! k r)) result)))
+  (if-let [cb (get @query-responses id)]
+    (doseq [{:keys [query/result query/error] :as qr} results]
+      (if result
+        (do
+          (log/debug "Query response:" (first result))
+          (cb (first result)))
+        (log/severe "Error in query response:" qr)))
+    (log/warn "Received query response id [" id "] but couldn't match callback."))
+  (swap! query-responses dissoc id))
 
 (defmethod handle-server-message
   :event
@@ -223,12 +250,15 @@
         (do
           (reset! ws-conn ws-channel)
           (on-connect)
+          (drain-buffered-queries)
           (go-loop []
             (let [{:keys [message]} (<! ws-channel)]
               (if message
-                (do
-                  (handle-server-message message)
-                  (recur))
+                (if-let [err (wgs/check-message "1.0" message)]
+                  (log/severe "Message failed validation:" err)
+                  (do
+                    (handle-server-message message)
+                    (recur)))
                 (log/warn "Websocket connection lost")))))
         (js/console.log "Error:" (pr-str error))))))
 
@@ -241,7 +271,8 @@
 (defmethod mutate 'change/route!
   [_ {:keys [route route-params]}]
   (app-state-swap! :app/route assoc-in [:route/path]   route)
-  (app-state-swap! :app/route assoc-in [:route/params] route-params))
+  (app-state-swap! :app/route assoc-in [:route/params] route-params)
+  (publish-topic :data/route-changed (get-app-state :app/route)))
 
 (defmethod mutate 'change/primary-view!
   [_ {:keys [idx]}]

@@ -20,6 +20,8 @@
              ^:prefix {:user-select :none}
              [:.pure-table.pure-table-horizontal
               {:width (percent 100)}]
+             [:#loading
+              {:margin-top (em 2)}]
              [:th
               {:color colour/table-header-text
                :font-weight :normal

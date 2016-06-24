@@ -35,20 +35,24 @@
         (let [percent (str (* 100 weight) "%")]
           [:th {:key title
                 :style {:width percent}} title]))]]]
-   [:table.pure-table.pure-table-horizontal
-    [:tbody
-     (for [row content]
-       [:tr
-        {:key (apply str content)}
-        {:class (when (and selected?-fn (selected?-fn row)) "selected")}
-        (for [{:keys [content-fn title weight]} headers]
-          (let [percent (str (* 100 weight) "%")]
-            [:td {:style {:width percent}
-                  :on-click (fn [e] (when on-select
-                                      (on-select row)))
-                  :on-double-click (fn [e] (when on-double-click
-                                             (on-double-click row)))}
-             (when content-fn (content-fn row))]))])]]])
+   (if-not content
+     [:div#loading.text-center (icons/loading :large)]
+     [:table.pure-table.pure-table-horizontal
+      [:tbody
+       (for [row content]
+         [:tr
+          {:key (apply str row)
+           :class (when (and selected?-fn (selected?-fn row)) "selected")}
+          (for [{:keys [content-fn title weight]} headers]
+            (let [percent (str (* 100 weight) "%")]
+              [:td {:style {:width percent}
+                    :key (apply str row title)
+
+                    :on-click (fn [e] (when on-select
+                                        (on-select row)))
+                    :on-double-click (fn [e] (when on-double-click
+                                               (on-double-click row)))}
+               (when content-fn (content-fn row))]))])]])])
 
 (defn header
   ([title]

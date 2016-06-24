@@ -24,6 +24,6 @@
    {:reagent-render
     (fn []
       (let [{:keys [route/path]} (data/get-app-state :app/route)
-            data (data/get-app-state path)
             active-component (get route->component path)]
-        (active-component data)))}))
+        (log/debug "Active component is" path)
+        [active-component]))}))

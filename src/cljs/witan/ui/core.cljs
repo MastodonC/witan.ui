@@ -17,6 +17,7 @@
 (when-let [node (gdom/getElement "app")]
   (defonce init
     (do
+      (data/load-data!)
       (accountant/configure-navigation! {:nav-handler route/dispatch-path!
                                          :path-exists? route/path-exists?})
       (route/dispatch-path! (path))))

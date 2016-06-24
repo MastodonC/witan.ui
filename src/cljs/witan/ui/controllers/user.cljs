@@ -14,7 +14,8 @@
 (defn kill-login-screen!
   []
   (when-let [login-div (.getElementById js/document "login")]
-    (aset login-div "style" "visibility" "hidden")))
+    (aset login-div "style" "visibility" "hidden")
+    (.unmountComponentAtNode js/ReactDOM login-div)))
 
 (defn login-success!
   [{:keys [id token] :as response}]
