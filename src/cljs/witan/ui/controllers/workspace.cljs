@@ -1,9 +1,17 @@
 (ns witan.ui.controllers.workspace
   (:require [schema.core :as s]
             [witan.ui.data :as data]
-            [witan.gateway.schema :as wgs])
+            [witan.gateway.schema :as wgs]
+            [witan.ui.utils :as utils]
+            [cljs-time.core :as t]
+            [witan.ui.route :as route])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
+
+(defn get-current-workspace
+  []
+  (:workspace/current (data/get-app-state :app/workspace)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Schema
@@ -21,17 +29,23 @@
 (defmethod on-receive
   :workspaces/list-by-owner
   [[_ workspaces]]
-  (data/app-state-swap! :app/workspace-dash assoc-in [:wd/workspaces] workspaces))
+  (data/swap-app-state! :app/workspace-dash assoc-in [:wd/workspaces] workspaces))
 
 (defmethod on-receive
   :workspaces/function-list
   [[_ functions]]
-  (data/app-state-swap! :app/workspace assoc-in [:workspace/functions] functions))
+  (data/swap-app-state! :app/workspace assoc-in [:workspace/functions] functions))
 
 (defmethod on-receive
   :workspaces/by-id
-  [[_ selected]]
-  (data/app-state-swap! :app/workspace assoc-in [:workspace/current] selected))
+  [[_ returned]]
+  (let [current (get-current-workspace)
+        current' (if (:workspace/id current)
+                   (reduce-kv (fn [a k v] (if v (assoc a k v) a)) current returned)
+                   returned)
+        current' (if (:workspace/id current') current' nil)]
+    (data/swap-app-state! :app/workspace assoc :workspace/current current')
+    (data/swap-app-state! :app/workspace assoc :workspace/pending? false)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; On Route Change
@@ -40,8 +54,15 @@
   (fn [{:keys [args]}] (:route/path args)))
 
 (defmethod on-route-change
+  :default [_])
+
+(defmethod on-route-change
   :app/workspace-dash
   [_]
+  ;; reset current
+  (data/swap-app-state! :app/workspace assoc :workspace/pending? true)
+  (data/swap-app-state! :app/workspace assoc :workspace/current nil)
+
   (data/query '[{:workspaces/function-list
                  [:function/name
                   :function/id
@@ -50,7 +71,6 @@
                  [:workspace/name
                   :workspace/id
                   :workspace/owner-name
-                  :workspace/owner-id
                   :workspace/modified]}]
               on-receive))
 
@@ -73,7 +93,19 @@
 ;; Handlers
 
 (defmulti handle
-  (fn [event owner args] event))
+  (fn [event args] event))
 
 (defmethod handle :create
-  [event owner {:keys [name desc]}])
+  [event {:keys [name desc]}]
+  (let [{:keys [login/id]} (data/get-app-state :app/login)
+        w-id (random-uuid)
+        wsp {:workspace/name name
+             :workspace/id w-id
+             :workspace/description desc
+             :workspace/owner-id id
+             :workspace/owner-name "Me" ;; TODO
+             :workspace/modified (t/now)}]
+    (data/swap-app-state! :app/workspace-dash update-in [:wd/workspaces] #(conj % wsp))
+    (data/swap-app-state! :app/workspace assoc :workspace/current wsp)
+    (data/swap-app-state! :app/workspace assoc :workspace/pending? false)
+    (route/navigate! :app/workspace {:id w-id})))

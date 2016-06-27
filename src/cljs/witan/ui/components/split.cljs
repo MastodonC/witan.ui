@@ -23,16 +23,11 @@
                  :cursor "row-resize"})))
     :reagent-render
     (fn []
-      (let [{:keys [workspace/primary workspace/secondary]}
-            (data/get-app-state :app/workspace)]
-        [:div#split
-         [:div#primary
-          #_(primary/view primary)]
-         [:div#secondary
-          #_(secondary/view secondary)]
-         #_[:div#loading
-            [:div
-             (icons/cog :x-large :spin :dark)]]]))}))
+      [:div#split
+       [:div#primary
+        [primary/view]]
+       [:div#secondary
+        [secondary/view]]])}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS

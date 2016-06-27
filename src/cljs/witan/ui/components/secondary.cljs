@@ -1,11 +1,16 @@
 (ns witan.ui.components.secondary
-  (:require [witan.ui.strings :refer [get-string]]
-            [witan.ui.data :as data]))
+  (:require [reagent.core :as r]
+            [witan.ui.strings :refer [get-string]]
+            [witan.ui.data :as data]
+            [witan.ui.utils :as utils]
+            [witan.ui.route :as route]
+            [witan.ui.components.icons :as icons]))
 
 (defn switcher
   [{:keys [titles selected-idx on-select]}]
   [:div.secondary-switcher
    (for [[idx title] (map-indexed vector titles)]
+     ^{:key idx}
      [:button.pure-button
       {:style {:width (str (/ 100 (count titles)) "%")}
        :class (when (= selected-idx idx) "selected")
@@ -13,13 +18,17 @@
       title])])
 
 (defn view
-  [this]
-  (let [{:keys [secondary/view-selected]
-         :or {secondary/view-selected 0}}  this]
-    [:div#primary
-     [:div#switcher
-      (switcher {:titles [(get-string :string/workspace-data-view)
-                          (get-string :string/workspace-config-view)
-                          (get-string :string/workspace-history-view)]
-                 :selected-idx view-selected
-                 :on-select #(data/transact! 'change/secondary-view! {:idx %})})]]))
+  []
+  (let [query-param :s
+        subview-idx (r/atom (or (utils/query-param-int query-param 0 2) 0))]
+    (fn []
+      [:div
+       [:div#switcher
+        (switcher {:titles [(get-string :string/workspace-data-view)
+                            (get-string :string/workspace-config-view)
+                            (get-string :string/workspace-history-view)]
+                   :selected-idx @subview-idx
+                   :on-select #(do
+                                 (route/swap-query-string!
+                                  (fn [m] (assoc m query-param %)))
+                                 (reset! subview-idx %))})]])))

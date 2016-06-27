@@ -15,10 +15,10 @@
 (defonce event-chan (chan))
 
 (go-loop []
-  (let [{:keys [owner event args]} (<! event-chan)
+  (let [{:keys [event args]} (<! event-chan)
         handler (event->handler event)
         un-ns-event (-> event name keyword)]
-    (handler un-ns-event owner args))
+    (handler un-ns-event args))
   (recur))
 
 (defn raise!

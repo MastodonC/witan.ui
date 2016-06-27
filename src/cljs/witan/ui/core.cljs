@@ -10,17 +10,13 @@
             [witan.ui.route            :as route])
   (:require-macros [cljs-log.core :as log]))
 
-(defn path
-  []
-  (.. js/document -location -pathname))
-
 (when-let [node (gdom/getElement "app")]
   (defonce init
     (do
       (data/load-data!)
       (accountant/configure-navigation! {:nav-handler route/dispatch-path!
                                          :path-exists? route/path-exists?})
-      (route/dispatch-path! (path))))
+      (route/dispatch-path! (route/path))))
   (r/render [app/root-view] node))
 
 (when-let [node (gdom/getElement "side")]

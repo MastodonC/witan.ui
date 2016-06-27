@@ -65,13 +65,13 @@
    :app/user {:user/name (s/maybe s/Str)
               :user/groups-by-id [s/Int]}
    :app/route {:route/path (s/maybe s/Keyword)
-               :route/params (s/maybe s/Any)}
-   :app/workspace  {:workspace/primary   {:primary/view-selected s/Int}
-                    :workspace/secondary {:secondary/view-selected s/Int}
-                    :workspace/functions (s/maybe [{:function/name s/Str
+               :route/params (s/maybe s/Any)
+               :route/query (s/maybe {s/Keyword s/Any})}
+   :app/workspace  {:workspace/functions (s/maybe [{:function/name s/Str
                                                     :function/id s/Uuid
                                                     :function/version s/Str}])
-                    :workspace/current (s/maybe (get wgs/Workspace "1.0"))}
+                    :workspace/current (s/maybe (get wgs/Workspace "1.0"))
+                    :workspace/pending? s/Bool}
    :app/workspace-dash {:wd/selected-id (s/maybe s/Int)
                         :wd/workspaces (s/maybe [(get wgs/Workspace "1.0")])}
    :app/data-dash (s/maybe s/Any)})
@@ -91,12 +91,12 @@
     :app/user {:user/name nil
                :user/groups-by-id []}
     :app/route {:route/path nil
-                :route/params nil}
+                :route/params nil
+                :route/query nil}
     ;; component data
-    :app/workspace {:workspace/primary   {:primary/view-selected 0}
-                    :workspace/secondary {:secondary/view-selected 0}
-                    :workspace/functions nil
-                    :workspace/current nil}
+    :app/workspace {:workspace/functions nil
+                    :workspace/current nil
+                    :workspace/pending? true}
     :app/workspace-dash {:wd/selected-id nil
                          :wd/workspaces nil}
     :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}}
@@ -107,11 +107,11 @@
   [k]
   (deref (get app-state k)))
 
-(defn app-state-swap!
+(defn swap-app-state!
   [k & symbs]
   (update app-state k #(apply swap! % symbs)))
 
-(defn app-state-reset!
+(defn reset-app-state!
   [k value]
   (update app-state k #(reset! % value)))
 
@@ -120,6 +120,10 @@
 
 (def cookie-name "_data_")
 (defonce wants-to-load? (atom true))
+
+(defn custom-resets!
+  []
+  (swap-app-state! :app/workspace assoc :workspace/pending? true))
 
 (defn save-data!
   []
@@ -149,7 +153,8 @@
         (try
           (do
             (s/validate AppStateSchema unencoded)
-            (run! (fn [[k v]] (app-state-reset! k v)) unencoded)
+            (run! (fn [[k v]] (reset-app-state! k v)) unencoded)
+            (custom-resets!)
             (log/debug "Restored app state from cookie")
             (publish-topic :data/app-state-restored))
           (catch js/Object e
@@ -178,9 +183,10 @@
 
 (defn- drain-buffered-queries
   []
-  (log/debug "Draining buffered queries")
-  (run! send-query @query-buffer)
-  (reset! query-buffer []))
+  (when-not (empty? @query-buffer)
+    (log/debug "Draining buffered queries")
+    (run! send-query @query-buffer)
+    (reset! query-buffer [])))
 
 (defn query
   [query cb]
@@ -268,40 +274,18 @@
 (defmulti mutate
   (fn [f _] f))
 
-(defmethod mutate 'change/route!
-  [_ {:keys [route route-params]}]
-  (app-state-swap! :app/route assoc-in [:route/path]   route)
-  (app-state-swap! :app/route assoc-in [:route/params] route-params)
-  (publish-topic :data/route-changed (get-app-state :app/route)))
-
-(defmethod mutate 'change/primary-view!
-  [_ {:keys [idx]}]
-  (app-state-swap! :app/workspace assoc-in [:workspace/primary :primary/view-selected] idx))
-
-(defmethod mutate 'change/secondary-view!
-  [_ {:keys [idx]}]
-  (app-state-swap! :app/workspace assoc-in [:workspace/secondary :secondary/view-selected] idx))
-
 ;;;;;;;;;;;;;;;;;;;;;;;
 ;; login state changes
 
 (defmethod mutate 'login/goto-phase!
   [_ {:keys [phase]}]
   (log/debug "Remove me!!")
-  (app-state-swap! :app/login assoc-in [:login/phase] phase))
+  (swap-app-state! :app/login assoc-in [:login/phase] phase))
 
 (defmethod mutate 'login/set-message!
   [_ {:keys [message]}]
   (log/debug "Remove me!!")
-  (app-state-swap! :app/login assoc-in [:login/message] message))
-
-;;;;;;;;;;;;;;;;;;;;;;;
-;; workspace dash changes
-
-(defmethod mutate 'wd/select-row!
-  [_ {:keys [id]}]
-  (log/debug "Remove me!!")
-  (app-state-swap! :app/workspace-dash assoc-in [:wd/selected-id] id))
+  (swap-app-state! :app/login assoc-in [:login/message] message))
 
 ;;;;
 

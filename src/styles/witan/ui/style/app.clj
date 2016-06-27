@@ -55,7 +55,7 @@
                 :height pc100
                 :background-color colour/body-bg
                 :position :absolute
-                :top (px 0)
+                :top (em 2)
                 :display :table
                 :text-align :center}
                [:div
