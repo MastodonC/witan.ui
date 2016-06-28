@@ -31,4 +31,9 @@
                    :on-select #(do
                                  (route/swap-query-string!
                                   (fn [m] (assoc m query-param %)))
-                                 (reset! subview-idx %))})]])))
+                                 (reset! subview-idx %))})]
+       [:div#secondary-content
+        (condp = @subview-idx
+          0 [:div "One"]
+          1 [:div "Two"]
+          2 [:div "Three"])]])))

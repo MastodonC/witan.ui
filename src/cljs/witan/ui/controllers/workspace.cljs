@@ -4,6 +4,7 @@
             [witan.gateway.schema :as wgs]
             [witan.ui.utils :as utils]
             [cljs-time.core :as t]
+            [cljs-time.format :as tf]
             [witan.ui.route :as route])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
@@ -11,6 +12,10 @@
 (defn get-current-workspace
   []
   (:workspace/current (data/get-app-state :app/workspace)))
+
+(defn ->transport
+  [m]
+  (update m :workspace/modified #(tf/unparse (tf/formatters :basic-date-time) %)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -45,7 +50,9 @@
                    returned)
         current' (if (:workspace/id current') current' nil)]
     (data/swap-app-state! :app/workspace assoc :workspace/current current')
-    (data/swap-app-state! :app/workspace assoc :workspace/pending? false)))
+    (data/swap-app-state! :app/workspace assoc :workspace/pending? false)
+    (when (and current' (not= current' returned))
+      (data/command! :workspace/save "1.0" {:workspace/to-save (->transport current')}))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; On Route Change

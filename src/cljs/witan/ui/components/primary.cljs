@@ -6,7 +6,8 @@
             [witan.ui.utils :as utils]
             [witan.ui.route :as route]
             [witan.ui.strings :refer [get-string]]
-            [witan.ui.components.icons :as icons])
+            [witan.ui.components.icons :as icons]
+            [witan.ui.components.primary.topology :as topology])
   (:require-macros
    [cljs-log.core :as log]))
 
@@ -34,10 +35,10 @@
       (let [wsp (data/get-app-state :app/workspace)
             pending? (:workspace/pending? wsp)]
         (if pending?
-          [:div
+          [:div#container
            [:div#loading (icons/loading :large)]]
           (if-let [current (:workspace/current wsp)]
-            [:div
+            [:div#container
              [:div#overlay
               (switcher {:icon-0 (partial icons/topology :dark :medium)
                          :icon-1 (partial icons/visualisation :dark :medium)
@@ -45,7 +46,11 @@
                          :on-select #(do
                                        (route/swap-query-string!
                                         (fn [m] (assoc m query-param %)))
-                                       (reset! subview-idx %))})]]
+                                       (reset! subview-idx %))})]
+             [:div#primary-content
+              (condp = @subview-idx
+                0 (topology/view current)
+                1 [:div "????"])]]
             [:div#loading
              (icons/error :large :dark)
              [:h1 (get-string :string/error)]

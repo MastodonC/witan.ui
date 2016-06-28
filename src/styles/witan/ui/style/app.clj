@@ -64,7 +64,14 @@
 
              [:#primary
               [:#overlay
-               {:margin (px 8)}]]]
+               {:margin (px 8)
+                :position :absolute
+                :top (px 0)}]
+              [:div#container
+               {:width pc100
+                :height pc100}]
+              [:#primary-content
+               {}]]]
 
             [:.primary-switcher
              {:height (px (+ (* switcher-padding 2) switcher-icon-dx))

@@ -22,8 +22,10 @@
                  [cljs-ajax "0.5.3"]
                  [prismatic/schema "1.1.2"]
                  [witan.gateway.schema "0.1.0-SNAPSHOT"]
-                 [cljsjs/moment "2.10.6-4"]
-                 [com.cemerick/url "0.1.1"]]
+                 [com.cemerick/url "0.1.1"]
+                 ;;
+                 [cljsjs/dialog-polyfill "0.4.3-0"]
+                 [cljsjs/moment "2.10.6-4"]]
 
   :plugins [[lein-figwheel "0.5.4-3" :exclusions [org.clojure/tools.reader]]
             [lein-cljsbuild "1.1.2" :exclusions [[org.clojure/clojure]]]

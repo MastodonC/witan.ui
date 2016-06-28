@@ -260,11 +260,13 @@
           (go-loop []
             (let [{:keys [message]} (<! ws-channel)]
               (if message
-                (if-let [err (wgs/check-message "1.0" message)]
-                  (log/severe "Message failed validation:" err)
-                  (do
-                    (handle-server-message message)
-                    (recur)))
+                (if (contains? message :error)
+                  (log/severe "Received message error:" message)
+                  (if-let [err (wgs/check-message "1.0" message)]
+                    (log/severe "Received message failed validation:" @err)
+                    (do
+                      (handle-server-message message)
+                      (recur))))
                 (log/warn "Websocket connection lost")))))
         (js/console.log "Error:" (pr-str error))))))
 

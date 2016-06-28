@@ -10,6 +10,7 @@
             [witan.ui.style.app        :as app]
             [witan.ui.style.dashboard  :as dashboard]
             [witan.ui.style.shared     :as shared]
+            [witan.ui.style.components.topology :as topology]
             ;;
             [witan.ui.ext-style.splitjs :as splitjs]))
 
@@ -24,6 +25,7 @@
     app/style
     dashboard/style
     shared/style
+    topology/style
     ;;
     splitjs/style]
    ;;

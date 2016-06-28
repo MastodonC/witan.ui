@@ -87,6 +87,10 @@
   [& args]
   (apply create-key "error" args))
 
+(defn clipboard
+  [& args]
+  (apply create-key "content_paste" args))
+
 ;;
 
 (defn loading
@@ -124,7 +128,9 @@
                     ["visualisation" visualisation]
                     ["person"        person]
                     ["plus"          plus]
-                    ["open"          open]]]
+                    ["open"          open]
+                    ["error"         error]
+                    ["clipboard"     clipboard]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div

@@ -42,7 +42,6 @@
 (def lol-color-6 "#F3A86C")
 (def lol-color-7 "#429491")
 
-
 ;;
 (def error   color-complement-0)
 (def warning color-secondary-2-0)
@@ -93,3 +92,9 @@
 
 ;; login
 (def login-subtitles "#777")
+
+;; topology
+(def topology-right-bar-bg lol-color-2)
+
+;; dialog
+(def dialog-bg lol-color-3)
