@@ -25,5 +25,4 @@
     (fn []
       (let [{:keys [route/path]} (data/get-app-state :app/route)
             active-component (get route->component path)]
-        (log/debug "Active component is" path)
         [active-component]))}))

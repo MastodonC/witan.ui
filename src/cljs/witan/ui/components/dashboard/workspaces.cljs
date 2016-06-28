@@ -26,7 +26,7 @@
     (fn []
       (let [{:keys [wd/workspaces]} (data/get-app-state :app/workspace-dash)
             selected-id' @selected-id
-            icon-fn #(vector :div.text-center (icons/workspace :dark))
+            icon-fn #(vector :div.text-center (icons/workspace (if (:workspace/local %) :error :dark)))
             modified-fn #(vector :div
                                  (utils/iso-time-as-moment (:workspace/modified %)))
             buttons (concat (when selected-id [{:id :view :icon icons/open :txt :string/view :class "workspace-view"}])

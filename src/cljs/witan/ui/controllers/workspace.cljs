@@ -13,10 +13,17 @@
   []
   (:workspace/current (data/get-app-state :app/workspace)))
 
+(defn get-workspaces
+  []
+  (:wd/workspaces (data/get-app-state :app/workspace-dash)))
+
 (defn ->transport
   [m]
   (update m :workspace/modified #(tf/unparse (tf/formatters :basic-date-time) %)))
 
+(defn find-workspace-by-id
+  [coll id]
+  (some #(when (= id (:workspace/id %)) %) coll))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Schema
@@ -34,7 +41,18 @@
 (defmethod on-receive
   :workspaces/list-by-owner
   [[_ workspaces]]
-  (data/swap-app-state! :app/workspace-dash assoc-in [:wd/workspaces] workspaces))
+  ;; TODO this needs to be way more intelligent, and use modified time stamps to
+  ;; select most recent version. We don't want to accidentally overwrite local
+  ;; changes.
+  (let [existing-workspaces (get-workspaces)
+        local-only (->> existing-workspaces
+                        (remove #(find-workspace-by-id workspaces (:workspace/id %)))
+                        (map #(assoc % :workspace/local true)))
+        all  (concat (->> workspaces
+                          (map #(assoc % :workspace/local false)))
+                     local-only)
+        all' (sort-by :workspace/name all)]
+    (data/swap-app-state! :app/workspace-dash assoc-in [:wd/workspaces] all')))
 
 (defmethod on-receive
   :workspaces/function-list
@@ -45,10 +63,16 @@
   :workspaces/by-id
   [[_ returned]]
   (let [current (get-current-workspace)
+        ;; merge the returned version into a local version
         current' (if (:workspace/id current)
-                   (reduce-kv (fn [a k v] (if v (assoc a k v) a)) current returned)
+                   (reduce-kv (fn [a k v] (if v (assoc a k v) a)) current returned) ;; TODO this merging is too crude
                    returned)
-        current' (if (:workspace/id current') current' nil)]
+        ;; if we're still null, find one from local cache
+        current' (if (:workspace/id current') current'
+                     (find-workspace-by-id
+                      (get-workspaces)
+                      (uuid (:id (:route/params (data/get-app-state :app/route))))))]
+    (log/info (if current' (str "Loading workspace: " current') (str "No workspace found.")))
     (data/swap-app-state! :app/workspace assoc :workspace/current current')
     (data/swap-app-state! :app/workspace assoc :workspace/pending? false)
     (when (and current' (not= current' returned))
@@ -94,7 +118,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subscriptions
 
-(data/subscribe-topic :data/route-changed on-route-change)
+(defonce subscriptions
+  (do (data/subscribe-topic :data/route-changed on-route-change)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Handlers

@@ -15,6 +15,8 @@
     {:font-size (px 54)}]
    [:.material-icons.md-xl
     {:font-size (px 72)}]
+   [:.material-icons.md-error
+    {:color error}]
    [:.material-icons.md-dark
     {:color icon-colour}]
    [:.material-icons.md-dark.md-inactive

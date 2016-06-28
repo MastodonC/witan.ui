@@ -6,8 +6,7 @@
 
 (defn iso-time-as-moment
   [time]
-  (log/debug "T:" time)
-  (.calendar (js/moment. time "YYYYMMDD HHmmss")))
+  (.calendar (js/moment. (str time) "YYYYMMDD HHmmss")))
 
 (defn query-param
   [k]

@@ -1,10 +1,12 @@
 (ns witan.ui.components.icons
   (:require [sablono.core :as sab :include-macros true])
   (:require-macros
-   [devcards.core :as dc :refer [defcard]]))
+   [devcards.core :as dc :refer [defcard]]
+   [cljs-log.core :as log]))
 
 (defn decode-keys [& args]
-  (let [lookup {:dark "md-dark"
+  (let [lookup {:error "md-error"
+                :dark "md-dark"
                 :light "md-light"
                 :disabled "md-inactive"
                 :small "md-s"
