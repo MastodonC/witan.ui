@@ -41,7 +41,7 @@
           (shared/table {:headers [{:content-fn icon-fn               :title ""              :weight 0.03}
                                    {:content-fn :workspace/name       :title "Name"          :weight 0.57}
                                    {:content-fn :workspace/owner-name :title "Owner"         :weight 0.2}
-                                   {:content-fn modified-fn   :title "Last Modified" :weight 0.2}]
+                                   {:content-fn modified-fn           :title "Last Modified" :weight 0.2}]
                          :content workspaces
                          :selected?-fn #(= (:workspace/id %) selected-id')
                          :on-select #(reset! selected-id (:workspace/id %))

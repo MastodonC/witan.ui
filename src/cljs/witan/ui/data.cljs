@@ -57,13 +57,10 @@
 (def AppStateSchema
   {:app/side {:side/upper [[s/Keyword]]
               :side/lower [[s/Keyword]]}
-   :app/login {:login/phase s/Keyword
-               :login/success? s/Bool
-               :login/token (s/maybe s/Str)
-               :login/id (s/maybe s/Str)
+   :app/login {:login/token (s/maybe s/Str)
                :login/message (s/maybe s/Str)}
    :app/user {:user/name (s/maybe s/Str)
-              :user/groups-by-id [s/Int]}
+              :user/id (s/maybe s/Uuid)}
    :app/route {:route/path (s/maybe s/Keyword)
                :route/params (s/maybe s/Any)
                :route/query (s/maybe {s/Keyword s/Any})}
@@ -72,8 +69,7 @@
                                                     :function/version s/Str}])
                     :workspace/current (s/maybe (get wgs/Workspace "1.0"))
                     :workspace/pending? s/Bool}
-   :app/workspace-dash {:wd/selected-id (s/maybe s/Int)
-                        :wd/workspaces (s/maybe [(get wgs/Workspace "1.0")])}
+   :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/Workspace "1.0")])}
    :app/data-dash (s/maybe s/Any)})
 
 ;; default app-state
@@ -83,13 +79,10 @@
                             [:button :data]]
                :side/lower [[:button :help]
                             [:button :logout]]}
-    :app/login {:login/phase :prompt
-                :login/success? false
-                :login/token nil
-                :login/id nil
+    :app/login {:login/token nil
                 :login/message nil}
     :app/user {:user/name nil
-               :user/groups-by-id []}
+               :user/id nil}
     :app/route {:route/path nil
                 :route/params nil
                 :route/query nil}
@@ -97,8 +90,7 @@
     :app/workspace {:workspace/functions nil
                     :workspace/current nil
                     :workspace/pending? true}
-    :app/workspace-dash {:wd/selected-id nil
-                         :wd/workspaces nil}
+    :app/workspace-dash {:wd/workspaces nil}
     :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}}
    (s/validate AppStateSchema)
    (atomize-map)))
@@ -127,7 +119,7 @@
 
 (defn save-data!
   []
-  (log/debug "Saving app state to cookie")
+  (log/info "Saving app state to cookie")
   (.set goog.net.cookies
         cookie-name
         (-> app-state
@@ -139,7 +131,7 @@
 
 (defn delete-data!
   []
-  (log/debug "Deleting contents of cookie")
+  (log/info "Deleting contents of cookie")
   (.remove goog.net.cookies
            cookie-name
            "/"))
@@ -155,7 +147,7 @@
             (s/validate AppStateSchema unencoded)
             (run! (fn [[k v]] (reset-app-state! k v)) unencoded)
             (custom-resets!)
-            (log/debug "Restored app state from cookie")
+            (log/info "Restored app state from cookie")
             (publish-topic :data/app-state-restored))
           (catch js/Object e
             (log/warn "Failed to restore app state from cookie:" (str e))
@@ -283,11 +275,6 @@
   [_ {:keys [phase]}]
   (log/debug "Remove me!!")
   (swap-app-state! :app/login assoc-in [:login/phase] phase))
-
-(defmethod mutate 'login/set-message!
-  [_ {:keys [message]}]
-  (log/debug "Remove me!!")
-  (swap-app-state! :app/login assoc-in [:login/message] message))
 
 ;;;;
 

@@ -9,6 +9,8 @@
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
+(def dash-query-pending? (atom false))
+
 (defn get-current-workspace
   []
   (:workspace/current (data/get-app-state :app/workspace)))
@@ -19,11 +21,28 @@
 
 (defn ->transport
   [m]
-  (update m :workspace/modified #(tf/unparse (tf/formatters :basic-date-time) %)))
+  (-> m
+      #_(update :workspace/modified utils/jstime->str)
+      (dissoc :workspace/local)))
 
 (defn find-workspace-by-id
   [coll id]
   (some #(when (= id (:workspace/id %)) %) coll))
+
+(defn send-dashboard-query!
+  [id on-receive]
+  (when-not @dash-query-pending?
+    (reset! dash-query-pending? true)
+    #_{:workspaces/function-list
+       [:function/name
+        :function/id
+        :function/version]}
+    (data/query `[{(:workspaces/list-by-owner ~id)
+                   [:workspace/name
+                    :workspace/id
+                    :workspace/owner-name
+                    :workspace/modified]}]
+                on-receive)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Schema
@@ -52,7 +71,8 @@
                           (map #(assoc % :workspace/local false)))
                      local-only)
         all' (sort-by :workspace/name all)]
-    (data/swap-app-state! :app/workspace-dash assoc-in [:wd/workspaces] all')))
+    (data/swap-app-state! :app/workspace-dash assoc-in [:wd/workspaces] all'))
+  (reset! dash-query-pending? false))
 
 (defmethod on-receive
   :workspaces/function-list
@@ -79,31 +99,14 @@
       (data/command! :workspace/save "1.0" {:workspace/to-save (->transport current')}))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; On Route Change
+;; Subscriptions
+
 
 (defmulti on-route-change
   (fn [{:keys [args]}] (:route/path args)))
 
 (defmethod on-route-change
   :default [_])
-
-(defmethod on-route-change
-  :app/workspace-dash
-  [_]
-  ;; reset current
-  (data/swap-app-state! :app/workspace assoc :workspace/pending? true)
-  (data/swap-app-state! :app/workspace assoc :workspace/current nil)
-
-  (data/query '[{:workspaces/function-list
-                 [:function/name
-                  :function/id
-                  :function/version]}
-                {(:workspaces/list-by-owner "*")
-                 [:workspace/name
-                  :workspace/id
-                  :workspace/owner-name
-                  :workspace/modified]}]
-              on-receive))
 
 (defmethod on-route-change
   :app/workspace
@@ -115,11 +118,25 @@
                              (vec))]
     (data/query `[{(:workspaces/by-id ~workspace-id) ~workspace-fields}] on-receive)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Subscriptions
+(defmethod on-route-change
+  :app/workspace-dash
+  [_]
+  ;; reset current
+  (data/swap-app-state! :app/workspace assoc :workspace/pending? true)
+  (data/swap-app-state! :app/workspace assoc :workspace/current nil)
+  (if-let [id (:user/id (data/get-app-state :app/user))]
+    (send-dashboard-query! id on-receive)))
+
+(defn on-user-logged-in
+  [{:keys [args]}]
+  (let [{:keys [user/id]} args
+        {:keys [route/path]} (data/get-app-state :app/route)]
+    (when (= path :app/workspace-dash)
+      (send-dashboard-query! id on-receive))))
 
 (defonce subscriptions
-  (do (data/subscribe-topic :data/route-changed on-route-change)))
+  (do (data/subscribe-topic :data/route-changed on-route-change)
+      (data/subscribe-topic :data/user-logged-in on-user-logged-in)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Handlers
@@ -129,14 +146,16 @@
 
 (defmethod handle :create
   [event {:keys [name desc]}]
-  (let [{:keys [login/id]} (data/get-app-state :app/login)
+  (let [{:keys [user/id]} (data/get-app-state :app/user)
         w-id (random-uuid)
-        wsp {:workspace/name name
-             :workspace/id w-id
-             :workspace/description desc
-             :workspace/owner-id id
-             :workspace/owner-name "Me" ;; TODO
-             :workspace/modified (t/now)}]
+        wsp (wgs/validate-workspace
+             "1.0"
+             {:workspace/name name
+              :workspace/id w-id
+              :workspace/description desc
+              :workspace/owner-id id
+              :workspace/owner-name "Me" ;; TODO
+              :workspace/modified (utils/jstime->str (t/now))})]
     (data/swap-app-state! :app/workspace-dash update-in [:wd/workspaces] #(conj % wsp))
     (data/swap-app-state! :app/workspace assoc :workspace/current wsp)
     (data/swap-app-state! :app/workspace assoc :workspace/pending? false)

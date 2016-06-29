@@ -6,7 +6,7 @@
                    [witan.ui.env :as env :refer [cljs-env]]))
 
 (def Login
-  {:username s/Str
+  {:username (s/constrained s/Str #(> (count %) 5))
    :password (s/constrained s/Str #(> (count %) 7))})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -20,16 +20,12 @@
 (defn login-success!
   [{:keys [id token] :as response}]
   (when response
-    (data/swap-app-state! :app/login assoc-in [:login/id] id)
-    (data/swap-app-state! :app/login assoc-in [:login/token] token)
+    (data/swap-app-state! :app/user assoc  :user/id (uuid id))
+    (data/swap-app-state! :app/login assoc :login/token token)
+    (data/swap-app-state! :app/login assoc :login/message nil)
     (data/save-data!))
   (kill-login-screen!)
-  (data/connect! {:on-connect #(data/publish-topic :data/user-logged-in)}))
-
-(defn local-endpoint
-  [method]
-  (let [api-url (cljs-env :witan-api-url)] ;; 'nil' is a valid api-url (will default to current hostname)
-    (str api-url "/api" method)))
+  (data/connect! {:on-connect #(data/publish-topic :data/user-logged-in (data/get-app-state :app/user))}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -41,13 +37,12 @@
   [_ {:keys [token] :as response}]
   (if token
     (login-success! response)
-    (data/transact! 'login/set-message! {:message :string/sign-in-failure})))
+    (data/swap-app-state! :app/login assoc :login/message :string/sign-in-failure)))
 
 (defmethod api-response
   [:login :failure]
   [_ response]
-  (login-success! response)
-  #_(data/transact! 'login/set-message! {:message :string/api-failure}))
+  (data/swap-app-state! :app/login assoc :login/message :string/api-failure))
 
 (defn route-api-response
   [event]
@@ -62,7 +57,7 @@
 (defmethod handle :login
   [event {:keys [email pass]}]
   (let [args {:username email :password pass}]
-    (POST (local-endpoint "/login")
+    (POST (str "http://" (:gateway/address data/config) "/login")
           {:id event
            :params (s/validate Login args)
            :result-cb (route-api-response event)})))
@@ -74,4 +69,4 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(data/subscribe-topic :data/app-state-restored login-success!)
+(data/subscribe-topic :data/app-state-restored #(login-success! nil))
