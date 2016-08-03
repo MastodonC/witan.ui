@@ -58,6 +58,11 @@
   (fn [[k v]] k))
 
 (defmethod on-receive
+  :error
+  [[_ error-query]]
+  (log/debug "Workspace controller acknowledges error:" error-query))
+
+(defmethod on-receive
   :workspaces/list-by-owner
   [[_ workspaces]]
   ;; TODO this needs to be way more intelligent, and use modified time stamps to
@@ -75,7 +80,7 @@
   (reset! dash-query-pending? false))
 
 (defmethod on-receive
-  :workspaces/function-list
+  :workspaces/available-functions
   [[_ functions]]
   (data/swap-app-state! :app/workspace assoc-in [:workspace/functions] functions))
 
@@ -97,6 +102,11 @@
     (data/swap-app-state! :app/workspace assoc :workspace/pending? false)
     (when (and current' (not= current' returned))
       (data/command! :workspace/save "1.0" {:workspace/to-save (->transport current')}))))
+
+(defmethod on-receive
+  :workspaces/available-models
+  [[_ models]]
+  (data/swap-app-state! :app/workspace assoc-in [:workspace/model-list] (map :metadata models)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subscriptions
@@ -160,3 +170,8 @@
     (data/swap-app-state! :app/workspace assoc :workspace/current wsp)
     (data/swap-app-state! :app/workspace assoc :workspace/pending? false)
     (route/navigate! :app/workspace {:id w-id})))
+
+(defmethod handle :fetch-models
+  [_]
+  (log/debug "Fetching models....")
+  (data/query [{:workspaces/available-models [:metadata]}] on-receive))

@@ -33,7 +33,8 @@
         subview-idx (r/atom (or (utils/query-param-int query-param 0 1) 0))]
     (fn []
       (let [wsp (data/get-app-state :app/workspace)
-            pending? (:workspace/pending? wsp)]
+            pending? (:workspace/pending? wsp)
+            model-list (not-empty (:workspace/model-list wsp))]
         (if pending?
           [:div#container
            [:div#loading (icons/loading :large)]]
@@ -49,7 +50,7 @@
                                        (reset! subview-idx %))})]
              [:div#primary-content
               (condp = @subview-idx
-                0 (topology/view current)
+                0 (topology/view current model-list)
                 1 [:div "????"])]]
             [:div#loading
              (icons/error :large :dark)

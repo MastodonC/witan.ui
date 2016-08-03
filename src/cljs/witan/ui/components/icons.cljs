@@ -93,6 +93,10 @@
   [& args]
   (apply create-key "content_paste" args))
 
+(defn close
+  [& args]
+  (apply create-key "close" args))
+
 ;;
 
 (defn loading
@@ -132,7 +136,8 @@
                     ["plus"          plus]
                     ["open"          open]
                     ["error"         error]
-                    ["clipboard"     clipboard]]]
+                    ["clipboard"     clipboard]
+                    ["close"         close]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div

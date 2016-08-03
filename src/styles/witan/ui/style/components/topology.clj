@@ -4,6 +4,7 @@
             [witan.ui.style.values :as values]))
 
 (def style [[:#primary-content
+
              [:#topology
               [:#heading
                {:margin-left (px 96)}
@@ -19,8 +20,20 @@
                 :border-radius (px 3)}]
               [:#add-model-dialog
                {:background-color colour/dialog-bg
-                :border-radius (em 1.2)
+                :border-radius (em 1)
                 :border 0
-                :box-shadow [[(px 2) (px 2) (px 40) colour/box-shadow]]
+                :box-shadow [[(px 2) (px 2) (px 20) colour/box-shadow]]
                 :width (percent 70)
-                :height (percent 70)}]]]])
+                :height (percent 70)
+                :position :relative}]]
+             [:.modal-container
+              {:position :absolute
+               :top (px 4)
+               :right (px 6)
+               :left (px 20)}]
+
+             [:.modal-close-button
+              {:cursor :pointer
+               :position :absolute
+               :right (px 0)
+               :top (px 0)}]]])

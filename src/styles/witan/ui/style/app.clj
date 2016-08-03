@@ -60,7 +60,14 @@
                 :text-align :center}
                [:div
                 {:display :table-cell
-                 :vertical-align :middle}]]]
+                 :vertical-align :middle}]]
+              [:#loading-modal
+               {:width pc100
+                :height pc100
+                :position :absolute
+                :top (em 4)
+                :display :table
+                :text-align :center}]]
 
              [:#primary
               [:#overlay

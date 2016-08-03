@@ -6,7 +6,9 @@
             [witan.gateway.schema :as wgs]
             [chord.client :refer [ws-ch]]
             [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all put! close!]]
-            [cljs.reader :as reader]   )
+            [cljs.reader :as reader]
+            [cognitect.transit :as tr]
+            [outpace.schema-transit :as st])
   (:require-macros [cljs-log.core :as log]
                    [cljs.core.async.macros :refer [go go-loop]]
                    [witan.ui.env :as env :refer [cljs-env]]))
@@ -64,9 +66,7 @@
    :app/route {:route/path (s/maybe s/Keyword)
                :route/params (s/maybe s/Any)
                :route/query (s/maybe {s/Keyword s/Any})}
-   :app/workspace  {:workspace/functions (s/maybe [{:function/name s/Str
-                                                    :function/id s/Uuid
-                                                    :function/version s/Str}])
+   :app/workspace  {:workspace/model-list (s/maybe [{s/Keyword s/Any}])
                     :workspace/current (s/maybe (get wgs/Workspace "1.0"))
                     :workspace/pending? s/Bool}
    :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/Workspace "1.0")])}
@@ -87,7 +87,7 @@
                 :route/params nil
                 :route/query nil}
     ;; component data
-    :app/workspace {:workspace/functions nil
+    :app/workspace {:workspace/model-list nil
                     :workspace/current nil
                     :workspace/pending? true}
     :app/workspace-dash {:wd/workspaces nil}
@@ -203,6 +203,13 @@
     (log/debug "Sending command:" m)
     (go (>! @ws-conn m))))
 
+(def transit-reader
+  (tr/reader :json-verbose {:handlers st/cross-platform-read-handlers}))
+
+(defn transit-decode
+  [s]
+  (tr/read transit-reader s))
+
 ;;
 
 (defmulti handle-server-message
@@ -223,10 +230,12 @@
   (if-let [cb (get @query-responses id)]
     (doseq [{:keys [query/result query/error] :as qr} results]
       (if result
+        (let [decoded-result (first (transit-decode result))]
+          (log/debug "Query response:" decoded-result)
+          (cb decoded-result))
         (do
-          (log/debug "Query response:" (first result))
-          (cb (first result)))
-        (log/severe "Error in query response:" qr)))
+          (log/severe "Error in query response:" qr)
+          (cb [:error (first (:query/original qr))]))))
     (log/warn "Received query response id [" id "] but couldn't match callback."))
   (swap! query-responses dissoc id))
 

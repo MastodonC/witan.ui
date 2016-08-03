@@ -130,7 +130,8 @@
    :string/workspace-404-error            "Unable to find a workspace at this address."
    :string/workspace-empty                "This workspace is empty!"
    :string/workspace-empty-prompt         "Click 'Add Model' to begin."
-   :string/workspace-add-model            "Add Model"})
+   :string/workspace-add-model            "Add Model"
+   :string/select-a-model                 "Please select a model:"})
 
 (defn get-string
   ""
