@@ -76,7 +76,8 @@
                 :top (px 0)}]
               [:div#container
                {:width pc100
-                :height pc100}]
+                :height pc100
+                :overflow :auto}]
               [:#primary-content
                {}]]]
 

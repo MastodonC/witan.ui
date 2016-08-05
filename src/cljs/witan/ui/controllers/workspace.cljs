@@ -52,6 +52,17 @@
    (s/optional-key :description) s/Str})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Event
+
+(defmulti on-event
+  (fn [{:keys [args]}] (:event/key args)))
+
+(defmethod on-event
+  :workspace/saved
+  [{event :args}]
+  (log/debug "Workspace" (get-in event [:event/params :workspace/id]) "was saved."))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query Response
 
 (defmulti on-receive
@@ -106,7 +117,21 @@
 (defmethod on-receive
   :workspaces/available-models
   [[_ models]]
-  (data/swap-app-state! :app/workspace assoc-in [:workspace/model-list] (map :metadata models)))
+  (data/swap-app-state! :app/workspace assoc :workspace/model-list models))
+
+(defmethod on-receive
+  :workspaces/model-by-name-and-version
+  [[_ {:keys [workflow catalog metadata]}]]
+  (let [{:keys [witan/name witan/version]} metadata
+        ml (:workspace/model-list (data/get-app-state :app/workspace))
+        ml' (map (fn [{:keys [metadata] :as model}]
+                   (if (and (= (:witan/name metadata) name)
+                            (= (:witan/version metadata) version))
+                     (assoc model
+                            :workflow workflow
+                            :catalog catalog)
+                     model)) ml)]
+    (data/swap-app-state! :app/workspace assoc :workspace/model-list ml')))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subscriptions
@@ -122,10 +147,10 @@
   :app/workspace
   [{:keys [args]}]
   (let [workspace-id (cljs.core/uuid (get-in args [:route/params :id]))
-        workspace-fields (-> wgs/Workspace
-                             (get "1.0")
-                             (keys)
-                             (vec))]
+        workspace-fields (vec
+                          (filter keyword? (-> wgs/WorkspaceMessage
+                                               (get "1.0")
+                                               (keys))))]
     (data/query `[{(:workspaces/by-id ~workspace-id) ~workspace-fields}] on-receive)))
 
 (defmethod on-route-change
@@ -146,7 +171,8 @@
 
 (defonce subscriptions
   (do (data/subscribe-topic :data/route-changed on-route-change)
-      (data/subscribe-topic :data/user-logged-in on-user-logged-in)))
+      (data/subscribe-topic :data/user-logged-in on-user-logged-in)
+      (data/subscribe-topic :data/event-received on-event)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Handlers
@@ -172,6 +198,14 @@
     (route/navigate! :app/workspace {:id w-id})))
 
 (defmethod handle :fetch-models
-  [_]
+  [_ _]
   (log/debug "Fetching models....")
   (data/query [{:workspaces/available-models [:metadata]}] on-receive))
+
+(defmethod handle :select-model
+  [_ {:keys [name version]}]
+  (log/debug "Fetching model" name version)
+  (data/query `[{(:workspaces/model-by-name-and-version ~name ~version)
+                 [:workflow :catalog :metadata]}]
+              #(do (println "FOOO FOOOOO") (on-receive %)
+                   (println (data/get-app-state :app/workspace)))))

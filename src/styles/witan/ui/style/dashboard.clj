@@ -45,17 +45,8 @@
                :justify-content :center
                :height (percent 100)
                :padding-right (px 10)}
-              [:.button-container
-               {:align-self :center}
-               [:.material-icons
-                {:vertical-align :middle}]
-               [:button
-                {:margin-left (em 0.5)
-                 :box-shadow [[(px 2) (px 2) (px 4) colour/box-shadow]]}
-                [:i
-                 {:margin [[(px -3) (px 5) (px 0) (px 0)]]}]]
-               [:.workspace-create
-                {:background-color colour/button-create
-                 :color colour/body-bg}]
-               [:.workspace-view
-                {:background-color colour/button-view}]]]]])
+              [:.workspace-create
+               {:background-color colour/button-create
+                :color colour/body-bg}]
+              [:.workspace-view
+               {:background-color colour/button-view}]]]])

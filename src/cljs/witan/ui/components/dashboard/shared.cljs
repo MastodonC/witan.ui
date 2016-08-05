@@ -13,14 +13,8 @@
    [:h1 (get-string title)]
    (shared/search-filter (get-string filter-txt) filter-fn)
    [:div.buttons
-    (for [{:keys [icon txt class id]} buttons]
-      [:div.button-container
-       {:key id}
-       [:button.pure-button
-        {:class class
-         :on-click #(when on-button-click (on-button-click id))}
-        (icon :small)
-        (get-string txt)]])]])
+    (for [button buttons]
+      (shared/button button on-button-click))]])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS

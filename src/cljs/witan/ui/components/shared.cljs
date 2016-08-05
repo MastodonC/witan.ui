@@ -63,6 +63,18 @@
     (when subtitle
       [:h2 (get-string subtitle)])]))
 
+(defn button
+  [{:keys [icon txt class id]} on-button-click]
+  [:div.button-container
+   {:key id}
+   [:button.pure-button
+    {:class class
+     :on-click #(when on-button-click (on-button-click id))}
+    (icon :small)
+    (if (keyword? txt)
+      (get-string txt)
+      txt)]])
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

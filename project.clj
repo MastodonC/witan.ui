@@ -23,7 +23,7 @@
                  [prismatic/schema "1.1.2"]
                  [com.cognitect/transit-cljs "0.8.239"]
                  [com.outpace/schema-transit "0.2.3"]
-                 [witan.gateway.schema "0.1.0-SNAPSHOT"]
+                 [witan.gateway.schema "0.1.1-SNAPSHOT"]
                  [com.cemerick/url "0.1.1"]
                  ;;
                  [cljsjs/dialog-polyfill "0.4.3-0"]

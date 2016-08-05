@@ -66,5 +66,17 @@
 
             ;;;;;;;;;;;;;;
 
+            [:.button-container
+             {:align-self :center}
+             [:.material-icons
+              {:vertical-align :middle}]
+             [:button
+              {:margin-left (em 0.5)
+               :box-shadow [[(px 2) (px 2) (px 4) colour/box-shadow]]}
+              [:i
+               {:margin [[(px -3) (px 5) (px 0) (px 0)]]}]]]
+
+            ;;;;;;;;;;;;;;
+
             [:.error
              {:color colour/error}]])

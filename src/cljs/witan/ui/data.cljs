@@ -16,35 +16,6 @@
 (def config {:gateway/address (or (cljs-env :witan-api-url) "localhost:30015")})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; PubSub
-
-(def publisher (chan))
-(def publication (pub publisher #(:topic %)))
-
-(def topics
-  #{:data/app-state-restored
-    :data/route-changed
-    :data/user-logged-in})
-
-(defn publish-topic
-  ([topic]
-   (publish-topic topic {}))
-  ([topic args]
-   (if (contains? topics topic)
-     (let [payload (merge {:topic topic} (when (not-empty args) {:args args}))]
-       (go (>! publisher (merge {:topic topic} (when (not-empty args) {:args args}))))
-       (log/debug "Publishing topic:" payload))
-     (log/severe "Couldn't publish topic" topic "because it's not on the whitelist."))))
-
-(defn subscribe-topic
-  [topic cb]
-  (let [subscriber (chan)
-        _ (sub publication topic subscriber)]
-    (go-loop []
-      (cb (<! subscriber))
-      (recur))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; App State
 
 (defn atomize-map
@@ -67,10 +38,11 @@
                :route/params (s/maybe s/Any)
                :route/query (s/maybe {s/Keyword s/Any})}
    :app/workspace  {:workspace/model-list (s/maybe [{s/Keyword s/Any}])
-                    :workspace/current (s/maybe (get wgs/Workspace "1.0"))
+                    :workspace/current (s/maybe (get wgs/WorkspaceMessage "1.0"))
                     :workspace/pending? s/Bool}
-   :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/Workspace "1.0")])}
-   :app/data-dash (s/maybe s/Any)})
+   :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/WorkspaceMessage "1.0")])}
+   :app/data-dash (s/maybe s/Any)
+   :app/panic-message (s/maybe s/Str)})
 
 ;; default app-state
 (defonce app-state
@@ -91,7 +63,8 @@
                     :workspace/current nil
                     :workspace/pending? true}
     :app/workspace-dash {:wd/workspaces nil}
-    :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}}
+    :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}
+    :app/panic-message nil}
    (s/validate AppStateSchema)
    (atomize-map)))
 
@@ -108,6 +81,44 @@
   (update app-state k #(reset! % value)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Panic
+
+(defn panic!
+  [msg]
+  (log/severe "App has panicked:" msg)
+  (reset-app-state! :app/panic-message msg))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; PubSub
+
+(def publisher (chan))
+(def publication (pub publisher #(:topic %)))
+
+(def topics
+  #{:data/app-state-restored
+    :data/route-changed
+    :data/user-logged-in
+    :data/event-received})
+
+(defn publish-topic
+  ([topic]
+   (publish-topic topic {}))
+  ([topic args]
+   (if (contains? topics topic)
+     (let [payload (merge {:topic topic} (when (not-empty args) {:args args}))]
+       (go (>! publisher (merge {:topic topic} (when (not-empty args) {:args args}))))
+       (log/debug "Publishing topic:" payload))
+     (log/severe "Couldn't publish topic" topic "because it's not on the whitelist."))))
+
+(defn subscribe-topic
+  [topic cb]
+  (let [subscriber (chan)
+        _ (sub publication topic subscriber)]
+    (go-loop []
+      (cb (<! subscriber))
+      (recur))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Cookies
 
 (def cookie-name "_data_")
@@ -115,7 +126,8 @@
 
 (defn custom-resets!
   []
-  (swap-app-state! :app/workspace assoc :workspace/pending? true))
+  (swap-app-state! :app/workspace assoc :workspace/pending? true)
+  (reset-app-state! :app/panic-message nil))
 
 (defn save-data!
   []
@@ -195,10 +207,11 @@
 
 (defn command!
   [command-key version params]
-  (let [m {:message/type :command
+  (let [id (swap! message-id inc)
+        m {:message/type :command
            :command/key command-key
            :command/version version
-           :command/id (swap! message-id inc)
+           :command/id id
            :command/params params}]
     (log/debug "Sending command:" m)
     (go (>! @ws-conn m))))
@@ -234,7 +247,7 @@
           (log/debug "Query response:" decoded-result)
           (cb decoded-result))
         (do
-          (log/severe "Error in query response:" qr)
+          (panic! (str "Error in query response: " qr))
           (cb [:error (first (:query/original qr))]))))
     (log/warn "Received query response id [" id "] but couldn't match callback."))
   (swap! query-responses dissoc id))
@@ -242,8 +255,7 @@
 (defmethod handle-server-message
   :event
   [event]
-  (println "Got event" event)
-  (swap! events conj event))
+  (publish-topic :data/event-received event))
 
 ;;
 
@@ -259,17 +271,17 @@
           (on-connect)
           (drain-buffered-queries)
           (go-loop []
-            (let [{:keys [message]} (<! ws-channel)]
+            (let [{:keys [message] :as resp} (<! ws-channel)]
               (if message
                 (if (contains? message :error)
-                  (log/severe "Received message error:" message)
+                  (panic! (str "Received message error: " message))
                   (if-let [err (wgs/check-message "1.0" message)]
-                    (log/severe "Received message failed validation:" @err)
+                    (panic! (str "Received message failed validation: " (str err)))
                     (do
                       (handle-server-message message)
                       (recur))))
-                (log/warn "Websocket connection lost")))))
-        (js/console.log "Error:" (pr-str error))))))
+                (log/warn "Websocket connection lost" resp)))))
+        (panic! (str "WS connection error: " (pr-str error)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Data Mutations - we should remove as many of these are possible

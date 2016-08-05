@@ -36,7 +36,7 @@
                               :filter-txt :string/workspace-dash-filter
                               :filter-fn nil
                               :buttons buttons
-                              :on-button-click (partial button-press selected-id)})
+                              :on-button-click (partial button-press (str selected-id'))})
          [:div.content
           (shared/table {:headers [{:content-fn icon-fn               :title ""              :weight 0.03}
                                    {:content-fn :workspace/name       :title "Name"          :weight 0.57}

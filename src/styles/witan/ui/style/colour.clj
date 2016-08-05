@@ -98,3 +98,7 @@
 
 ;; dialog
 (def dialog-bg lol-color-3)
+
+;; panic
+(def panic-bg lol-color-2)
+(def panic-header-text lol-color-4)

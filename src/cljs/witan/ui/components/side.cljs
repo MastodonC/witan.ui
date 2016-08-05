@@ -43,7 +43,7 @@
    id))
 
 (defn add-side-elements!
-  [element-list current-route]
+  [element-list current-route disabled?]
   (for [[element-type element-key] element-list]
     [:div.side-element
      {:key element-key}
@@ -59,26 +59,29 @@
            :data-ot-fixed true
            :data-ot-target true
            :data-ot-delay 0.5
-           :data-ot-contain-in-viewport false}
+           :data-ot-contain-in-viewport false
+           ;;
+           :style {:pointer-events (if disabled? "none" "auto")}}
           (get-icon element-key)])
        :hr [:hr])]))
 
 (defn side-bar
-  [{:keys [side/upper side/lower]} path]
+  [{:keys [side/upper side/lower]} path disabled?]
   [:div#side-container
    [:div#side-upper
-    (add-side-elements! upper path)]
+    (add-side-elements! upper path disabled?)]
    [:div#side-lower
-    (add-side-elements! lower path)]])
+    (add-side-elements! lower path disabled?)]])
 
 (defn root-view
   []
   (r/create-class
    {:reagent-render
     (fn []
-      (let [{:keys [route/path]} (data/get-app-state :app/route)
+      (let [panic-message (data/get-app-state :app/panic-message)
+            {:keys [route/path]} (data/get-app-state :app/route)
             side (data/get-app-state :app/side)]
-        (side-bar side path)))}))
+        (side-bar side path panic-message)))}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;

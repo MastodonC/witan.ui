@@ -6,6 +6,7 @@
             [witan.ui.components.dashboard.data :as data-dash]
             [witan.ui.components.split :as split]
             [witan.ui.components.create-workspace :as createws]
+            [witan.ui.components.panic :refer [panic-screen]]
             [witan.ui.utils :as utils]
             [witan.ui.data :as data]
             [witan.ui.route :as route])
@@ -23,6 +24,8 @@
   (r/create-class
    {:reagent-render
     (fn []
-      (let [{:keys [route/path]} (data/get-app-state :app/route)
-            active-component (get route->component path)]
-        [active-component]))}))
+      (let [panic-message (data/get-app-state :app/panic-message)
+            {:keys [route/path]} (data/get-app-state :app/route)]
+        (if-not panic-message
+          [(get route->component path)]
+          (panic-screen panic-message))))}))

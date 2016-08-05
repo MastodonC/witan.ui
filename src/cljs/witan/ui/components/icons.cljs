@@ -97,6 +97,14 @@
   [& args]
   (apply create-key "close" args))
 
+(defn grain
+  [& args]
+  (apply create-key "grain" args))
+
+(defn cake
+  [& args]
+  (apply create-key "cake" args))
+
 ;;
 
 (defn loading
@@ -137,7 +145,9 @@
                     ["open"          open]
                     ["error"         error]
                     ["clipboard"     clipboard]
-                    ["close"         close]]]
+                    ["close"         close]
+                    ["grain"         grain ]
+                    ["cake"          cake]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div
