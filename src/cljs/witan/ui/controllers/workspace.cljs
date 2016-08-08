@@ -207,5 +207,11 @@
   (log/debug "Fetching model" name version)
   (data/query `[{(:workspaces/model-by-name-and-version ~name ~version)
                  [:workflow :catalog :metadata]}]
-              #(do (println "FOOO FOOOOO") (on-receive %)
-                   (println (data/get-app-state :app/workspace)))))
+              #(let [[_ {:keys [workflow catalog]}] %]
+                 (on-receive %)
+                 (data/swap-app-state!
+                  :app/workspace assoc-in [:workspace/current :workspace/workflow]
+                  workflow)
+                 (data/swap-app-state!
+                  :app/workspace assoc-in [:workspace/current :workspace/catalog]
+                  catalog))))

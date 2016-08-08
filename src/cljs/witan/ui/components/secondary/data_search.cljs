@@ -1,4 +1,4 @@
-(ns witan.ui.components.secondary-data-search
+(ns witan.ui.components.secondary.data-search
   (:require [cljs.test :refer-macros [is async]]
             [sablono.core :as sab :include-macros true])
   (:require-macros

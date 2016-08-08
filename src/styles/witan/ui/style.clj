@@ -12,6 +12,9 @@
             [witan.ui.style.shared     :as shared]
             [witan.ui.style.panic      :as panic]
             [witan.ui.style.components.topology :as topology]
+            [witan.ui.style.components.data-select :as data-select]
+            [witan.ui.style.components.configuration :as configuration]
+
             ;;
             [witan.ui.ext-style.splitjs :as splitjs]))
 
@@ -28,6 +31,8 @@
     shared/style
     panic/style
     topology/style
+    data-select/style
+    configuration/style
     ;;
     splitjs/style]
    ;;

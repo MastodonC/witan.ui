@@ -99,4 +99,4 @@
                              [:button :data]
                              [:hr])
                :side/lower '([:button :help]
-                             [:button :logout])} :app/foo)]))
+                             [:button :logout])} :app/foo false)]))

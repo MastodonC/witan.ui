@@ -118,7 +118,7 @@
    :string/workspace-dash-filter          "Filter your workspaces"
    :string/data-dash-filter               "Filter your data sets"
    :string/workspace-data-view            "Data"
-   :string/workspace-config-view          "Settings"
+   :string/workspace-config-view          "Configuration"
    :string/workspace-history-view         "History"
    :string/create-workspace-title         "Create a new workspace"
    :string/create-workspace-subtitle      "A workspace contains models and visualisations, configured how you want them"
@@ -130,7 +130,9 @@
    :string/workspace-404-error            "Unable to find a workspace at this address."
    :string/workspace-empty                "This workspace is empty!"
    :string/workspace-add-model            "Add Model"
-   :string/workspace-select-a-model       "Please start by selecting a model:"})
+   :string/workspace-select-a-model       "Please start by selecting a model:"
+   :string/data-empty-catalog             "No data inputs required."
+   :string/config-empty-catalog           "No configuration required."})
 
 (defn get-string
   ""

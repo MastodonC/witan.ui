@@ -5,6 +5,7 @@
 (def pc100 (percent 100))
 (def switcher-padding 3)
 (def switcher-icon-dx 32)
+(def switcher-height 28)
 
 (def style [[:#app
              {:background-color colour/body-bg}
@@ -79,6 +80,15 @@
                 :height pc100
                 :overflow :auto}]
               [:#primary-content
+               {}]]
+
+             [:#secondary
+              [:div#container
+               {:top (px (+ 6 switcher-height))
+                :overflow :auto
+                :position :absolute
+                :bottom (px 0)}]
+              [:#secondary-content
                {}]]]
 
             [:.primary-switcher
@@ -116,6 +126,7 @@
             [:.secondary-switcher
              [:button
               {:border-radius 0
+               :height (px switcher-height)
                :background-color colour/switcher-bg
                :margin 0
                :border-left [[(px 1) 'solid colour/side-bg]]

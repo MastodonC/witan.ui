@@ -75,22 +75,26 @@
   (fn [{:keys [workspace/name workspace/workflow]} model-list]
     [:div#topology
      #_(add-model-dialog model-list)
+     [:div#right-bar
+      [:div.buttons
+       [:button.pure-button
+        {:on-click #()}
+        (icons/cog :small)
+        "Run"]]]
      [:div#heading
       [:h1 name]]
-     #_[:div#right-bar
-        [:div.buttons
-         [:button.pure-button
-          {:on-click show-add-model-dialog}
-          (icons/plus :small)
-          (get-string :string/workspace-add-model)]]]
-     (when-not workflow
+     (if-not workflow
        [:div#content.text-center
         (icons/clipboard :large :dark)
         [:h2 (get-string :string/workspace-empty)]
         [:hr
          {:style {:margin "0% 20%"}}]
         [:h3 (get-string :string/workspace-select-a-model)]
-        (add-model-widget (map :metadata model-list))])]))
+        (add-model-widget (map :metadata model-list))]
+       [:div#content.text-center
+        (for [edge workflow]
+          ^{:key (str edge)}
+          [:div (str edge)])])]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Devcards
