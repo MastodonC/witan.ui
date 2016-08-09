@@ -33,11 +33,11 @@
   [id on-receive]
   (when-not @dash-query-pending?
     (reset! dash-query-pending? true)
-    #_{:workspaces/function-list
+    #_{:workspace/function-list
        [:function/name
         :function/id
         :function/version]}
-    (data/query `[{(:workspaces/list-by-owner ~id)
+    (data/query `[{(:workspace/list-by-owner ~id)
                    [:workspace/name
                     :workspace/id
                     :workspace/owner-name
@@ -74,7 +74,7 @@
   (log/debug "Workspace controller acknowledges error:" error-query))
 
 (defmethod on-receive
-  :workspaces/list-by-owner
+  :workspace/list-by-owner
   [[_ workspaces]]
   ;; TODO this needs to be way more intelligent, and use modified time stamps to
   ;; select most recent version. We don't want to accidentally overwrite local
@@ -91,12 +91,12 @@
   (reset! dash-query-pending? false))
 
 (defmethod on-receive
-  :workspaces/available-functions
+  :workspace/available-functions
   [[_ functions]]
   (data/swap-app-state! :app/workspace assoc-in [:workspace/functions] functions))
 
 (defmethod on-receive
-  :workspaces/by-id
+  :workspace/by-id
   [[_ returned]]
   (let [current (get-current-workspace)
         ;; merge the returned version into a local version
@@ -112,15 +112,15 @@
     (data/swap-app-state! :app/workspace assoc :workspace/current current')
     (data/swap-app-state! :app/workspace assoc :workspace/pending? false)
     (when (and current' (not= current' returned))
-      (data/command! :workspace/save "1.0" {:workspace/to-save (->transport current')}))))
+      (data/command! :workspace/save "1.0.0" {:workspace/to-save (->transport current')}))))
 
 (defmethod on-receive
-  :workspaces/available-models
+  :workspace/available-models
   [[_ models]]
   (data/swap-app-state! :app/workspace assoc :workspace/model-list models))
 
 (defmethod on-receive
-  :workspaces/model-by-name-and-version
+  :workspace/model-by-name-and-version
   [[_ {:keys [workflow catalog metadata]}]]
   (let [{:keys [witan/name witan/version]} metadata
         ml (:workspace/model-list (data/get-app-state :app/workspace))
@@ -151,7 +151,7 @@
                           (filter keyword? (-> wgs/WorkspaceMessage
                                                (get "1.0")
                                                (keys))))]
-    (data/query `[{(:workspaces/by-id ~workspace-id) ~workspace-fields}] on-receive)))
+    (data/query `[{(:workspace/by-id ~workspace-id) ~workspace-fields}] on-receive)))
 
 (defmethod on-route-change
   :app/workspace-dash
@@ -200,12 +200,12 @@
 (defmethod handle :fetch-models
   [_ _]
   (log/debug "Fetching models....")
-  (data/query [{:workspaces/available-models [:metadata]}] on-receive))
+  (data/query [{:workspace/available-models [:metadata]}] on-receive))
 
 (defmethod handle :select-model
   [_ {:keys [name version]}]
   (log/debug "Fetching model" name version)
-  (data/query `[{(:workspaces/model-by-name-and-version ~name ~version)
+  (data/query `[{(:workspace/model-by-name-and-version ~name ~version)
                  [:workflow :catalog :metadata]}]
               #(let [[_ {:keys [workflow catalog]}] %]
                  (on-receive %)
@@ -215,3 +215,10 @@
                  (data/swap-app-state!
                   :app/workspace assoc-in [:workspace/current :workspace/catalog]
                   catalog))))
+
+(defmethod handle :run-current
+  [_ _]
+  (let [current (:workspace/current (data/get-app-state :app/workspace))]
+    (log/info "Running model" (:workspace/id current))
+    (data/swap-app-state! :app/workspace assoc :workspace/running? true)
+    (data/command! :workspace/run "1.0.0" {:workspace/to-run current})))

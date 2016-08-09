@@ -39,6 +39,7 @@
                :route/query (s/maybe {s/Keyword s/Any})}
    :app/workspace  {:workspace/model-list (s/maybe [{s/Keyword s/Any}])
                     :workspace/current (s/maybe (get wgs/WorkspaceMessage "1.0"))
+                    :workspace/running? s/Bool
                     :workspace/pending? s/Bool}
    :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/WorkspaceMessage "1.0")])}
    :app/data-dash (s/maybe s/Any)
@@ -61,6 +62,7 @@
     ;; component data
     :app/workspace {:workspace/model-list nil
                     :workspace/current nil
+                    :workspace/running? false
                     :workspace/pending? true}
     :app/workspace-dash {:wd/workspaces nil}
     :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}

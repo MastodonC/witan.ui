@@ -78,9 +78,9 @@
      [:div#right-bar
       [:div.buttons
        [:button.pure-button
-        {:on-click #()}
+        {:on-click #(controller/raise! :workspace/run-current)}
         (icons/cog :small)
-        "Run"]]]
+        (get-string :string/run)]]]
      [:div#heading
       [:h1 name]]
      (if-not workflow

@@ -25,9 +25,7 @@
   (let [query-param :s
         subview-idx (r/atom (or (utils/query-param-int query-param 0 2) 0))]
     (fn []
-      [:div
-       {:style {:height "100%"
-                :position "relative"}}
+      [:div#outer-container
        [:div#switcher
         (switcher {:titles [(get-string :string/workspace-data-view)
                             (get-string :string/workspace-config-view)

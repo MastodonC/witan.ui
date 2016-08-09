@@ -132,7 +132,8 @@
    :string/workspace-add-model            "Add Model"
    :string/workspace-select-a-model       "Please start by selecting a model:"
    :string/data-empty-catalog             "No data inputs required."
-   :string/config-empty-catalog           "No configuration required."})
+   :string/config-empty-catalog           "No configuration required."
+   :string/run                            "Run"})
 
 (defn get-string
   ""

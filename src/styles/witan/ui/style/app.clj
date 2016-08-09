@@ -83,6 +83,9 @@
                {}]]
 
              [:#secondary
+              [:div#outer-container
+               {:height (percent 100)
+                :position :relative}]
               [:div#container
                {:top (px (+ 6 switcher-height))
                 :overflow :auto
