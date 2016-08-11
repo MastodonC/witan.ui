@@ -1,6 +1,7 @@
 (ns witan.ui.components.secondary.data-select
   (:require [cljs.test :refer-macros [is async]]
             [sablono.core :as sab :include-macros true]
+            [witan.ui.controller :as controller]
             [witan.ui.data :as data]
             [witan.ui.strings :refer [get-string]])
   (:require-macros
@@ -27,7 +28,11 @@
               {:key (str "input-row" in-idx)}
               [:td {:key "num"}  (inc in-idx)]
               [:td {:key "name"} (str (:witan/name in))]
-              [:td {:key "src"}  [:input {:value (get-in in [:witan/params :src])}]]]))]]))])
+              [:td.pure-form {:key "src"}  [:input {:value (get-in in [:witan/params :src])
+                                                    :on-change #(controller/raise!
+                                                                 :workspace/adjust-current-data
+                                                                 {:key (:witan/name in)
+                                                                  :value (-> % .-target .-value)})}]]]))]]))])
 
 (defn view
   []

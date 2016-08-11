@@ -2,6 +2,7 @@
   (:require [cljs.test :refer-macros [is async]]
             [sablono.core :as sab :include-macros true]
             [witan.ui.data :as data]
+            [witan.ui.controller :as controller]
             [witan.ui.strings :refer [get-string]])
   (:require-macros
    [devcards.core :as dc :refer [defcard deftest]]))
@@ -37,7 +38,11 @@
               {:key (str "config-row" in-idx)}
               [:td {:key "num"}  (inc in-idx)]
               [:td {:key "name"} (str k)]
-              [:td {:key "value"}  [:input {:value value}]]])))]])])
+              [:td.pure-form {:key "value"}  [:input {:value value
+                                                      :on-change #(controller/raise!
+                                                                   :workspace/adjust-current-configuration
+                                                                   {:key k
+                                                                    :value (-> % .-target .-value)})}]]])))]])])
 
 (defn view
   []

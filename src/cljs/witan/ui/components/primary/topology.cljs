@@ -70,31 +70,41 @@
      [:div#loading-modal (icons/loading :x-large)])])
 
 (defn view
-  [current model-list]
+  [wsp]
   (controller/raise! :workspace/fetch-models)
-  (fn [{:keys [workspace/name workspace/workflow]} model-list]
-    [:div#topology
-     #_(add-model-dialog model-list)
-     [:div#right-bar
-      [:div.buttons
-       [:button.pure-button
-        {:on-click #(controller/raise! :workspace/run-current)}
-        (icons/cog :small)
-        (get-string :string/run)]]]
-     [:div#heading
-      [:h1 name]]
-     (if-not workflow
-       [:div#content.text-center
-        (icons/clipboard :large :dark)
-        [:h2 (get-string :string/workspace-empty)]
-        [:hr
-         {:style {:margin "0% 20%"}}]
-        [:h3 (get-string :string/workspace-select-a-model)]
-        (add-model-widget (map :metadata model-list))]
-       [:div#content.text-center
-        (for [edge workflow]
-          ^{:key (str edge)}
-          [:div (str edge)])])]))
+  (fn [{:keys [workspace/current workspace/model-list workspace/running?]}]
+    (let [{:keys [workspace/workflow workspace/name]} current]
+      [:div#topology
+       #_(add-model-dialog model-list)
+       [:div#right-bar
+        [:div.buttons
+         [:button.pure-button
+          {:class (->> (vector
+                        (when (or running? (not workflow)) "pure-button-disabled")
+                        (when running?                     "running"))
+                       (keep identity)
+                       (clojure.string/join " "))
+           :on-click #(controller/raise! :workspace/run-current)}
+          (if running?
+            (icons/loading :small :dark)
+            (icons/cog :small :dark))
+          (if running?
+            (get-string :string/running)
+            (get-string :string/run))]]]
+       [:div#heading
+        [:h1 name]]
+       (if-not workflow
+         [:div#content.text-center
+          (icons/clipboard :large :dark)
+          [:h2 (get-string :string/workspace-empty)]
+          [:hr
+           {:style {:margin "0% 20%"}}]
+          [:h3 (get-string :string/workspace-select-a-model)]
+          (add-model-widget (map :metadata model-list))]
+         [:div#content.text-center
+          (for [edge workflow]
+            ^{:key (str edge)}
+            [:div (str edge)])])])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Devcards

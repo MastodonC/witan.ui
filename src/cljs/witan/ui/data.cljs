@@ -38,10 +38,10 @@
                :route/params (s/maybe s/Any)
                :route/query (s/maybe {s/Keyword s/Any})}
    :app/workspace  {:workspace/model-list (s/maybe [{s/Keyword s/Any}])
-                    :workspace/current (s/maybe (get wgs/WorkspaceMessage "1.0"))
+                    :workspace/current (s/maybe (get wgs/WorkspaceMessage "1.0.0"))
                     :workspace/running? s/Bool
                     :workspace/pending? s/Bool}
-   :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/WorkspaceMessage "1.0")])}
+   :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/WorkspaceMessage "1.0.0")])}
    :app/data-dash (s/maybe s/Any)
    :app/panic-message (s/maybe s/Str)})
 
@@ -277,7 +277,7 @@
               (if message
                 (if (contains? message :error)
                   (panic! (str "Received message error: " message))
-                  (if-let [err (wgs/check-message "1.0" message)]
+                  (if-let [err (wgs/check-message "1.0.0" message)]
                     (panic! (str "Received message failed validation: " (str err)))
                     (do
                       (handle-server-message message)

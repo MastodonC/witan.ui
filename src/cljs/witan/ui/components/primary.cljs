@@ -50,7 +50,7 @@
                                        (reset! subview-idx %))})]
              [:div#primary-content
               (condp = @subview-idx
-                0 [topology/view current model-list]
+                0 [topology/view wsp]
                 1 [:div "????"])]]
             [:div#loading
              (icons/error :large :dark)

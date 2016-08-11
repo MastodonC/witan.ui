@@ -62,6 +62,17 @@
   [{event :args}]
   (log/debug "Workspace" (get-in event [:event/params :workspace/id]) "was saved."))
 
+(defmethod on-event
+  :workspace/run-failed
+  [{event :args}]
+  (log/warn "Workspace failed to run" (get-in event [:event/params :workspace/id])))
+
+(defmethod on-event
+  :workspace/started-running
+  [{event :args}]
+  (data/swap-app-state! :app/workspace assoc :workspace/running? true)
+  (log/info "Workspace is running" (get-in event [:event/params :workspace/id])))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query Response
 
@@ -149,7 +160,7 @@
   (let [workspace-id (cljs.core/uuid (get-in args [:route/params :id]))
         workspace-fields (vec
                           (filter keyword? (-> wgs/WorkspaceMessage
-                                               (get "1.0")
+                                               (get "1.0.0")
                                                (keys))))]
     (data/query `[{(:workspace/by-id ~workspace-id) ~workspace-fields}] on-receive)))
 
@@ -185,7 +196,7 @@
   (let [{:keys [user/id]} (data/get-app-state :app/user)
         w-id (random-uuid)
         wsp (wgs/validate-workspace
-             "1.0"
+             "1.0.0"
              {:workspace/name name
               :workspace/id w-id
               :workspace/description desc
@@ -222,3 +233,23 @@
     (log/info "Running model" (:workspace/id current))
     (data/swap-app-state! :app/workspace assoc :workspace/running? true)
     (data/command! :workspace/run "1.0.0" {:workspace/to-run current})))
+
+(defmethod handle :adjust-current-data
+  [_ {:keys [key value]}]
+  (let [current (:workspace/current (data/get-app-state :app/workspace))
+        {:keys [workspace/catalog]} current
+        input (some #(when (= key (:witan/name %)) %) catalog)]
+    (when input
+      (let [catalog' (vec (-> (remove #{input} catalog)
+                              (conj (assoc-in input [:witan/params :src] value))))]
+        (data/swap-app-state! :app/workspace assoc-in [:workspace/current :workspace/catalog] catalog')))))
+
+(defmethod handle :adjust-current-configuration
+  [_ {:keys [key value]}]
+  (let [current (:workspace/current (data/get-app-state :app/workspace))
+        {:keys [workspace/catalog]} current
+        entries (not-empty (filter #(when (contains? (:witan/params %) key) %) catalog))]
+    (when entries
+      (let [entries' (map #(assoc-in % [:witan/params key] value) entries)
+            catalog' (vec (reduce conj (remove (set entries) catalog) entries'))]
+        (data/swap-app-state! :app/workspace assoc-in [:workspace/current :workspace/catalog] catalog')))))
