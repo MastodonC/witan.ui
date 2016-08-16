@@ -84,7 +84,7 @@
                         (when running?                     "running"))
                        (keep identity)
                        (clojure.string/join " "))
-           :on-click #(controller/raise! :workspace/run-current)}
+           :on-click #(when-not running? (controller/raise! :workspace/run-current))}
           (if running?
             (icons/loading :small :dark)
             (icons/cog :small :dark))

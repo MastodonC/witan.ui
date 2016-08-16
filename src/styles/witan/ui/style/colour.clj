@@ -102,3 +102,5 @@
 ;; panic
 (def panic-bg lol-color-2)
 (def panic-header-text lol-color-4)
+
+(def temp-var-replacement lol-color-5)

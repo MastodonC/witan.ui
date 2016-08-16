@@ -229,10 +229,19 @@
 
 (defmethod handle :run-current
   [_ _]
-  (let [current (:workspace/current (data/get-app-state :app/workspace))]
-    (log/info "Running model" (:workspace/id current))
-    (data/swap-app-state! :app/workspace assoc :workspace/running? true)
-    (data/command! :workspace/run "1.0.0" {:workspace/to-run current})))
+  (let [{:keys [workspace/current workspace/running? workspace/temp-variables]}
+        (data/get-app-state :app/workspace)
+        apply-temp-vars (fn [entry]
+                          (if (= :input (:witan/type entry))
+                            (update-in entry [:witan/params :src] #(utils/render-mustache % temp-variables))
+                            entry))]
+    (if running?
+      (log/warn "Model is already running. Request ignored.")
+      (do
+        (log/info "Running model" (:workspace/id current))
+        (data/swap-app-state! :app/workspace assoc :workspace/running? true)
+        (let [current' (update current :workspace/catalog (partial mapv apply-temp-vars))]
+          (data/command! :workspace/run "1.0.0" {:workspace/to-run current'}))))))
 
 (defmethod handle :adjust-current-data
   [_ {:keys [key value]}]
@@ -253,3 +262,9 @@
       (let [entries' (map #(assoc-in % [:witan/params key] value) entries)
             catalog' (vec (reduce conj (remove (set entries) catalog) entries'))]
         (data/swap-app-state! :app/workspace assoc-in [:workspace/current :workspace/catalog] catalog')))))
+
+(defmethod handle :adjust-temp-variable
+  [_ {:keys [key value]}]
+  (if (clojure.string/blank? value)
+    (data/swap-app-state! :app/workspace update :workspace/temp-variables #(dissoc % key))
+    (data/swap-app-state! :app/workspace assoc-in [:workspace/temp-variables key] value)))

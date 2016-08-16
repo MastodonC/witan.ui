@@ -3,7 +3,8 @@
             [witan.ui.data :as data]
             [cljs.reader :as reader]
             [cljs-time.core :as t]
-            [cljs-time.format :as tf])
+            [cljs-time.format :as tf]
+            [cljsjs.mustache])
   (:require-macros [cljs-log.core :as log]))
 
 (defn iso-time-as-moment
@@ -26,3 +27,7 @@
        (reader/parse-int)
        (min mx)
        (max mn))))
+
+(defn render-mustache
+  [s m]
+  (.render js/Mustache s (clj->js m)))

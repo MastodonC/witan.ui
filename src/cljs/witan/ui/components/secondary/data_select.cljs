@@ -3,43 +3,113 @@
             [sablono.core :as sab :include-macros true]
             [witan.ui.controller :as controller]
             [witan.ui.data :as data]
+            [witan.ui.utils :as util]
             [witan.ui.strings :refer [get-string]])
-  (:require-macros
-   [devcards.core :as dc :refer [defcard deftest]]))
+  (:require-macros [devcards.core :as dc :refer [defcard deftest]]
+                   [cljs-log.core :as log]))
+
+(def mustache-regex
+  (re-pattern #"\{\{ *[a-zA-Z0-9- _]+}\}"))
+
+(defn clean-mustache
+  [s]
+  (-> s
+      (clojure.string/replace  #"\s*\{\{\s*" "")
+      (clojure.string/replace  #"\s*}}\s*" "")))
+
+(defn get-variables-from-inputs
+  [inputs]
+  (->> inputs
+       (map (comp :src :witan/params))
+       (reduce #(concat (re-seq mustache-regex %2) %1) [])
+       (set)
+       (map clean-mustache)
+       (not-empty)))
+
+(defn variable-table
+  [variables temps]
+  [:table.pure-table.pure-table-horizontal
+   {:key "variable-table"}
+   [:thead
+    [:tr
+     [:th.col-data-num ""]
+     [:th.col-data-name "Variable"]
+     [:th.col-data-key "Value"]]]
+   [:tbody
+    (for [variable variables]
+      [:tr
+       {:key (str "variable-" variable)}
+       [:td {:key "blank"} ">"]
+       [:td {:key "name"} variable]
+       [:td.pure-form {:key "value"}
+        [:div.input-container
+         {:style {:width "50%"}}
+         [:input {:value (get temps variable)
+                  :on-change #(controller/raise!
+                               :workspace/adjust-temp-variable
+                               {:key variable
+                                :value (-> % .-target .-value)})}]]]])]])
+
+(defn input-table
+  [inputs temps]
+  [:table.pure-table.pure-table-horizontal
+   {:key "input-table"}
+   [:thead
+    [:tr
+     [:th.col-data-num "#"]
+     [:th.col-data-name "Name"]
+     [:th.col-data-key "Key"]]]
+   [:tbody
+    (for [in-idx (-> inputs count range)]
+      (let [in  (nth inputs in-idx)
+            src (get-in in [:witan/params :src])
+            tvs (->> src (re-seq mustache-regex))
+            requires-render (and (not-empty tvs) ;; TODO THIS WONT SUPPORT MULTIPLE TVS IN ONE STRING
+                                 (every? (partial contains? temps)
+                                         (map clean-mustache tvs)))
+            src' (if requires-render
+                   (util/render-mustache src temps) src)
+            fake (reduce (fn [a x] (clojure.string/replace a x (apply str (repeat (count x) \u00a0)))) src
+                         (clojure.string/split src mustache-regex))
+            fake' (if requires-render
+                    (util/render-mustache fake temps) "")]
+        [:tr
+         {:key (str "input-row" in-idx)}
+         [:td {:key "num"}  (inc in-idx)]
+         [:td {:key "name"} (str (:witan/name in))]
+         [:td.pure-form {:key "src"
+                         :style {:position "relative"}}
+          [:div.input-container
+           {:style {:position "absolute"
+                    :left "0px"
+                    :top "5px"}}
+           [:input {:value src'
+                    :on-change #(controller/raise!
+                                 :workspace/adjust-current-data
+                                 {:key (:witan/name in)
+                                  :value (-> % .-target .-value)})}]
+           [:span.fake-input
+            fake']]]]))]])
 
 (defn data-select-view
-  [catalog]
+  [catalog temp-variables]
   [:div#data-select
    (if-not (not-empty catalog)
      [:div#no-data (get-string :string/data-empty-catalog)]
      (let [inputs (->> catalog
                        (filter #(= :input (:witan/type %)))
-                       (sort-by :witan/name))]
-       [:table.pure-table.pure-table-horizontal
-        [:thead
-         [:tr
-          [:th.col-data-num "#"]
-          [:th.col-data-name "Name"]
-          [:th.col-data-key "Key"]]]
-        [:tbody
-         (for [in-idx (-> inputs count range)]
-           (let [in (nth inputs in-idx)]
-             [:tr
-              {:key (str "input-row" in-idx)}
-              [:td {:key "num"}  (inc in-idx)]
-              [:td {:key "name"} (str (:witan/name in))]
-              [:td.pure-form {:key "src"}  [:input {:value (get-in in [:witan/params :src])
-                                                    :on-change #(controller/raise!
-                                                                 :workspace/adjust-current-data
-                                                                 {:key (:witan/name in)
-                                                                  :value (-> % .-target .-value)})}]]]))]]))])
+                       (sort-by :witan/name))
+           variables (get-variables-from-inputs inputs)]
+       [:div
+        (variable-table variables temp-variables)
+        (input-table inputs temp-variables)]))])
 
 (defn view
   []
   (fn []
-    (let [{:keys [workspace/catalog]}
-          (get (data/get-app-state :app/workspace) :workspace/current)]
-      (data-select-view catalog))))
+    (let [{:keys [workspace/temp-variables] :as wsp} (data/get-app-state :app/workspace)
+          {:keys [workspace/catalog]} (get wsp :workspace/current)]
+      (data-select-view catalog temp-variables))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS

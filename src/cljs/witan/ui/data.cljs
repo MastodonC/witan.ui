@@ -38,6 +38,7 @@
                :route/params (s/maybe s/Any)
                :route/query (s/maybe {s/Keyword s/Any})}
    :app/workspace  {:workspace/model-list (s/maybe [{s/Keyword s/Any}])
+                    :workspace/temp-variables {s/Str s/Str}
                     :workspace/current (s/maybe (get wgs/WorkspaceMessage "1.0.0"))
                     :workspace/running? s/Bool
                     :workspace/pending? s/Bool}
@@ -61,6 +62,7 @@
                 :route/query nil}
     ;; component data
     :app/workspace {:workspace/model-list nil
+                    :workspace/temp-variables {}
                     :workspace/current nil
                     :workspace/running? false
                     :workspace/pending? true}

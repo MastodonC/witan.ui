@@ -4,12 +4,16 @@
             [witan.ui.style.values :as values]))
 
 (def style [[:.panic-screen
-             {:width (percent 100)
+             {:left (px 0)
+              :right (px 0)
               :height (percent 100)
               :background-color colour/panic-bg
-              :position :fixed
+              :position :absolute
               :text-align :center}
              [:h1 {:color colour/panic-header-text
                    :font-size (em 4)}]
+             [:strong
+              {:font-size (em 1.5)
+               :line-height (em 1.4)}]
              [:p {:position :fixed
                   :bottom (px 0)}]]])

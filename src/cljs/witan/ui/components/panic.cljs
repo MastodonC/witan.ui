@@ -15,7 +15,10 @@
         (set! (.-location js/window) "/")
         [:div.panic-screen
          [:h1 "Sorry!"]
-         [:h2 "It's not you, it's us. We've messed something up. Have another go and if it persists, please get in touch."]
+         [:div [:strong "It's not you, it's us. We've messed something up."]]
+         [:div [:strong "Have another go and if it persists, please get in touch."]]
+         [:br]
+         [:br]
          (icons/cake :x-large :dark)
          [:h2 (str "Restarting app in " @countdown " seconds...")]
          [:p
