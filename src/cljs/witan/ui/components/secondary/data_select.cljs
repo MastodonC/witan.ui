@@ -72,7 +72,7 @@
             fake (reduce (fn [a x] (clojure.string/replace a x (apply str (repeat (count x) \u00a0)))) src
                          (clojure.string/split src mustache-regex))
             fake' (if requires-render
-                    (util/render-mustache fake temps) "")]
+                    (util/render-mustache fake temps) fake)]
         [:tr
          {:key (str "input-row" in-idx)}
          [:td {:key "num"}  (inc in-idx)]
@@ -89,6 +89,7 @@
                                  {:key (:witan/name in)
                                   :value (-> % .-target .-value)})}]
            [:span.fake-input
+            {:class (when requires-render "has-input")}
             fake']]]]))]])
 
 (defn data-select-view

@@ -25,7 +25,9 @@
                  :left (px 1)
                  :top (px 0.5)
                  :pointer-events :none
-                 :color colour/temp-var-replacement
-                 :padding [[(em 0.5) (em 0.6)]]}]]
+                 :padding [[(em 0.5) (em 0.6)]]
+                 :color colour/temp-var-empty}]
+               [:.has-input
+                {:color colour/temp-var-replacement}]]
               [:th.col-data-key
                {:width (percent 100)}]]]])
