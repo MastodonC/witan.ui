@@ -105,6 +105,10 @@
   [& args]
   (apply create-key "cake" args))
 
+(defn download
+  [& args]
+  (apply create-key "file_download" args))
+
 ;;
 
 (defn loading
@@ -147,7 +151,8 @@
                     ["clipboard"     clipboard]
                     ["close"         close]
                     ["grain"         grain ]
-                    ["cake"          cake]]]
+                    ["cake"          cake]
+                    ["download"      download]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div

@@ -37,11 +37,15 @@
    :app/route {:route/path (s/maybe s/Keyword)
                :route/params (s/maybe s/Any)
                :route/query (s/maybe {s/Keyword s/Any})}
-   :app/workspace  {:workspace/model-list (s/maybe [{s/Keyword s/Any}])
-                    :workspace/temp-variables {s/Str s/Str}
-                    :workspace/current (s/maybe (get wgs/WorkspaceMessage "1.0.0"))
+   :app/workspace  {:workspace/temp-variables {s/Str s/Str}
                     :workspace/running? s/Bool
-                    :workspace/pending? s/Bool}
+                    :workspace/pending? s/Bool
+                    (s/optional-key :workspace/current) (get wgs/WorkspaceMessage "1.0.0")
+                    (s/optional-key :workspace/current-results) [{:result/location s/Str
+                                                                  :result/key s/Keyword
+                                                                  :result/downloading? s/Bool
+                                                                  (s/optional-key :result/content) s/Any}]
+                    (s/optional-key :workspace/model-list) [{s/Keyword s/Any}]}
    :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/WorkspaceMessage "1.0.0")])}
    :app/data-dash (s/maybe s/Any)
    :app/panic-message (s/maybe s/Str)})
@@ -61,9 +65,7 @@
                 :route/params nil
                 :route/query nil}
     ;; component data
-    :app/workspace {:workspace/model-list nil
-                    :workspace/temp-variables {}
-                    :workspace/current nil
+    :app/workspace {:workspace/temp-variables {}
                     :workspace/running? false
                     :workspace/pending? true}
     :app/workspace-dash {:wd/workspaces nil}
