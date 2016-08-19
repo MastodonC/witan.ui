@@ -90,7 +90,9 @@
                {:top (px (+ 6 switcher-height))
                 :overflow :auto
                 :position :absolute
-                :bottom (px 0)}]
+                :bottom (px 0)
+                :right (px 0)
+                :left (px 0)}]
               [:#secondary-content
                {}]]]
 

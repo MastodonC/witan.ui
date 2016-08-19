@@ -4,6 +4,7 @@
             [witan.ui.controller :as controller]
             [witan.ui.data :as data]
             [witan.ui.utils :as util]
+            [witan.ui.components.icons :as icons]
             [witan.ui.strings :refer [get-string]])
   (:require-macros [devcards.core :as dc :refer [defcard deftest]]
                    [cljs-log.core :as log]))
@@ -76,7 +77,7 @@
         [:tr
          {:key (str "input-row" in-idx)}
          [:td {:key "num"}  (inc in-idx)]
-         [:td {:key "name"} (str (:witan/name in))]
+         [:td {:key "name"} (:witan/name in)]
          [:td.pure-form {:key "src"
                          :style {:position "relative"}}
           [:div.input-container
@@ -92,8 +93,42 @@
             {:class (when requires-render "has-input")}
             fake']]]]))]])
 
+(defn results-table
+  [current-results]
+  (when current-results
+    [:table.pure-table.pure-table-horizontal
+     {:key "results-table"}
+     [:thead
+      [:tr
+       [:th.col-data-num "#"]
+       [:th.col-data-name "Result"]
+       [:th.col-data-location "Location"]
+       [:th.col-data-actions "Actions"]]]
+     [:tbody
+      (for [result-idx (-> current-results count range)]
+        (let [{:keys [result/location
+                      result/key
+                      result/downloading?
+                      result/content] :as result} (nth current-results result-idx)]
+          [:tr
+           {:key (str "result-" key)}
+           [:td {:key "number"} (inc result-idx)]
+           [:td {:key "result"} key]
+           [:td {:key "location"} location]
+           [:td {:key "actions"}
+            [:button.pure-button {:class (when downloading? "pure-button-disabled")
+                                  :on-click #(controller/raise! :workspace/download-result {:result result})}
+             (if downloading?
+               (icons/loading :small :dark)
+               (icons/download :small :dark))
+             (if downloading?
+               (get-string :string/downloading)
+               (get-string :string/download))]
+            [:button.pure-button {:on-click #(controller/raise! :workspace/open-as-visualisation {:location location})}
+             (icons/visualisation :small :dark) "Visualise"]]]))]]))
+
 (defn data-select-view
-  [catalog temp-variables]
+  [catalog temp-variables current-results]
   [:div#data-select
    (if-not (not-empty catalog)
      [:div#no-data (get-string :string/data-empty-catalog)]
@@ -103,14 +138,16 @@
            variables (get-variables-from-inputs inputs)]
        [:div
         (variable-table variables temp-variables)
-        (input-table inputs temp-variables)]))])
+        (input-table inputs temp-variables)
+        (results-table current-results)]))])
 
 (defn view
   []
   (fn []
-    (let [{:keys [workspace/temp-variables] :as wsp} (data/get-app-state :app/workspace)
+    (let [{:keys [workspace/temp-variables
+                  workspace/current-results] :as wsp} (data/get-app-state :app/workspace)
           {:keys [workspace/catalog]} (get wsp :workspace/current)]
-      (data-select-view catalog temp-variables))))
+      (data-select-view catalog temp-variables current-results))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS

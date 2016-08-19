@@ -13,6 +13,8 @@
                 {:height (px 40)}]]
               [:td
                {:white-space :nowrap}
+               [:button
+                {:margin-right (px 10)}]
                [:.input-container
                 {:width (percent 80)
                  :overflow :hidden
@@ -29,5 +31,5 @@
                  :color colour/temp-var-empty}]
                [:.has-input
                 {:color colour/temp-var-replacement}]]
-              [:th.col-data-key
+              [:th.col-data-key :th.col-data-actions
                {:width (percent 100)}]]]])

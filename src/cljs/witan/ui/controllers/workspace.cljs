@@ -1,11 +1,13 @@
 (ns witan.ui.controllers.workspace
   (:require [schema.core :as s]
+            [ajax.core :as ajax]
             [witan.ui.data :as data]
             [witan.gateway.schema :as wgs]
             [witan.ui.utils :as utils]
             [cljs-time.core :as t]
             [cljs-time.format :as tf]
-            [witan.ui.route :as route])
+            [witan.ui.route :as route]
+            [cljsjs.filesaverjs])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
@@ -44,6 +46,18 @@
                     :workspace/modified]}]
                 on-receive)))
 
+(defn set-result-downloading!
+  ([result dling?]
+   (set-result-downloading!
+    (data/get-app-state :app/workspace)
+    result
+    dling?))
+  ([workspace result dling?]
+   (let [{:keys [workspace/current-results]} workspace
+         cr' (vec (-> (remove #{result} current-results)
+                      (conj (assoc result :result/downloading? dling?))))]
+     (data/swap-app-state! :app/workspace assoc :workspace/current-results cr'))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Schema
 
@@ -55,23 +69,64 @@
 ;; Event
 
 (defmulti on-event
-  (fn [{:keys [args]}] (:event/key args)))
+  (fn [{:keys [args]}] [(:event/key args) (:event/version args)]))
 
 (defmethod on-event
-  :workspace/saved
+  [:workspace/saved "1.0.0"]
   [{event :args}]
   (log/debug "Workspace" (get-in event [:event/params :workspace/id]) "was saved."))
 
 (defmethod on-event
-  :workspace/run-failed
+  [:workspace/run-failed "1.0.0"]
   [{event :args}]
   (log/warn "Workspace failed to run" (get-in event [:event/params :workspace/id])))
 
 (defmethod on-event
-  :workspace/started-running
+  [:workspace/started-running "1.0.0"]
   [{event :args}]
   (data/swap-app-state! :app/workspace assoc :workspace/running? true)
   (log/info "Workspace is running" (get-in event [:event/params :workspace/id])))
+
+(defmethod on-event
+  [:workspace/finished-with-results "1.0.0"]
+  [{event :args}]
+  (let [results (get-in event [:event/params :workspace/results])
+        make-result-fn (fn [[k v]] {:result/key k
+                                    :result/location v
+                                    :result/downloading? false})]
+    (log/debug "Got new results:" results)
+    (data/swap-app-state! :app/workspace assoc
+                          :workspace/current-results (mapv make-result-fn results)
+                          :workspace/running? false)))
+
+(defmethod on-event
+  [:workspace/finished-with-errors "1.0.0"]
+  [{event :args}]
+  (let [error (get-in event [:event/params :error])]
+    (log/severe "Workspace returned an error:" error)
+    (data/swap-app-state! :app/workspace assoc :workspace/running? false)))
+
+(defmethod on-event
+  [:workspace/result-url-created "1.0.0"]
+  [{event :args}]
+  (let [{:keys [workspace/result-url
+                workspace/original-location]} (:event/params event)
+        wsp                                   (data/get-app-state :app/workspace)
+        original-result                       (some #(when (= original-location (:result/location %)) %)
+                                                    (:workspace/current-results wsp))
+        filename                              (str (name (:result/key original-result)) ".csv")]
+    (when original-result
+      (let [handler (fn [response]
+                      (log/debug "Saving CSV as" filename)
+                      (js/saveAs
+                       (js/Blob. #js [response] #js {:type "text/csv;charset=utf-8"})
+                       filename)
+                      (set-result-downloading! wsp original-result false))
+            error-handler (fn [response]
+                            (set-result-downloading! wsp original-result false)
+                            (log/severe response))]
+        (ajax/GET result-url  {:handler handler
+                               :error-handler error-handler})))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query Response
@@ -268,3 +323,9 @@
   (if (clojure.string/blank? value)
     (data/swap-app-state! :app/workspace update :workspace/temp-variables #(dissoc % key))
     (data/swap-app-state! :app/workspace assoc-in [:workspace/temp-variables key] value)))
+
+(defmethod handle :download-result
+  [_ {:keys [result]}]
+  (let [wsp (data/get-app-state :app/workspace)]
+    (set-result-downloading! wsp result true)
+    (data/command! :workspace/create-result-url "1.0.0" {:workspace/result-location (:result/location result)})))
