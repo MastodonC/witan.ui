@@ -73,7 +73,7 @@
   [wsp]
   (controller/raise! :workspace/fetch-models)
   (fn [{:keys [workspace/current workspace/model-list workspace/running?]}]
-    (let [{:keys [workspace/workflow workspace/name]} current]
+    (let [{:keys [workspace/workflow]} current]
       [:div#topology
        #_(add-model-dialog model-list)
        [:div#right-bar
@@ -91,8 +91,6 @@
           (if running?
             (get-string :string/running)
             (get-string :string/run))]]]
-       [:div#heading
-        [:h1 name]]
        (if-not workflow
          [:div#content.text-center
           (icons/clipboard :large :dark)

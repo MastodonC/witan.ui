@@ -329,3 +329,13 @@
   (let [wsp (data/get-app-state :app/workspace)]
     (set-result-downloading! wsp result true)
     (data/command! :workspace/create-result-url "1.0.0" {:workspace/result-location (:result/location result)})))
+
+(defmethod handle :download-result
+  [_ {:keys [result]}]
+  (let [wsp (data/get-app-state :app/workspace)]
+    (set-result-downloading! wsp result true)
+    (data/command! :workspace/create-result-url "1.0.0" {:workspace/result-location (:result/location result)})))
+
+(defmethod handle :open-as-visualisation
+  [_ {:keys [location]}]
+  (data/swap-app-state! :app/workspace assoc :workspace/current-viz {:result/location location}))

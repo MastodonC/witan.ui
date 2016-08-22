@@ -9,12 +9,6 @@
                :position :fixed
                :top (px 0)
                :right (px 16)}]
-             [:#heading
-              {:margin-left (px 96)
-               :position :fixed
-               :top (px 0)}
-              [:h1
-               {:margin-top (em 0.5)}]]
              [:#content
               {:margin-top (em 2)}]]
 

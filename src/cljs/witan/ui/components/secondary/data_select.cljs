@@ -5,6 +5,7 @@
             [witan.ui.data :as data]
             [witan.ui.utils :as util]
             [witan.ui.components.icons :as icons]
+            [witan.ui.components.primary :refer [switch-primary-view!]]
             [witan.ui.strings :refer [get-string]])
   (:require-macros [devcards.core :as dc :refer [defcard deftest]]
                    [cljs-log.core :as log]))
@@ -124,7 +125,9 @@
              (if downloading?
                (get-string :string/downloading)
                (get-string :string/download))]
-            [:button.pure-button {:on-click #(controller/raise! :workspace/open-as-visualisation {:location location})}
+            [:button.pure-button {:on-click #(do
+                                               (controller/raise! :workspace/open-as-visualisation {:location location})
+                                               (switch-primary-view! :viz))}
              (icons/visualisation :small :dark) "Visualise"]]]))]]))
 
 (defn data-select-view

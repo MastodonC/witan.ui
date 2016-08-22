@@ -12,6 +12,7 @@
             [witan.ui.style.shared     :as shared]
             [witan.ui.style.panic      :as panic]
             [witan.ui.style.components.topology :as topology]
+            [witan.ui.style.components.viz :as viz]
             [witan.ui.style.components.data-select :as data-select]
             [witan.ui.style.components.configuration :as configuration]
 
@@ -30,6 +31,7 @@
     dashboard/style
     shared/style
     panic/style
+    viz/style
     topology/style
     data-select/style
     configuration/style
