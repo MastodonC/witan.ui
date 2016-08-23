@@ -71,6 +71,13 @@
                 :text-align :center}]]
 
              [:#primary
+              [:#heading
+               {:margin-left (px 96)
+                :position :fixed
+                :top (px 0)}
+               [:h1
+                {:margin-top (em 0.5)
+                 :background-color colour/body-bg}]]
               [:#overlay
                {:margin (px 8)
                 :position :absolute
@@ -79,8 +86,7 @@
                {:width pc100
                 :height pc100
                 :overflow :auto}]
-              [:#primary-content
-               {}]]
+              [:#primary-content]]
 
              [:#secondary
               [:div#outer-container

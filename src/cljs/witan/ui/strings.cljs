@@ -135,7 +135,9 @@
    :string/data-empty-catalog             "No data inputs required."
    :string/config-empty-catalog           "No configuration required."
    :string/run                            "Run"
-   :string/running                        "Running"})
+   :string/running                        "Running"
+   :string/no-viz-selected                "Please select the data you'd like to visualise!"
+   :string/no-viz-selected-desc           "If you don't have any data yet, try running the workspace first."})
 
 (defn get-string
   ""

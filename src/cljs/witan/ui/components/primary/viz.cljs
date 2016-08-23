@@ -1,0 +1,96 @@
+(ns witan.ui.components.primary.viz
+  (:require [reagent.core :as r]
+            [witan.ui.components.shared :as shared]
+            [witan.ui.components.icons :as icons]
+            [witan.ui.data :as data]
+            [witan.ui.strings :refer [get-string]]
+            [witan.ui.controller :as controller]
+            [sablono.core :as sab :include-macros true]
+            [clojure.string :as str]
+            cljsjs.dialog-polyfill
+            cljsjs.clipboard)
+  (:require-macros [devcards.core :as dc :refer [defcard]]
+                   [cljs-log.core :as log]))
+
+(def id "viz")
+(defonce ready? (r/atom false))
+(defonce pymo (atom nil))
+(defonce last-location (atom nil))
+
+(defn location->path
+  [location]
+  (str "http://localhost:3448/?data=" location "&style=table"))
+
+(defn make-iframe
+  [location]
+  (reset! pymo (.Parent js/pym id (location->path location) #js {}))
+  (.onMessage @pymo "ready" (fn [_]
+                              (log/debug "Viz is ready")
+                              (reset! ready? true))))
+
+(defn reset-iframe
+  [location]
+  (reset! ready? false)
+  (.sendMessage @pymo "dataLocation" location))
+
+(defn clipboard-button [content text]
+  (let [clipboard-atom (atom nil)]
+    (r/create-class
+     {:display-name "clipboard-button"
+      :component-did-mount
+      #(let [clipboard (new js/Clipboard (r/dom-node %))]
+         (reset! clipboard-atom clipboard)
+         (log/debug "Clipboard mounted"))
+      :component-will-unmount
+      #(when-not (nil? @clipboard-atom)
+         (.destroy @clipboard-atom)
+         (reset! clipboard-atom nil)
+         (log/debug "Clipboard unmounted"))
+      :reagent-render
+      (fn []
+        [:button.pure-button
+         {:data-clipboard-text text}
+         (content)])})))
+
+(defn view
+  []
+  (r/create-class
+   {:component-will-unmount
+    (fn [this])
+    :component-did-mount
+    (fn [this]
+      (when @last-location
+        (make-iframe @last-location)))
+    :reagent-render
+    (fn []
+      (let [{:keys [workspace/current-viz]} (data/get-app-state :app/workspace)
+            {:keys [result/location]} current-viz]
+        (log/debug "RENDER INNER" location (not= @last-location location) @pymo)
+        (when (not= @last-location location)
+          (reset! last-location location)
+          (log/info "Loading viz:" location)
+          (if (not @pymo)
+            (make-iframe location)
+            (reset-iframe location)))
+        [:div#viz-container
+         (if (and location @ready?)
+           [:div.buttons
+            [:span location]
+            [clipboard-button
+             #(icons/link :small :dark)
+             (location->path location)]
+            [:button.pure-button
+             {:on-click #()}
+             (icons/download :small :dark)]]
+           [:div.buttons])
+         (if-not location
+           [:div#viz-placeholder.text-center
+            (icons/pie-chart :large :dark)
+            [:h2 (get-string :string/no-viz-selected)]
+            [:h3 (get-string :string/no-viz-selected-desc)]]
+           [:div#loading
+            {:style {:background-color "transparent"
+                     :display (if @ready? "none" "inherit")}}
+            (icons/loading :large)])
+         [:div {:id id
+                :style {:display (if @ready? "inherit" "none")}}]]))}))

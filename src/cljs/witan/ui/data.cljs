@@ -45,6 +45,7 @@
                                                                   :result/key s/Keyword
                                                                   :result/downloading? s/Bool
                                                                   (s/optional-key :result/content) s/Any}]
+                    (s/optional-key :workspace/current-viz) {:result/location s/Str}
                     (s/optional-key :workspace/model-list) [{s/Keyword s/Any}]}
    :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/WorkspaceMessage "1.0.0")])}
    :app/data-dash (s/maybe s/Any)

@@ -109,6 +109,14 @@
   [& args]
   (apply create-key "file_download" args))
 
+(defn pie-chart
+  [& args]
+  (apply create-key "pie_chart" args))
+
+(defn link
+  [& args]
+  (apply create-key "link" args))
+
 ;;
 
 (defn loading
@@ -152,7 +160,9 @@
                     ["close"         close]
                     ["grain"         grain ]
                     ["cake"          cake]
-                    ["download"      download]]]
+                    ["download"      download]
+                    ["pie chart"     pie-chart]
+                    ["link"          link]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div
