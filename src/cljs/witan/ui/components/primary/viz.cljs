@@ -7,7 +7,8 @@
             [witan.ui.controller :as controller]
             [sablono.core :as sab :include-macros true]
             [clojure.string :as str]
-            cljsjs.dialog-polyfill)
+            cljsjs.dialog-polyfill
+            cljsjs.clipboard)
   (:require-macros [devcards.core :as dc :refer [defcard]]
                    [cljs-log.core :as log]))
 
@@ -16,10 +17,13 @@
 (defonce pymo (atom nil))
 (defonce last-location (atom nil))
 
+(defn location->path
+  [location]
+  (str "http://localhost:3448/?data=" location "&style=table"))
+
 (defn make-iframe
   [location]
-  (reset! ready? false)
-  (reset! pymo (.Parent js/pym id (str "http://localhost:3448/?data=" location "&style=table") #js {}))
+  (reset! pymo (.Parent js/pym id (location->path location) #js {}))
   (.onMessage @pymo "ready" (fn [_]
                               (log/debug "Viz is ready")
                               (reset! ready? true))))
@@ -28,6 +32,25 @@
   [location]
   (reset! ready? false)
   (.sendMessage @pymo "dataLocation" location))
+
+(defn clipboard-button [content text]
+  (let [clipboard-atom (atom nil)]
+    (r/create-class
+     {:display-name "clipboard-button"
+      :component-did-mount
+      #(let [clipboard (new js/Clipboard (r/dom-node %))]
+         (reset! clipboard-atom clipboard)
+         (log/debug "Clipboard mounted"))
+      :component-will-unmount
+      #(when-not (nil? @clipboard-atom)
+         (.destroy @clipboard-atom)
+         (reset! clipboard-atom nil)
+         (log/debug "Clipboard unmounted"))
+      :reagent-render
+      (fn []
+        [:button.pure-button
+         {:data-clipboard-text text}
+         (content)])})))
 
 (defn view
   []
@@ -50,6 +73,16 @@
             (make-iframe location)
             (reset-iframe location)))
         [:div#viz-container
+         (if (and location @ready?)
+           [:div.buttons
+            [:span location]
+            [clipboard-button
+             #(icons/link :small :dark)
+             (location->path location)]
+            [:button.pure-button
+             {:on-click #()}
+             (icons/download :small :dark)]]
+           [:div.buttons])
          (if-not location
            [:div#viz-placeholder.text-center
             (icons/pie-chart :large :dark)

@@ -8,7 +8,9 @@
               {:margin (px 16)
                :position :fixed
                :top (px 0)
-               :right (px 16)}]
+               :right (px 16)}
+              [:button
+               {:margin (px 4)}]]
              [:#content
               {:margin-top (em 2)}]]
 
