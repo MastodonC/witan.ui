@@ -16,13 +16,28 @@
 (defonce pymo (atom nil))
 (defonce last-location (atom nil))
 
+(defn make-iframe
+  [location]
+  (reset! ready? false)
+  (reset! pymo (.Parent js/pym id (str "http://localhost:3448/?data=" location "&style=table") #js {}))
+  (.onMessage @pymo "ready" (fn [_]
+                              (log/debug "Viz is ready")
+                              (reset! ready? true))))
+
+(defn reset-iframe
+  [location]
+  (reset! ready? false)
+  (.sendMessage @pymo "dataLocation" location))
+
 (defn view
   []
   (r/create-class
    {:component-will-unmount
     (fn [this])
     :component-did-mount
-    (fn [this])
+    (fn [this]
+      (when @last-location
+        (make-iframe @last-location)))
     :reagent-render
     (fn []
       (let [{:keys [workspace/current-viz]} (data/get-app-state :app/workspace)
@@ -32,14 +47,8 @@
           (reset! last-location location)
           (log/info "Loading viz:" location)
           (if (not @pymo)
-            (do
-              (reset! pymo (.Parent js/pym id (str "http://localhost:3448/?data=" location "&style=table") #js {}))
-              (.onMessage @pymo "ready" (fn [_]
-                                          (log/debug "Viz is ready")
-                                          (reset! ready? true))))
-            (do
-              (reset! ready? false)
-              (.sendMessage @pymo "dataLocation" location))))
+            (make-iframe location)
+            (reset-iframe location)))
         [:div#viz-container
          (if-not location
            [:div#viz-placeholder.text-center
