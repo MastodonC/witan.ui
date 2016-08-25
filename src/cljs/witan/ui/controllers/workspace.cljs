@@ -337,5 +337,17 @@
     (data/command! :workspace/create-result-url "1.0.0" {:workspace/result-location (:result/location result)})))
 
 (defmethod handle :open-as-visualisation
-  [_ {:keys [location]}]
-  (data/swap-app-state! :app/workspace assoc :workspace/current-viz {:result/location location}))
+  [_ {:keys [location style]}]
+  (data/swap-app-state! :app/workspace assoc :workspace/current-viz {:result/location location
+                                                                     :viz/style style}))
+
+(defmethod handle :change-visualisation-style
+  [_ m]
+  (let [{:keys [style params] :as opts} m]
+    (log/info "Changing viz style to" opts)
+    (data/swap-app-state! :app/workspace
+                          assoc-in
+                          [:workspace/current-viz :viz/style] style)
+    (data/swap-app-state! :app/workspace
+                          assoc-in
+                          [:workspace/current-viz :viz/params] params)))
