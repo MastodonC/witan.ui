@@ -134,6 +134,7 @@
 (defn custom-resets!
   []
   (swap-app-state! :app/workspace assoc :workspace/pending? true)
+  (swap-app-state! :app/workspace dissoc :workspace/current)
   (reset-app-state! :app/panic-message nil))
 
 (defn save-data!

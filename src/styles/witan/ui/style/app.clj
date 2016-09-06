@@ -85,8 +85,12 @@
               [:div#container
                {:width pc100
                 :height pc100
-                :overflow :auto}]
-              [:#primary-content]]
+                :overflow :hidden}]
+              [:#primary-content
+               {:width pc100
+                :height pc100
+                :position :relative
+                :display :flex}]]
 
              [:#secondary
               [:div#outer-container

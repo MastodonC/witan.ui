@@ -4,6 +4,7 @@
             [witan.ui.style.values :as values]))
 
 (def style [[:#topology
+             {:width (percent 100)}
              [:#right-bar
               {:margin (px 16)
                :position :fixed

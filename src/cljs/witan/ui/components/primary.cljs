@@ -55,10 +55,12 @@
           [:div#container
            [:div#primary-content
             [:div
-             {:style {:display (if (= 0 @subview-idx) "inherit" "none")}}
+             {:style {:display (if (= 0 @subview-idx) "inherit" "none")
+                      :width "100%"}}
              [topology/view wsp]]
             [:div
-             {:style {:display (if (= 1 @subview-idx) "inherit" "none")}}
+             {:style {:display (if (= 1 @subview-idx) "inherit" "none")
+                      :width "100%"}}
              [viz/view wsp]]]
            [:div#overlay
             (switcher {:icon-0 (partial icons/topology :dark :medium)
