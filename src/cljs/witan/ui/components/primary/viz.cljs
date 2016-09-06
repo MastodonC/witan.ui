@@ -47,8 +47,8 @@
 
 (defn location->path
   [location style & [opts]]
-  (let [ss (name style)]
-    (str "http://localhost:3448/?" (m->query-params (merge {:data location :style (name style)} opts)))))
+  (str "http://localhost:3448/?"
+       (m->query-params (merge {:data location :style (name style)} opts))))
 
 (defn make-iframe
   [location style & [opts]]

@@ -224,7 +224,7 @@
   [_]
   ;; reset current
   (data/swap-app-state! :app/workspace assoc :workspace/pending? true)
-  (data/swap-app-state! :app/workspace assoc :workspace/current nil)
+  (data/swap-app-state! :app/workspace dissoc :workspace/current)
   (if-let [id (:user/id (data/get-app-state :app/user))]
     (send-dashboard-query! id on-receive)))
 
