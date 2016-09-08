@@ -27,6 +27,12 @@
                  (keyword))]
     [key-str icon-name]))
 
+
+(defn add-react-args
+  [icon args]
+  (let [[head & body] icon]
+    (vec (concat [head] [args] body))))
+
 ;;
 
 (defn cog
@@ -71,11 +77,11 @@
 
 (defn visualisation
   [& args]
-  (apply create-key "show_chart" args))
+  (apply create-key "timeline" args))
 
 (defn topology
   [& args]
-  (apply create-key "transform" args))
+  (apply create-key "device_hub" args))
 
 (defn plus
   [& args]
@@ -116,6 +122,19 @@
 (defn link
   [& args]
   (apply create-key "link" args))
+
+(defn tree-arrow-down
+  [& args]
+  (apply create-key "arrow_drop_down" args))
+
+(defn unchecked
+  [& args]
+  (apply create-key "check_box_outline_blank" args))
+
+(defn checked
+  [& args]
+  (apply create-key "check_box" args))
+
 
 ;;
 
@@ -162,7 +181,10 @@
                     ["cake"          cake]
                     ["download"      download]
                     ["pie chart"     pie-chart]
-                    ["link"          link]]]
+                    ["link"          link]
+                    ["tree-arrow-down" tree-arrow-down]
+                    ["unchecked"     unchecked]
+                    ["checked"       checked]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div

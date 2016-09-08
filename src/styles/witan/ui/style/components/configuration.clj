@@ -11,6 +11,6 @@
               [:td
                {:white-space :nowrap}
                [:input
-                {:width (percent 80)}]]
+                {:width (percent 100)}]]
               [:th.col-data-key
                {:width (percent 100)}]]]])

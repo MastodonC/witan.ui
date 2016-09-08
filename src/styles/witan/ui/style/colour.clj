@@ -103,5 +103,9 @@
 (def panic-bg lol-color-2)
 (def panic-header-text lol-color-4)
 
+;; temp vars
 (def temp-var-empty lol-color-6)
 (def temp-var-replacement lol-color-5)
+
+;; results
+(def result-header (color/lighten button-view 10))

@@ -8,11 +8,26 @@
             [sablono.core :as sab :include-macros true]
             [clojure.string :as str]
             [goog.string :as gstr]
+            [inflections.core :as i]
             cljsjs.dialog-polyfill
             cljsjs.clipboard)
   (:require-macros [devcards.core :as dc :refer [defcard]]
                    [cljs-log.core :as log])
   (:import goog.Uri))
+
+;; color presets used by viz
+;; https://github.com/thi-ng/color/blob/master/src/presets.org
+(def cat10
+  ["#1f77b4"
+   "#ff7f0e"
+   "#2ca02c"
+   "#d62728"
+   "#9467bd"
+   "#8c564b"
+   "#e377c2"
+   "#7f7f7f"
+   "#bcbd22"
+   "#17becf"])
 
 (def id "viz")
 (defonce ready? (r/atom false))
@@ -46,13 +61,13 @@
     (gstr/urlDecode (.toString qd))))
 
 (defn location->path
-  [location style & [opts]]
+  [locations style & [opts]]
   (str "http://localhost:3448/?"
-       (m->query-params (merge {:data location :style (name style)} opts))))
+       (m->query-params (merge {:data (str/join "," locations) :style (name style)} opts))))
 
 (defn make-iframe
-  [location style & [opts]]
-  (let [p (location->path location style (merge default-viz-options opts))]
+  [locations style & [opts]]
+  (let [p (location->path locations style (merge default-viz-options opts))]
     (log/info "Creating iFrame for " p)
     (reset! pymo (.Parent js/pym id p #js {}))
     (.onMessage @pymo "ready" (fn [_]
@@ -60,9 +75,9 @@
                                 (reset! ready? true)))))
 
 (defn reset-iframe
-  [location style params]
+  [locations style params]
   (reset! ready? false)
-  (let [args (m->query-params (merge {:data location :style (name style)} params))]
+  (let [args (m->query-params (merge {:data (str/join "," locations) :style (name style)} params))]
     (log/debug "Resetting iframe to " args)
     (.sendMessage @pymo "arguments" args)))
 
@@ -91,48 +106,59 @@
     :component-did-mount
     (fn [this]
       (when @last-opts
-        (let [{:keys [result/location viz/style viz/params]} @last-opts]
-          (make-iframe location (or style default-style) params))))
+        (let [{:keys [result/location viz/style viz/params]} @last-opts
+              params (if params params (when style (:params (get viz-lookup (name style)))))
+              locations (when location (if (coll? location) location [location]))]
+          (make-iframe locations (or style default-style) params))))
     :reagent-render
     (fn []
       (let [{:keys [workspace/current-viz]} (data/get-app-state :app/workspace)
             {:keys [result/location viz/style viz/params] :as opts} current-viz
-            location' (when location
-                        (subs location (+ 1 (.lastIndexOf location "/"))))
-            select (fn [{:keys [value] :as opts}]
-                     (if (and style (= value (name style)))
-                       (assoc opts :selected true)
-                       opts))]
+            params (if params params (when style (:params (get viz-lookup (name style)))))
+            locations (when location (if (coll? location) location [location]))]
         [:div#viz-container
          (when (not= @last-opts opts)
            (reset! last-opts opts)
            (log/debug "Changing visualisation data...")
            (if (not @pymo)
              (do (log/debug "Making iframe")
-                 (make-iframe location (or style default-style)))
-             (reset-iframe location (or style default-style) params)))
-         (if (and location @ready?)
+                 (make-iframe locations (or style default-style) params))
+             (reset-iframe locations (or style default-style) params)))
+         (if (and (not-empty locations) @ready?)
            [:div.buttons.pure-form
-            [:span location']
+            (for [location-idx (range (count locations))]
+              ^{:key (str "location" location-idx)}
+              (let [location (nth locations location-idx)]
+                [:span
+                 {:style {:border-bottom (str "2px " (nth cat10 location-idx) " solid")}}
+                 (str
+                  (inc location-idx) ": "
+                  (-> location
+                      (as-> l (subs l (inc (.lastIndexOf l "/"))))
+                      (as-> l (subs l 0 (.lastIndexOf l ".")))
+                      (i/capitalize)))]))
             [:select.pure-input
              {:on-change #(controller/raise! :workspace/change-visualisation-style
-                                             (get viz-lookup (.. % -target -value)))}
-             [:option (select {:value "table"})    "Table"]
-             [:option (select {:value "lineplot"}) "Line Chart"]]
+                                             (get viz-lookup (.. % -target -value)))
+              :value (when style (name style))}
+             [:option {:value "table"}    "Table"]
+             [:option {:value "lineplot"} "Line Chart"]]
             [clipboard-button
              #(icons/link :small :dark)
-             (location->path location (or style default-style) params)]]
+             (location->path locations (or style default-style) params)]]
            [:div.buttons])
-         (if-not location
+         (when (empty? locations)
            [:div#viz-placeholder.text-center
             (icons/pie-chart :large :dark)
             [:h2 (get-string :string/no-viz-selected)]
             [:h3 (get-string :string/no-viz-selected-desc)]])
          [:div#loading
           {:style {:background-color "transparent"
-                   :height "10%"
-                   :display (if (or (not location) @ready?) "none" "inherit")}}
+                   :z-index "1"
+                   :pointer-events "none"
+                   :display (if (or (empty? locations) @ready?) "none" "inherit")
+                   }}
           (icons/loading :large)]
          [:div {:id id
-                :style {:display (if (or (not location) @ready?) "inherit" "none")}
+                :style {:display (if (or (empty? locations) @ready?) "inherit" "none")}
                 }]]))}))

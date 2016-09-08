@@ -79,4 +79,12 @@
             ;;;;;;;;;;;;;;
 
             [:.error
-             {:color colour/error}]])
+             {:color colour/error}]
+
+            ;;;;;;;;;;;;;;
+            [:.rotates
+             {:transition "transform 0.3s"}]
+            [:.rotate0
+             {:transform "rotate(0deg)"}]
+            [:.rotate270
+             {:transform "rotate(-90deg)"}]])

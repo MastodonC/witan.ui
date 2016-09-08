@@ -17,17 +17,26 @@
       (js/Split.
        (clj->js ["#primary" "#secondary"])
        (clj->js {:direction "vertical"
-                 :sizes [50, 50]
+                 :sizes [55, 45]
                  :gutterSize 8
-                 :minSize 200
-                 :cursor "row-resize"})))
+                 :minSize 200}))
+      (js/Split.
+       (clj->js ["#secondary-left" "#secondary-right"])
+       (clj->js {:sizes [60, 40]
+                 :gutterSize 8
+                 :minSize 200})))
     :reagent-render
     (fn []
       [:div#split
        [:div#primary
         [primary/view]]
        [:div#secondary
-        [secondary/view]]])}))
+        [:div
+         {:style {:height "100%"}}
+         [:div#secondary-left
+          [secondary/main-view]]
+         [:div#secondary-right
+          [secondary/results-view]]]]])}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS

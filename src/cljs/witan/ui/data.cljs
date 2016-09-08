@@ -41,14 +41,14 @@
                     :workspace/running? s/Bool
                     :workspace/pending? s/Bool
                     (s/optional-key :workspace/current) (get wgs/WorkspaceMessage "1.0.0")
-                    (s/optional-key :workspace/current-results) [{:result/location s/Str
-                                                                  :result/key s/Keyword
-                                                                  :result/downloading? s/Bool
-                                                                  (s/optional-key :result/content) s/Any}]
                     (s/optional-key :workspace/current-viz) {:result/location s/Str}
                     (s/optional-key :workspace/model-list) [{s/Keyword s/Any}]}
    :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/WorkspaceMessage "1.0.0")])}
    :app/data-dash (s/maybe s/Any)
+   :app/workspace-results [{:result/location s/Str
+                            :result/key s/Keyword
+                            :result/downloading? s/Bool
+                            (s/optional-key :result/content) s/Any}]
    :app/panic-message (s/maybe s/Str)})
 
 ;; default app-state
@@ -71,6 +71,7 @@
                     :workspace/pending? true}
     :app/workspace-dash {:wd/workspaces nil}
     :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}
+    :app/workspace-results []
     :app/panic-message nil}
    (s/validate AppStateSchema)
    (atomize-map)))
