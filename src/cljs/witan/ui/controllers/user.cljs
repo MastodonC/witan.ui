@@ -25,8 +25,10 @@
        (contains-numbers pass)
        true))
 
+(def email-regex #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}")
+
 (def Login
-  {:username (s/constrained s/Str #(> (count %) 5))
+  {:username email-regex
    :password (s/constrained s/Str valid-password)})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
