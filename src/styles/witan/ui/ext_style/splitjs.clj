@@ -14,8 +14,11 @@
               :background-repeat :no-repeat
               :background-position (percent 50)}
              [:&.gutter-vertical
-              {:cursor :row-resize
-               :background-image (util/url "../img/horizontal.png")}]]
-            [:.split.split-horizontal :.gutter.gutter-horizontal]
-            {:height (percent 100)
-             :float :left}])
+              {:width (percent 100)
+               :cursor 'ns-resize
+               :background-image (util/url "../img/horizontal.png")}]
+             [:&.gutter-horizontal
+              {:height (percent 100)
+               :cursor 'ew-resize
+               :float :left
+               :background-image (util/url "../img/vertical.png")}]]])

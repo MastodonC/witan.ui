@@ -93,18 +93,21 @@
                 :display :flex}]]
 
              [:#secondary
-              [:div#outer-container
+              [:div.secondary-outer-container
                {:height (percent 100)
                 :position :relative}]
-              [:div#container
-               {:top (px (+ 6 switcher-height))
+              [:div.secondary-container
+               {:top (px (+ 2 switcher-height))
                 :overflow :auto
                 :position :absolute
                 :bottom (px 0)
                 :right (px 0)
                 :left (px 0)}]
-              [:#secondary-content
-               {}]]]
+              [:dev.secondary-content
+               {}]]
+             [:#secondary-left :#secondary-right
+              {:height (percent 100)
+               :float :left}]]
 
             [:.primary-switcher
              {:height (px (+ (* switcher-padding 2) switcher-icon-dx))
@@ -145,7 +148,7 @@
                :background-color colour/switcher-bg
                :margin 0
                :border-left [[(px 1) 'solid colour/side-bg]]
-               :box-shadow [[ (px 0) (px 2) (px 4) colour/box-shadow]]
+               :box-shadow [[(px 0) (px 2) (px 4) colour/box-shadow]]
                :font-weight :bold}]
              [:.selected
               {:background-color colour/switcher-button-selected

@@ -4,19 +4,19 @@
             [witan.ui.data :as data]
             [witan.ui.controller :as controller]
             [witan.ui.strings :refer [get-string]])
-  (:require-macros
-   [devcards.core :as dc :refer [defcard deftest]]))
+  (:require-macros [cljs-log.core :as log]
+                   [devcards.core :as dc :refer [defcard deftest]]))
 
 (defn format-catalog
   [catalog]
-  (->> (reduce (fn [a {:keys [witan/params witan/name witan/type]}]
+  (->> catalog
+       (reduce (fn [a {:keys [witan/params witan/name witan/type]}]
                  (if-not (and params (not= :input type))
                    a
                    (reduce-kv (fn [a' k' v']
-                                (-> a
+                                (-> a'
                                     (update k' #(assoc % :value v'))
-                                    (update k' #(update % :fns conj name)))) a params))) {}
-               catalog)
+                                    (update k' #(update % :fns conj name)))) a params))) {})
        (sort)))
 
 (defn configuration-view

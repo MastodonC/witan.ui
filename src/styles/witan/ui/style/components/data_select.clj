@@ -16,7 +16,7 @@
                [:button
                 {:margin-right (px 10)}]
                [:.input-container
-                {:width (percent 80)
+                {:width (percent 99)
                  :overflow :hidden
                  :font-size (em 1)
                  :font-family "monospace"}

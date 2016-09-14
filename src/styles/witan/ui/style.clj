@@ -15,6 +15,7 @@
             [witan.ui.style.components.viz :as viz]
             [witan.ui.style.components.data-select :as data-select]
             [witan.ui.style.components.configuration :as configuration]
+            [witan.ui.style.components.results :as results]
 
             ;;
             [witan.ui.ext-style.splitjs :as splitjs]))
@@ -35,6 +36,7 @@
     topology/style
     data-select/style
     configuration/style
+    results/style
     ;;
     splitjs/style]
    ;;

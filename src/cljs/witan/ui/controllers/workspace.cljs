@@ -52,11 +52,10 @@
     (data/get-app-state :app/workspace)
     result
     dling?))
-  ([workspace result dling?]
-   (let [{:keys [workspace/current-results]} workspace
-         cr' (vec (-> (remove #{result} current-results)
+  ([current-results result dling?]
+   (let [cr' (vec (-> (remove #{result} current-results)
                       (conj (assoc result :result/downloading? dling?))))]
-     (data/swap-app-state! :app/workspace assoc :workspace/current-results cr'))))
+     (data/reset-app-state! :app/workspace-results cr'))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Schema
@@ -91,13 +90,15 @@
   [:workspace/finished-with-results "1.0.0"]
   [{event :args}]
   (let [results (get-in event [:event/params :workspace/results])
+        timestamp (:event/created-at event)
         make-result-fn (fn [[k v]] {:result/key k
                                     :result/location v
+                                    :result/created-at timestamp ;; TODO replace with real time stamp at some point
                                     :result/downloading? false})]
     (log/debug "Got new results:" results)
     (data/swap-app-state! :app/workspace assoc
-                          :workspace/current-results (mapv make-result-fn results)
-                          :workspace/running? false)))
+                          :workspace/running? false)
+    (data/swap-app-state! :app/workspace-results concat (mapv make-result-fn results))))
 
 (defmethod on-event
   [:workspace/finished-with-errors "1.0.0"]
@@ -111,9 +112,9 @@
   [{event :args}]
   (let [{:keys [workspace/result-url
                 workspace/original-location]} (:event/params event)
-        wsp                                   (data/get-app-state :app/workspace)
+        wsp-results                           (data/get-app-state :app/workspace-results)
         original-result                       (some #(when (= original-location (:result/location %)) %)
-                                                    (:workspace/current-results wsp))
+                                                    wsp-results)
         filename                              (str (name (:result/key original-result)) ".csv")]
     (when original-result
       (let [handler (fn [response]
@@ -121,9 +122,9 @@
                       (js/saveAs
                        (js/Blob. #js [response] #js {:type "text/csv;charset=utf-8"})
                        filename)
-                      (set-result-downloading! wsp original-result false))
+                      (set-result-downloading! wsp-results original-result false))
             error-handler (fn [response]
-                            (set-result-downloading! wsp original-result false)
+                            (set-result-downloading! wsp-results original-result false)
                             (log/severe response))]
         (ajax/GET result-url  {:handler handler
                                :error-handler error-handler})))))
@@ -326,20 +327,15 @@
 
 (defmethod handle :download-result
   [_ {:keys [result]}]
-  (let [wsp (data/get-app-state :app/workspace)]
-    (set-result-downloading! wsp result true)
-    (data/command! :workspace/create-result-url "1.0.0" {:workspace/result-location (:result/location result)})))
-
-(defmethod handle :download-result
-  [_ {:keys [result]}]
-  (let [wsp (data/get-app-state :app/workspace)]
-    (set-result-downloading! wsp result true)
+  (let [wsp-results (data/get-app-state :app/workspace-results)]
+    (set-result-downloading! wsp-results result true)
     (data/command! :workspace/create-result-url "1.0.0" {:workspace/result-location (:result/location result)})))
 
 (defmethod handle :open-as-visualisation
   [_ {:keys [location style]}]
-  (data/swap-app-state! :app/workspace assoc :workspace/current-viz {:result/location location
-                                                                     :viz/style style}))
+  (data/swap-app-state! :app/workspace assoc-in [:workspace/current-viz :result/location] location)
+  (when style
+    (data/swap-app-state! :app/workspace assoc-in [:workspace/current-viz :viz/style] style)))
 
 (defmethod handle :change-visualisation-style
   [_ m]

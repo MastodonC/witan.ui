@@ -137,7 +137,10 @@
    :string/run                            "Run"
    :string/running                        "Running"
    :string/no-viz-selected                "Please select the data you'd like to visualise!"
-   :string/no-viz-selected-desc           "If you don't have any data yet, try running the workspace first."})
+   :string/no-viz-selected-desc           "If you don't have any data yet, try running the workspace first."
+   :string/workspace-result-history       "Result History"
+   :string/no-results                     "You haven't generated any results yet."
+   :string/compare                        "Compare"})
 
 (defn get-string
   ""
