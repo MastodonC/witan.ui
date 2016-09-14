@@ -5,9 +5,29 @@
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
+(defn- contains-lowercase-letters
+  [string]
+  (re-find #"[a-z]+" string))
+
+(defn- contains-uppercase-letters
+  [string]
+  (re-find #"[A-Z]+" string))
+
+(defn- contains-numbers
+  [string]
+  (re-find #"[0-9]+" string))
+
+(defn valid-password
+  [pass]
+  (and (> (count pass) 7)
+       (contains-lowercase-letters pass)
+       (contains-uppercase-letters pass)
+       (contains-numbers pass)
+       true))
+
 (def Login
   {:username (s/constrained s/Str #(> (count %) 5))
-   :password (s/constrained s/Str #(> (count %) 7))})
+   :password (s/constrained s/Str valid-password)})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
