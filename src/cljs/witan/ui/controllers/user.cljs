@@ -25,6 +25,7 @@
        (contains-numbers pass)
        true))
 
+;; regex from here http://www.lispcast.com/clojure.spec-vs-schema
 (def email-regex #"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,63}")
 
 (def Login
