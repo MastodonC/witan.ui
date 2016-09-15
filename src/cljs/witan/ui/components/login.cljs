@@ -10,8 +10,8 @@
                    [devcards.core :as dc :refer [defcard]]))
 
 (def password-validation
-  {:pattern ".{8,}"
-   :title "8 characters minimum"})
+  {:pattern "(?=.*\\d.*)(?=.*[a-z].*)(?=.*[A-Z].*).{8,}"
+   :title "8 characters minimum, at least one number, lowercase letter, and uppercase letter"})
 
 (defmulti login-state-view
   (fn [phase data] phase))

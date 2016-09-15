@@ -87,7 +87,6 @@
    :string/new                            "New"
    :string/create                         "Create"
    :string/in-progress-no-downloads       "Sorry, we're still running the projection to generate your data. This can take several minutes so please check again shortly."
-   :string/password-under-length          "The provided password is too short. Please make passwords at least 8 characters long."
    :string/upload-data-public-explain     "Tick this box to make the data visible to everyone (public)"
    :string/password                       "Password"
    :string/created                        "Created"
