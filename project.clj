@@ -13,7 +13,8 @@
                  [sablono "0.6.2"]
                  [reagent "0.6.0-rc"]
                  [cljs-log "0.2.2"]
-                 [jarohen/chord "0.7.0"]
+                 [com.fasterxml.jackson.core/jackson-core "2.6.6"]
+                 [jarohen/chord "0.7.0" :exclusions [com.fasterxml.jackson.core/jackson-core]]
                  [com.andrewmcveigh/cljs-time "0.4.0"]
                  [bidi "2.0.0"]
                  [venantius/accountant "0.1.7"]
@@ -37,6 +38,8 @@
             [lein-garden "0.2.6"]]
 
   :profiles {:uberjar {:auto-clean false}
+             :data {:source-paths ["data-src"]
+                    :dependencies [[amazonica "0.3.73" :exclusions [com.fasterxml.jackson.core/jackson-core]]]}
              :dev {:dependencies [[com.cemerick/piggieback "0.2.1"]
                                   [org.clojure/tools.nrepl "0.2.12"]
                                   [ring/ring-defaults "0.1.5"]
@@ -106,4 +109,5 @@
                   ["vcs" "tag" "release-v"]
                   ["change" "version" "leiningen.release/bump-version"]
                   ["vcs" "commit"]
-                  ["vcs" "push"]])
+                  ["vcs" "push"]]
+  :aliases {"upload-data" ["with-profile" "data" "run" "-m" "witan.ui.upload-data"]})
