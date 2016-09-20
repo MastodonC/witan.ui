@@ -31,10 +31,13 @@
 
 (def id "viz")
 (defonce ready? (r/atom false))
+(defonce settings-open? (r/atom false))
+(defonce last-location (r/atom ""))
 (defonce pymo (atom nil))
 (defonce last-opts (atom nil))
 (def default-viz-options
-  {:spinner false})
+  {:spinner false
+   :settings false})
 
 (def default-style :table)
 (def viz-lookup
@@ -70,16 +73,23 @@
   (let [p (location->path locations style (merge default-viz-options opts))]
     (log/info "Creating iFrame for " p)
     (reset! pymo (.Parent js/pym id p #js {}))
+    (reset! last-location p)
     (.onMessage @pymo "ready" (fn [_]
                                 (log/debug "Viz is ready")
-                                (reset! ready? true)))))
+                                (reset! ready? true)))
+    (.onMessage @pymo "location" (fn [location]
+                                   (reset! last-location (-> location
+                                                             (str/replace #"spinner=false" "spinner=true")
+                                                             (str/replace #"settings=false" "settings=true")))))))
 
 (defn reset-iframe
   [locations style params]
   (reset! ready? false)
-  (let [args (m->query-params (merge {:data (str/join "," locations) :style (name style)} params))]
+  (let [args (m->query-params (merge {:data (str/join "," locations) :style (name style)}
+                                     (merge default-viz-options params)))]
     (log/debug "Resetting iframe to " args)
-    (.sendMessage @pymo "arguments" args)))
+    (.sendMessage @pymo "arguments" args)
+    (reset! settings-open? false)))
 
 (defn clipboard-button [content text]
   (let [clipboard-atom (atom nil)]
@@ -95,8 +105,20 @@
       :reagent-render
       (fn []
         [:button.pure-button
-         {:data-clipboard-text text}
+         {:data-clipboard-text @last-location
+          :key "clipboard-btn"}
          (content)])})))
+
+(defn settings-button
+  []
+  [:button.pure-button
+   {:key "settings-btn"
+    :on-click #(do
+                 (swap! settings-open? not)
+                 (.sendMessage @pymo "toggle-settings" 0))}
+   (if @settings-open?
+     (icons/close :small :dark)
+     (icons/cog :small :dark))])
 
 (defn view
   []
@@ -130,7 +152,8 @@
               ^{:key (str "location" location-idx)}
               (let [location (nth locations location-idx)]
                 [:span
-                 {:style {:border-bottom (str "2px " (nth cat10 location-idx) " solid")}}
+                 {:style {:border-bottom (str "2px " (nth cat10 location-idx) " solid")}
+                  :key "location"}
                  (str
                   (inc location-idx) ": "
                   (-> location
@@ -138,14 +161,18 @@
                       (as-> l (subs l 0 (.lastIndexOf l ".")))
                       (i/capitalize)))]))
             [:select.pure-input
-             {:on-change #(controller/raise! :workspace/change-visualisation-style
+             {:key "select-a-style"
+              :on-change #(controller/raise! :workspace/change-visualisation-style
                                              (get viz-lookup (.. % -target -value)))
               :value (when style (name style))}
-             [:option {:value "table"}    "Table"]
-             [:option {:value "lineplot"} "Line Chart"]]
+             [:option {:value "table"
+                       :key   "table"}    "Table"]
+             [:option {:value "lineplot"
+                       :key   "lineplot"} "Line Chart"]]
             [clipboard-button
              #(icons/link :small :dark)
-             (location->path locations (or style default-style) params)]]
+             (location->path locations (or style default-style) params)]
+            [settings-button]]
            [:div.buttons])
          (when (empty? locations)
            [:div#viz-placeholder.text-center
