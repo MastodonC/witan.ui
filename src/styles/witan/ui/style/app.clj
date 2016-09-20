@@ -19,7 +19,9 @@
               [:.material-icons
                {:vertical-align :middle}]
               [:i
-               {:margin [[(px -3) (px 5) (px 0) (px 0)]]}]]
+               {:margin [[(px -3) (px 0) (px 0) (px 0)]]}]
+              [:span
+               {:margin-left (px 5)}]]
 
              [:hr
               {:height 0

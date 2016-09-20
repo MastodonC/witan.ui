@@ -87,7 +87,7 @@
            :on-click #(when-not running? (controller/raise! :workspace/run-current))}
           (if running?
             (icons/loading :small :dark)
-            (icons/cog :small :dark))
+            (icons/play :small :dark))
           (if running?
             (get-string :string/running)
             (get-string :string/run))]]]

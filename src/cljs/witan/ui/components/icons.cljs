@@ -135,6 +135,10 @@
   [& args]
   (apply create-key "check_box" args))
 
+(defn play
+  [& args]
+  (apply create-key "play_arrow" args))
+
 
 ;;
 
