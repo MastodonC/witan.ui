@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 
+# exports
+export LOG_LEVEL=2
+export WITAN_API_URL=$1
+
 # build
 lein clean
-LOG_LEVEL=2 lein cljsbuild once prod
+lein cljsbuild once prod
 lein garden once
 
 # cp
