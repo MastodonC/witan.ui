@@ -65,7 +65,7 @@
 
 (defn location->path
   [locations style & [opts]]
-  (str "http://localhost:3448/?"
+  (str "http://" (get data/config :viz/address) "/?"
        (m->query-params (merge {:data (str/join "," locations) :style (name style)} opts))))
 
 (defn make-iframe

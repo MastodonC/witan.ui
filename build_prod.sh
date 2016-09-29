@@ -3,6 +3,7 @@
 # exports
 export LOG_LEVEL=2
 export WITAN_API_URL=$1
+export WITAN_VIZ_URL=$2
 
 # build
 lein clean
