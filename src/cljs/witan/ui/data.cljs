@@ -13,7 +13,8 @@
                    [cljs.core.async.macros :refer [go go-loop]]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
-(def config {:gateway/address (or (cljs-env :witan-api-url) "localhost:30015")})
+(def config {:gateway/address (or (cljs-env :witan-api-url) "localhost:30015")
+             :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; App State
