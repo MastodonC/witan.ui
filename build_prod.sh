@@ -2,7 +2,7 @@
 
 # exports
 export LOG_LEVEL=2
-export WITAN_API_URL=$1
+export WITAN_API_URL=$1/api
 
 # build
 lein clean
