@@ -73,4 +73,4 @@
            (icons/error :large :dark)
            [:h1 (get-string :string/error)]
            [:h3 (get-string :string/workspace-404-error)]
-           [:h4 [:a {:href "/"} "Click here to view your Workspaces"]]])))))
+           [:h4 [:a {:href "/"} (get-string :string/return-to-dash)]]])))))

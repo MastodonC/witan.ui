@@ -54,7 +54,7 @@
 
 (defonce add-hooks
   (do
-    (log/info "Adding resize event listener...")
+    (log/debug "Adding resize event listener...")
     (.addEventListener js/window "resize" on-resize)))
 
 (defn m->query-params
@@ -71,7 +71,7 @@
 (defn make-iframe
   [locations style & [opts]]
   (let [p (location->path locations style (merge default-viz-options opts))]
-    (log/info "Creating iFrame for " p)
+    (log/debug "Creating iFrame for " p)
     (reset! pymo (.Parent js/pym id p #js {}))
     (reset! last-location p)
     (.onMessage @pymo "ready" (fn [_]
@@ -149,11 +149,10 @@
          (if (and (not-empty locations) @ready?)
            [:div.buttons.pure-form
             (for [location-idx (range (count locations))]
-              ^{:key (str "location" location-idx)}
               (let [location (nth locations location-idx)]
                 [:span
                  {:style {:border-bottom (str "2px " (nth cat10 location-idx) " solid")}
-                  :key "location"}
+                  :key (str "location" location-idx)}
                  (str
                   (inc location-idx) ": "
                   (-> location

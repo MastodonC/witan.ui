@@ -20,6 +20,7 @@
      (get
       {:workspaces  icons/workspace
        :data        icons/data
+       :rts         icons/request-to-share
        :help        icons/help
        :logout      icons/logout}
       id) props)))
@@ -36,6 +37,8 @@
                  :tooltip :string/tooltip-workspace}
     :data       {:fnc (partial navigate! :app/data-dash)
                  :tooltip :string/tooltip-data}
+    :rts        {:fnc (partial navigate! :app/request-to-share)
+                 :tooltip :string/tooltip-request-to-share}
     :help       {:fnc nil
                  :tooltip :string/tooltip-help}
     :logout     {:fnc #(controller/raise! :user/logout)

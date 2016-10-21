@@ -10,7 +10,7 @@
               {:position       :absolute
                :vertical-align :middle
                :margin         (em 0.24)}]
-             [:#filter-input
+             [:input
               {:padding-left (px 30)
                :width        (percent 100)}]]
 
@@ -62,7 +62,23 @@
               {:font-family fonts/base-fonts
 
                :font-weight 500
-               :font-size (em 1.2)}]]
+               :font-size (em 1.2)}]
+             [:.shared-search-input
+              {:display :inline-flex
+               :font-size (px 14)
+               :vertical-align :super
+               :margin-left (em 1)}
+              [:form
+               {:width (em 36)}]]]
+
+            ;;;;;;;;;;;;;;
+
+            [:.shared-inline-group :.shared-inline-schema
+             {:display :inline}
+             [:.group-icon :.schema-icon
+              {:display :inline
+               :vertical-align :sub
+               :margin-right (em 0.2)}]]
 
             ;;;;;;;;;;;;;;
 
@@ -82,9 +98,26 @@
              {:color colour/error}]
 
             ;;;;;;;;;;;;;;
+
             [:.rotates
              {:transition "transform 0.3s"}]
             [:.rotate0
              {:transform "rotate(0deg)"}]
             [:.rotate270
-             {:transform "rotate(-90deg)"}]])
+             {:transform "rotate(-90deg)"}]
+
+            ;;;;;;;;;;;;;;
+
+            [:.shared-index
+             [:.alpha-header
+              [:.alpha-header-clickable
+               {:color 'blue
+                :cursor :pointer}]
+              [:a :span
+               {:margin-right (px 4)
+                :font-size (px 18)}]]
+             [:.alpha-index
+              [:h1
+               {:font-size (px 24)
+                :font-weight :bold
+                :font-family fonts/base-fonts}]]]])

@@ -6,41 +6,25 @@
 (def style [[:.dashboard
              {:height (percent 100)
               :min-width (px 800)}
-             [:.heading
-              {:background-color colour/dash-heading-bg
-               :padding-left (px 15)
-               :box-shadow "0px 2px 4px #888"
-               :position :relative
-               :height values/app-peripheral-height
-               :z-index 50}
-              [:h1
-               {:padding (px 0)
-                :margin [[(px (/ values/app-peripheral-height-value 4)) (px 0) (px 0) (px 0)]]
-                :line-height (em 1)
-                :display :inline-block
-                :width (em 6)
-                :font-weight 700}]
-              [:.shared-search-input
-               {:display :inline-flex
-                :font-size (px 14)
-                :vertical-align :super
-                :margin-left (em 1)}
-               [:form
-                {:width (em 36)}]]]
-
              [:.content
               {:position :absolute
                :top values/app-peripheral-height
+               :padding 0
                :bottom 0
                :left 0
                :right 0
                :overflow-y :auto
                :overflow-x :hidden}
+              [:h1
+               {:display :inline-block
+                :font-weight 400}]
               [:#container
                {:width (percent 99)}]]
 
-             [:.buttons
-              {:float :right
+             [:.dash-buttons
+              {:position :absolute
+               :top 0
+               :right 0
                :display :flex
                :justify-content :center
                :height (percent 100)
@@ -49,4 +33,17 @@
                {:background-color colour/button-create
                 :color colour/body-bg}]
               [:.workspace-view
-               {:background-color colour/button-view}]]]])
+               {:background-color colour/button-view}]]]
+
+            ;;;;;;;;;;;;;;;;;;;;;
+            [:#rts-no-requests
+             {:text-align :center
+              :padding (em 1)}]
+            [:#rts-functions
+             {:padding [[(px 0) (px 10)]]}
+             [:div.buttons
+              [:div
+               [:span
+                {:padding (em 1)}]
+               [:.description
+                {:font-size (em 1.1)}]]]]])

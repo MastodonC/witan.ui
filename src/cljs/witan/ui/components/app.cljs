@@ -4,8 +4,11 @@
             ;;
             [witan.ui.components.dashboard.workspaces :as workspace-dash]
             [witan.ui.components.dashboard.data :as data-dash]
+            [witan.ui.components.dashboard.rts :as rts-dash]
+            [witan.ui.components.rts :as rts]
             [witan.ui.components.split :as split]
-            [witan.ui.components.create-workspace :as createws]
+            [witan.ui.components.create-workspace :as create-ws]
+            [witan.ui.components.create-rts :as create-rts]
             [witan.ui.components.panic :refer [panic-screen]]
             [witan.ui.utils :as utils]
             [witan.ui.data :as data]
@@ -17,7 +20,10 @@
   {:app/workspace-dash   workspace-dash/view
    :app/data-dash        data-dash/view
    :app/workspace        split/view
-   :app/create-workspace createws/view})
+   :app/create-workspace create-ws/view
+   :app/request-to-share rts-dash/view
+   :app/rts-create       create-rts/view
+   :app/rts              rts/view})
 
 (defn root-view
   []

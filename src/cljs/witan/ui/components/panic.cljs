@@ -19,7 +19,7 @@
          [:div [:strong "Have another go and if it persists, please get in touch."]]
          [:br]
          [:br]
-         (icons/cake :x-large :dark)
+         (icons/bug :x-large :dark)
          [:h2 (str "Restarting app in " @countdown " seconds...")]
          [:p
           [:span.error message]]]))))

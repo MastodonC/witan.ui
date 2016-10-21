@@ -109,3 +109,10 @@
 
 ;; results
 (def result-header (color/lighten button-view 10))
+
+;; rts
+(def rts-button-create button-view)
+(def rts-info-bg "#ddd")
+
+;; hero
+(def hero-bg (color/lighten lol-color-3 22))

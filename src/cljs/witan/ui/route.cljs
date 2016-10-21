@@ -14,10 +14,14 @@
 
 (def route-patterns
   ["/app/" {"" nil
-            "dashboard/" {"data"      :app/data-dash
-                          "workspace" :app/workspace-dash}
-            "workspace/" {"create"    :app/create-workspace
-                          ["id/" :id] :app/workspace}}])
+            "dashboard/" {"data"          :app/data-dash
+                          "workspace"     :app/workspace-dash
+                          "rts"           :app/request-to-share}
+            "workspace/" {"create"        :app/create-workspace
+                          ["id/" :id]     :app/workspace}
+            "rts/"       {"create"        :app/rts-create
+                          ["id/" :id]     :app/rts
+                          ["submit/" :id] :app/rts-submit}}])
 
 (defn path-exists?
   [path]
@@ -31,7 +35,7 @@
 (defn dispatch-path!
   [path]
   (let [route (if (= "/" path)
-                {:handler :app/workspace-dash} ;; default
+                {:handler :app/data-dash} ;; default
                 (bidi/match-route route-patterns path))]
     (if route
       (let [{:keys [handler route-params]} route
@@ -44,16 +48,22 @@
         (put! app-route-chan handler))
       (log/severe "Couldn't match a route to this path:" path))))
 
+(defn find-path
+  ([route]
+   (find-path route {}))
+  ([route args]
+   (apply bidi/path-for route-patterns route (mapcat vec args))))
+
 (defn navigate!
   ([route]
    (navigate! route {}))
   ([route args]
    (navigate! route args {}))
   ([route args query]
-   (let [path (apply bidi/path-for route-patterns route (mapcat vec args))]
+   (let [path (find-path route args)]
      (if path
        (do
-         (log/info "Navigating to" route args "=>" path)
+         (log/debug "Navigating to" route args "=>" path)
          (accountant/navigate! path query))
        (log/severe "No path was found for route" route args)))))
 

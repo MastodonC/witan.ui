@@ -31,13 +31,21 @@
                :border 0
                :border-bottom [[(px 1) 'solid "#ddd"]]}]
 
+             [:.padded-content
+              {:padding [[(em 0) (em 1)]]}]
+
+             [:.flex
+              {:display :flex
+               :align-items :flex-start
+               :justify-content :space-between}]
+
              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
              ;; Create Workspace
 
              [:#create-workspace
               [:#content
                {:padding [[(em 0) (em 1)]]
-                :width (px 700)}
+                :max-width (px 700)}
                [:h2
                 [:em
                  {:font-size (px 12)
@@ -47,6 +55,38 @@
                [:button
                 {:background-color colour/button-create
                  :color colour/body-bg}]]]
+
+             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+             ;; Create RTS
+
+             [:.user-list :.schema-list
+              {:display :block}
+              [:& :table
+               {:border "none"}
+               [:thead :th
+                {:background-color colour/switcher-bg}]
+               [:td :th
+                {:border "none"}]]
+              [:.user-list-item :.schema-list-item
+               {:margin-bottom (em 0.4)}
+               [:.button-container
+                {:display :inline
+                 :margin-right (em 0.6)}
+                [:button
+                 {:background-color colour/button-view
+                  :color colour/button-create}]]]]
+
+             [::.loading
+              {:width pc100
+               :height pc100
+               :background-color colour/body-bg
+               :position :absolute
+               :top (em 2)
+               :display :table
+               :text-align :center}
+              [:div
+               {:display :table-cell
+                :vertical-align :middle}]]
 
              [:#split
               {:height pc100
@@ -104,9 +144,7 @@
                 :position :absolute
                 :bottom (px 0)
                 :right (px 0)
-                :left (px 0)}]
-              [:dev.secondary-content
-               {}]]
+                :left (px 0)}]]
              [:#secondary-left :#secondary-right
               {:height (percent 100)
                :float :left}]]
@@ -154,4 +192,19 @@
                :font-weight :bold}]
              [:.selected
               {:background-color colour/switcher-button-selected
-               :pointer-events :none}]]])
+               :pointer-events :none}]]
+
+            [:div.hero-notification
+             {:position :relative
+              :margin [[(px 0) (px 0)]]
+              :border [[(px 1) 'silver 'solid]]
+              :border-right 0
+              :background-color colour/hero-bg
+              :padding [[(px 0) (px 10) (px 10) (px 10)]]}
+             [:div.hero-close
+              {:position :absolute
+               :right (px 1)
+               :cursor :pointer
+               :color 'silver}
+              [:&:hover
+               {:color 'gray}]]]])
