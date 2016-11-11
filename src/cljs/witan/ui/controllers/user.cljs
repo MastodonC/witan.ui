@@ -24,7 +24,7 @@
 (defn login-success!
   [{:keys [id token] :as response}]
   (when response
-    (data/swap-app-state! :app/user assoc  :user/id (uuid id))
+    (data/swap-app-state! :app/user assoc  :user/id (str id))
     (data/swap-app-state! :app/login assoc :login/token token)
     (data/swap-app-state! :app/login assoc :login/message nil)
     (data/save-data!))
@@ -70,6 +70,60 @@
   [event {:keys [email pass]}]
   (data/delete-data!)
   (.replace js/location "/" true))
+
+(defmethod handle :search-groups
+  [event {:keys [search]}]
+  (data/swap-app-state! :app/user assoc :user/group-search-results
+                        [{:kixi.group/name "Bob"
+                          :kixi.group/id "a74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
+                          :kixi.group/type :user
+                          :kixi.group/emails ["bob@example.com"]}
+                         {:kixi.group/name "Bob1"
+                          :kixi.group/id "b74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
+                          :kixi.group/type :user
+                          :kixi.group/emails ["bob1@example.com"]}
+                         {:kixi.group/name "Bob2"
+                          :kixi.group/id "c74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
+                          :kixi.group/type :user
+                          :kixi.group/emails ["bob2@example.com"]}
+                         {:kixi.group/name "Bob3"
+                          :kixi.group/id "d74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
+                          :kixi.group/type :user
+                          :kixi.group/emails ["bob3@example.com"]}
+                         {:kixi.group/name "Bob4"
+                          :kixi.group/id "e74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
+                          :kixi.group/type :user
+                          :kixi.group/emails ["bob4@example.com"]}
+                         {:kixi.group/name "Alice1"
+                          :kixi.group/id "f74f742d-9cb9-4ede-aeaf-f82aa4b6f3a8"
+                          :kixi.group/type :user
+                          :kixi.group/emails ["alice1@example.com"]}
+                         {:kixi.group/name "Alice2"
+                          :kixi.group/id "f74f742d-9cb9-4ede-aeaf-f82aa4b6f3a7"
+                          :kixi.group/type :user
+                          :kixi.group/emails ["alice2@example.com"]}
+                         {:kixi.group/name "Alice3"
+                          :kixi.group/id "f74f742d-9cb9-4ede-aeaf-f82aa4b6f3a6"
+                          :kixi.group/type :user
+                          :kixi.group/emails ["alice3@example.com"]}
+                         {:kixi.group/name "Alice4"
+                          :kixi.group/id "f74f742d-9cb9-4ede-aeaf-f82aa4b6f3a5"
+                          :kixi.group/type :user
+                          :kixi.group/emails ["alice4@example.com"]}
+                         {:kixi.group/name "Alice5"
+                          :kixi.group/id "f74f742d-9cb9-4ede-aeaf-f82aa4b6f3a4"
+                          :kixi.group/type :user
+                          :kixi.group/emails ["alice5@example.com"]}
+                         {:kixi.group/name "GLA Demography"
+                          :kixi.group/id "074f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
+                          :kixi.group/type :group
+                          :kixi.group/emails ["alice1@example.com"
+                                              "bob1@example.com"]}
+                         {:kixi.group/name "Camden Demography"
+                          :kixi.group/id "074f742d-9cb9-4ede-aeaf-f82aa4b6329a"
+                          :kixi.group/type :group
+                          :kixi.group/emails ["alice2@example.com"
+                                              "bob2@example.com"]}]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

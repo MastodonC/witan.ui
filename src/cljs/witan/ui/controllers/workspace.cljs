@@ -2,7 +2,6 @@
   (:require [schema.core :as s]
             [ajax.core :as ajax]
             [witan.ui.data :as data]
-            [witan.gateway.schema :as wgs]
             [witan.ui.utils :as utils]
             [cljs-time.core :as t]
             [cljs-time.format :as tf]
@@ -39,7 +38,7 @@
        [:function/name
         :function/id
         :function/version]}
-    (data/query `[{(:workspace/list-by-owner ~id)
+    (data/query `[{[:workspace/list-by-owner ~id]
                    [:workspace/name
                     :workspace/id
                     :workspace/owner-name
@@ -68,17 +67,20 @@
 ;; Event
 
 (defmulti on-event
-  (fn [{:keys [args]}] [(:event/key args) (:event/version args)]))
+  (fn [{:keys [args]}] [(:kixi.comms.event/key args) (:kixi.comms.event/version args)]))
+
+(defmethod on-event
+  :default [_])
 
 (defmethod on-event
   [:workspace/saved "1.0.0"]
   [{event :args}]
-  (log/debug "Workspace" (get-in event [:event/params :workspace/id]) "was saved."))
+  (log/debug "Workspace" (get-in event [:kixi.comms.event/payload :workspace/id]) "was saved."))
 
 (defmethod on-event
   [:workspace/run-failed "1.0.0"]
   [{event :args}]
-  (log/warn "Workspace failed to run" (get-in event [:event/params :workspace/id])))
+  (log/warn "Workspace failed to run" (get-in event [:kixi.comms.event/payload :workspace/id])))
 
 (defmethod on-event
   [:workspace/started-running "1.0.0"]
@@ -214,11 +216,12 @@
   :app/workspace
   [{:keys [args]}]
   (let [workspace-id (cljs.core/uuid (get-in args [:route/params :id]))
-        workspace-fields (vec
-                          (filter keyword? (-> wgs/WorkspaceMessage
-                                               (get "1.0.0")
-                                               (keys))))]
-    (data/query `[{(:workspace/by-id ~workspace-id) ~workspace-fields}] on-receive)))
+        workspace-fields [:workspace/name
+                          :workspace/id
+                          :workspace/owner-id
+                          :workspace/description
+                          :workspace/modified]]
+    (data/query `[{[:workspace/by-id ~workspace-id] ~workspace-fields}] on-receive)))
 
 (defmethod on-route-change
   :app/workspace-dash
@@ -251,14 +254,12 @@
   [event {:keys [name desc]}]
   (let [{:keys [user/id]} (data/get-app-state :app/user)
         w-id (random-uuid)
-        wsp (wgs/validate-workspace
-             "1.0.0"
-             {:workspace/name name
+        wsp  {:workspace/name name
               :workspace/id w-id
               :workspace/description desc
               :workspace/owner-id id
               :workspace/owner-name "Me" ;; TODO
-              :workspace/modified (utils/jstime->str (t/now))})]
+              :workspace/modified (utils/jstime->str (t/now))}]
     (data/swap-app-state! :app/workspace-dash update-in [:wd/workspaces] #(conj % wsp))
     (data/swap-app-state! :app/workspace assoc :workspace/current wsp)
     (data/swap-app-state! :app/workspace assoc :workspace/pending? false)
@@ -272,7 +273,7 @@
 (defmethod handle :select-model
   [_ {:keys [name version]}]
   (log/debug "Fetching model" name version)
-  (data/query `[{(:workspace/model-by-name-and-version ~name ~version)
+  (data/query `[{[:workspace/model-by-name-and-version ~name ~version]
                  [:workflow :catalog :metadata]}]
               #(let [[_ {:keys [workflow catalog]}] %]
                  (on-receive %)

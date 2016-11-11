@@ -16,8 +16,8 @@
   (method-fn {:params params
               :handler (partial handle-response :success id result-cb)
               :error-handler (partial handle-response :failure id result-cb)
-              :format :json
-              :response-format :json
+              :format :transit
+              :response-format :transit
               :keywords? true
               :headers auth}))
 

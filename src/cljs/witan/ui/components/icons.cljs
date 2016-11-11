@@ -6,6 +6,8 @@
 
 (defn decode-keys [& args]
   (let [lookup {:error "md-error"
+                :success "md-success"
+                :warning "md-warning"
                 :dark "md-dark"
                 :light "md-light"
                 :disabled "md-inactive"
@@ -13,7 +15,8 @@
                 :medium "md-m"
                 :large "md-l"
                 :x-large "md-xl"
-                :spin "anim-spin"}]
+                :spin "anim-spin"
+                :silver "md-silver"}]
     (reduce (fn [a r]
               (apply str a
                      (if-let [value (get lookup r)]
@@ -139,6 +142,50 @@
   [& args]
   (apply create-key "play_arrow" args))
 
+(defn bug
+  [& args]
+  (apply create-key "bug_report" args))
+
+(defn request-to-share
+  [& args]
+  (apply create-key "assignment_return" args))
+
+(defn user
+  [& args]
+  (apply create-key "person" args))
+
+(defn organisation
+  [& args]
+  (apply create-key "location_city" args))
+
+(defn delete
+  [& args]
+  (apply create-key "delete" args))
+
+(defn tick
+  [& args]
+  (apply create-key "done" args))
+
+(defn schema
+  [& args]
+  (apply create-key "assignment" args))
+
+(defn email
+  [& args]
+  (apply create-key "email" args))
+
+(defn tick-circle
+  [& args]
+  (apply create-key "check_circle" args))
+
+(defn warning
+  [& args]
+  (apply create-key "warning" args))
+
+(defn file
+  [& args]
+  (apply create-key "insert_drive_file" args))
+
 
 ;;
 
@@ -188,7 +235,19 @@
                     ["link"          link]
                     ["tree-arrow-down" tree-arrow-down]
                     ["unchecked"     unchecked]
-                    ["checked"       checked]]]
+                    ["checked"       checked]
+                    ["play"          play]
+                    ["bug"           bug]
+                    ["request-to-share" request-to-share]
+                    ["user"          user]
+                    ["organisation"  organisation]
+                    ["delete"        delete]
+                    ["done"          done]
+                    ["schema"        schema]
+                    ["email"         email]
+                    ["tick-circle"   tick-circle]
+                    ["warning"       warning]
+                    ["file"          file]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div

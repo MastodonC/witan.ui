@@ -9,10 +9,10 @@
 
 (defn header
   [{:keys [title buttons filter-txt filter-fn on-button-click]}]
-  [:div.heading
+  [:div.shared-heading
    [:h1 (get-string title)]
    (shared/search-filter (get-string filter-txt) filter-fn)
-   [:div.buttons
+   [:div.dash-buttons
     (for [button buttons]
       (shared/button button on-button-click))]])
 

@@ -3,7 +3,7 @@
             [goog.net.cookies :as cookies]
             [goog.crypt.base64 :as b64]
             [schema.core :as s]
-            [witan.gateway.schema :as wgs]
+            [witan.ui.schema :as ws]
             [chord.client :refer [ws-ch]]
             [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all put! close!]]
             [cljs.reader :as reader]
@@ -27,36 +27,12 @@
   [m]
   (reduce-kv (fn [a k v] (assoc a k (deref v))) {} m))
 
-;; app state schema
-(def AppStateSchema
-  {:app/side {:side/upper [[s/Keyword]]
-              :side/lower [[s/Keyword]]}
-   :app/login {:login/token (s/maybe s/Str)
-               :login/message (s/maybe s/Str)}
-   :app/user {:user/name (s/maybe s/Str)
-              :user/id (s/maybe s/Uuid)}
-   :app/route {:route/path (s/maybe s/Keyword)
-               :route/params (s/maybe s/Any)
-               :route/query (s/maybe {s/Keyword s/Any})}
-   :app/workspace  {:workspace/temp-variables {s/Str s/Str}
-                    :workspace/running? s/Bool
-                    :workspace/pending? s/Bool
-                    (s/optional-key :workspace/current) (get wgs/WorkspaceMessage "1.0.0")
-                    (s/optional-key :workspace/current-viz) {:result/location s/Str}
-                    (s/optional-key :workspace/model-list) [{s/Keyword s/Any}]}
-   :app/workspace-dash {:wd/workspaces (s/maybe [(get wgs/WorkspaceMessage "1.0.0")])}
-   :app/data-dash (s/maybe s/Any)
-   :app/workspace-results [{:result/location s/Str
-                            :result/key s/Keyword
-                            :result/downloading? s/Bool
-                            (s/optional-key :result/content) s/Any}]
-   :app/panic-message (s/maybe s/Str)})
-
 ;; default app-state
 (defonce app-state
   (->>
    {:app/side {:side/upper [[:button :workspaces]
-                            [:button :data]]
+                            [:button :data]
+                            [:button :rts]]
                :side/lower [[:button :help]
                             [:button :logout]]}
     :app/login {:login/token nil
@@ -71,15 +47,25 @@
                     :workspace/running? false
                     :workspace/pending? true}
     :app/workspace-dash {:wd/workspaces nil}
-    :app/data-dash {:about/content "This is the about page, the place where one might write things about their own self."}
+    :app/data-dash {}
+    :app/rts-dash {}
     :app/workspace-results []
-    :app/panic-message nil}
-   (s/validate AppStateSchema)
+    :app/panic-message nil
+    :app/create-rts {:crts/pending? false}
+    :app/request-to-share {:rts/requests {}
+                           :rts/current nil
+                           :rts/pending? false}
+    :app/datastore {}}
+   (s/validate ws/AppStateSchema)
    (atomize-map)))
 
 (defn get-app-state
   [k]
   (deref (get app-state k)))
+
+(defn get-in-app-state
+  [k & ks]
+  (get-in (deref (get app-state k)) ks))
 
 (defn swap-app-state!
   [k & symbs]
@@ -141,19 +127,20 @@
 
 (defn save-data!
   []
-  (log/info "Saving app state to cookie")
-  (.set goog.net.cookies
-        cookie-name
-        (-> app-state
-            deatomize-map
-            pr-str
-            b64/encodeString)
-        -1
-        "/"))
+  (log/debug "Saving app state to cookie")
+  (let [unencoded (deatomize-map app-state)]
+    (s/validate ws/AppStateSchema unencoded)
+    (.set goog.net.cookies
+          cookie-name
+          (-> unencoded
+              pr-str
+              b64/encodeString)
+          -1
+          "/")))
 
 (defn delete-data!
   []
-  (log/info "Deleting contents of cookie")
+  (log/debug "Deleting contents of cookie")
   (.remove goog.net.cookies
            cookie-name
            "/"))
@@ -166,10 +153,10 @@
       (let [unencoded (->> data b64/decodeString reader/read-string)]
         (try
           (do
-            (s/validate AppStateSchema unencoded)
+            (s/validate ws/AppStateSchema unencoded)
             (run! (fn [[k v]] (reset-app-state! k v)) unencoded)
             (custom-resets!)
-            (log/info "Restored app state from cookie")
+            (log/debug "Restored app state from cookie")
             (publish-topic :data/app-state-restored))
           (catch js/Object e
             (log/warn "Failed to restore app state from cookie:" (str e))
@@ -180,15 +167,34 @@
 ;; Websocket
 
 (defonce ws-conn (atom nil))
-(defonce message-id (atom 0))
 (defonce events (atom []))
 (def query-responses (atom {}))
 (def query-buffer (atom []))
 
+(def transit-encoding-level :json-verbose) ;; DO NOT CHANGE
+
+(def transit-reader
+  (tr/reader
+   transit-encoding-level
+   {:handlers st/cross-platform-read-handlers}))
+
+(defn transit-decode
+  [s]
+  (tr/read transit-reader s))
+
+(def transit-writer
+  (tr/writer
+   transit-encoding-level
+   {:handlers st/cross-platform-read-handlers}))
+
+(defn transit-encode
+  [s]
+  (tr/write transit-writer s))
+
 (defn- send-query
   [m]
   (log/debug "Sending query:" m)
-  (go (>! @ws-conn m)))
+  (go (>! @ws-conn (transit-encode m))))
 
 (defn- buffer-query
   [m]
@@ -205,10 +211,10 @@
 (defn query
   [query cb]
   (if (vector? query)
-    (let [id (swap! message-id inc)
-          m {:message/type :query
-             :query/id id
-             :query/edn query}]
+    (let [id (str (random-uuid))
+          m {:kixi.comms.message/type "query"
+             :kixi.comms.query/id id
+             :kixi.comms.query/body query}]
       (swap! query-responses assoc id cb)
       (if @ws-conn
         (send-query m)
@@ -217,26 +223,19 @@
 
 (defn command!
   [command-key version params]
-  (let [id (swap! message-id inc)
-        m {:message/type :command
-           :command/key command-key
-           :command/version version
-           :command/id id
-           :command/params params}]
+  (let [id (str (random-uuid))
+        m {:kixi.comms.message/type "command"
+           :kixi.comms.command/key command-key
+           :kixi.comms.command/version version
+           :kixi.comms.command/id id
+           :kixi.comms.command/payload params}]
     (log/debug "Sending command:" m)
-    (go (>! @ws-conn m))))
-
-(def transit-reader
-  (tr/reader :json-verbose {:handlers st/cross-platform-read-handlers}))
-
-(defn transit-decode
-  [s]
-  (tr/read transit-reader s))
+    (go (>! @ws-conn (transit-encode m)))))
 
 ;;
 
 (defmulti handle-server-message
-  (fn [{:keys [message/type]}] type))
+  (fn [{:keys [kixi.comms.message/type]}] type))
 
 (defmethod handle-server-message
   :default
@@ -244,26 +243,24 @@
   (log/warn "Unknown message:" msg))
 
 (defmethod handle-server-message
-  :command-receipt
-  [msg])
-
-(defmethod handle-server-message
-  :query-response
-  [{:keys [query/id query/results]}]
+  "query-response"
+  [{:keys [kixi.comms.query/id kixi.comms.query/results kixi.comms.query/error]}]
   (if-let [cb (get @query-responses id)]
-    (doseq [{:keys [query/result query/error] :as qr} results]
-      (if result
-        (let [decoded-result (first (transit-decode result))]
-          (log/debug "Query response:" decoded-result)
-          (cb decoded-result))
-        (do
-          (panic! (str "Error in query response: " qr))
-          (cb [:error (first (:query/original qr))]))))
+    (if error
+      (log/warn "Query failed:" error)
+      (doseq [result results]
+        (if result
+          (let [r (first result)]
+            (log/debug "Query response:" r)
+            (cb r))
+          (do
+            (panic! (str "Error in query response: " result))
+            (cb [:error result])))))
     (log/warn "Received query response id [" id "] but couldn't match callback."))
   (swap! query-responses dissoc id))
 
 (defmethod handle-server-message
-  :event
+  "event"
   [event]
   (publish-topic :data/event-received event))
 
@@ -274,22 +271,22 @@
   (go
     (let [{:keys [ws-channel error]} (<! (ws-ch (str "ws://"
                                                      (get config :gateway/address)
-                                                     "/ws")))]
+                                                     "/ws")
+                                                {:format :str}))]
       (if-not error
         (do
           (reset! ws-conn ws-channel)
           (on-connect)
           (drain-buffered-queries)
           (go-loop []
-            (let [{:keys [message] :as resp} (<! ws-channel)]
+            (let [{:keys [message] :as resp} (<! ws-channel)
+                  message (transit-decode message)]
               (if message
                 (if (contains? message :error)
                   (panic! (str "Received message error: " message))
-                  (if-let [err (wgs/check-message "1.0.0" message)]
-                    (panic! (str "Received message failed validation: " (str err)))
-                    (do
-                      (handle-server-message message)
-                      (recur))))
+                  (do
+                    (handle-server-message message)
+                    (recur)))
                 (log/warn "Websocket connection lost" resp)))))
         (panic! (str "WS connection error: " (pr-str error)))))))
 

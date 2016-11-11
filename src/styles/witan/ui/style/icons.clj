@@ -1,8 +1,7 @@
 (ns witan.ui.style.icons
   (:require [garden.color :refer [rgba]]
             [garden.units :refer [px]]
-            [witan.ui.style.colour :refer [icon-colour
-                                           error]]))
+            [witan.ui.style.colour :as c :refer [icon-colour]]))
 
 (def style
   [[:.material-icons
@@ -16,7 +15,13 @@
    [:.material-icons.md-xl
     {:font-size (px 72)}]
    [:.material-icons.md-error
-    {:color error}]
+    {:color c/error}]
+   [:.material-icons.md-success
+    {:color c/success}]
+   [:.material-icons.md-warning
+    {:color c/warning}]
+   [:.material-icons.md-silver
+    {:color 'silver}]
    [:.material-icons.md-dark
     {:color icon-colour}]
    [:.material-icons.md-dark.md-inactive

@@ -12,8 +12,10 @@
   (.calendar (js/moment. (str time) "YYYYMMDD HHmmss")))
 
 (defn jstime->str
-  [time]
-  (tf/unparse (tf/formatters :basic-date-time) time))
+  ([]
+   (jstime->str (t/now)))
+  ([time]
+   (tf/unparse (tf/formatters :basic-date-time) time)))
 
 (defn query-param
   [k]

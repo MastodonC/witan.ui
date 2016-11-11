@@ -78,6 +78,7 @@
    :string/no-description-provided        "(No description has been provided.)"
    :string/upload-success                 "Upload successful"
    :string/in-progress                    "In-Progress"
+   :string/progress                       "Progress"
    :string/forgotten-question             "forgotten your password?"
    :string/witan-tagline                  "Make more sense of your city"
    :string/browser-upload-option-new      "This is a brand new data item"
@@ -113,9 +114,14 @@
    :string/tooltip-data                   "Browse your data sets"
    :string/tooltip-logout                 "Log out from your account"
    :string/tooltip-help                   "Get help"
-   :string/workspace-dash-title           "Workspaces"
+   :string/tooltip-request-to-share       "Request some data be shared with you or a group you belong to"
+   :string/workspace-noun-plural          "Workspaces"
+   :string/workspace-dash-title           :string/workspace-noun-plural
+   :string/data                           "Data"
+   :string/go-to                          "Go to"
+   :string/go-to-data                     [:string/go-to :string/data]
    :string/data-dash-title                "Data Sets"
-   :string/workspace-dash-filter          "Filter your workspaces"
+   :string/workspace-dash-filter          ["Filter your" :string/workspace-noun-plural]
    :string/data-dash-filter               "Filter your data sets"
    :string/workspace-data-view            "Data"
    :string/workspace-config-view          "Configuration"
@@ -127,7 +133,7 @@
    :string/create-workspace-desc          "Description"
    :string/create-workspace-desc-ph       "What will this workspace be used for?"
    :string/create-workspace-error         "An error occurred whilst trying to create this workspace. Please try again."
-   :string/workspace-404-error            "Unable to find a workspace at this address."
+   :string/workspace-404-error            "Unable to find a Workspace at this address."
    :string/workspace-empty                "This workspace is empty!"
    :string/workspace-add-model            "Add Model"
    :string/workspace-select-a-model       "Please start by selecting a model:"
@@ -139,15 +145,78 @@
    :string/no-viz-selected-desc           "If you don't have any data yet, try running the workspace first."
    :string/workspace-result-history       "Result History"
    :string/no-results                     "You haven't generated any results yet."
-   :string/compare                        "Compare"})
+   :string/compare                        "Compare"
+   :string/request-to-share-noun          "Data Request"
+   :string/request-to-share-dash-title    "Data Requests"
+   :string/request-to-share-dash-desc     "Manage data requests to and from other groups and users"
+   :string/create-request-to-share        ["Create a new" :string/request-to-share-noun]
+   :string/create-request-to-share-desc   "Request a dataset, of a given format, from one or more users or organisations. Ensure the data you receive is valid and track the progress of your request by being able to see who has submit their data and who hasn't."
+   :string/get-started                    "Get Started"
+   :string/rts-no-requests                ["It looks like you haven't created any" :string/request-to-share-dash-title
+                                           "yet. Use the button above to get started!"]
+   :string/create-rts-subtitle            "Send a request, to a user or organisation, for data of a specific type"
+   :string/create-rts-user                "Recipient Users/Groups"
+   :string/create-rts-user-ph             "Search for the users and/or organisations you'd like to send the request to."
+   :string/search-results                 "Search Results"
+   :string/create-rts-will-be-sent-to     "This request will be sent to:"
+   :string/schema                         "Schema"
+   :string/create-rts-schema-ph           "Search for the schema you'd like associate with the uploaded data."
+   :string/create-rts-selected-schema     "The selected schema for the requested data:"
+   :string/create-rts-destination         "Destination Users/Groups"
+   :string/create-rts-destination-ph      "Search for the users and/or organisations you'd like the requested data to be shared with."
+   :string/create-rts-will-be-shared-with "The requested data will be shared with:"
+   :string/create-rts-recipients-invalid  "Please specify at least one recipient group."
+   :string/create-rts-schema-invalid      "Please specify a schema."
+   :string/create-rts-destinations-invalid "Please specify at least one destination group."
+   :string/message                        "Message"
+   :string/create-rts-message-ph          "Add an optional message which the recipients will see when they receive the request."
+   :string/create-rts-message-failed      "There was an error creating this Request. Please contact us."
+   :string/create-rts-message-created     "Your Request was created successfully! The next step is to email your request to the relevant groups. Click the individual 'Mail' buttons below to do this now:"
+   :string/send-mail                      "Send Mail"
+   :string/return-to-dash                 "Return to Dashboard"
+   :string/rts-404-error                  "Unable to find a Request at this address."
+   :string/status                         "Status"
+   :string/rts-status-incomplete          "Pending"
+   :string/rts-status-complete            "Complete"
+   :string/new-data-request-created       ["New" :string/request-to-share-noun "created!"]
+   :string/new-data-request-created-desc  ["Congratulations! You've successfully created a new" :string/request-to-share-noun "- please remember to email each of the recipients. This will also give you an opportunity to tailor the message and add any attachments that might help them fulfil the request for data."]
+   :string/date                           "Date"
+   :string/rts-info-paragraph-1           "Your request for"
+   :string/rts-info-paragraph-2           "data, dated"
+   :string/rts-info-paragraph-3           "has been responded to by"
+   :string/rts-info-paragraph-4           "out of"
+   :string/rts-info-paragraph-5           "group(s)."
+   :string/rts-info-paragraph-6           "You wrote them the following message:"
+   :string/groups                         "Groups"
+   :string/outbound-requests              ["Outbound" :string/request-to-share-dash-title]
+   :string/rts-email-subject              ["New" :string/request-to-share-noun "from "]
+   :string/rts-email-header-line          "To whom it may concern,\n\n"
+   :string/rts-email-footer-line          "Here is the link you should use to submit your data:\n\n"
+   :string/rts-email-default-body         (str
+                                           "You are receiving this email because you belong to the '%s' City Datastore group.\n"
+                                           "This is a formal request for submission of '%s' data.\n"
+                                           "Please submit the data directly into the City Datastore using the link provided below.\n\n"
+                                           "If you feel you've received this requesst in error, please reply directly or liase with other members of the group.")})
+
+(defn resolve-string
+  ([r]
+   (let [s (get strings r)]
+     (if (string? s) s
+         (resolve-string s nil))))
+  ([r a]
+   (cond (keyword? r) (if a (clojure.string/join " " [a (get strings r)]) (get strings r))
+         (string? r)  (if a (clojure.string/join " " [a r]) r)
+         (vector? r)  (reduce #(resolve-string %2 %1) a r)
+         :else nil)))
 
 (defn get-string
   ""
   [keywd & add]
   (if (contains? strings keywd)
-    (if add
-      (str (keywd strings) (first add) (clojure.string/join " " (concat " " (rest add))))
-      (keywd strings))
+    (let [r (resolve-string keywd)]
+      (if add
+        (str r (first add) (clojure.string/join " " (concat " " (rest add))))
+        r))
     (do
       (log/severe "Failed to find string " (str keywd))
       "## ERROR ##")))
