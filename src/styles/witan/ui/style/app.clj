@@ -76,7 +76,7 @@
                  {:background-color colour/button-view
                   :color colour/button-create}]]]]
 
-             [::.loading
+             [:.loading
               {:width pc100
                :height pc100
                :background-color colour/body-bg
