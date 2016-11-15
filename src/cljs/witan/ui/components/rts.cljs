@@ -11,6 +11,10 @@
             [clojure.string :as str])
   (:require-macros [cljs-log.core :as log]))
 
+(defn generate-submission-link
+  [id]
+  (str (.. js/document -location -origin) (route/find-path :app/rts-submit {:id id})))
+
 (defn result-message
   []
   [:div
@@ -40,7 +44,7 @@
            message)
          "\n\n----------------------------\n\n"
          (get-string :string/rts-email-footer-line)
-         (str (.. js/document -location -origin) (route/find-path :app/rts-submit {:id request-id}))
+         (generate-submission-link request-id)
          "\n\n----------------------------\n\n")))
 
 (defn group-mail-row
@@ -58,7 +62,7 @@
                       #(route/navigate! :app/rts {:id id}))]
       [:div.flex.group-mail-row-actions
        (icons/warning :warning)
-       [:a {:href (str "mailto:?BCC=" (str/join "," (:kixi.group/emails group))
+       [:a {:href (str "mailto:?CC=" (str/join "," (:kixi.group/emails group))
                        "&Subject=" (gstring/urlEncode (str (get-string :string/rts-email-subject) (or from "Witan")))
                        "&body=" (gstring/urlEncode (body group)))
             :target "_blank"} (shared/button {:id :mail :icon icons/email :txt :string/send-mail

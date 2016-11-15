@@ -14,14 +14,14 @@
 
 (def route-patterns
   ["/app/" {"" nil
-            "dashboard/" {"data"          :app/data-dash
-                          "workspace"     :app/workspace-dash
-                          "rts"           :app/request-to-share}
+            "data/"      {"dashboard"     :app/data-dash}
             "workspace/" {"create"        :app/create-workspace
-                          ["id/" :id]     :app/workspace}
+                          "dashboard"     :app/workspace-dash
+                          [:id ""]        :app/workspace}
             "rts/"       {"create"        :app/rts-create
-                          ["id/" :id]     :app/rts
-                          ["submit/" :id] :app/rts-submit}}])
+                          "dashboard"     :app/request-to-share
+                          [:id ""]        :app/rts
+                          [:id "/submit"] :app/rts-submit}}])
 
 (defn path-exists?
   [path]
