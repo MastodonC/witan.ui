@@ -1,7 +1,10 @@
 (ns witan.ui.controllers.user
   (:require [witan.ui.ajax :refer [GET POST]]
             [schema.core :as s]
-            [witan.ui.data :as data])
+            [witan.ui.data :as data]
+            [goog.crypt.base64 :as b64]
+            [cljs.reader :as reader]
+            [witan.ui.data :refer [transit-decode]])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
@@ -22,12 +25,18 @@
     (.unmountComponentAtNode js/ReactDOM login-div)))
 
 (defn login-success!
-  [{:keys [id token] :as response}]
-  (when response
-    (data/swap-app-state! :app/user assoc  :user/id (str id))
-    (data/swap-app-state! :app/login assoc :login/token token)
-    (data/swap-app-state! :app/login assoc :login/message nil)
-    (data/save-data!))
+  [{:keys [token-pair] :as response}]
+  (let [auth-groups (clojure.string/split (:auth-token token-pair) #"\.")
+        user-info   (-> auth-groups
+                        (second)
+                        (b64/decodeString)
+                        (transit-decode keyword))]
+    (when response
+      (data/swap-app-state! :app/user assoc  :kixi.user/id (:id user-info))
+      (data/swap-app-state! :app/user assoc  :kixi.user/name (:name user-info))
+      (data/swap-app-state! :app/login assoc :login/token token-pair)
+      (data/swap-app-state! :app/login assoc :login/message nil)
+      (data/save-data!)))
   (kill-login-screen!)
   (data/connect! {:on-connect #(data/publish-topic :data/user-logged-in (data/get-app-state :app/user))}))
 
@@ -38,8 +47,8 @@
 
 (defmethod api-response
   [:login :success]
-  [_ {:keys [token] :as response}]
-  (if token
+  [_ {:keys [token-pair] :as response}]
+  (if token-pair
     (login-success! response)
     (data/swap-app-state! :app/login assoc :login/message :string/sign-in-failure)))
 

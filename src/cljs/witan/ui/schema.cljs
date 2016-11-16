@@ -33,10 +33,11 @@
 (def AppStateSchema
   {:app/side {:side/upper [[s/Keyword]]
               :side/lower [[s/Keyword]]}
-   :app/login {:login/token (s/maybe s/Str)
+   :app/login {:login/token (s/maybe {:auth-token s/Str
+                                      :refresh-token s/Str})
                :login/message (s/maybe s/Str)}
-   :app/user {:user/name (s/maybe s/Str)
-              :user/id (s/maybe s/Str)
+   :app/user {:kixi.user/name (s/maybe s/Str)
+              :kixi.user/id (s/maybe s/Str)
               (s/optional-key :user/group-search-results) [GroupSchema]}
    :app/route {:route/path (s/maybe s/Keyword)
                :route/params (s/maybe s/Any)
