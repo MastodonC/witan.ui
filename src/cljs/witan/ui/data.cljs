@@ -37,8 +37,8 @@
                             [:button :logout]]}
     :app/login {:login/token nil
                 :login/message nil}
-    :app/user {:user/name nil
-               :user/id nil}
+    :app/user {:kixi.user/name nil
+               :kixi.user/id nil}
     :app/route {:route/path nil
                 :route/params nil
                 :route/query nil}
@@ -179,8 +179,11 @@
    {:handlers st/cross-platform-read-handlers}))
 
 (defn transit-decode
-  [s]
-  (tr/read transit-reader s))
+  ([s key-fn]
+   (reduce-kv (fn [a k v] (assoc a (key-fn k) v)) {}
+              (tr/read transit-reader s)))
+  ([s]
+   (tr/read transit-reader s)))
 
 (def transit-writer
   (tr/writer
