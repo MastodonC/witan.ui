@@ -53,6 +53,7 @@
                     :workspace/pending? true}
     :app/workspace-dash {:wd/workspaces nil}
     :app/data-dash {}
+    :app/create-data {:cd/pending? false}
     :app/rts-dash {}
     :app/workspace-results []
     :app/panic-message nil

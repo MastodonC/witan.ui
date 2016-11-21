@@ -18,6 +18,8 @@
     {:color c/error}]
    [:.material-icons.md-success
     {:color c/success}]
+   [:.material-icons.md-info
+    {:color c/info-icon}]
    [:.material-icons.md-warning
     {:color c/warning}]
    [:.material-icons.md-silver

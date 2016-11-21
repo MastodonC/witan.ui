@@ -17,6 +17,7 @@
             [witan.ui.style.components.configuration :as configuration]
             [witan.ui.style.components.results :as results]
             [witan.ui.style.components.rts :as rts]
+            [witan.ui.style.components.data :as data]
 
 
             ;;
@@ -40,6 +41,7 @@
     configuration/style
     results/style
     rts/style
+    data/style
     ;;
     splitjs/style]
    ;;

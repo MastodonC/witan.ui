@@ -2,7 +2,8 @@
   (:require [garden.units :refer [px em percent]]
             [witan.ui.style.colour :as colour]
             [witan.ui.style.fonts  :as fonts]
-            [witan.ui.style.values :as values]))
+            [witan.ui.style.values :as values]
+            [witan.ui.style.util :refer [transition]]))
 
 (def style [[:.shared-search-input
              {:position :relative}
@@ -28,7 +29,8 @@
                :cursor :default}]
              [:tbody
               [:tr
-               {:transition "background-color 0.15s, color 0.15s"
+               {:transition (transition :background-color "0.15s"
+                                        :color "0.15s")
                 :height (em 3)}
                [:&:hover
                 {:background-color colour/table-row-hover-bg
@@ -49,7 +51,8 @@
               :z-index 50
               :display :flex
               :align-items :center
-              :justify-content :flex-start}
+              :justify-content :flex-start
+              :min-width (px 325)}
              [:h1 :h2
               {:position :relative
                :float :left
@@ -69,7 +72,7 @@
                :vertical-align :super
                :margin-left (em 1)}
               [:form
-               {:width (em 36)}]]]
+               {:width (em 32)}]]]
 
             ;;;;;;;;;;;;;;
 
@@ -96,11 +99,13 @@
 
             [:.error
              {:color colour/error}]
+            [:.success
+             {:color colour/success}]
 
             ;;;;;;;;;;;;;;
 
             [:.rotates
-             {:transition "transform 0.3s"}]
+             {:transition (transition :transform "0.3s")}]
             [:.rotate0
              {:transform "rotate(0deg)"}]
             [:.rotate270
@@ -120,4 +125,67 @@
               [:h1
                {:font-size (px 24)
                 :font-weight :bold
-                :font-family fonts/base-fonts}]]]])
+                :font-family fonts/base-fonts}]]]
+
+            ;;;;;;;;;;;;;;
+
+            [:div.shared-info-panel
+             {:display :flex
+              :background-color colour/info-bg
+              :border [[(px 1) colour/info-border 'solid]]
+              :padding (em 0.5)
+              :margin [[(em 0.4) (em 0)]]}
+             [:div
+              {:font-size (px 11)
+               :font-style :italic
+               :color colour/info-text
+               :display :flex
+               :justify-content :center
+               :align-content :center
+               :flex-direction :column
+               :vertical-align :middle}]
+             [:i
+              {:padding-right (em 0.5)}]]
+
+
+            ;;;;;;;;;;;;;;
+
+            [:.number-circle
+             {:border-radius (percent 50)
+              :width (px 20)
+              :height (px 18)
+              :line-height (px 18)
+              :padding (px 3)
+              :background colour/button-create
+              :color colour/body-bg
+              :text-align :center
+              :font-size (px 12)
+              :font-weight :bold
+              }]
+
+            ;;;;;;;;;;;;;;;
+
+            [:.shared-schema-search-area :.shared-group-search-area
+             [:div.breakout-area
+              {:display :flex
+               :overflow :hidden
+               :transition (transition :height "0.3s")
+               :width (percent 100)
+               :margin (px 10)}
+              [:.shared-table
+               {:width (percent 100)
+                :border [[(px 1) colour/gutter 'solid]]
+                :overflow-y :scroll
+                :overflow-x :hidden}
+               [:.pure-table.pure-table-horizontal
+                {:border 0}]
+               [:.shared-table-rows
+                [:tbody>tr:last-child>td
+                 {:border-bottom [[(px 1) "#cbcbcb" 'solid]]}]]
+               [:.pure-button
+                ]]
+              [:.close
+               {:color 'silver
+                :cursor :pointer}
+               [:&:hover
+                {:color colour/side-bg}]]]]])
