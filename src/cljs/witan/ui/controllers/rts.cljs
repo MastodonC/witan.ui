@@ -7,6 +7,8 @@
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
+(def dash-query-pending? (atom false))
+
 (def query-fields
   {:header [:kixi.data-acquisition.request-for-data/recipients
             :kixi.data-acquisition.request-for-data/created-at
@@ -46,6 +48,7 @@
 (defmethod on-query-response
   :data-acquisition/requests-by-requester
   [[_ data]]
+  (reset! dash-query-pending? false)
   (log/debug ">>>>> GOT RESULTS" data))
 
 (defmethod on-query-response
@@ -121,6 +124,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; On Route Change
 
+(defn send-dashboard-query!
+  [id]
+  (when-not @dash-query-pending?
+    (reset! dash-query-pending? true)
+    (data/query `[{[:data-acquisition/requests-by-requester ~id] ~(:header query-fields)}]
+                on-query-response)))
+
 (defmulti on-route-change
   (fn [{:keys [args]}] (:route/path args)))
 
@@ -130,9 +140,8 @@
 (defmethod on-route-change
   :app/request-to-share
   [_]
-  (if-let [id (:user/id (data/get-app-state :app/user))]
-    (data/query `[{[:data-acquisition/requests-by-requester ~id] ~(:header query-fields)}]
-                on-query-response)))
+  (if-let [id (:kixi.user/id (data/get-app-state :app/user))]
+    (send-dashboard-query! id)))
 
 (defmethod on-route-change
   :app/rts
@@ -145,6 +154,16 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn on-user-logged-in
+  [{:keys [args]}]
+  (let [{:keys [kixi.user/id]} args
+        {:keys [route/path]} (data/get-app-state :app/route)]
+    (when (= path :app/request-to-share)
+      (send-dashboard-query! id))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defonce subscriptions
-  (do (data/subscribe-topic :data/route-changed on-route-change)
+  (do (data/subscribe-topic :data/route-changed  on-route-change)
+      (data/subscribe-topic :data/user-logged-in on-user-logged-in)
       (data/subscribe-topic :data/event-received on-event)))

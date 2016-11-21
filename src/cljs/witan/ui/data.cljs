@@ -8,7 +8,9 @@
             [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all put! close!]]
             [cljs.reader :as reader]
             [cognitect.transit :as tr]
-            [outpace.schema-transit :as st])
+            [outpace.schema-transit :as st]
+            [cljs-time.coerce :as tc]
+            [cljs-time.core :as t])
   (:require-macros [cljs-log.core :as log]
                    [cljs.core.async.macros :refer [go go-loop]]
                    [witan.ui.env :as env :refer [cljs-env]]))
@@ -35,8 +37,11 @@
                             [:button :rts]]
                :side/lower [[:button :help]
                             [:button :logout]]}
-    :app/login {:login/token nil
-                :login/message nil}
+    :app/login {:login/pending? false
+                :login/token nil
+                :login/message nil
+                :login/auth-expiry -1
+                :login/refresh-expiry -1}
     :app/user {:kixi.user/name nil
                :kixi.user/id nil}
     :app/route {:route/path nil
@@ -168,6 +173,7 @@
 
 (defonce ws-conn (atom nil))
 (defonce events (atom []))
+(defonce token-refresh-callbacks (atom []))
 (def query-responses (atom {}))
 (def query-buffer (atom []))
 
@@ -194,10 +200,34 @@
   [s]
   (tr/write transit-writer s))
 
+(defn manage-token-validity
+  [completed-cb]
+  (let [{:keys [login/auth-expiry
+                login/refresh-expiry
+                login/token]} (get-app-state :app/login)
+        ae-as-time (tc/from-long auth-expiry)]
+    (if (t/after? (t/now) ae-as-time)
+      (let [_ (log/debug "Auth token has expired. Attempting to refresh...")
+            re-as-time (tc/from-long refresh-expiry)]
+        (if (t/after? (t/now) re-as-time)
+          (do
+            (log/debug "Refresh token has expired. Logging out...")
+            (delete-data!)
+            (.replace js/location "/" true))
+          (let [refresh-required (empty? @token-refresh-callbacks)]
+            (swap! token-refresh-callbacks conj completed-cb)
+            (when refresh-required
+              (log/debug "Sending tokens for refresh")
+              (go (>! @ws-conn (transit-encode {:kixi.comms.message/type "refresh"
+                                                :kixi.comms.auth/token-pair token})))))))
+      (completed-cb))))
+
 (defn- send-query
   [m]
-  (log/debug "Sending query:" m)
-  (go (>! @ws-conn (transit-encode m))))
+  (manage-token-validity
+   (fn []
+     (log/debug "Sending query:" m)
+     (go (>! @ws-conn (transit-encode m))))))
 
 (defn- buffer-query
   [m]
@@ -233,7 +263,8 @@
            :kixi.comms.command/id id
            :kixi.comms.command/payload params}]
     (log/debug "Sending command:" m)
-    (go (>! @ws-conn (transit-encode m)))))
+    (manage-token-validity
+     #(go (>! @ws-conn (transit-encode m))))))
 
 ;;
 
@@ -261,6 +292,31 @@
             (cb [:error result])))))
     (log/warn "Received query response id [" id "] but couldn't match callback."))
   (swap! query-responses dissoc id))
+
+(defn deconstruct-token
+  [tkn]
+  (-> tkn
+      (clojure.string/split #"\.")
+      (second)
+      (b64/decodeString)
+      (transit-decode keyword)))
+
+(defn save-token-pair!
+  [token-pair]
+  (let [auth-info    (deconstruct-token (:auth-token token-pair))
+        refresh-info (deconstruct-token (:refresh-token token-pair))]
+    (swap-app-state! :app/login assoc :login/token token-pair)
+    (swap-app-state! :app/login assoc :login/auth-expiry (:exp auth-info))
+    (swap-app-state! :app/login assoc :login/refresh-expiry (:exp refresh-info))
+    (swap-app-state! :app/login assoc :login/message nil)))
+
+(defmethod handle-server-message
+  "refresh-response"
+  [{:keys [kixi.comms.auth/token-pair]}]
+  (save-token-pair! token-pair)
+  (save-data!)
+  (doseq [cb @token-refresh-callbacks] (cb))
+  (reset! token-refresh-callbacks []))
 
 (defmethod handle-server-message
   "event"

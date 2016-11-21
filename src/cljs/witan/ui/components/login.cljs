@@ -31,7 +31,7 @@
   [_ {:keys [set-phase-fn message]}]
   [:div.sub-page-div
    [:h3 (get-string :string/create-account)]
-   [:span#error-message message]
+   [:span#error-message (if (string? message) message "")]
    [:form {:class "pure-form pure-form-stacked"
            :key "sign-up"
            :on-submit (fn [e]
@@ -129,7 +129,7 @@
 (defmethod
   login-state-view
   :prompt
-  [_ {:keys [message set-phase-fn]}]
+  [_ {:keys [message set-phase-fn pending?]}]
   [:div
    [:h3 (get-string :string/sign-in)]
    (when message
@@ -155,9 +155,11 @@
                     :require :required
                     })]
     [:button {:tab-index 3
+              :disabled pending?
               :type "submit"
               :class "pure-button pure-button-primary"} (get-string :string/sign-in)]
     [:a {:id "forgotten-link"
+         :disabled pending?
          :on-click (fn [e]
                      (set-phase-fn :reset)
                      (.preventDefault e))} (str "(" (get-string :string/forgotten-question) ")")]]
@@ -165,7 +167,8 @@
    [:p
     [:span.text-white (get-string :string/create-account-info)]]
    [:button.pure-button.pure-button-success
-    {:on-click (fn [e]
+    {:disabled pending?
+     :on-click (fn [e]
                  (set-phase-fn :sign-up)
                  (.preventDefault e))} (get-string :string/create-account)]])
 
@@ -176,7 +179,7 @@
       (r/create-class
        {:reagent-render
         (fn []
-          (let [{:keys [login/message]} (data/get-app-state :app/login)]
+          (let [{:keys [login/message login/pending?]} (data/get-app-state :app/login)]
             [:div
              [:div#login-bg {:key "login-bg"}
               [:span#bg-attribution.trans-bg
@@ -190,4 +193,4 @@
                 [:h1 {:key "login-title-main"} (get-string :string/witan) ]
                 [:h2 {:key "login-title-sub"} (get-string :string/witan-tagline)]]
                [:div#witan-login.trans-bg {:key "login-state"}
-                [login-state-view @phase {:message message :set-phase-fn (partial reset! phase)}]]]]]))}))))
+                [login-state-view @phase {:message message :set-phase-fn (partial reset! phase) :pending? pending?}]]]]]))}))))
