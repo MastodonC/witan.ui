@@ -229,12 +229,12 @@
   ;; reset current
   (data/swap-app-state! :app/workspace assoc :workspace/pending? true)
   (data/swap-app-state! :app/workspace dissoc :workspace/current)
-  (if-let [id (:user/id (data/get-app-state :app/user))]
+  (if-let [id (:kixi.user/id (data/get-app-state :app/user))]
     (send-dashboard-query! id on-receive)))
 
 (defn on-user-logged-in
   [{:keys [args]}]
-  (let [{:keys [user/id]} args
+  (let [{:keys [kixi.user/id]} args
         {:keys [route/path]} (data/get-app-state :app/route)]
     (when (= path :app/workspace-dash)
       (send-dashboard-query! id on-receive))))
@@ -252,12 +252,12 @@
 
 (defmethod handle :create
   [event {:keys [name desc]}]
-  (let [{:keys [user/id]} (data/get-app-state :app/user)
+  (let [{:keys [kixi.user/id]} (data/get-app-state :app/user)
         w-id (random-uuid)
         wsp  {:workspace/name name
               :workspace/id w-id
               :workspace/description desc
-              :workspace/owner-id id
+              :workspace/owner-id    id
               :workspace/owner-name "Me" ;; TODO
               :workspace/modified (utils/jstime->str (t/now))}]
     (data/swap-app-state! :app/workspace-dash update-in [:wd/workspaces] #(conj % wsp))

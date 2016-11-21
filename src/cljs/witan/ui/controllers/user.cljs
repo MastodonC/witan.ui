@@ -26,17 +26,28 @@
 
 (defn login-success!
   [{:keys [token-pair] :as response}]
-  (let [auth-groups (clojure.string/split (:auth-token token-pair) #"\.")
-        user-info   (-> auth-groups
-                        (second)
-                        (b64/decodeString)
-                        (transit-decode keyword))]
-    (when response
-      (data/swap-app-state! :app/user assoc  :kixi.user/id (:id user-info))
-      (data/swap-app-state! :app/user assoc  :kixi.user/name (:name user-info))
-      (data/swap-app-state! :app/login assoc :login/token token-pair)
-      (data/swap-app-state! :app/login assoc :login/message nil)
-      (data/save-data!)))
+  (if response
+    ;; if response, we assume everything is shiny and new
+    (let [auth-info    (data/deconstruct-token (:auth-token token-pair))
+          refresh-info (data/deconstruct-token (:refresh-token token-pair))]
+      (data/swap-app-state! :app/user assoc  :kixi.user/id (:id auth-info))
+      (data/swap-app-state! :app/user assoc  :kixi.user/name (:name auth-info))
+      (data/save-token-pair! token-pair)
+      (data/save-data!))
+    ;; if NO response, check we have everything
+    ;; NB. don't bother checking that tokens are valid because they'll be checked
+    ;; by data as soon as any commands or queries are issued
+    (let [user  (data/get-app-state :app/user)
+          login (data/get-app-state :app/login)]
+      ;; - checking presence of data
+      (when-not (and (:kixi.user/id user)
+                     (:kixi.user/name user)
+                     (:login/token login)
+                     (:login/auth-expiry login)
+                     (:login/refresh-expiry login))
+        (data/delete-data!)
+        (data/panic! (str "login-success! was called erroneously - data was deleted" login))
+        (throw (js/Error. "login-success! was called erroneously")))))
   (kill-login-screen!)
   (data/connect! {:on-connect #(data/publish-topic :data/user-logged-in (data/get-app-state :app/user))}))
 
@@ -48,6 +59,7 @@
 (defmethod api-response
   [:login :success]
   [_ {:keys [token-pair] :as response}]
+  (data/swap-app-state! :app/login assoc :login/pending? false)
   (if token-pair
     (login-success! response)
     (data/swap-app-state! :app/login assoc :login/message :string/sign-in-failure)))
@@ -55,7 +67,10 @@
 (defmethod api-response
   [:login :failure]
   [_ response]
-  (data/swap-app-state! :app/login assoc :login/message :string/api-failure))
+  (data/swap-app-state! :app/login assoc :login/pending? false)
+  (if (= 401 (:status response))
+    (data/swap-app-state! :app/login assoc :login/message :string/sign-in-failure)
+    (data/swap-app-state! :app/login assoc :login/message :string/api-failure)))
 
 (defn route-api-response
   [event]
@@ -70,6 +85,7 @@
 (defmethod handle :login
   [event {:keys [email pass]}]
   (let [args {:username email :password pass}]
+    (data/swap-app-state! :app/login assoc :login/pending? true)
     (POST (str "http://" (:gateway/address data/config) "/login")
           {:id event
            :params (s/validate Login args)
@@ -77,8 +93,7 @@
 
 (defmethod handle :logout
   [event {:keys [email pass]}]
-  (data/delete-data!)
-  (.replace js/location "/" true))
+  (data/reset-everything!))
 
 (defmethod handle :search-groups
   [event {:keys [search]}]
@@ -136,4 +151,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(data/subscribe-topic :data/app-state-restored #(login-success! nil))
+(defonce subscriptions
+  (do
+    (data/subscribe-topic :data/app-state-restored #(login-success! nil))))

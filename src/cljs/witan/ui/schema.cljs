@@ -33,9 +33,12 @@
 (def AppStateSchema
   {:app/side {:side/upper [[s/Keyword]]
               :side/lower [[s/Keyword]]}
-   :app/login {:login/token (s/maybe {:auth-token s/Str
+   :app/login {:login/pending? s/Bool
+               :login/token (s/maybe {:auth-token s/Str
                                       :refresh-token s/Str})
-               :login/message (s/maybe s/Str)}
+               :login/message (s/maybe s/Str)
+               :login/auth-expiry s/Num
+               :login/refresh-expiry s/Num}
    :app/user {:kixi.user/name (s/maybe s/Str)
               :kixi.user/id (s/maybe s/Str)
               (s/optional-key :user/group-search-results) [GroupSchema]}
