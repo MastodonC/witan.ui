@@ -200,7 +200,7 @@
   [s]
   (tr/write transit-writer s))
 
-(def reset-everything!
+(defn reset-everything!
   []
   (delete-data!)
   (.replace js/location "/" true))
