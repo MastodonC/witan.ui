@@ -200,6 +200,11 @@
   [s]
   (tr/write transit-writer s))
 
+(def reset-everything!
+  []
+  (delete-data!)
+  (.replace js/location "/" true))
+
 (defn manage-token-validity
   [completed-cb]
   (let [{:keys [login/auth-expiry
@@ -212,8 +217,7 @@
         (if (t/after? (t/now) re-as-time)
           (do
             (log/debug "Refresh token has expired. Logging out...")
-            (delete-data!)
-            (.replace js/location "/" true))
+            (reset-everything!))
           (let [refresh-required (empty? @token-refresh-callbacks)]
             (swap! token-refresh-callbacks conj completed-cb)
             (when refresh-required
@@ -313,10 +317,14 @@
 (defmethod handle-server-message
   "refresh-response"
   [{:keys [kixi.comms.auth/token-pair]}]
-  (save-token-pair! token-pair)
-  (save-data!)
-  (doseq [cb @token-refresh-callbacks] (cb))
-  (reset! token-refresh-callbacks []))
+  (if token-pair
+    (do (save-token-pair! token-pair)
+        (save-data!)
+        (doseq [cb @token-refresh-callbacks] (cb))
+        (reset! token-refresh-callbacks []))
+    (do
+      (log/debug "Tokens could not be refreshed. Logging out...")
+      (reset-everything!))))
 
 (defmethod handle-server-message
   "event"

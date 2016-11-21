@@ -93,8 +93,7 @@
 
 (defmethod handle :logout
   [event {:keys [email pass]}]
-  (data/delete-data!)
-  (.replace js/location "/" true))
+  (data/reset-everything!))
 
 (defmethod handle :search-groups
   [event {:keys [search]}]
