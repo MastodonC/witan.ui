@@ -81,7 +81,10 @@
                     {:font-size (px 10)}]]]]
                 [:&#step-5
                  [:label
-                  {:font-style :italic}]]]]]]
+                  {:font-style :italic}]
+                 [:button.data-upload
+                  {:background-color colour/button-create
+                   :color colour/body-bg}]]]]]]
 
             [:#data-view
              [:.padded-content

@@ -184,15 +184,12 @@
                        (shared/inline-group group)])]])]))
 
             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-            ;; Step 5 - Declaration
+            ;; Step 5 - Confirm
             (phase
              5 form-data
-             [:div (get-string :string/data-upload-step-5-decl-unsure)]
-             [:p
-              [:input {:id  "permission" :type "checkbox" :name "permission"
-                       :on-change #(swap! form-data assoc :permission? (.. % -target -checked))}]
-              [:label {:for "permission"} (get-string :string/data-upload-step-5-declaration)]]
-             (when (:permission? @form-data)
+             [:p (get-string :string/data-upload-step-5-decl-unsure)]
+             (when true
                (shared/button {:id  :continue
-                               :txt :string/continue}
+                               :class "data-upload"
+                               :txt :string/upload}
                               #(controller/raise! :data/upload @form-data))))]]]]))))

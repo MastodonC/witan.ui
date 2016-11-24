@@ -220,10 +220,8 @@
    :string/data-upload-search-groups       "Search for users and/or groups with whom you'd like to share this data."
    :string/data-upload-step-4-group-heading "This data will be shared with %s user/group(s):"
    :string/remove-lc                        "remove"
-   :string/data-upload-step-5               "Declaration"
-   :string/data-upload-step-5-declaration   "I declare that I have permission to upload this data."
-   :string/data-upload-step-5-decl-unsure   "Some data is restricted by license or requires special conditions in order to be stored. If you're unsure whether the data falls under this category, or whether you have the appropriate license, please contact your manager."
-   :string/continue                          "Continue"} )
+   :string/data-upload-step-5               "Confirm"
+   :string/data-upload-step-5-decl-unsure   "Please take a moment to check that the steps are filled out correctly and then press the 'Upload' button to begin uploading the data."} )
 
 (defn resolve-string
   ([r]
