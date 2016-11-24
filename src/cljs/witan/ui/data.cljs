@@ -216,7 +216,6 @@
 
 (defn send-ping!
   []
-  #_(log/debug "Ping!")
   (send-ws! {:kixi.comms.message/type "ping"}))
 
 (defn manage-token-validity
@@ -292,8 +291,7 @@
 
 (defmethod handle-server-message
   "pong"
-  [msg]
-  #_(log/debug "Pong!"))
+  [msg])
 
 (defmethod handle-server-message
   "query-response"
