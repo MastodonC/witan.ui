@@ -17,12 +17,12 @@
   [event {:keys [search]}]
   (data/swap-app-state! :app/datastore assoc :schema/search-results
                         [{:schema/name "Net New Dwellings"
-                          :schema/author {:group/name "GLA Demography"
-                                          :group/id "074f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
-                                          :group/type :group}
+                          :schema/author {:kixi.group/name "GLA Demography"
+                                          :kixi.group/id "074f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
+                                          :kixi.group/type :group}
                           :schema/id "a74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"}
                          {:schema/name "Test Schema"
-                          :schema/author {:group/name "GLA Demography"
-                                          :group/id "074f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
-                                          :group/type :group}
+                          :schema/author {:kixi.group/name "GLA Demography"
+                                          :kixi.group/id "074f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
+                                          :kixi.group/type :group}
                           :schema/id "a74f742d-9cb9-4ede-aeaf-f82aa4b6f310"}]))

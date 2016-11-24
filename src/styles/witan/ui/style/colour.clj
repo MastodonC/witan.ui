@@ -88,7 +88,7 @@
 
 ;; buttons
 (def button-create lol-color-4)
-(def button-view   lol-color-2)
+(def button-view   (color/lighten lol-color-2 10))
 
 ;; login
 (def login-subtitles "#777")
@@ -116,3 +116,8 @@
 
 ;; hero
 (def hero-bg (color/lighten lol-color-3 22))
+
+(def info-border lol-color-7)
+(def info-text (color/darken lol-color-7 20))
+(def info-icon info-text)
+(def info-bg (color/lighten lol-color-7 40))

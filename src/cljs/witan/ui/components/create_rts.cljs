@@ -136,7 +136,7 @@
               #(if (clojure.string/blank? %)
                  (reset! show-schema-breakout? false)
                  (do (reset! show-schema-breakout? true)
-                     (controller/raise! :datastore/search-schema {:search %})))
+                     (controller/raise! :data/search-schema {:search %})))
               {:id schema-search-field
                :disabled? disabled?})
 

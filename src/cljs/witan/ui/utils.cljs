@@ -33,3 +33,8 @@
 (defn render-mustache
   [s m]
   (.render js/Mustache s (clj->js m)))
+
+(defn sanitize-filename
+  "Removed slashes from a filename"
+  [filename]
+  (.replace filename #".*[\\\/]" ""))

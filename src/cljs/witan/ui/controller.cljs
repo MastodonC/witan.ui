@@ -13,7 +13,7 @@
     (get {"user"      user/handle
           "workspace" workspace/handle
           "rts"       rts/handle
-          "datastore" datastore/handle}
+          "data"      datastore/handle}
          nsp)))
 
 (defonce event-chan (chan))

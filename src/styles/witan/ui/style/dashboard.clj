@@ -29,7 +29,7 @@
                :justify-content :center
                :height (percent 100)
                :padding-right (px 10)}
-              [:.workspace-create
+              [:.workspace-create :.data-upload
                {:background-color colour/button-create
                 :color colour/body-bg}]
               [:.workspace-view

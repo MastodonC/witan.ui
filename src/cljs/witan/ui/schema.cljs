@@ -52,8 +52,9 @@
                     (s/optional-key :workspace/current-viz) {:result/location s/Str}
                     (s/optional-key :workspace/model-list) [{s/Keyword s/Any}]}
    :app/workspace-dash {:wd/workspaces (s/maybe [s/Any])}
-   :app/data-dash (s/maybe s/Any)
-   :app/rts-dash (s/maybe s/Any)
+   :app/data-dash {s/Keyword s/Any}
+   :app/create-data {:cd/pending? s/Bool}
+   :app/rts-dash {s/Keyword s/Any}
    :app/workspace-results [{:result/location s/Str
                             :result/key s/Keyword
                             :result/downloading? s/Bool

@@ -29,7 +29,7 @@
             icon-fn #(vector :div.text-center (icons/workspace (if (:workspace/local %) :error :dark)))
             modified-fn #(vector :div
                                  (utils/iso-time-as-moment (:workspace/modified %)))
-            buttons (concat (when selected-id [{:id :view :icon icons/open :txt :string/view :class "workspace-view"}])
+            buttons (concat (when selected-id' [{:id :view :icon icons/open :txt :string/view :class "workspace-view"}])
                             [{:id :create :icon icons/plus :txt :string/create :class "workspace-create"}])]
         [:div.dashboard
          (shared-dash/header {:title :string/workspace-dash-title
@@ -39,9 +39,9 @@
                               :on-button-click (partial button-press (str selected-id'))})
          [:div.content
           (shared/table {:headers [{:content-fn icon-fn               :title ""              :weight 0.03}
-                                   {:content-fn :workspace/name       :title "Name"          :weight 0.57}
-                                   {:content-fn :workspace/owner-name :title "Owner"         :weight 0.2}
-                                   {:content-fn modified-fn           :title "Last Modified" :weight 0.2}]
+                                   {:content-fn :workspace/name       :title (get-string :string/forecast-name)          :weight 0.57}
+                                   {:content-fn :workspace/owner-name :title (get-string :string/forecast-owner)         :weight 0.2}
+                                   {:content-fn modified-fn           :title (get-string :string/forecast-lastmodified) :weight 0.2}]
                          :content workspaces
                          :selected?-fn #(= (:workspace/id %) selected-id')
                          :on-select #(reset! selected-id (:workspace/id %))

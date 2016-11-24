@@ -16,7 +16,8 @@
                 :large "md-l"
                 :x-large "md-xl"
                 :spin "anim-spin"
-                :silver "md-silver"}]
+                :silver "md-silver"
+                :info   "md-info"}]
     (reduce (fn [a r]
               (apply str a
                      (if-let [value (get lookup r)]
@@ -211,7 +212,12 @@
                       [:small]
                       [:medium]
                       [:large]
-                      [:x-large])
+                      [:x-large]
+                      [:error]
+                      [:success]
+                      [:warning]
+                      [:info]
+                      [:silver])
          all-icons [["cog"           cog]
                     ["upload"        upload]
                     ["padlock"       padlock]
@@ -242,7 +248,7 @@
                     ["user"          user]
                     ["organisation"  organisation]
                     ["delete"        delete]
-                    ["done"          done]
+                    ["tick"          tick]
                     ["schema"        schema]
                     ["email"         email]
                     ["tick-circle"   tick-circle]

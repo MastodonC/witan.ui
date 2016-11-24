@@ -1,6 +1,9 @@
 (ns witan.ui.components.shared
-  (:require [sablono.core :as sab :include-macros true]
+  (:require [reagent.core :as r]
+            [sablono.core :as sab :include-macros true]
             ;;
+            [witan.ui.data :as data]
+            [witan.ui.controller :as controller]
             [witan.ui.strings :refer [get-string]]
             [witan.ui.components.icons :as icons])
   (:require-macros
@@ -31,7 +34,7 @@
 (defn table
   [{:keys [headers content selected?-fn on-select on-double-click]}]
   [:div.shared-table
-   [:table.pure-table.pure-table-horizontal
+   [:table.pure-table.pure-table-horizontal.shared-table-headers
     [:thead
      [:tr
       (doall
@@ -41,7 +44,7 @@
                  :style {:width percent}} title])))]]]
    (if-not content
      [:div#loading.text-center (icons/loading :large)]
-     [:table.pure-table.pure-table-horizontal
+     [:table.pure-table.pure-table-horizontal.shared-table-rows
       [:tbody
        (doall
         (for [row content]
@@ -65,6 +68,7 @@
    (header title nil))
   ([title subtitle]
    [:div.shared-heading
+    {:key "heading"}
     [:h1 (get-string title)]
     (when subtitle
       [:h2 (get-string subtitle)])]))
@@ -80,7 +84,7 @@
      :on-click #(do
                   (when on-button-click (on-button-click id))
                   (when prevent? (.preventDefault %)))}
-    (icon :small)
+    (when icon (icon :small))
     [:span
      {:key (str "txt-" (name id))}
      (if (keyword? txt)
@@ -108,14 +112,17 @@
   (let [groups (-> (comp first group-by-key)
                    (group-by data)
                    (into {}))
-        alphabet (mapv char (range 65 91))]
+        alphabet (mapv char (range 65 91))
+        id (random-uuid)
+        gen-index-id (fn [a] (str id "-" a))]
     [:div.shared-index
      [:div.alpha-header
       (for [letter alphabet]
         [:span {:key letter
                 :class (when (contains? groups letter) "alpha-header-clickable")
                 :on-click (when (contains? groups letter)
-                            #(.scrollIntoView (.-target %)))}
+                            #(.scrollIntoView
+                              (.getElementById js/document (gen-index-id letter))))}
          letter])]
      [:hr]
      [:div.alpha-index
@@ -123,11 +130,112 @@
         [:div.letter
          {:name letter
           :key letter}
-         [:h1 letter]
+         [:h1
+          {:id (gen-index-id letter)}
+          letter]
          [:ul
           (for [item (get groups letter)]
             ^{:key item}
             [:li (render-fn item)])]])]]))
+
+(defn info-panel
+  [message-k]
+  [:div.shared-info-panel
+   {:key "shared-info-panel"}
+   [:div.icon
+    {:key "icon"}
+    (icons/help :medium :info)]
+   [:div.message
+    {:key "message"}
+    (get-string message-k)]])
+
+(defn schema-search-area
+  [ph on-click & opts]
+  (let [show-breakout? (r/atom false)
+        selected-schema (r/atom nil)
+        {:keys [id disabled?]
+         :or {id (str "schema-search-field-"ph)
+              disabled? false}} (first opts)]
+    (fn [ph on-click & opts]
+      (let [results (:schema/search-results (data/get-app-state :app/datastore))
+            close-fn (fn [& _]
+                       (aset (.getElementById js/document id) "value" nil)
+                       (reset! show-breakout? false))
+            select-fn (fn [final? schema]
+                        (reset! selected-schema schema)
+                        (on-click schema final?)
+                        (when final?
+                          (close-fn)))]
+        [:div.shared-schema-search-area
+         (search-filter (get-string ph)
+                        #(if (clojure.string/blank? %)
+                           (reset! show-breakout? false)
+                           (do (reset! show-breakout? true)
+                               (controller/raise! :data/search-schema {:search %})))
+                        {:id id
+                         :disabled? disabled?})
+         [:div.breakout-area
+          {:style {:height (if @show-breakout? "300px" "0px")}}
+          (table {:headers [{:content-fn #(button {:icon icons/tick
+                                                   :id (:schema/id %)
+                                                   :prevent? true}
+                                                  (fn [_] (select-fn true %)))
+                             :title ""  :weight 0.12}
+                            {:content-fn :schema/name     :title "Name"          :weight 0.38}
+                            {:content-fn (comp :kixi.group/name :schema/author)   :title "Author"        :weight 0.3}
+                            {:content-fn :schema/modified :title "Last Modified" :weight 0.2}]
+                  :content results
+                  :selected?-fn #(= (:schema/id %) (:schema/id @selected-schema))
+                  :on-select (partial select-fn false)
+                  :on-double-click (partial select-fn true)})
+          [:div.close
+           {:on-click close-fn}
+           (icons/close)]]]))))
+
+(defn group-search-area
+  [ph on-click & opts]
+  (let [show-breakout? (r/atom false)
+        selected-group (r/atom nil)]
+    (fn [ph on-click & opts]
+      (let [{:keys [id disabled? exclusions]
+             :or {id (str "group-search-field-"ph)
+                  disabled? false
+                  exclusions nil}} (first opts)
+            results (:user/group-search-results (data/get-app-state :app/user))
+            results (if exclusions
+                      (remove (fn [x] (some #{x} exclusions)) results)
+                      results)
+            close-fn (fn [& _]
+                       (aset (.getElementById js/document id) "value" nil)
+                       (reset! show-breakout? false))
+            select-fn (fn [final? group]
+                        (reset! selected-group group)
+                        (on-click group final?)
+                        (when final?
+                          (close-fn)))]
+        [:div.shared-group-search-area
+         (search-filter (get-string ph)
+                        #(if (clojure.string/blank? %)
+                           (reset! show-breakout? false)
+                           (do (reset! show-breakout? true)
+                               (controller/raise! :user/search-groups {:search %})))
+                        {:id id
+                         :disabled? disabled?})
+         [:div.breakout-area
+          {:style {:height (if @show-breakout? "300px" "0px")}}
+          (table {:headers [{:content-fn #(button {:icon icons/tick
+                                                   :id (:kixi.group/id %)
+                                                   :prevent? true}
+                                                  (fn [_] (select-fn true %)))
+                             :title ""  :weight 0.12}
+                            {:content-fn inline-group  :title "Name"          :weight 0.88}]
+                  :content results
+                  :selected?-fn #(= (:kixi.group/id %) (:kixi.group/id @selected-group))
+                  :on-select (partial select-fn false)
+                  :on-double-click (partial select-fn true)})
+          [:div.close
+           {:on-click close-fn}
+           (icons/close)]]]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS
@@ -145,7 +253,7 @@
 
 (defcard paragraph
   (sab/html
-   [:p "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum."]))
+   [:p "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commqodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia gdeserunt mollit anim id est laborum."]))
 
 (defcard search-filter
   (fn [data _]
@@ -239,3 +347,33 @@
 (defcard index
   (sab/html
    (index states :name (fn [x] [:span (:name x)]))))
+
+(defcard info-panel
+  (sab/html
+   (info-panel :string/new-data-request-created-desc)))
+
+(defcard schema-search-area
+  (fn [data _]
+    (sab/html
+     [:div
+      {:style {:width "100%"}}
+      (r/as-element
+       [schema-search-area :string/create-rts-schema-ph
+        #(swap! data assoc :selected-schema %1)])]))
+  {:selected-schema nil}
+  {:inspect-data true
+   :frame true
+   :history false})
+
+(defcard group-search-area
+  (fn [data _]
+    (sab/html
+     [:div
+      {:style {:width "100%"}}
+      (r/as-element
+       [group-search-area :string/data-upload-search-groups
+        #(swap! data assoc :selected-group %1)])]))
+  {:selected-group nil}
+  {:inspect-data true
+   :frame true
+   :history false})
