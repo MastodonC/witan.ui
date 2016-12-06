@@ -15,7 +15,8 @@
 (def route-patterns
   ["/app/" {"" nil
             "data/"      {"dashboard"     :app/data-dash
-                          "create"        :app/data-create}
+                          "create"        :app/data-create
+                          [:id ""]        :app/data}
             "workspace/" {"create"        :app/create-workspace
                           "dashboard"     :app/workspace-dash
                           [:id ""]        :app/workspace}

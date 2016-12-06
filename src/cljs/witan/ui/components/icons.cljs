@@ -187,6 +187,10 @@
   [& args]
   (apply create-key "insert_drive_file" args))
 
+(defn retry
+  [& args]
+  (apply create-key "undo" args))
+
 
 ;;
 
@@ -253,7 +257,8 @@
                     ["email"         email]
                     ["tick-circle"   tick-circle]
                     ["warning"       warning]
-                    ["file"          file]]]
+                    ["file"          file]
+                    ["retry"         retry]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div
