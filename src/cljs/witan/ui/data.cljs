@@ -173,10 +173,11 @@
 ;; Websocket
 
 (defonce ws-conn (atom nil))
+(defonce ws-timeout (atom nil))
 (defonce events (atom []))
 (defonce token-refresh-callbacks (atom []))
 (def query-responses (atom {}))
-(def query-buffer (atom []))
+(def message-buffer (atom []))
 
 (def transit-encoding-level :json-verbose) ;; DO NOT CHANGE
 
@@ -206,6 +207,17 @@
   (delete-data!)
   (.replace js/location "/" true))
 
+(defn- buffer-message
+  [m]
+  (log/debug "Buffering message:" m)
+  (swap! message-buffer conj m))
+
+(declare send-ws!)
+
+(defn send-ping!
+  []
+  (send-ws! {:kixi.comms.message/type "ping"}))
+
 (defn manage-token-validity
   [completed-cb]
   (let [{:keys [login/auth-expiry
@@ -223,28 +235,28 @@
             (swap! token-refresh-callbacks conj completed-cb)
             (when refresh-required
               (log/debug "Sending tokens for refresh")
-              (go (>! @ws-conn (transit-encode {:kixi.comms.message/type "refresh"
-                                                :kixi.comms.auth/token-pair token})))))))
+              (send-ws! {:kixi.comms.message/type "refresh"
+                         :kixi.comms.auth/token-pair token})))))
       (completed-cb))))
 
-(defn- send-query
-  [m]
-  (manage-token-validity
-   (fn []
-     (log/debug "Sending query:" m)
-     (go (>! @ws-conn (transit-encode m))))))
+(defn send-ws!
+  [payload]
+  (if-not @ws-conn
+    (buffer-message payload)
+    (manage-token-validity
+     #(go
+        (log/debug "Sending message:" payload)
+        (>! @ws-conn (transit-encode payload))
+        (when @ws-timeout
+          (.clearInterval js/window @ws-timeout))
+        (reset! ws-timeout (.setInterval js/window send-ping! 55000)))))) ;; 55 secs
 
-(defn- buffer-query
-  [m]
-  (log/debug "Buffering query:" m)
-  (swap! query-buffer conj m))
-
-(defn- drain-buffered-queries
+(defn- drain-buffered-messages
   []
-  (when-not (empty? @query-buffer)
-    (log/debug "Draining buffered queries")
-    (run! send-query @query-buffer)
-    (reset! query-buffer [])))
+  (when-not (empty? @message-buffer)
+    (log/debug "Draining buffered messages...")
+    (run! send-ws! @message-buffer)
+    (reset! message-buffer [])))
 
 (defn query
   [query cb]
@@ -254,9 +266,7 @@
              :kixi.comms.query/id id
              :kixi.comms.query/body query}]
       (swap! query-responses assoc id cb)
-      (if @ws-conn
-        (send-query m)
-        (buffer-query m)))
+      (send-ws! m))
     (throw (js/Error. "Query needs to be a vector"))))
 
 (defn command!
@@ -267,9 +277,7 @@
            :kixi.comms.command/version version
            :kixi.comms.command/id id
            :kixi.comms.command/payload params}]
-    (log/debug "Sending command:" m)
-    (manage-token-validity
-     #(go (>! @ws-conn (transit-encode m))))))
+    (send-ws! m)))
 
 ;;
 
@@ -280,6 +288,10 @@
   :default
   [msg]
   (log/warn "Unknown message:" msg))
+
+(defmethod handle-server-message
+  "pong"
+  [msg])
 
 (defmethod handle-server-message
   "query-response"
@@ -345,7 +357,7 @@
         (do
           (reset! ws-conn ws-channel)
           (on-connect)
-          (drain-buffered-queries)
+          (drain-buffered-messages)
           (go-loop []
             (let [{:keys [message] :as resp} (<! ws-channel)
                   message (transit-decode message)]
