@@ -2,7 +2,8 @@
   (:require [garden.units :refer [px em percent]]
             [witan.ui.style.colour :as colour]
             [witan.ui.style.values :as values]
-            [witan.ui.style.fonts :as fonts]))
+            [witan.ui.style.fonts :as fonts]
+            [witan.ui.style.util :refer [transition]]))
 
 (def style [[:#create-data
              {:height (percent 100)}
@@ -38,6 +39,13 @@
                 [:.button-container
                  {:margin-top (px 6)}
                  [:button {:margin (px 0)}]]]
+               [:.upload-phases]
+               [:.uploading :.upload-error
+                {:text-align :center}
+                [:.pure-button
+                 {:margin 0}]
+                [:.error
+                 {:margin (em 1)}]]
                [:.upload-phase
                 {:margin-top (em 2)}
                 [:.upload-phase-heading
@@ -61,7 +69,11 @@
                   {:position :fixed
                    :top (em -100)}]
                  [:div.selected-file-name
-                  {:margin-top (em 1)}]]
+                  {:margin-top (em 1)}
+                  [:.size
+                   {:margin-left (em 0.2)
+                    :font-size (px 10)
+                    :font-style :italic}]]]
                 [:&#step-2 :&#step-4 :&#step-5
                  [:label
                   {:margin-left (em 0.3)

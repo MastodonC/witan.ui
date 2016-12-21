@@ -1,10 +1,10 @@
 (ns witan.ui.schema
   (:require [schema.core :as s]))
 
-(defn uuid?
-  [s]
-  (and (string? s)
-       (re-find #"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" s)))
+(def uuid?
+  (s/pred (fn [s]
+            (and (string? s)
+                 (re-find #"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" s)))))
 
 (def GroupSchema
   {:kixi.group/name   s/Str
@@ -53,7 +53,9 @@
                     (s/optional-key :workspace/model-list) [{s/Keyword s/Any}]}
    :app/workspace-dash {:wd/workspaces (s/maybe [s/Any])}
    :app/data-dash {s/Keyword s/Any}
-   :app/create-data {:cd/pending? s/Bool}
+   :app/create-data {:cd/pending? s/Bool
+                     (s/optional-key :cd/message) s/Str
+                     (s/optional-key :cd/pending-data) s/Any}
    :app/rts-dash {s/Keyword s/Any}
    :app/workspace-results [{:result/location s/Str
                             :result/key s/Keyword
@@ -66,4 +68,7 @@
    :app/request-to-share {:rts/requests {uuid? RTSSchema}
                           :rts/current (s/maybe uuid?)
                           :rts/pending? s/Bool}
-   :app/datastore {(s/optional-key :schema/search-results) [SchemaSchema]}})
+   :app/datastore {(s/optional-key :schema/search-results) [SchemaSchema]
+                   :ds/current (s/maybe uuid?)
+                   :ds/pending? s/Bool
+                   :ds/file-metadata {uuid? s/Any}}})

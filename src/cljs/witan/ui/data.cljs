@@ -61,7 +61,9 @@
     :app/request-to-share {:rts/requests {}
                            :rts/current nil
                            :rts/pending? false}
-    :app/datastore {}}
+    :app/datastore {:ds/current nil
+                    :ds/pending? false
+                    :ds/file-metadata {}}}
    (s/validate ws/AppStateSchema)
    (atomize-map)))
 
@@ -129,7 +131,8 @@
   []
   (swap-app-state! :app/workspace assoc :workspace/pending? true)
   (swap-app-state! :app/workspace dissoc :workspace/current)
-  (reset-app-state! :app/panic-message nil))
+  (reset-app-state! :app/panic-message nil)
+  (swap-app-state! :app/create-data dissoc :cd/pending-data))
 
 (defn save-data!
   []
@@ -221,12 +224,10 @@
 (defn manage-token-validity
   [completed-cb]
   (let [{:keys [login/auth-expiry
-                login/refresh-expiry
-                login/token]} (get-app-state :app/login)
+                login/refresh-expiry]} (get-app-state :app/login)
         ae-as-time (tc/from-long auth-expiry)]
     (if (t/after? (t/now) ae-as-time)
-      (let [_ (log/debug "Auth token has expired. Attempting to refresh...")
-            re-as-time (tc/from-long refresh-expiry)]
+      (let [re-as-time (tc/from-long refresh-expiry)]
         (if (t/after? (t/now) re-as-time)
           (do
             (log/debug "Refresh token has expired. Logging out...")
@@ -235,21 +236,27 @@
             (swap! token-refresh-callbacks conj completed-cb)
             (when refresh-required
               (log/debug "Sending tokens for refresh")
-              (send-ws! {:kixi.comms.message/type "refresh"
-                         :kixi.comms.auth/token-pair token})))))
+              (send-ws! {:kixi.comms.message/type "refresh"} false)))))
       (completed-cb))))
 
 (defn send-ws!
-  [payload]
-  (if-not @ws-conn
-    (buffer-message payload)
-    (manage-token-validity
-     #(go
-        (log/debug "Sending message:" payload)
-        (>! @ws-conn (transit-encode payload))
-        (when @ws-timeout
-          (.clearInterval js/window @ws-timeout))
-        (reset! ws-timeout (.setInterval js/window send-ping! 55000)))))) ;; 55 secs
+  ([payload manage]
+   (let [send-fn
+         #(go
+            (let [{:keys [login/token]} (get-app-state :app/login)
+                  payload' (assoc payload :kixi.comms.auth/token-pair token)]
+              (log/debug "Sending message:" payload)
+              (>! @ws-conn (transit-encode payload')))
+            (when @ws-timeout
+              (.clearInterval js/window @ws-timeout))
+            (reset! ws-timeout (.setInterval js/window send-ping! 55000)))] ;; 55 secs
+     (if-not @ws-conn
+       (buffer-message payload)
+       (if manage
+         (manage-token-validity send-fn)
+         (send-fn)))))
+  ([payload]
+   (send-ws! payload true)))
 
 (defn- drain-buffered-messages
   []
@@ -292,6 +299,16 @@
 (defmethod handle-server-message
   "pong"
   [msg])
+
+(defmethod handle-server-message
+  "error"
+  [{:keys [kixi.comms.message/payload] :as msg}]
+  (let [{:keys [witan.gateway/error
+                witan.gateway/error-str]} payload]
+    (log/severe "An error was received from the server:" msg)
+    (condp = error
+      :server-error (panic! (str "Server Error:" error-str))
+      :unauthenticated (reset-everything!))))
 
 (defmethod handle-server-message
   "query-response"
@@ -346,8 +363,17 @@
 
 ;;
 
+(add-watch
+ ws-conn
+ nil
+ (fn [k r old new]
+   (when @ws-conn
+     (log/debug "Connected")
+     (drain-buffered-messages))))
+
 (defn connect!
   [{:keys [on-connect]}]
+  (log/debug "Connecting to gateway...")
   (go
     (let [{:keys [ws-channel error]} (<! (ws-ch (str "ws://"
                                                      (get config :gateway/address)
@@ -357,7 +383,6 @@
         (do
           (reset! ws-conn ws-channel)
           (on-connect)
-          (drain-buffered-messages)
           (go-loop []
             (let [{:keys [message] :as resp} (<! ws-channel)
                   message (transit-decode message)]

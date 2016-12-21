@@ -221,7 +221,8 @@
    :string/data-upload-step-4-group-heading "This data will be shared with %s user/group(s):"
    :string/remove-lc                        "remove"
    :string/data-upload-step-5               "Confirm"
-   :string/data-upload-step-5-decl-unsure   "Please take a moment to check that the steps are filled out correctly and then press the 'Upload' button to begin uploading the data."} )
+   :string/data-upload-step-5-decl-unsure   "Please take a moment to check that the steps are filled out correctly and then press the 'Upload' button to begin uploading the data."
+   :string/try-again                        "Try Again" } )
 
 (defn resolve-string
   ([r]
