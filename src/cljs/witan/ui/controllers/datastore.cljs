@@ -58,7 +58,7 @@
                 info-name
                 selected-schema]} (data/get-in-app-state :app/create-data :cd/pending-data)
         user-id (data/get-in-app-state :app/user :kixi.user/id)
-        payload {:kixi.datastore.metadatastore/file-name info-name
+        payload {:kixi.datastore.metadatastore/name info-name
                  :kixi.datastore.metadatastore/id id
                  :kixi.datastore.metadatastore/type "stored"
                  :kixi.datastore.metadatastore/sharing {:kixi.datastore.metadatastore/file-read [user-id]
