@@ -13,10 +13,7 @@
 (def dash-query-pending? (atom false))
 
 (def query-fields
-  {:header [:kixi.data-acquisition.request-for-data/recipients
-            :kixi.data-acquisition.request-for-data/created-at
-            :kixi.data-acquisition.request-for-data/request-id
-            :kixi.data-acquisition.request-for-data/schema]
+  {:header [{:activities [:kixi.datastore.metadatastore/meta-read :kixi.datastore.metadatastore/file-read]}]
    :full [{:kixi.data-acquisition.request-for-data/recipients
            [:kixi.group/id
             :kixi.group/emails
@@ -148,7 +145,7 @@
   (fn [[k v]] k))
 
 (defmethod on-query-response
-  :datastore/files-by-author
+  :datastore/metadata-with-activities
   [[_ data]]
   (reset! dash-query-pending? false)
   (log/debug ">>>>> GOT RESULTS" data))
@@ -160,7 +157,7 @@
   [id]
   (when-not @dash-query-pending?
     (reset! dash-query-pending? true)
-    (data/query `[{:datastore/files-by-author ~(:header query-fields)}]
+    (data/query `[{:datastore/metadata-with-activities [:kixi.datastore.metadatastore/meta-read :kixi.datastore.metadatastore/file-read]}]
                 on-query-response)))
 
 (defmulti on-route-change
