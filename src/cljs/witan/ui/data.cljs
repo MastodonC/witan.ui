@@ -43,7 +43,9 @@
                 :login/auth-expiry -1
                 :login/refresh-expiry -1}
     :app/user {:kixi.user/name nil
-               :kixi.user/id nil}
+               :kixi.user/id nil
+               :kixi.user/groups [nil]
+               :kixi.user/self-group nil}
     :app/route {:route/path nil
                 :route/params nil
                 :route/query nil}

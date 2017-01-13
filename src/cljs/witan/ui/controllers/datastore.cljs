@@ -13,10 +13,7 @@
 (def dash-query-pending? (atom false))
 
 (def query-fields
-  {:header [:kixi.data-acquisition.request-for-data/recipients
-            :kixi.data-acquisition.request-for-data/created-at
-            :kixi.data-acquisition.request-for-data/request-id
-            :kixi.data-acquisition.request-for-data/schema]
+  {:header [{:activities [:kixi.datastore.metadatastore/meta-read :kixi.datastore.metadatastore/file-read]}]
    :full [{:kixi.data-acquisition.request-for-data/recipients
            [:kixi.group/id
             :kixi.group/emails
@@ -57,12 +54,13 @@
   (let [{:keys [pending-file
                 info-name
                 selected-schema]} (data/get-in-app-state :app/create-data :cd/pending-data)
+        user-groups (data/get-in-app-state :app/user :kixi.user/groups)
         user-id (data/get-in-app-state :app/user :kixi.user/id)
         payload {:kixi.datastore.metadatastore/name info-name
                  :kixi.datastore.metadatastore/id id
                  :kixi.datastore.metadatastore/type "stored"
-                 :kixi.datastore.metadatastore/sharing {:kixi.datastore.metadatastore/file-read [user-id]
-                                                        :kixi.datastore.metadatastore/meta-read [user-id]}
+                 :kixi.datastore.metadatastore/sharing {:kixi.datastore.metadatastore/file-read user-groups
+                                                        :kixi.datastore.metadatastore/meta-read user-groups}
                  :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
                                                            :kixi.user/id user-id}
                  :kixi.datastore.metadatastore/size-bytes (.-size pending-file)
@@ -87,6 +85,10 @@
 (defmethod on-event
   :default [x])
 
+(defn sleep [msec]
+  (let [deadline (+ msec (.getTime (js/Date.)))]
+    (while (> deadline (.getTime (js/Date.))))))
+
 (defmethod on-event
   [:kixi.datastore.filestore/upload-link-created "1.0.0"]
   [{:keys [args]}]
@@ -95,10 +97,16 @@
                 kixi.datastore.filestore/id]} payload
         {:keys [pending-file]} (data/get-in-app-state :app/create-data :cd/pending-data)]
     (log/debug "Uploading to" upload-link)
-    (ajax/PUT upload-link
-              {:body pending-file
-               :handler (partial api-response {:event :upload :status :success :id id})
-               :error-handler (partial api-response {:event :upload :status :failure})})))
+    (if (clojure.string/starts-with? upload-link "file")
+      (do
+        ;for testing locally, so you can manually copy the metadata-one-valid.csv file
+        (log/debug "Sleeping, copy file!")
+        (sleep 20000)
+        (api-response {:event :upload :status :success :id id} 14))
+      (ajax/PUT upload-link
+                {:body pending-file
+                 :handler (partial api-response {:event :upload :status :success :id id})
+                 :error-handler (partial api-response {:event :upload :status :failure})}))))
 
 (defmethod on-event
   [:kixi.datastore.file/created "1.0.0"]
@@ -148,10 +156,19 @@
   (fn [[k v]] k))
 
 (defmethod on-query-response
-  :datastore/files-by-author
+  :datastore/metadata-with-activities
   [[_ data]]
   (reset! dash-query-pending? false)
-  (log/debug ">>>>> GOT RESULTS" data))
+  (log/debug ">>>>> GOT RESULTS" data)
+  (data/swap-app-state! :app/data-dash assoc
+                        :items (get-in data [:body :items])
+                        :paging (get-in data [:body :paging])))
+
+(defmethod on-query-response
+  :error
+  [[o data]]
+  (reset! dash-query-pending? false)
+  (log/debug ">>>>> GOT ERROR" o data))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; On Route Change
@@ -160,7 +177,7 @@
   [id]
   (when-not @dash-query-pending?
     (reset! dash-query-pending? true)
-    (data/query `[{:datastore/files-by-author ~(:header query-fields)}]
+    (data/query `[{:datastore/metadata-with-activities [:kixi.datastore.metadatastore/meta-read :kixi.datastore.metadatastore/file-read]}]
                 on-query-response)))
 
 (defmulti on-route-change
