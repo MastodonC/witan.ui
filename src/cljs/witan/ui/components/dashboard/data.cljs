@@ -6,7 +6,9 @@
             [witan.ui.utils :as utils]
             [witan.ui.route   :as route]
             [witan.ui.strings :refer [get-string]]
-            [witan.ui.data :as data]))
+            [witan.ui.data :as data])
+  (:require-macros [cljs-log.core :as log]
+                   [witan.ui.env :as env :refer [cljs-env]]))
 
 (defmulti button-press
   (fn [_ event] event))
@@ -15,14 +17,22 @@
   [selected-id _]
   (route/navigate! :app/data-create))
 
+(defn file-metadata->dash-display
+  [file-metadata]
+  {:data/id (:kixi.datastore.metadatastore/id file-metadata)
+   :data/name (:kixi.datastore.metadatastore/name file-metadata)
+   :data/schema (:kixi.datastore.metadatastore/schema file-metadata)
+   :data/owner-name (get-in file-metadata [:kixi.datastore.metadatastore/provenance :kixi.user/id])
+   :data/created-at (get-in file-metadata [:kixi.datastore.metadatastore/provenance :kixi.datastore.metadatastore/created])})
+
 (defn view
   []
   (let [selected-id (r/atom nil)]
     (fn []
-      (let [{:keys [about/content]} (data/get-app-state :app/data-dash)
+      (let [{:keys [about/content] :as raw-data} (data/get-app-state :app/data-dash)
             buttons [{:id :upload :icon icons/upload :txt :string/upload :class "data-upload"}]
             modified-fn #(vector :div (utils/iso-time-as-moment (:data/created-at %)))
-            datasets []
+            datasets (mapv file-metadata->dash-display (:items raw-data))
             selected-id' @selected-id
             icon-fn #(vector :div.text-center (icons/workspace (if (:data/local %) :error :dark)))]
         [:div.dashboard
@@ -40,5 +50,4 @@
                          :content datasets
                          :selected?-fn #(= (:data/id %) selected-id')
                          :on-select #(reset! selected-id (:data/id %))
-                         :on-double-click #(route/navigate! :app/data {:id (str (:data/id %))})})]])))
-  )
+                         :on-double-click #(route/navigate! :app/data {:id (str (:data/id %))})})]]))))

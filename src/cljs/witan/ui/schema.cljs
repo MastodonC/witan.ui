@@ -41,6 +41,8 @@
                :login/refresh-expiry s/Num}
    :app/user {:kixi.user/name (s/maybe s/Str)
               :kixi.user/id (s/maybe s/Str)
+              :kixi.user/groups [(s/maybe s/Str)]
+              :kixi.user/self-group (s/maybe s/Str)
               (s/optional-key :user/group-search-results) [GroupSchema]}
    :app/route {:route/path (s/maybe s/Keyword)
                :route/params (s/maybe s/Any)
