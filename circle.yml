@@ -2,10 +2,10 @@ deployment:
   production:
     tag: /release-.*/
     commands:
-      - ./build_prod.sh $WITAN_GATEWAY_PRODUCTION_URL $WITAN_VIZ_PRODUCTION_URL
+      - ./scripts/build.sh $WITAN_GATEWAY_PRODUCTION_URL $WITAN_VIZ_PRODUCTION_URL production
       - lein upload-data witan-ui-production
   staging:
     branch: master
     commands:
-      - ./build_prod.sh $WITAN_GATEWAY_STAGING_URL $WITAN_VIZ_STAGING_URL
+      - ./scripts/build.sh $WITAN_GATEWAY_STAGING_URL $WITAN_VIZ_STAGING_URL staging
       - lein upload-data witan-ui-staging
