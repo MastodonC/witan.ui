@@ -1,9 +1,14 @@
 #!/usr/bin/env bash
 
 # exports
-export LOG_LEVEL=2
 export WITAN_API_URL=$1
 export WITAN_VIZ_URL=$2
+export ENVIRONMENT=$3
+
+if [ "$ENVIRONMENT" == "production" ]
+then
+    export LOG_LEVEL=2
+fi
 
 # build
 lein clean
