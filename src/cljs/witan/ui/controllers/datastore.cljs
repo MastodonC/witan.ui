@@ -149,6 +149,13 @@
   (data/swap-app-state! :app/create-data assoc :cd/pending-data data)
   (data/command! :kixi.datastore.filestore/create-upload-link "1.0.0" nil))
 
+(defmethod handle
+  :download-file
+  [event {:keys [id]}]
+  (data/swap-app-state! :app/datastore assoc :ds/download-pending? true)
+  (data/command! :kixi.datastore.filestore/create-file-download-link "1.0.0"
+                 {:kixi.datastore.metadatastore/id id}))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query Response
 

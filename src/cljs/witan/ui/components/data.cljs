@@ -11,8 +11,8 @@
 
 (defn view
   []
-  (let [id (data/get-in-app-state :app/datastore :ds/current)
-        md (data/get-in-app-state :app/datastore :ds/file-metadata id)]
+  (let [{:keys [ds/current ds/download-pending?]} (data/get-in-app-state :app/datastore)
+        md (data/get-in-app-state :app/datastore :ds/file-metadata current)]
     (if-not md
       [:div.loading
        (icons/loading :large)]
@@ -24,6 +24,7 @@
             meta-read-groups (:kixi.datastore.metadatastore/meta-read sharing)]
         [:div#data-view.padded-content
          [:h2 (get-string :string/file-name ":" name)]
+         ;; ----------------------------------------------
          [:hr]
          [:div.field-entries
           [:div.field-entry
@@ -41,6 +42,7 @@
           [:div.field-entry
            [:strong (get-string :string/file-uploader ":")]
            [:span (:kixi.user/id provenance)]]]
+         ;; ----------------------------------------------
          [:hr]
          [:div.sharing-controls
           [:h2 (get-string :string/sharing)]
@@ -63,4 +65,13 @@
                         (get-string :string/remove-lc)] ")"]
                 #_(shared/inline-group group)
                 [:span group]])]]
-           #_[shared/group-search-area :string/data-upload-search-groups #()]]]]))))
+           #_[shared/group-search-area :string/data-upload-search-groups #()]]]
+         ;; ----------------------------------------------
+         [:hr]
+         [:div.actions
+          (shared/button {:id :button-a
+                          :icon (if download-pending? icons/loading icons/download)
+                          :txt :string/file-actions-download-file
+                          :class "file-action-download"}
+                         #(when-not download-pending?
+                            (controller/raise! :data/download-file {:id current})))]]))))

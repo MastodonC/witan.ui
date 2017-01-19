@@ -73,4 +73,5 @@
    :app/datastore {(s/optional-key :schema/search-results) [SchemaSchema]
                    :ds/current (s/maybe uuid?)
                    :ds/pending? s/Bool
+                   :ds/download-pending? s/Bool
                    :ds/file-metadata {uuid? s/Any}}})
