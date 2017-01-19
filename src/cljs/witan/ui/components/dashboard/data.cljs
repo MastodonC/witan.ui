@@ -29,7 +29,7 @@
   []
   (let [selected-id (r/atom nil)]
     (fn []
-      (let [{:keys [about/content] :as raw-data} (data/get-app-state :app/data-dash)
+      (let [raw-data (data/get-app-state :app/data-dash)
             buttons [{:id :upload :icon icons/upload :txt :string/upload :class "data-upload"}]
             modified-fn #(vector :div (utils/iso-time-as-moment (:data/created-at %)))
             datasets (mapv file-metadata->dash-display (:items raw-data))

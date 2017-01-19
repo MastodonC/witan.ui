@@ -269,14 +269,14 @@
 
 (defn query
   [query cb]
-  (if (vector? query)
+  (if (map? query)
     (let [id (str (random-uuid))
           m {:kixi.comms.message/type "query"
              :kixi.comms.query/id id
              :kixi.comms.query/body query}]
       (swap! query-responses assoc id cb)
       (send-ws! m))
-    (throw (js/Error. "Query needs to be a vector"))))
+    (throw (js/Error. "Query needs to be a map"))))
 
 (defn command!
   [command-key version params]

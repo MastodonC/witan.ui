@@ -99,10 +99,10 @@
                    :color colour/body-bg}]]]]]]
 
             [:#data-view
-             [:.padded-content
-              {:max-width (px 1024)}
-              [:#heading
-               {:margin [[(em 1) (em 0)]]
-                :height (px 24)}]
-              [:h1
-               {:margin 0}]]]])
+             {:max-width (px 1024)}
+             [:.field-entry
+              {:margin [[(em 0.5) (em 0)]]}]
+             [:.sharing-controls
+              [:.sharing-activity
+               [:.selected-groups
+                {:margin [[(em 0.5) (em 0)]]}]]]]])

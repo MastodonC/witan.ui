@@ -5,6 +5,9 @@
 
 (def strings
   {:string/name                           "Name"
+   :string/file-name                      "File Name"
+   :string/file-type                      "File Type"
+   :string/file-provenance-source         "Source"
    :string/forecast-in-progress-text      "We're currently building a new version of this projection for you. You can download your data from the 'Output' section when this message disappears."
    :string/sign-in-failure                "There was a problem with your details. Please try again."
    :string/upload-new-data                "Upload new data"
@@ -222,7 +225,12 @@
    :string/remove-lc                        "remove"
    :string/data-upload-step-5               "Confirm"
    :string/data-upload-step-5-decl-unsure   "Please take a moment to check that the steps are filled out correctly and then press the 'Upload' button to begin uploading the data."
-   :string/try-again                        "Try Again" } )
+   :string/try-again                        "Try Again"
+   :string/file-size                        "Size"
+   :string/file-uploader                    "Uploader"
+   :string/sharing                          "Sharing"
+   :string/file-sharing-meta-read "This data is visible to %s user/group(s):"
+   } )
 
 (defn resolve-string
   ([r]
