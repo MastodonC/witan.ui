@@ -117,6 +117,15 @@
     (data/swap-app-state! :app/create-data assoc :cd/pending? false)
     (route/navigate! :app/data {:id id})))
 
+(defmethod on-event
+  [:kixi.datastore.filestore/download-link-created "1.0.0"]
+  [{:keys [args]}]
+  (let [{:keys [kixi.comms.event/payload]} args
+        {:keys [kixi.datastore.metadatastore/link]} payload]
+    (data/swap-app-state! :app/datastore assoc :ds/download-pending? false)
+    (log/info "Downloading file" link)
+    (.open js/window link)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti handle
@@ -148,6 +157,13 @@
   (data/swap-app-state! :app/create-data assoc :cd/pending? true)
   (data/swap-app-state! :app/create-data assoc :cd/pending-data data)
   (data/command! :kixi.datastore.filestore/create-upload-link "1.0.0" nil))
+
+(defmethod handle
+  :download-file
+  [event {:keys [id]}]
+  (data/swap-app-state! :app/datastore assoc :ds/download-pending? true)
+  (data/command! :kixi.datastore.filestore/create-download-link "1.0.0"
+                 {:kixi.datastore.metadatastore/id id}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query Response

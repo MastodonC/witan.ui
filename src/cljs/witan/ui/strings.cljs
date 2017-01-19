@@ -229,7 +229,8 @@
    :string/file-size                        "Size"
    :string/file-uploader                    "Uploader"
    :string/sharing                          "Sharing"
-   :string/file-sharing-meta-read "This data is visible to %s user/group(s):"
+   :string/file-sharing-meta-read           "This data is visible to %s user/group(s):"
+   :string/file-actions-download-file       "Download this file"
    } )
 
 (defn resolve-string

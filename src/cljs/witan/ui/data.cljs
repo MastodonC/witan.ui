@@ -65,6 +65,7 @@
                            :rts/pending? false}
     :app/datastore {:ds/current nil
                     :ds/pending? false
+                    :ds/download-pending? false
                     :ds/file-metadata {}}}
    (s/validate ws/AppStateSchema)
    (atomize-map)))
