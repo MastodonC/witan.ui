@@ -41,7 +41,7 @@
            [:span (js/filesize size-bytes)]]
           [:div.field-entry
            [:strong (get-string :string/file-uploader ":")]
-           [:span (:kixi.user/id provenance)]]]
+           [:span (get-in provenance [:kixi/user :kixi.user/name])]]]
          ;; ----------------------------------------------
          [:hr]
          [:div.sharing-controls
