@@ -179,7 +179,7 @@
   (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
                  {:kixi.datastore.metadatastore/id current
                   :kixi.datastore.metadatastore/activity activity
-                  :kixi.group/id group
+                  :kixi.group/id (:kixi.group/id group)
                   :kixi.datastore.metadatastore/sharing-update (if target-state
                                                                  :kixi.datastore.metadatastore/sharing-conj
                                                                  :kixi.datastore.metadatastore/sharing-disj)}))
