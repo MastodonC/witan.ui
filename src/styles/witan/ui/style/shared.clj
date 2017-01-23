@@ -15,7 +15,7 @@
               {:padding-left (px 30)
                :width        (percent 100)}]]
 
-            ;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
 
             [:.shared-table
              ^:prefix {:user-select :none}
@@ -41,7 +41,27 @@
                  :color colour/table-row-selected-text
                  :cursor :pointer}]]]]
 
-            ;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
+
+            [:.sharing-matrix
+             [:.pure-table.pure-table-horizontal
+              {:width (percent 100)}]
+             [:#loading
+              {:margin-top (em 2)}]
+             [:th
+              {:color colour/table-header-text
+               :font-weight :normal
+               :cursor :default}]
+             [:thead
+              [:th
+               [:&:first-child {:width "50%"}]]]
+             [:tbody              
+              [:tr
+               {:height (em 3)}
+               [:td                
+                [:&:first-child {:width "50%"}]]]]]
+
+;;;;;;;;;;;;;;
 
             [:.shared-heading
              {:background-color colour/dash-heading-bg
@@ -74,7 +94,7 @@
               [:form
                {:width (em 32)}]]]
 
-            ;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
 
             [:.shared-inline-group :.shared-inline-schema
              {:display :inline}
@@ -83,7 +103,7 @@
                :vertical-align :sub
                :margin-right (em 0.2)}]]
 
-            ;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
 
             [:.button-container
              {:align-self :center}
@@ -95,14 +115,14 @@
               [:i
                {:margin [[(px -3) (px 5) (px 0) (px 0)]]}]]]
 
-            ;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
 
             [:.error
              {:color colour/error}]
             [:.success
              {:color colour/success}]
 
-            ;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
 
             [:.rotates
              {:transition (transition :transform "0.3s")}]
@@ -111,7 +131,7 @@
             [:.rotate270
              {:transform "rotate(-90deg)"}]
 
-            ;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
 
             [:.shared-index
              [:.alpha-header
@@ -127,7 +147,7 @@
                 :font-weight :bold
                 :font-family fonts/base-fonts}]]]
 
-            ;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
 
             [:div.shared-info-panel
              {:display :flex
@@ -148,7 +168,7 @@
               {:padding-right (em 0.5)}]]
 
 
-            ;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;
 
             [:.number-circle
              {:border-radius (percent 50)
@@ -163,7 +183,7 @@
               :font-weight :bold
               }]
 
-            ;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;
 
             [:.shared-schema-search-area :.shared-group-search-area
              [:div.breakout-area

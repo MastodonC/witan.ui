@@ -60,7 +60,8 @@
                  :kixi.datastore.metadatastore/id id
                  :kixi.datastore.metadatastore/type "stored"
                  :kixi.datastore.metadatastore/sharing {:kixi.datastore.metadatastore/file-read user-groups
-                                                        :kixi.datastore.metadatastore/meta-read user-groups}
+                                                        :kixi.datastore.metadatastore/meta-read user-groups
+                                                        :kixi.datastore.metadatastore/meta-update user-groups}
                  :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
                                                            :kixi.user/id user-id}
                  :kixi.datastore.metadatastore/size-bytes (.-size pending-file)
@@ -164,6 +165,24 @@
   (data/swap-app-state! :app/datastore assoc :ds/download-pending? true)
   (data/command! :kixi.datastore.filestore/create-download-link "1.0.0"
                  {:kixi.datastore.metadatastore/id id}))
+
+(defmethod handle
+  :sharing-change
+  [event {:keys [current activity target-state group] :as data}]
+  (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current 
+                                                  :kixi.datastore.metadatastore/sharing activity]
+                        (fn [groups]
+                          (let [g-set (set groups)]
+                            (if target-state
+                              (conj g-set group)
+                              (disj g-set group)))))
+  (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
+                 {:kixi.datastore.metadatastore/id current
+                  :kixi.datastore.metadatastore/activity activity
+                  :kixi.group/id group
+                  :kixi.datastore.metadatastore/sharing-update (if target-state
+                                                                 :kixi.datastore.metadatastore/sharing-conj
+                                                                 :kixi.datastore.metadatastore/sharing-disj)}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query Response

@@ -237,6 +237,31 @@
            {:on-click close-fn}
            (icons/close)]]]))))
 
+(defn sharing-matrix
+  [sharing-activites group->activities on-change]
+  [:div.sharing-matrix
+   [:table.pure-table.pure-table-horizontal.sharing-matrix-table-headers
+    [:thead
+     [:tr
+      (cons 
+       [:th {:key "group-name"} (get-string :string/sharing-matrix-group-name)]
+       (for [[key title] sharing-activites]
+         [:th {:key title} title]))]]
+    [:tbody
+     (for [[group activities :as row] group->activities]
+       (let [group-name (:kixi.group/name group)]
+         [:tr
+          {:key (str row)}
+          [:td {:key group-name}
+           (inline-group group)]
+          (for [[activity-k activity-t] sharing-activites]
+            [:td
+             {:key (str group-name "-" activity-t)}
+             [:input {:type "checkbox"
+                      :checked (get activities activity-k)
+                      :on-change #(let [new-value (.-checked (.-target %))]
+                                    (on-change row activity-k new-value))}]])]))]]])
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -374,6 +399,34 @@
        [group-search-area :string/data-upload-search-groups
         #(swap! data assoc :selected-group %1)])]))
   {:selected-group nil}
+  {:inspect-data true
+   :frame true
+   :history false})
+
+(defcard sharing-matrix
+  (fn [data _]
+    (sab/html
+     [:div
+      {:style {:width "100%"}}
+      (r/as-element
+       [sharing-matrix (get @data :sharing-activites)
+        (get @data :group->activites)
+        (fn [[group activities] activity target-state] 
+          (swap! data
+                 #(assoc-in %
+                            [:group->activites group activity]
+                            target-state))
+          )])]))
+  {:sharing-activites {:meta-read (get-string :string/file-sharing-meta-read)
+                       :file-read (get-string :string/file-sharing-file-read)}
+   :group->activites {{:kixi.group/id "123"
+                       :kixi.group/name "balh"
+                       :kixi.group/type :group} {:meta-read true
+                       :file-read false}
+                      {:kixi.group/id "34531"
+                       :kixi.group/name "ploop"
+                       :kixi.group/type :user} {:meta-read false
+                       :file-read true}}}
   {:inspect-data true
    :frame true
    :history false})

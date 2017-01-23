@@ -9,6 +9,27 @@
             [goog.string :as gstring])
   (:require-macros [cljs-log.core :as log]))
 
+(defn reverse-group->activity-map
+  [all-activities sharing]
+(log/debug sharing)
+  (let [sharing-sets (zipmap (keys sharing)
+                             (map set (vals sharing)))
+        all-groups (set (apply concat (vals sharing)))]
+    (reduce 
+     (fn [group->activities group]
+       (assoc group->activities
+              group
+              (reduce
+               (fn [a activity]
+                 (assoc a
+                        activity
+                        (not (nil? ((get sharing-sets activity #{})
+                                    group)))))
+               {}
+               all-activities)))
+     {}
+     all-groups)))
+
 (defn view
   []
   (let [{:keys [ds/current ds/download-pending?]} (data/get-in-app-state :app/datastore)
@@ -21,7 +42,9 @@
                     kixi.datastore.metadatastore/sharing
                     kixi.datastore.metadatastore/provenance
                     kixi.datastore.metadatastore/size-bytes]} md
-            meta-read-groups (:kixi.datastore.metadatastore/meta-read sharing)]
+            activities->string  {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
+                                 :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)} ;TODO get this from datastore
+            ]
         [:div#data-view.padded-content
          [:h2 (get-string :string/file-name ":" name)]
          ;; ----------------------------------------------
@@ -50,21 +73,14 @@
            ;; meta-read
            [:strong "Groups who can see this data"]
            [:div.selected-groups
-            [:span.success
-             (gstring/format
-              (get-string :string/file-sharing-meta-read)
-              (count meta-read-groups))]
-            [:div
-             (for [group meta-read-groups]
-               ^{:key identity}
-               [:div
-                #_[:span.removal-link
-                   "(" [:a {:href "javascript:void(0)"
-                            :on-click
-                            #()}
-                        (get-string :string/remove-lc)] ")"]
-                #_(shared/inline-group group)
-                [:span group]])]]
+            [shared/sharing-matrix activities->string
+             (reverse-group->activity-map (keys activities->string) sharing)
+             (fn [[group activities] activity target-state] 
+               (controller/raise! :data/sharing-change
+                                  {:current current
+                                   :group group
+                                   :activity activity
+                                   :target-state target-state}))]]
            #_[shared/group-search-area :string/data-upload-search-groups #()]]]
          ;; ----------------------------------------------
          [:hr]
