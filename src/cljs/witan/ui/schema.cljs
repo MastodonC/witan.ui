@@ -9,8 +9,7 @@
 (def GroupSchema
   {:kixi.group/name   s/Str
    :kixi.group/type   s/Keyword
-   :kixi.group/id     uuid?
-   :kixi.group/emails [s/Str]})
+   :kixi.group/id     uuid?})
 
 (def SchemaSchema
   {:schema/name s/Str
@@ -43,7 +42,8 @@
               :kixi.user/id (s/maybe s/Str)
               :kixi.user/groups [(s/maybe s/Str)]
               :kixi.user/self-group (s/maybe s/Str)
-              (s/optional-key :user/group-search-results) [GroupSchema]}
+              (s/optional-key :user/group-search-results) [GroupSchema]
+              (s/optional-key :user/group-search-filtered) [GroupSchema]}
    :app/route {:route/path (s/maybe s/Keyword)
                :route/params (s/maybe s/Any)
                :route/query (s/maybe {s/Keyword s/Any})}

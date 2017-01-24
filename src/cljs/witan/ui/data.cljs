@@ -135,7 +135,10 @@
   (swap-app-state! :app/workspace assoc :workspace/pending? true)
   (swap-app-state! :app/workspace dissoc :workspace/current)
   (reset-app-state! :app/panic-message nil)
-  (swap-app-state! :app/create-data dissoc :cd/pending-data))
+  (swap-app-state! :app/create-data dissoc :cd/pending-data)
+  (swap-app-state! :app/create-data dissoc :cd/pending-data)
+  (swap-app-state! :app/user dissoc :user/group-search-results)
+  (swap-app-state! :app/user dissoc :user/group-search-filtered))
 
 (defn save-data!
   []

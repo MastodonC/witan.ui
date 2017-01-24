@@ -232,7 +232,8 @@
    :string/file-sharing-meta-read           "Meta Read"
    :string/file-sharing-file-read           "File Read"
    :string/file-actions-download-file       "Download this file"
-   :string/sharing-matrix-group-name "Group Name"} )
+   :string/sharing-matrix-group-name        "Group Name"
+   :string/sharing-matrix-group-search-ph   "Search for users and/or groups..."} )
 
 (defn resolve-string
   ([r]

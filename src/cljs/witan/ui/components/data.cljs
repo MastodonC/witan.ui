@@ -11,11 +11,10 @@
 
 (defn reverse-group->activity-map
   [all-activities sharing]
-(log/debug sharing)
   (let [sharing-sets (zipmap (keys sharing)
                              (map set (vals sharing)))
         all-groups (set (apply concat (vals sharing)))]
-    (reduce 
+    (reduce
      (fn [group->activities group]
        (assoc group->activities
               group
@@ -70,18 +69,20 @@
          [:div.sharing-controls
           [:h2 (get-string :string/sharing)]
           [:div.sharing-activity
-           ;; meta-read
-           [:strong "Groups who can see this data"]
            [:div.selected-groups
             [shared/sharing-matrix activities->string
              (reverse-group->activity-map (keys activities->string) sharing)
-             (fn [[group activities] activity target-state] 
-               (controller/raise! :data/sharing-change
-                                  {:current current
-                                   :group group
-                                   :activity activity
-                                   :target-state target-state}))]]
-           #_[shared/group-search-area :string/data-upload-search-groups #()]]]
+             {:on-change
+              (fn [[group activities] activity target-state]
+                (controller/raise! :data/sharing-change
+                                   {:current current
+                                    :group group
+                                    :activity activity
+                                    :target-state target-state}))
+              :on-add
+              (fn [group]
+                (controller/raise! :data/sharing-add-group
+                                   {:current current :group group}))}]]]]
          ;; ----------------------------------------------
          [:hr]
          [:div.actions
