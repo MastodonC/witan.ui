@@ -76,6 +76,72 @@
   (data/swap-app-state! :app/create-data assoc :cd/pending? false)
   (data/swap-app-state! :app/create-data assoc :cd/message :api-failure))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Query Response
+
+(defmulti on-query-response
+  (fn [[k v]] k))
+
+(defmethod on-query-response
+  :datastore/metadata-with-activities
+  [[_ data]]
+  (reset! dash-query-pending? false)
+  (log/debug ">>>>> GOT RESULTS" data)
+  (data/swap-app-state! :app/data-dash assoc
+                        :items (get data :items)
+                        :paging (get data :paging)))
+
+
+(defmethod on-query-response
+  :datastore/metadata-by-id
+  [[_ data]]
+  (log/debug ">>>>> GOT RESULTS BY ID" data)
+  (save-file-metadata! data))
+
+(defmethod on-query-response
+  :error
+  [[o data]]
+  (reset! dash-query-pending? false)
+  (log/debug ">>>>> GOT ERROR" o data))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; On Route Change
+
+(defn send-dashboard-query!
+  [id]
+  (when-not @dash-query-pending?
+    (reset! dash-query-pending? true)
+    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read
+                                                        :kixi.datastore.metadatastore/file-read]]
+                                                      (:full query-fields)]}
+                on-query-response)))
+
+(defn send-single-file-item-query!
+  [id]
+  (data/query {:datastore/metadata-by-id [[id]
+                                          (:full query-fields)]}
+              on-query-response))
+
+(defmulti on-route-change
+  (fn [{:keys [args]}] (:route/path args)))
+
+(defmethod on-route-change
+  :default [_])
+
+(defmethod on-route-change
+  :app/data-dash
+  [_]
+  (if-let [id (:kixi.user/id (data/get-app-state :app/user))]
+    (send-dashboard-query! id)))
+
+(defmethod on-route-change
+  :app/data
+  [{:keys [args]}]
+  (data/swap-app-state! :app/datastore assoc :ds/pending? true)
+  (let [id (get-in args [:route/params :id])]
+    (send-single-file-item-query! id)
+    (select-current! id)))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Events
@@ -127,6 +193,14 @@
     (log/info "Downloading file" link)
     (.open js/window link)))
 
+(defmethod on-event
+  [:kixi.datastore.metadatastore/sharing-change-rejected "1.0.0"]
+  [{:keys [args]}]
+  (let [{:keys [kixi.comms.event/payload]} args
+        {:keys [kixi.datastore.metadatastore/id]} payload]
+    (log/warn "An adjustment to the sharing properties of" id "was rejected. Restoring...")
+    (send-single-file-item-query! id)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti handle
@@ -169,7 +243,7 @@
 (defmethod handle
   :sharing-change
   [event {:keys [current activity target-state group] :as data}]
-  (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current 
+  (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current
                                                   :kixi.datastore.metadatastore/sharing activity]
                         (fn [groups]
                           (let [g-set (set groups)]
@@ -184,68 +258,20 @@
                                                                  :kixi.datastore.metadatastore/sharing-conj
                                                                  :kixi.datastore.metadatastore/sharing-disj)}))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Query Response
-
-(defmulti on-query-response
-  (fn [[k v]] k))
-
-(defmethod on-query-response
-  :datastore/metadata-with-activities
-  [[_ data]]
-  (reset! dash-query-pending? false)
-  (log/debug ">>>>> GOT RESULTS" data)
-  (data/swap-app-state! :app/data-dash assoc
-                        :items (get data :items)
-                        :paging (get data :paging)))
-
-
-(defmethod on-query-response
-  :datastore/metadata-by-id
-  [[_ data]]
-  (log/debug ">>>>> GOT RESULTS BY ID" data)
-  (save-file-metadata! data))
-
-(defmethod on-query-response
-  :error
-  [[o data]]
-  (reset! dash-query-pending? false)
-  (log/debug ">>>>> GOT ERROR" o data))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; On Route Change
-
-(defn send-dashboard-query!
-  [id]
-  (when-not @dash-query-pending?
-    (reset! dash-query-pending? true)
-    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read
-                                                        :kixi.datastore.metadatastore/file-read]]
-                                                      (:full query-fields)]}
-                on-query-response)))
-
-(defmulti on-route-change
-  (fn [{:keys [args]}] (:route/path args)))
-
-(defmethod on-route-change
-  :default [_])
-
-(defmethod on-route-change
-  :app/data-dash
-  [_]
-  (if-let [id (:kixi.user/id (data/get-app-state :app/user))]
-    (send-dashboard-query! id)))
-
-(defmethod on-route-change
-  :app/data
-  [{:keys [args]}]
-  (data/swap-app-state! :app/datastore assoc :ds/pending? true)
-  (let [rts-id (get-in args [:route/params :id])]
-    (data/query {:datastore/metadata-by-id [[rts-id]
-                                            (:full query-fields)]}
-                on-query-response)
-    (select-current! rts-id)))
-
+(defmethod handle
+  :sharing-add-group
+  [event {:keys [current group] :as data}]
+  (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current
+                                                  :kixi.datastore.metadatastore/sharing
+                                                  :kixi.datastore.metadatastore/meta-read]
+                        (fn [groups]
+                          (let [g-set (set groups)]
+                            (conj g-set group))))
+  (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
+                 {:kixi.datastore.metadatastore/id current
+                  :kixi.datastore.metadatastore/activity :kixi.datastore.metadatastore/meta-read
+                  :kixi.group/id (:kixi.group/id group)
+                  :kixi.datastore.metadatastore/sharing-update :kixi.datastore.metadatastore/sharing-conj}))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-user-logged-in

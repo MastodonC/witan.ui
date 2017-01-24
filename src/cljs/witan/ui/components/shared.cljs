@@ -94,9 +94,9 @@
 (defn inline-group
   [{:keys [kixi.group/name kixi.group/type]}]
   [:div.shared-inline-group
-   (let [icon-fn (condp = type
-                   :user icons/user
-                   :group icons/organisation
+   (let [icon-fn (condp = (str type)
+                   "user" icons/user
+                   "group" icons/organisation
                    icons/help)]
      [:div.group-icon
       (icon-fn :small :dark)])
@@ -196,12 +196,13 @@
   [ph on-click & opts]
   (let [show-breakout? (r/atom false)
         selected-group (r/atom nil)]
+    (controller/raise! :user/refresh-groups {})
     (fn [ph on-click & opts]
       (let [{:keys [id disabled? exclusions]
              :or {id (str "group-search-field-"ph)
                   disabled? false
                   exclusions nil}} (first opts)
-            results (:user/group-search-results (data/get-app-state :app/user))
+            results (:user/group-search-filtered (data/get-app-state :app/user))
             results (if exclusions
                       (remove (fn [x] (some #{x} exclusions)) results)
                       results)
@@ -238,12 +239,15 @@
            (icons/close)]]]))))
 
 (defn sharing-matrix
-  [sharing-activites group->activities on-change]
+  [sharing-activites group->activities {:keys [on-change on-add]}]
   [:div.sharing-matrix
+   [group-search-area
+    :string/sharing-matrix-group-search-ph
+    on-add]
    [:table.pure-table.pure-table-horizontal.sharing-matrix-table-headers
     [:thead
      [:tr
-      (cons 
+      (cons
        [:th {:key "group-name"} (get-string :string/sharing-matrix-group-name)]
        (for [[key title] sharing-activites]
          [:th {:key title} title]))]]
@@ -411,22 +415,23 @@
       (r/as-element
        [sharing-matrix (get @data :sharing-activites)
         (get @data :group->activites)
-        (fn [[group activities] activity target-state] 
-          (swap! data
-                 #(assoc-in %
-                            [:group->activites group activity]
-                            target-state))
-          )])]))
+        {:on-change
+         (fn [[group activities] activity target-state]
+           (swap! data
+                  #(assoc-in %
+                             [:group->activites group activity]
+                             target-state)))
+         :on-add #()}])]))
   {:sharing-activites {:meta-read (get-string :string/file-sharing-meta-read)
                        :file-read (get-string :string/file-sharing-file-read)}
    :group->activites {{:kixi.group/id "123"
                        :kixi.group/name "balh"
                        :kixi.group/type :group} {:meta-read true
-                       :file-read false}
+                                                 :file-read false}
                       {:kixi.group/id "34531"
                        :kixi.group/name "ploop"
                        :kixi.group/type :user} {:meta-read false
-                       :file-read true}}}
+                                                :file-read true}}}
   {:inspect-data true
    :frame true
    :history false})

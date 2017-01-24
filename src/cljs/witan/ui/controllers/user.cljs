@@ -3,8 +3,10 @@
             [schema.core :as s]
             [witan.ui.data :as data]
             [goog.crypt.base64 :as b64]
+            [goog.string :as gstring]
             [cljs.reader :as reader]
-            [witan.ui.data :refer [transit-decode]])
+            [witan.ui.data :refer [transit-decode]]
+            [witan.ui.schema :as ws])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
@@ -80,6 +82,18 @@
     (api-response {:event event :status status} response)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Query Response
+
+(defmulti on-query-response
+  (fn [[k v]] k))
+
+(defmethod on-query-response
+  :groups/search
+  [[_ data]]
+  (data/swap-app-state! :app/user assoc :user/group-search-results (:items data))
+  (data/swap-app-state! :app/user assoc :user/group-search-filtered (:items data)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti handle
   (fn [event args] event))
@@ -97,59 +111,18 @@
   [event {:keys [email pass]}]
   (data/reset-everything!))
 
+(defmethod handle :refresh-groups
+  [event {:keys [email pass]}]
+  (data/query {:groups/search [[] (keys ws/GroupSchema)]} on-query-response))
+
 (defmethod handle :search-groups
   [event {:keys [search]}]
-  (data/swap-app-state! :app/user assoc :user/group-search-results
-                        [{:kixi.group/name "Bob"
-                          :kixi.group/id "a74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
-                          :kixi.group/type :user
-                          :kixi.group/emails ["bob@example.com"]}
-                         {:kixi.group/name "Bob1"
-                          :kixi.group/id "b74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
-                          :kixi.group/type :user
-                          :kixi.group/emails ["bob1@example.com"]}
-                         {:kixi.group/name "Bob2"
-                          :kixi.group/id "c74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
-                          :kixi.group/type :user
-                          :kixi.group/emails ["bob2@example.com"]}
-                         {:kixi.group/name "Bob3"
-                          :kixi.group/id "d74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
-                          :kixi.group/type :user
-                          :kixi.group/emails ["bob3@example.com"]}
-                         {:kixi.group/name "Bob4"
-                          :kixi.group/id "e74f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
-                          :kixi.group/type :user
-                          :kixi.group/emails ["bob4@example.com"]}
-                         {:kixi.group/name "Alice1"
-                          :kixi.group/id "f74f742d-9cb9-4ede-aeaf-f82aa4b6f3a8"
-                          :kixi.group/type :user
-                          :kixi.group/emails ["alice1@example.com"]}
-                         {:kixi.group/name "Alice2"
-                          :kixi.group/id "f74f742d-9cb9-4ede-aeaf-f82aa4b6f3a7"
-                          :kixi.group/type :user
-                          :kixi.group/emails ["alice2@example.com"]}
-                         {:kixi.group/name "Alice3"
-                          :kixi.group/id "f74f742d-9cb9-4ede-aeaf-f82aa4b6f3a6"
-                          :kixi.group/type :user
-                          :kixi.group/emails ["alice3@example.com"]}
-                         {:kixi.group/name "Alice4"
-                          :kixi.group/id "f74f742d-9cb9-4ede-aeaf-f82aa4b6f3a5"
-                          :kixi.group/type :user
-                          :kixi.group/emails ["alice4@example.com"]}
-                         {:kixi.group/name "Alice5"
-                          :kixi.group/id "f74f742d-9cb9-4ede-aeaf-f82aa4b6f3a4"
-                          :kixi.group/type :user
-                          :kixi.group/emails ["alice5@example.com"]}
-                         {:kixi.group/name "GLA Demography"
-                          :kixi.group/id "074f742d-9cb9-4ede-aeaf-f82aa4b6f3a9"
-                          :kixi.group/type :group
-                          :kixi.group/emails ["alice1@example.com"
-                                              "bob1@example.com"]}
-                         {:kixi.group/name "Camden Demography"
-                          :kixi.group/id "074f742d-9cb9-4ede-aeaf-f82aa4b6329a"
-                          :kixi.group/type :group
-                          :kixi.group/emails ["alice2@example.com"
-                                              "bob2@example.com"]}]))
+  (let [groups (data/get-in-app-state :app/user :user/group-search-results)
+        filtered-groups (filter
+                         #(gstring/caseInsensitiveContains
+                           (:kixi.group/name %)
+                           search) groups)]
+    (data/swap-app-state! :app/user assoc :user/group-search-filtered filtered-groups)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
