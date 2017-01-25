@@ -135,7 +135,7 @@
                    [:span [:span.success (str
                                           (utils/sanitize-filename (.-name (:pending-file @form-data))))]
                     [:span.success.size "("
-                     (.-size (:pending-file @form-data)) " bytes)"]]]))
+                     (js/filesize (.-size (:pending-file @form-data))) ")"]]]))
 
                ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                ;; Step 2 - Schema opt-out/selection
