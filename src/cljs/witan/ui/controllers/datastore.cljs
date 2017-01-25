@@ -54,7 +54,7 @@
   (let [{:keys [pending-file
                 info-name
                 selected-schema]} (data/get-in-app-state :app/create-data :cd/pending-data)
-        user-groups (data/get-in-app-state :app/user :kixi.user/groups)
+        user-groups [(data/get-in-app-state :app/user :kixi.user/self-group)]
         user-id (data/get-in-app-state :app/user :kixi.user/id)
         payload {:kixi.datastore.metadatastore/name info-name
                  :kixi.datastore.metadatastore/id id
@@ -96,7 +96,8 @@
   :datastore/metadata-by-id
   [[_ data]]
   (log/debug ">>>>> GOT RESULTS BY ID" data)
-  (save-file-metadata! data))
+  (when-not (:error data)
+    (save-file-metadata! data)))
 
 (defmethod on-query-response
   :error
@@ -111,8 +112,7 @@
   [id]
   (when-not @dash-query-pending?
     (reset! dash-query-pending? true)
-    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read
-                                                        :kixi.datastore.metadatastore/file-read]]
+    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read]]
                                                       (:full query-fields)]}
                 on-query-response)))
 
@@ -166,7 +166,7 @@
     (log/debug "Uploading to" upload-link)
     (if (clojure.string/starts-with? upload-link "file")
       (do
-        ;for testing locally, so you can manually copy the metadata-one-valid.csv file
+                                        ;for testing locally, so you can manually copy the metadata-one-valid.csv file
         (log/debug "Sleeping, copy file!")
         (sleep 20000)
         (api-response {:event :upload :status :success :id id} 14))
@@ -192,6 +192,14 @@
     (data/swap-app-state! :app/datastore assoc :ds/download-pending? false)
     (log/info "Downloading file" link)
     (.open js/window link)))
+
+(defmethod on-event
+  [:kixi.datastore.filestore/download-link-rejected "1.0.0"]
+  [{:keys [args]}]
+  (let [{:keys [kixi.comms.event/payload]} args
+        {:keys [reason]} payload]
+    (.alert js/window (str "Unable to download file: " (name reason)))
+    (data/swap-app-state! :app/datastore assoc :ds/download-pending? false)))
 
 (defmethod on-event
   [:kixi.datastore.metadatastore/sharing-change-rejected "1.0.0"]

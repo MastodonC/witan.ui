@@ -11,6 +11,14 @@
    :kixi.group/type   s/Keyword
    :kixi.group/id     uuid?})
 
+(def UserSchema
+  {:kixi.user/name   (s/maybe s/Str)
+   :kixi.user/id     (s/maybe s/Str)
+   :kixi.user/groups [(s/maybe s/Str)]
+   :kixi.user/self-group (s/maybe s/Str)
+   (s/optional-key :user/group-search-results) [GroupSchema]
+   (s/optional-key :user/group-search-filtered) [GroupSchema]})
+
 (def SchemaSchema
   {:schema/name s/Str
    :schema/id   uuid?
@@ -38,12 +46,7 @@
                :login/message (s/maybe s/Str)
                :login/auth-expiry s/Num
                :login/refresh-expiry s/Num}
-   :app/user {:kixi.user/name (s/maybe s/Str)
-              :kixi.user/id (s/maybe s/Str)
-              :kixi.user/groups [(s/maybe s/Str)]
-              :kixi.user/self-group (s/maybe s/Str)
-              (s/optional-key :user/group-search-results) [GroupSchema]
-              (s/optional-key :user/group-search-filtered) [GroupSchema]}
+   :app/user UserSchema
    :app/route {:route/path (s/maybe s/Keyword)
                :route/params (s/maybe s/Any)
                :route/query (s/maybe {s/Keyword s/Any})}
