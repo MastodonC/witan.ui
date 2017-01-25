@@ -112,8 +112,7 @@
   [id]
   (when-not @dash-query-pending?
     (reset! dash-query-pending? true)
-    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read
-                                                        :kixi.datastore.metadatastore/file-read]]
+    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read]]
                                                       (:full query-fields)]}
                 on-query-response)))
 
