@@ -31,7 +31,8 @@
 
 (defn view
   []
-  (let [{:keys [ds/current ds/download-pending?]} (data/get-in-app-state :app/datastore)
+  (let [{:keys [ds/current ds/download-pending?] :as ds} (data/get-in-app-state :app/datastore)
+        activities->string (:ds/activities ds)
         md (data/get-in-app-state :app/datastore :ds/file-metadata current)]
     (if-not md
       [:div.loading
@@ -41,9 +42,7 @@
                     kixi.datastore.metadatastore/sharing
                     kixi.datastore.metadatastore/provenance
                     kixi.datastore.metadatastore/size-bytes]} md
-            activities->string  {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
-                                 :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)} ;TODO get this from datastore
-            ]
+            sharing-groups (set (reduce concat [] (vals sharing)))]
         [:div#data-view.padded-content
          [:h2 (get-string :string/file-name ":" name)]
          ;; ----------------------------------------------
@@ -82,7 +81,8 @@
               :on-add
               (fn [group]
                 (controller/raise! :data/sharing-add-group
-                                   {:current current :group group}))}]]]]
+                                   {:current current :group group}))}
+             {:exclusions sharing-groups}]]]]
          ;; ----------------------------------------------
          [:hr]
          [:div.actions

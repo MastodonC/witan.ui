@@ -4,6 +4,7 @@
             [goog.crypt.base64 :as b64]
             [schema.core :as s]
             [witan.ui.schema :as ws]
+            [witan.ui.strings :refer [get-string]]
             [chord.client :refer [ws-ch]]
             [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all put! close!]]
             [cljs.reader :as reader]
@@ -66,7 +67,10 @@
     :app/datastore {:ds/current nil
                     :ds/pending? false
                     :ds/download-pending? false
-                    :ds/file-metadata {}}}
+                    :ds/file-metadata {}
+                    :ds/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
+                                    :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
+                                    :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)}}}
    (s/validate ws/AppStateSchema)
    (atomize-map)))
 

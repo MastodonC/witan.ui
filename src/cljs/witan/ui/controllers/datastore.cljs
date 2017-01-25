@@ -40,6 +40,14 @@
   [{:keys [kixi.datastore.metadatastore/id] :as payload}]
   (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload))
 
+(defn selected-groups->sharing-activities
+  [groups activities]
+  (zipmap activities
+          (map (fn [activity]
+                 (vec (keep (fn [[group group-activities]]
+                              (when (get group-activities activity)
+                                (:kixi.group/id group))) groups))) activities)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; API responses
 
@@ -53,15 +61,18 @@
   ;; now upload metadata
   (let [{:keys [pending-file
                 info-name
-                selected-schema]} (data/get-in-app-state :app/create-data :cd/pending-data)
+                selected-schema
+                selected-groups]} (data/get-in-app-state :app/create-data :cd/pending-data)
         user-groups [(data/get-in-app-state :app/user :kixi.user/self-group)]
         user-id (data/get-in-app-state :app/user :kixi.user/id)
+        ext (last (clojure.string/split (.-name pending-file) #"\."))
         payload {:kixi.datastore.metadatastore/name info-name
                  :kixi.datastore.metadatastore/id id
                  :kixi.datastore.metadatastore/type "stored"
-                 :kixi.datastore.metadatastore/sharing {:kixi.datastore.metadatastore/file-read user-groups
-                                                        :kixi.datastore.metadatastore/meta-read user-groups
-                                                        :kixi.datastore.metadatastore/meta-update user-groups}
+                 :kixi.datastore.metadatastore/file-type ext
+                 :kixi.datastore.metadatastore/sharing (selected-groups->sharing-activities
+                                                        selected-groups
+                                                        (keys (data/get-in-app-state :app/datastore :ds/activities)))
                  :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
                                                            :kixi.user/id user-id}
                  :kixi.datastore.metadatastore/size-bytes (.-size pending-file)
