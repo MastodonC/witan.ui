@@ -77,4 +77,5 @@
                    :ds/current (s/maybe uuid?)
                    :ds/pending? s/Bool
                    :ds/download-pending? s/Bool
-                   :ds/file-metadata {uuid? s/Any}}})
+                   :ds/file-metadata {uuid? s/Any}
+                   :ds/activities {s/Keyword s/Str}}})

@@ -204,7 +204,8 @@
                   exclusions nil}} (first opts)
             results (:user/group-search-filtered (data/get-app-state :app/user))
             results (if exclusions
-                      (remove (fn [x] (some #{x} exclusions)) results)
+                      (let [excluded-groups (map :kixi.group/id exclusions)]
+                        (remove (fn [x] (some #{(:kixi.group/id x)} excluded-groups)) results))
                       results)
             close-fn (fn [& _]
                        (aset (.getElementById js/document id) "value" nil)
@@ -239,32 +240,33 @@
            (icons/close)]]]))))
 
 (defn sharing-matrix
-  [sharing-activites group->activities {:keys [on-change on-add]}]
+  [sharing-activites group->activities {:keys [on-change on-add]} & opts]
   [:div.sharing-matrix
    [group-search-area
     :string/sharing-matrix-group-search-ph
-    on-add]
-   [:table.pure-table.pure-table-horizontal.sharing-matrix-table-headers
-    [:thead
-     [:tr
-      (cons
-       [:th {:key "group-name"} (get-string :string/sharing-matrix-group-name)]
-       (for [[key title] sharing-activites]
-         [:th {:key title} title]))]]
-    [:tbody
-     (for [[group activities :as row] (sort-by (comp :kixi.group/name first) group->activities)]
-       (let [group-name (:kixi.group/name group)]
-         [:tr
-          {:key (str row)}
-          [:td {:key group-name}
-           (inline-group group)]
-          (for [[activity-k activity-t] sharing-activites]
-            [:td
-             {:key (str group-name "-" activity-t)}
-             [:input {:type "checkbox"
-                      :checked (get activities activity-k)
-                      :on-change #(let [new-value (.-checked (.-target %))]
-                                    (on-change row activity-k new-value))}]])]))]]])
+    on-add (first opts)]
+   (when (not-empty group->activities)
+     [:table.pure-table.pure-table-horizontal.sharing-matrix-table-headers
+      [:thead
+       [:tr
+        (cons
+         [:th {:key "group-name"} (get-string :string/sharing-matrix-group-name)]
+         (for [[key title] sharing-activites]
+           [:th {:key title} title]))]]
+      [:tbody
+       (for [[group activities :as row] (sort-by (comp :kixi.group/name first) group->activities)]
+         (let [group-name (:kixi.group/name group)]
+           [:tr
+            {:key (str row)}
+            [:td {:key group-name}
+             (inline-group group)]
+            (for [[activity-k activity-t] sharing-activites]
+              [:td
+               {:key (str group-name "-" activity-t)}
+               [:input {:type "checkbox"
+                        :checked (get activities activity-k)
+                        :on-change #(let [new-value (.-checked (.-target %))]
+                                      (on-change row activity-k new-value))}]])]))]])])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS

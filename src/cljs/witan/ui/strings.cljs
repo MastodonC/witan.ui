@@ -230,6 +230,7 @@
    :string/file-uploader                    "Uploader"
    :string/sharing                          "Sharing"
    :string/file-sharing-meta-read           "Meta Read"
+   :string/file-sharing-meta-update         "Meta Update"
    :string/file-sharing-file-read           "File Read"
    :string/file-actions-download-file       "Download this file"
    :string/sharing-matrix-group-name        "Group Name"

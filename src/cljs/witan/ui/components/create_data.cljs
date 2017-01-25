@@ -37,7 +37,9 @@
                                          (and (> (count (:info-name d)) 2)
                                               (> (count (:info-description d)) 2))))
 (defmethod phase-validation 5 [n d] (and (phase-validation (dec n) d)
-                                         (or (> (count (:selected-groups d)) 0)
+                                         (or (and
+                                              (= (:wants-to-share? d) :yes)
+                                              (> (count (:selected-groups d)) 0))
                                              (= (:wants-to-share? d) :no))))
 
 (defn phase
@@ -57,21 +59,27 @@
            ^{:key (str "phase-" n "-item-" el)}
            [:span (nth body el)]))])]))
 
-(def empty-form-data
-  {:pending-file nil
-   :wants-schema? nil
-   :selected-schema nil
-   :info-name ""
-   :info-description ""
-   :wants-to-share? nil
-   :selected-groups #{}})
+(defn empty-form-data
+  [activities]
+  (let [user (data/get-in-app-state :app/user)]
+    {:pending-file nil
+     :wants-schema? nil
+     :selected-schema nil
+     :info-name ""
+     :info-description ""
+     :wants-to-share? nil
+     :selected-groups {{:kixi.group/id (:kixi.user/self-group user)
+                        :kixi.group/name (:kixi.user/name user)
+                        :kixi.group/type "user"}
+                       (zipmap (keys activities) (repeat true))}}))
 
 (defn view
   [this]
-  (let [form-data (r/atom empty-form-data)]
+  (let [activities->string (data/get-in-app-state :app/datastore :ds/activities)
+        form-data (r/atom (empty-form-data
+                           activities->string))]
     (fn [this]
-      (let [schema-results (:schema/search-results (data/get-app-state :app/datastore))
-            {:keys [cd/pending?
+      (let [{:keys [cd/pending?
                     cd/message]} (data/get-app-state :app/create-data)
             disabled? pending?]
         [:div#create-data
@@ -102,7 +110,8 @@
                                 :txt :string/try-again}
                                #(do
                                   ;; TODO it'd be nice to maintain the form data but right now the search boxes and radios don't work, so we kill it all.
-                                  (reset! form-data empty-form-data)
+                                  (reset! form-data (empty-form-data
+                                                     activities->string))
                                   (controller/raise! :data/reset-errors)))]]
               :else
               [:div.upload-phases
@@ -194,25 +203,17 @@
 
                 (when (and (:wants-to-share? @form-data)
                            (= (:wants-to-share? @form-data) :yes))
-                  [:div [shared/group-search-area :string/data-upload-search-groups
-                         #(when %2 (swap! form-data update :selected-groups (fn [x] (conj x %1))))
-                         {:exclusions (:selected-groups @form-data)}]
-                   (when (not-empty (:selected-groups @form-data))
-                     [:div.selected-groups
-                      [:span.success
-                       (gstring/format
-                        (get-string :string/data-upload-step-4-group-heading)
-                        (count (:selected-groups @form-data)))]
-                      [:div
-                       (for [group (:selected-groups @form-data)]
-                         ^{:key (:kixi.group/name group)}
-                         [:div
-                          [:span.removal-link
-                           "(" [:a {:href "javascript:void(0)"
-                                    :on-click
-                                    #(swap! form-data update :selected-groups (fn [x] (disj x group)))}
-                                (get-string :string/remove-lc)] ")"]
-                          (shared/inline-group group)])]])]))
+                  [:div
+                   [shared/sharing-matrix
+                    activities->string
+                    (:selected-groups @form-data)
+                    {:on-change
+                     (fn [[group activities] activity target-state]
+                       (swap! form-data assoc-in [:selected-groups group activity] target-state))
+                     :on-add
+                     #(swap! form-data assoc-in [:selected-groups %]
+                             {:kixi.datastore.metadatastore/meta-read true})}
+                    {:exclusions (keys (:selected-groups @form-data))}]]))
 
                ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                ;; Step 5 - Confirm
