@@ -9,6 +9,10 @@
             [goog.string :as gstring])
   (:require-macros [cljs-log.core :as log]))
 
+(defn valid-extension?
+  [ext]
+  true)
+
 (defn upload-phase-heading
   [n msg enabled?]
   [:div.upload-phase-heading
@@ -113,7 +117,13 @@
                                            :type "file"
                                            :on-change
                                            (fn [e]
-                                             (swap! form-data assoc :pending-file (first (array-seq (.. e -target -files)))))}]
+                                             (let [file (first (array-seq (.. e -target -files)))
+                                                   file-name (.-name file)
+                                                   ext (last (clojure.string/split file-name #"\."))]
+                                               (if (valid-extension? ext)
+                                                 (swap! form-data assoc :pending-file file)
+                                                 (.alert js/window
+                                                         (str file-name " is not a valid file type.")))))}]
                 (shared/button {:id :select-upload
                                 :icon icons/upload
                                 :txt :string/choose-file}
