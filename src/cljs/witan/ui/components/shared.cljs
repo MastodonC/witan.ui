@@ -252,7 +252,7 @@
        (for [[key title] sharing-activites]
          [:th {:key title} title]))]]
     [:tbody
-     (for [[group activities :as row] group->activities]
+     (for [[group activities :as row] (sort-by (comp :kixi.group/name first) group->activities)]
        (let [group-name (:kixi.group/name group)]
          [:tr
           {:key (str row)}
