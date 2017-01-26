@@ -222,6 +222,7 @@
    :string/remove-lc                        "remove"
    :string/data-upload-step-4               "Confirm"
    :string/data-upload-step-4-decl-unsure   "Please take a moment to check that the steps are filled out correctly and then press the 'Upload' button to begin uploading the data."
+   :string/file-description                 "Description"
    :string/try-again                        "Try Again"
    :string/file-size                        "Size"
    :string/file-uploader                    "Uploader"

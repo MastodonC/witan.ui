@@ -78,12 +78,14 @@
   ;; now upload metadata
   (let [{:keys [pending-file
                 info-name
+                info-description
                 selected-schema
                 selected-groups]} (data/get-in-app-state :app/create-data :cd/pending-data)
         user-groups [(data/get-in-app-state :app/user :kixi.user/self-group)]
         user-id (data/get-in-app-state :app/user :kixi.user/id)
         ext (last (clojure.string/split (.-name pending-file) #"\."))
         payload {:kixi.datastore.metadatastore/name info-name
+                 :kixi.datastore.metadatastore/description info-description
                  :kixi.datastore.metadatastore/id id
                  :kixi.datastore.metadatastore/type "stored"
                  :kixi.datastore.metadatastore/file-type ext

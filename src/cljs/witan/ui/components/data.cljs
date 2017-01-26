@@ -29,6 +29,17 @@
      {}
      all-groups)))
 
+(defn format-description
+  [description-str]
+  (let [substrings (clojure.string/split description-str #"\n")]
+    [:div
+     (doall
+      (mapcat
+       #(vector [:span {:key (str "string-" %1)} %2]
+                [:br {:key (str "br-" %1)}])       
+       (range (count substrings))
+       substrings))]))
+
 (defn view
   []
   (let [{:keys [ds/current ds/download-pending? ds/error] :as ds}
@@ -45,6 +56,7 @@
          (icons/loading :large)]
         (let [{:keys [kixi.datastore.metadatastore/file-type
                       kixi.datastore.metadatastore/name
+                      kixi.datastore.metadatastore/description
                       kixi.datastore.metadatastore/sharing
                       kixi.datastore.metadatastore/provenance
                       kixi.datastore.metadatastore/size-bytes]} md
@@ -69,6 +81,10 @@
             [:div.field-entry
              [:strong (get-string :string/file-uploader ":")]
              [:span (get-in provenance [:kixi/user :kixi.user/name])]]]
+           (when description
+             [:div.field-entry
+              [:strong (get-string :string/file-description ":")]
+              (format-description description)])
            ;; ----------------------------------------------
            [:hr]
            [:div.sharing-controls
