@@ -31,8 +31,7 @@
 (defmethod phase-validation 2 [n d] (and (phase-validation (dec n) d)
                                          (:pending-file d)))
 (defmethod phase-validation 3 [n d] (and (phase-validation (dec n) d)
-                                         (and (> (count (:info-name d)) 2)
-                                              (> (count (:info-description d)) 2))))
+                                         (> (count (:info-name d)) 2)))
 (defmethod phase-validation 4 [n d] (and (phase-validation (dec n) d)
                                          (or (and
                                               (= (:wants-to-share? d) :yes)
