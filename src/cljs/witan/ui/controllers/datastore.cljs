@@ -6,6 +6,7 @@
             [cljs-time.core :as t]
             [cljs-time.format :as tf]
             [witan.ui.route :as route]
+            [witan.ui.title :as title]
             [goog.string :as gstring])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
@@ -108,7 +109,8 @@
   [[_ data]]
   (log/debug ">>>>> GOT RESULTS BY ID" data)
   (when-not (:error data)
-    (save-file-metadata! data)))
+    (save-file-metadata! data)
+    (title/set! "File -" (:kixi.datastore.metadatastore/name data))))
 
 (defmethod on-query-response
   :error
@@ -143,7 +145,8 @@
   :app/data-dash
   [_]
   (if-let [id (:kixi.user/id (data/get-app-state :app/user))]
-    (send-dashboard-query! id)))
+    (send-dashboard-query! id))
+  (title/set! "Your Files"))
 
 (defmethod on-route-change
   :app/data
@@ -151,7 +154,8 @@
   (data/swap-app-state! :app/datastore assoc :ds/pending? true)
   (let [id (get-in args [:route/params :id])]
     (send-single-file-item-query! id)
-    (select-current! id)))
+    (select-current! id)
+    (title/set! "File - Loading")))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
