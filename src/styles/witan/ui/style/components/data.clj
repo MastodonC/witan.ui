@@ -74,7 +74,7 @@
                    {:margin-left (em 0.2)
                     :font-size (px 10)
                     :font-style :italic}]]]
-                [:&#step-2 :&#step-4 :&#step-5
+                [:&#step-2 :&#step-3 :&#step-4
                  [:label
                   {:margin-left (em 0.3)
                    :line-height (em 1.6)
@@ -83,15 +83,12 @@
                   :.shared-group-search-area
                   {:padding-top (px 10)}]]
                 [:&#step-3
-                 [:input :textarea
-                  {:width (percent 100)}]]
-                [:&#step-4
                  [:.selected-groups
                   [:div:first-of-type
                    {:margin-top (em 0.5)}
                    [:span.removal-link
                     {:font-size (px 10)}]]]]
-                [:&#step-5
+                [:&#step-4
                  [:label
                   {:font-style :italic}]
                  [:button.data-upload
