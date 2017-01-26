@@ -123,17 +123,16 @@
   :datastore/metadata-by-id
   [[_ data]]
   (if (:error data)
-    (do
-      (let [id (first (get-in data [:original :params]))
-            tries (data/get-in-app-state :app/datastore :ds/query-tries)]
-        (if (< tries 3)
-          (do
-            (data/swap-app-state! :app/datastore update :ds/query-tries inc)
-            (send-single-file-item-query! id))
-          (do
-            (log/warn "File" id "is not accessible.")
-            (data/swap-app-state! :app/datastore assoc :ds/error :string/file-inaccessible)
-            (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)))))
+    (let [id (first (get-in data [:original :params]))
+          tries (data/get-in-app-state :app/datastore :ds/query-tries)]
+      (if (< tries 3)
+        (do
+          (data/swap-app-state! :app/datastore update :ds/query-tries inc)
+          (send-single-file-item-query! id))
+        (do
+          (log/warn "File" id "is not accessible.")
+          (data/swap-app-state! :app/datastore assoc :ds/error :string/file-inaccessible)
+          (data/swap-app-state! :app/datastore assoc :ds/query-tries 0))))
     (do
       (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)
       (save-file-metadata! data)
