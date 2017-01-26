@@ -8,10 +8,9 @@
                    [devcards.core :as dc :refer [defcard]]))
 
 (defn header
-  [{:keys [title buttons filter-txt filter-fn on-button-click]}]
+  [{:keys [title buttons on-button-click]}]
   [:div.shared-heading
    [:h1 (get-string title)]
-   (shared/search-filter (get-string filter-txt) filter-fn)
    [:div.dash-buttons
     (for [button buttons]
       (shared/button button on-button-click))]])
@@ -28,8 +27,6 @@
        [:div.dashboard
         {:style {:width "100%"}}
         (header {:title :string/workspace-dash-title
-                 :filter-txt :string/workspace-dash-filter
-                 :filter-fn filter-fn
                  :buttons [{:id :button-a :icon icons/open :txt :string/view   :class "workspace-view"}
                            {:id :button-b :icon icons/plus :txt :string/create :class "workspace-create"}]
                  :on-button-click button-fn})])))
