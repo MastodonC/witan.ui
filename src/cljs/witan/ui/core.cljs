@@ -8,11 +8,13 @@
             [witan.ui.components.app   :as app]
             [witan.ui.data             :as data]
             [witan.ui.route            :as route])
-  (:require-macros [cljs-log.core :as log]))
+  (:require-macros [cljs-log.core :as log]
+                   [witan.ui.env :as env :refer [cljs-env]]))
 
 (when-let [node (gdom/getElement "app")]
   (defonce init
     (do
+      (log/info "SHA" (cljs-env :circle-sha1))
 
       ;; data
       (data/load-data!)
