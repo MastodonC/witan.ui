@@ -21,7 +21,6 @@
   [file-metadata]
   {:data/id (:kixi.datastore.metadatastore/id file-metadata)
    :data/name (:kixi.datastore.metadatastore/name file-metadata)
-   :data/schema (:kixi.datastore.metadatastore/schema file-metadata)
    :data/owner-name (get-in file-metadata [:kixi.datastore.metadatastore/provenance :kixi/user :kixi.user/name])
    :data/created-at (get-in file-metadata [:kixi.datastore.metadatastore/provenance :kixi.datastore.metadatastore/created])})
 
@@ -44,7 +43,6 @@
          [:div.content
           (shared/table {:headers [{:content-fn icon-fn            :title ""              :weight 0.03}
                                    {:content-fn :data/name         :title (get-string :string/forecast-name)          :weight 0.3}
-                                   {:content-fn :data/schema       :title (get-string :string/schema)          :weight 0.3}
                                    {:content-fn :data/owner-name   :title (get-string :string/author)         :weight 0.2}
                                    {:content-fn modified-fn        :title (get-string :string/created-at) :weight 0.2}]
                          :content datasets
