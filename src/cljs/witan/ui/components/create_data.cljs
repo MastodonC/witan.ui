@@ -31,12 +31,9 @@
 (defmethod phase-validation 2 [n d] (and (phase-validation (dec n) d)
                                          (:pending-file d)))
 (defmethod phase-validation 3 [n d] (and (phase-validation (dec n) d)
-                                         (or (:selected-schema d)
-                                             (= (:wants-schema? d) :no))))
-(defmethod phase-validation 4 [n d] (and (phase-validation (dec n) d)
                                          (and (> (count (:info-name d)) 2)
                                               (> (count (:info-description d)) 2))))
-(defmethod phase-validation 5 [n d] (and (phase-validation (dec n) d)
+(defmethod phase-validation 4 [n d] (and (phase-validation (dec n) d)
                                          (or (and
                                               (= (:wants-to-share? d) :yes)
                                               (> (count (:selected-groups d)) 0))
@@ -63,7 +60,7 @@
   [activities]
   (let [user (data/get-in-app-state :app/user)]
     {:pending-file nil
-     :wants-schema? nil
+     :wants-schema? 2
      :selected-schema nil
      :info-name ""
      :info-description ""
@@ -146,60 +143,40 @@
                     [:span.success.size "("
                      (js/filesize (.-size (:pending-file @form-data))) ")"]]]))
 
-               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-               ;; Step 2 - Schema opt-out/selection
-               (phase
-                2 form-data
-                [:input {:id  "step-2-yes" :type "radio" :name "schema" :value 1
-                         :on-change #(swap! form-data assoc :wants-schema? :yes)}]
-                [:label {:for "step-2-yes"} (get-string :string/data-upload-step-2-radio-1)][:br]
-                [:input {:id  "step-2-no" :type "radio" :name "schema" :value 2
-                         :on-change #(swap! form-data assoc :wants-schema? :no)}]
-                [:label {:for "step-2-no"} (get-string :string/data-upload-step-2-radio-2)]
-                (when (and (:wants-schema? @form-data)
-                           (= (:wants-schema? @form-data) :yes))
-                  [:div [shared/schema-search-area :string/create-rts-schema-ph
-                         #(swap! form-data assoc :selected-schema %1)]
-                   (when (:selected-schema @form-data)
-                     [:div.selected-schema
-                      [:span (get-string :string/data-upload-selected-schema ":")]
-                      [:span.success (str (:schema/name (:selected-schema @form-data)) " ")]
-                      [:span (get-string :string/from-lower " ")]
-                      [:span.success (-> (:selected-schema @form-data) :schema/author :kixi.group/name)]])]))
 
                ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-               ;; Step 3 - Information
+               ;; Step 2 - Information
                (phase
-                3 form-data
+                2 form-data
                 [:form.pure-form.pure-form-stacked
                  {:on-submit #(.preventDefault %)}
                  [:field-set
                   [:div.pure-control-group
-                   [:label {:for "name"} (get-string :string/data-upload-step-3-input-1-title)]
+                   [:label {:for "name"} (get-string :string/data-upload-step-2-input-1-title)]
                    [:input {:id  "name"
                             :type "text"
                             :value (:info-name @form-data)
                             :placeholder
-                            (get-string :string/data-upload-step-3-input-1-ph)
+                            (get-string :string/data-upload-step-2-input-1-ph)
                             :on-change #(swap! form-data assoc :info-name (.. % -target -value))}]]
                   [:div.pure-control-group
-                   [:label {:for "desc"} (get-string :string/data-upload-step-3-input-2-title)]
+                   [:label {:for "desc"} (get-string :string/data-upload-step-2-input-2-title)]
                    [:textarea {:id  "desc"
                                :value (:info-description @form-data)
                                :placeholder
-                               (get-string :string/data-upload-step-3-input-2-ph)
+                               (get-string :string/data-upload-step-2-input-2-ph)
                                :on-change #(swap! form-data assoc :info-description (.. % -target -value))}]]]])
 
                ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-               ;; Step 4 - Sharing
+               ;; Step 3 - Sharing
                (phase
-                4 form-data
+                3 form-data
                 [:input {:id  "step-4-yes" :type "radio" :name "share" :value 1
                          :on-change #(swap! form-data assoc :wants-to-share? :yes)}]
-                [:label {:for "step-4-yes"} (get-string :string/data-upload-step-4-radio-1)][:br]
+                [:label {:for "step-4-yes"} (get-string :string/data-upload-step-3-radio-1)][:br]
                 [:input {:id  "step-4-no" :type "radio" :name "share" :value 2
                          :on-change #(swap! form-data assoc :wants-to-share? :no)}]
-                [:label {:for "step-4-no"} (get-string :string/data-upload-step-4-radio-2)]
+                [:label {:for "step-4-no"} (get-string :string/data-upload-step-3-radio-2)]
 
                 (when (and (:wants-to-share? @form-data)
                            (= (:wants-to-share? @form-data) :yes))
@@ -216,10 +193,10 @@
                     {:exclusions (keys (:selected-groups @form-data))}]]))
 
                ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-               ;; Step 5 - Confirm
+               ;; Step 4 - Confirm
                (phase
-                5 form-data
-                [:p (get-string :string/data-upload-step-5-decl-unsure)]
+                4 form-data
+                [:p (get-string :string/data-upload-step-4-decl-unsure)]
                 (when true
                   (shared/button {:id  :continue
                                   :class "data-upload"
