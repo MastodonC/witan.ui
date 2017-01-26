@@ -68,6 +68,7 @@
                     :ds/pending? false
                     :ds/download-pending? false
                     :ds/file-metadata {}
+                    :ds/query-tries 0
                     :ds/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
                                     :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
                                     :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)}}}
@@ -142,7 +143,10 @@
   (swap-app-state! :app/create-data dissoc :cd/pending-data)
   (swap-app-state! :app/create-data dissoc :cd/pending-data)
   (swap-app-state! :app/user dissoc :user/group-search-results)
-  (swap-app-state! :app/user dissoc :user/group-search-filtered))
+  (swap-app-state! :app/user dissoc :user/group-search-filtered)
+  (swap-app-state! :app/datastore assoc :ds/query-tries 0)
+  (swap-app-state! :app/datastore assoc :ds/current nil)
+  (swap-app-state! :app/datastore dissoc :ds/error))
 
 (defn save-data!
   []
