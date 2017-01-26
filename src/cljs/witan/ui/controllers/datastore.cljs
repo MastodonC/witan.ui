@@ -32,6 +32,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(declare on-query-response)
+
 (defn select-current!
   [id]
   (when id
@@ -48,6 +50,20 @@
                  (vec (keep (fn [[group group-activities]]
                               (when (get group-activities activity)
                                 (:kixi.group/id group))) groups))) activities)))
+
+(defn send-dashboard-query!
+  [id]
+  (when-not @dash-query-pending?
+    (reset! dash-query-pending? true)
+    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read]]
+                                                      (:full query-fields)]}
+                on-query-response)))
+
+(defn send-single-file-item-query!
+  [id]
+  (data/query {:datastore/metadata-by-id
+               [[id] (:full query-fields)]}
+              on-query-response))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; API responses
@@ -98,7 +114,6 @@
   :datastore/metadata-with-activities
   [[_ data]]
   (reset! dash-query-pending? false)
-  (log/debug ">>>>> GOT RESULTS" data)
   (data/swap-app-state! :app/data-dash assoc
                         :items (get data :items)
                         :paging (get data :paging)))
@@ -107,33 +122,30 @@
 (defmethod on-query-response
   :datastore/metadata-by-id
   [[_ data]]
-  (log/debug ">>>>> GOT RESULTS BY ID" data)
-  (when-not (:error data)
-    (save-file-metadata! data)
-    (set-title! "File -" (:kixi.datastore.metadatastore/name data))))
+  (if (:error data)
+    (let [id (first (get-in data [:original :params]))
+          tries (data/get-in-app-state :app/datastore :ds/query-tries)]
+      (if (< tries 3)
+        (do
+          (data/swap-app-state! :app/datastore update :ds/query-tries inc)
+          (send-single-file-item-query! id))
+        (do
+          (log/warn "File" id "is not accessible.")
+          (data/swap-app-state! :app/datastore assoc :ds/error :string/file-inaccessible)
+          (data/swap-app-state! :app/datastore assoc :ds/query-tries 0))))
+    (do
+      (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)
+      (save-file-metadata! data)
+      (set-title! "File -" (:kixi.datastore.metadatastore/name data)))))
 
 (defmethod on-query-response
   :error
   [[o data]]
   (reset! dash-query-pending? false)
-  (log/debug ">>>>> GOT ERROR" o data))
+  (log/severe "Query Error:" o data))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; On Route Change
-
-(defn send-dashboard-query!
-  [id]
-  (when-not @dash-query-pending?
-    (reset! dash-query-pending? true)
-    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read]]
-                                                      (:full query-fields)]}
-                on-query-response)))
-
-(defn send-single-file-item-query!
-  [id]
-  (data/query {:datastore/metadata-by-id [[id]
-                                          (:full query-fields)]}
-              on-query-response))
 
 (defmulti on-route-change
   (fn [{:keys [args]}] (:route/path args)))
@@ -151,6 +163,7 @@
 (defmethod on-route-change
   :app/data
   [{:keys [args]}]
+  (data/swap-app-state! :app/datastore dissoc :ds/error)
   (data/swap-app-state! :app/datastore assoc :ds/pending? true)
   (let [id (get-in args [:route/params :id])]
     (send-single-file-item-query! id)

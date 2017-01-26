@@ -78,4 +78,6 @@
                    :ds/pending? s/Bool
                    :ds/download-pending? s/Bool
                    :ds/file-metadata {uuid? s/Any}
-                   :ds/activities {s/Keyword s/Str}}})
+                   :ds/activities {s/Keyword s/Str}
+                   :ds/query-tries s/Num
+                   (s/optional-key :ds/error) s/Keyword}})
