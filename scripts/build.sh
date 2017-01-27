@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
 
 # exports
-export WITAN_API_URL=$1
-export WITAN_VIZ_URL=$2
-export ENVIRONMENT=$3
+export WITAN_API_URL=$1 # URL to contact Witan Gateway
+export WITAN_VIZ_URL=$2 # URL to load Witan Viz
+export ENVIRONMENT=$3   # Environment
+export INTERCOM=1       # Intercom enabled
+export BUILD_DT=$(date) # Build Date and Time
 
 if [ "$ENVIRONMENT" == "production" ]
 then
