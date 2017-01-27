@@ -14,7 +14,12 @@
 (when-let [node (gdom/getElement "app")]
   (defonce init
     (do
-      (log/info "SHA" (cljs-env :circle-sha1))
+      (when (cljs-env :environment)
+        (.log js/console
+              (str "Witan For Cities\n"
+                   "ENV:  " (or (cljs-env :environment) "development") "\n"
+                   "SHA:  " (or (cljs-env :circle-sha1) "?")
+                   "DATE: " (or (cljs-env :build-dt)    "?"))))
 
       ;; data
       (data/load-data!)

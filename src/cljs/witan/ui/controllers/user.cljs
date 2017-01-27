@@ -34,6 +34,7 @@
           refresh-info (data/deconstruct-token (:refresh-token token-pair))]
       (data/swap-app-state! :app/user assoc  :kixi.user/id (:id auth-info))
       (data/swap-app-state! :app/user assoc  :kixi.user/name (:name auth-info))
+      (data/swap-app-state! :app/user assoc  :kixi.user/username (:username auth-info))
       (data/swap-app-state! :app/user assoc  :kixi.user/groups (:user-groups auth-info))
       (data/swap-app-state! :app/user assoc  :kixi.user/self-group (:self-group auth-info))
       (data/save-token-pair! token-pair)

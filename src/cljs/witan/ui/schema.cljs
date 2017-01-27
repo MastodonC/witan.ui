@@ -13,6 +13,7 @@
 
 (def UserSchema
   {:kixi.user/name   (s/maybe s/Str)
+   :kixi.user/username (s/maybe s/Str)
    :kixi.user/id     (s/maybe s/Str)
    :kixi.user/groups [(s/maybe s/Str)]
    :kixi.user/self-group (s/maybe s/Str)

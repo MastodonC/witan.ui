@@ -3,6 +3,7 @@
             [witan.ui.controllers.workspace :as workspace]
             [witan.ui.controllers.rts :as rts]
             [witan.ui.controllers.datastore :as datastore]
+            [witan.ui.controllers.intercom :as intercom]
             [cljs.core.async :refer [<! chan put!]])
   (:require-macros [cljs.core.async.macros :as am :refer [go-loop]]
                    [cljs-log.core :as log]))
