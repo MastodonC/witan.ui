@@ -154,24 +154,21 @@
   (log/debug "Saving app state to cookie")
   (let [unencoded (deatomize-map app-state)]
     (s/validate ws/AppStateSchema unencoded)
-    (.set goog.net.cookies
-          cookie-name
-          (-> unencoded
-              pr-str
-              b64/encodeString)
-          -1
-          "/")))
+    (.setItem
+     (.-localStorage js/window)
+     cookie-name
+     (-> unencoded
+         pr-str
+         b64/encodeString))))
 
 (defn delete-data!
   []
   (log/debug "Deleting contents of cookie")
-  (.remove goog.net.cookies
-           cookie-name
-           "/"))
+  (.removeItem (.-localStorage js/window) cookie-name))
 
 (defn load-data!
   []
-  (if-let [data (.get goog.net.cookies cookie-name)]
+  (if-let [data (.getItem (.-localStorage js/window) cookie-name)]
     (when @wants-to-load?
       (reset! wants-to-load? false)
       (let [unencoded (->> data b64/decodeString reader/read-string)]
@@ -350,6 +347,8 @@
       (b64/decodeString)
       (transit-decode keyword)))
 
+(def token-name "token")
+
 (defn save-token-pair!
   [token-pair]
   (let [auth-info    (deconstruct-token (:auth-token token-pair))
@@ -357,7 +356,10 @@
     (swap-app-state! :app/login assoc :login/token token-pair)
     (swap-app-state! :app/login assoc :login/auth-expiry (:exp auth-info))
     (swap-app-state! :app/login assoc :login/refresh-expiry (:exp refresh-info))
-    (swap-app-state! :app/login assoc :login/message nil)))
+    (swap-app-state! :app/login assoc :login/message nil)
+    (.set goog.net.cookies
+          token-name
+          (:auth-token token-pair) -1 "/")))
 
 (defmethod handle-server-message
   "refresh-response"
