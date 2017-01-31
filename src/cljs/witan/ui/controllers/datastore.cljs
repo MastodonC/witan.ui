@@ -127,7 +127,7 @@
   (if (:error data)
     (let [id (first (get-in data [:original :params]))
           tries (data/get-in-app-state :app/datastore :ds/query-tries)]
-      (if (< tries 3)
+      (if (< tries 5)
         (do
           (data/swap-app-state! :app/datastore update :ds/query-tries inc)
           (send-single-file-item-query! id))

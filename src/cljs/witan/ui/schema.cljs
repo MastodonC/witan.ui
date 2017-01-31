@@ -8,7 +8,7 @@
 
 (def GroupSchema
   {:kixi.group/name   s/Str
-   :kixi.group/type   s/Keyword
+   :kixi.group/type   s/Str
    :kixi.group/id     uuid?})
 
 (def UserSchema
