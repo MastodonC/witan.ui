@@ -109,15 +109,13 @@
            ;; ----------------------------------------------
            [:hr]
            [:div.actions
-            (shared/button {:id :button-a
-                            :icon (if download-pending? icons/loading icons/download)
-                            :txt :string/file-actions-download-file
-                            :class "file-action-download"}
-                           #(when-not download-pending?
-                              (controller/raise! :data/download-file {:id current})))
             [:a {:href (str
                         "http://"
                         (or (cljs-env :witan-api-url) "localhost:30015")
                         "/download?id="
                         current)
-                 :target "_blank"} "Download me"]]])))))
+                 :target "_blank"} (shared/button {:id :button-a
+                                                   :icon icons/download
+                                                   :txt :string/file-actions-download-file
+                                                   :class "file-action-download"}
+                                                  #())]]])))))
