@@ -127,7 +127,7 @@
   (if (:error data)
     (let [id (first (get-in data [:original :params]))
           tries (data/get-in-app-state :app/datastore :ds/query-tries)]
-      (if (< tries 3)
+      (if (< tries 5)
         (do
           (data/swap-app-state! :app/datastore update :ds/query-tries inc)
           (send-single-file-item-query! id))
@@ -215,23 +215,6 @@
     (route/navigate! :app/data {:id id})))
 
 (defmethod on-event
-  [:kixi.datastore.filestore/download-link-created "1.0.0"]
-  [{:keys [args]}]
-  (let [{:keys [kixi.comms.event/payload]} args
-        {:keys [kixi.datastore.metadatastore/link]} payload]
-    (data/swap-app-state! :app/datastore assoc :ds/download-pending? false)
-    (log/info "Downloading file" link)
-    (.open js/window link)))
-
-(defmethod on-event
-  [:kixi.datastore.filestore/download-link-rejected "1.0.0"]
-  [{:keys [args]}]
-  (let [{:keys [kixi.comms.event/payload]} args
-        {:keys [reason]} payload]
-    (.alert js/window (str "Unable to download file: " (name reason)))
-    (data/swap-app-state! :app/datastore assoc :ds/download-pending? false)))
-
-(defmethod on-event
   [:kixi.datastore.metadatastore/sharing-change-rejected "1.0.0"]
   [{:keys [args]}]
   (let [{:keys [kixi.comms.event/payload]} args
@@ -261,13 +244,6 @@
   (data/swap-app-state! :app/create-data assoc :cd/pending? true)
   (data/swap-app-state! :app/create-data assoc :cd/pending-data data)
   (data/command! :kixi.datastore.filestore/create-upload-link "1.0.0" nil))
-
-(defmethod handle
-  :download-file
-  [event {:keys [id]}]
-  (data/swap-app-state! :app/datastore assoc :ds/download-pending? true)
-  (data/command! :kixi.datastore.filestore/create-download-link "1.0.0"
-                 {:kixi.datastore.metadatastore/id id}))
 
 (defmethod handle
   :sharing-change

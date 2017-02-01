@@ -7,7 +7,8 @@
             [witan.ui.controller :as controller]
             [witan.ui.utils :as utils]
             [goog.string :as gstring])
-  (:require-macros [cljs-log.core :as log]))
+  (:require-macros [cljs-log.core :as log]
+                   [witan.ui.env :as env :refer [cljs-env]]))
 
 (defn reverse-group->activity-map
   [all-activities sharing]
@@ -36,7 +37,7 @@
      (doall
       (mapcat
        #(vector [:span {:key (str "string-" %1)} %2]
-                [:br {:key (str "br-" %1)}])       
+                [:br {:key (str "br-" %1)}])
        (range (count substrings))
        substrings))]))
 
@@ -108,9 +109,13 @@
            ;; ----------------------------------------------
            [:hr]
            [:div.actions
-            (shared/button {:id :button-a
-                            :icon (if download-pending? icons/loading icons/download)
-                            :txt :string/file-actions-download-file
-                            :class "file-action-download"}
-                           #(when-not download-pending?
-                              (controller/raise! :data/download-file {:id current})))]])))))
+            [:a {:href (str
+                        "http://"
+                        (or (cljs-env :witan-api-url) "localhost:30015")
+                        "/download?id="
+                        current)
+                 :target "_blank"} (shared/button {:id :button-a
+                                                   :icon icons/download
+                                                   :txt :string/file-actions-download-file
+                                                   :class "file-action-download"}
+                                                  #())]]])))))

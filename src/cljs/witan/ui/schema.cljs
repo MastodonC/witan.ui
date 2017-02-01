@@ -8,7 +8,7 @@
 
 (def GroupSchema
   {:kixi.group/name   s/Str
-   :kixi.group/type   s/Keyword
+   :kixi.group/type   s/Str
    :kixi.group/id     uuid?})
 
 (def UserSchema
@@ -77,7 +77,6 @@
    :app/datastore {(s/optional-key :schema/search-results) [SchemaSchema]
                    :ds/current (s/maybe uuid?)
                    :ds/pending? s/Bool
-                   :ds/download-pending? s/Bool
                    :ds/file-metadata {uuid? s/Any}
                    :ds/activities {s/Keyword s/Str}
                    :ds/query-tries s/Num
