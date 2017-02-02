@@ -58,9 +58,9 @@
 ;; default app-state
 (defonce app-state
   (->>
-   {:app/side {:side/upper [[:button :workspaces]
+   {:app/side {:side/upper [#_[:button :workspaces]
                             [:button :data]
-                            [:button :rts]]
+                            #_[:button :rts]]
                :side/lower [[:button :help]
                             [:button :logout]]}
     :app/login {:login/pending? false
