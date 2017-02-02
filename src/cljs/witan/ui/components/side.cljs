@@ -39,7 +39,7 @@
                  :tooltip :string/tooltip-data}
     :rts        {:fnc (partial navigate! :app/request-to-share)
                  :tooltip :string/tooltip-request-to-share}
-    :help       {:fnc nil
+    :help       {:fnc #(controller/raise! :intercom/open-new)
                  :tooltip :string/tooltip-help}
     :logout     {:fnc #(controller/raise! :user/logout)
                  :tooltip :string/tooltip-logout}}

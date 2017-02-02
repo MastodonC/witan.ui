@@ -16,6 +16,14 @@
                          :name name
                          :widget {:activator "#IntercomDefaultWidget"}}))))
 
+(defmulti handle
+  (fn [event args] event))
+
+(defmethod handle
+  :open-new
+  [event _]
+  (.Intercom js/window "showNewMessage"))
+
 (defonce subscriptions
   (when (cljs-env :intercom)
     (data/subscribe-topic :data/user-logged-in on-user-logged-in)))
