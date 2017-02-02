@@ -25,9 +25,10 @@
                              fobj  (io/file (str f))]
                          (when-not (contains? blacklist fname)
                            (println "-" fname)
-                           (aws/put-object {:access-key aak
-                                            :secret-key ask
-                                            :endpoint   region}
+                           (aws/put-object (merge {:endpoint region}
+                                                  (when (and aak ask)
+                                                    {:access-key aak
+                                                     :secret-key ask}))
                                            :bucket-name bucket
                                            :key fname
                                            :file fobj)))))]
