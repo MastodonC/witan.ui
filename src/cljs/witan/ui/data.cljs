@@ -20,6 +20,31 @@
              :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(def transit-encoding-level :json-verbose) ;; DO NOT CHANGE
+
+(def transit-reader
+  (tr/reader
+   transit-encoding-level
+   {:handlers st/cross-platform-read-handlers}))
+
+(defn transit-decode
+  ([s key-fn]
+   (reduce-kv (fn [a k v] (assoc a (key-fn k) v)) {}
+              (tr/read transit-reader s)))
+  ([s]
+   (tr/read transit-reader s)))
+
+(def transit-writer
+  (tr/writer
+   transit-encoding-level
+   {:handlers st/cross-platform-read-handlers}))
+
+(defn transit-encode
+  [s]
+  (tr/write transit-writer s))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; App State
 
 (defn atomize-map
@@ -132,7 +157,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Cookies
 
-(def cookie-name "_data_")
+(def storage-key "_data_")
+(def token-name "token")
 (defonce wants-to-load? (atom true))
 
 (defn custom-resets!
@@ -150,24 +176,45 @@
 
 (defn save-data!
   []
-  (log/debug "Saving app state to cookie")
+  (log/debug "Saving app state to local storage")
   (let [unencoded (deatomize-map app-state)]
     (s/validate ws/AppStateSchema unencoded)
     (.setItem
      (.-localStorage js/window)
-     cookie-name
+     storage-key
      (-> unencoded
          pr-str
          b64/encodeString))))
 
+(defn deconstruct-token
+  [tkn]
+  (-> tkn
+      (clojure.string/split #"\.")
+      (second)
+      (b64/decodeString)
+      (transit-decode keyword)))
+
+(defn save-token-pair!
+  [token-pair]
+  (let [auth-info    (deconstruct-token (:auth-token token-pair))
+        refresh-info (deconstruct-token (:refresh-token token-pair))]
+    (swap-app-state! :app/login assoc :login/token token-pair)
+    (swap-app-state! :app/login assoc :login/auth-expiry (:exp auth-info))
+    (swap-app-state! :app/login assoc :login/refresh-expiry (:exp refresh-info))
+    (swap-app-state! :app/login assoc :login/message nil)
+    (.set goog.net.cookies
+          token-name
+          (:auth-token token-pair) -1 "/" (cljs-env :witan-domain))))
+
 (defn delete-data!
   []
-  (log/debug "Deleting contents of cookie")
-  (.removeItem (.-localStorage js/window) cookie-name))
+  (log/debug "Deleting contents of local storage and cookies")
+  (.removeItem (.-localStorage js/window) storage-key)
+  (.remove goog.net.cookies token-name))
 
 (defn load-data!
   []
-  (if-let [data (.getItem (.-localStorage js/window) cookie-name)]
+  (if-let [data (.getItem (.-localStorage js/window) storage-key)]
     (when @wants-to-load?
       (reset! wants-to-load? false)
       (let [unencoded (->> data b64/decodeString reader/read-string)]
@@ -176,12 +223,13 @@
             (s/validate ws/AppStateSchema unencoded)
             (run! (fn [[k v]] (reset-app-state! k v)) unencoded)
             (custom-resets!)
-            (log/debug "Restored app state from cookie")
+            (log/debug "Restored app state from local storage")
             (publish-topic :data/app-state-restored))
           (catch js/Object e
-            (log/warn "Failed to restore app state from cookie:" (str e))
+            (log/warn "Failed to restore app state from local storage:" (str e))
             (delete-data!)))))
     (log/debug "(No existing token was found.)")))
+
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Websocket
@@ -192,29 +240,6 @@
 (defonce token-refresh-callbacks (atom []))
 (def query-responses (atom {}))
 (def message-buffer (atom []))
-
-(def transit-encoding-level :json-verbose) ;; DO NOT CHANGE
-
-(def transit-reader
-  (tr/reader
-   transit-encoding-level
-   {:handlers st/cross-platform-read-handlers}))
-
-(defn transit-decode
-  ([s key-fn]
-   (reduce-kv (fn [a k v] (assoc a (key-fn k) v)) {}
-              (tr/read transit-reader s)))
-  ([s]
-   (tr/read transit-reader s)))
-
-(def transit-writer
-  (tr/writer
-   transit-encoding-level
-   {:handlers st/cross-platform-read-handlers}))
-
-(defn transit-encode
-  [s]
-  (tr/write transit-writer s))
 
 (defn reset-everything!
   []
@@ -337,28 +362,6 @@
             (cb [:error result])))))
     (log/warn "Received query response id [" id "] but couldn't match callback."))
   (swap! query-responses dissoc id))
-
-(defn deconstruct-token
-  [tkn]
-  (-> tkn
-      (clojure.string/split #"\.")
-      (second)
-      (b64/decodeString)
-      (transit-decode keyword)))
-
-(def token-name "token")
-
-(defn save-token-pair!
-  [token-pair]
-  (let [auth-info    (deconstruct-token (:auth-token token-pair))
-        refresh-info (deconstruct-token (:refresh-token token-pair))]
-    (swap-app-state! :app/login assoc :login/token token-pair)
-    (swap-app-state! :app/login assoc :login/auth-expiry (:exp auth-info))
-    (swap-app-state! :app/login assoc :login/refresh-expiry (:exp refresh-info))
-    (swap-app-state! :app/login assoc :login/message nil)
-    (.set goog.net.cookies
-          token-name
-          (:auth-token token-pair) -1 "/")))
 
 (defmethod handle-server-message
   "refresh-response"
