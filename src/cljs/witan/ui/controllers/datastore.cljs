@@ -127,8 +127,9 @@
   (if (:error data)
     (let [id (first (get-in data [:original :params]))
           tries (data/get-in-app-state :app/datastore :ds/query-tries)]
-      (if (< tries 5)
+      (if (< tries 3)
         (do
+          (utils/sleep 500)
           (data/swap-app-state! :app/datastore update :ds/query-tries inc)
           (send-single-file-item-query! id))
         (do
@@ -182,10 +183,6 @@
 (defmethod on-event
   :default [x])
 
-(defn sleep [msec]
-  (let [deadline (+ msec (.getTime (js/Date.)))]
-    (while (> deadline (.getTime (js/Date.))))))
-
 (defmethod on-event
   [:kixi.datastore.filestore/upload-link-created "1.0.0"]
   [{:keys [args]}]
@@ -198,7 +195,7 @@
       (do
                                         ;for testing locally, so you can manually copy the metadata-one-valid.csv file
         (log/debug "Sleeping, copy file!")
-        (sleep 20000)
+        (utils/sleep 20000)
         (api-response {:event :upload :status :success :id id} 14))
       (ajax/PUT upload-link
                 {:body pending-file
@@ -211,6 +208,7 @@
   (let [{:keys [kixi.comms.event/payload]} args
         {:keys [kixi.datastore.metadatastore/id]} payload]
     (save-file-metadata! payload)
+    (utils/sleep 500)
     (data/swap-app-state! :app/create-data assoc :cd/pending? false)
     (route/navigate! :app/data {:id id})))
 

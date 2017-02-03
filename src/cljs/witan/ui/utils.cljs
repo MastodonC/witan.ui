@@ -38,3 +38,7 @@
   "Removed slashes from a filename"
   [filename]
   (.replace filename #".*[\\\/]" ""))
+
+(defn sleep [msec]
+  (let [deadline (+ msec (.getTime (js/Date.)))]
+    (while (> deadline (.getTime (js/Date.))))))
