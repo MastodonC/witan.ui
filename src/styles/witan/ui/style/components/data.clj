@@ -92,6 +92,13 @@
                   {:background-color colour/button-create
                    :color colour/body-bg}]]]]]]
 
+            [:#data-dash
+             [:.data-name
+              [:span
+               {:vertical-align :top
+                :line-height 2.1
+                :margin-left (px 10)}]]]
+
             [:#data-view
              {:width (percent 100)
               :height (percent 100)
