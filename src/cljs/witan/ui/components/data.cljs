@@ -62,60 +62,61 @@
                       kixi.datastore.metadatastore/provenance
                       kixi.datastore.metadatastore/size-bytes]} md
               sharing-groups (set (reduce concat [] (vals sharing)))]
-          [:div#data-view.padded-content
-           [:h2 (get-string :string/file-name ":" name)]
-           ;; ----------------------------------------------
-           [:hr]
-           [:div.field-entries
-            [:div.field-entry
-             [:strong (get-string :string/file-type ":")]
-             [:span file-type]]
-            [:div.field-entry
-             [:strong (get-string :string/file-provenance-source ":")]
-             [:span (:kixi.datastore.metadatastore/source provenance)]]
-            [:div.field-entry
-             [:strong (get-string :string/created-at ":")]
-             [:span (utils/iso-time-as-moment (:kixi.datastore.metadatastore/created provenance))]]
-            [:div.field-entry
-             [:strong (get-string :string/file-size ":")]
-             [:span (js/filesize size-bytes)]]
-            [:div.field-entry
-             [:strong (get-string :string/file-uploader ":")]
-             [:span (get-in provenance [:kixi/user :kixi.user/name])]]]
-           (when description
+          [:div#data-view
+           [:div.container.padded-content
+            [:h2 (get-string :string/file-name ":" name)]
+            ;; ----------------------------------------------
+            [:hr]
+            [:div.field-entries
              [:div.field-entry
-              [:strong (get-string :string/file-description ":")]
-              (format-description description)])
-           ;; ----------------------------------------------
-           [:hr]
-           [:div.sharing-controls
-            [:h2 (get-string :string/sharing)]
-            [:div.sharing-activity
-             [:div.selected-groups
-              [shared/sharing-matrix activities->string
-               (reverse-group->activity-map (keys activities->string) sharing)
-               {:on-change
-                (fn [[group activities] activity target-state]
-                  (controller/raise! :data/sharing-change
-                                     {:current current
-                                      :group group
-                                      :activity activity
-                                      :target-state target-state}))
-                :on-add
-                (fn [group]
-                  (controller/raise! :data/sharing-add-group
-                                     {:current current :group group}))}
-               {:exclusions sharing-groups}]]]]
-           ;; ----------------------------------------------
-           [:hr]
-           [:div.actions
-            [:a {:href (str
-                        "http://"
-                        (or (cljs-env :witan-api-url) "localhost:30015")
-                        "/download?id="
-                        current)
-                 :target "_blank"} (shared/button {:id :button-a
-                                                   :icon icons/download
-                                                   :txt :string/file-actions-download-file
-                                                   :class "file-action-download"}
-                                                  #())]]])))))
+              [:strong (get-string :string/file-type ":")]
+              [:span file-type]]
+             [:div.field-entry
+              [:strong (get-string :string/file-provenance-source ":")]
+              [:span (:kixi.datastore.metadatastore/source provenance)]]
+             [:div.field-entry
+              [:strong (get-string :string/created-at ":")]
+              [:span (utils/iso-time-as-moment (:kixi.datastore.metadatastore/created provenance))]]
+             [:div.field-entry
+              [:strong (get-string :string/file-size ":")]
+              [:span (js/filesize size-bytes)]]
+             [:div.field-entry
+              [:strong (get-string :string/file-uploader ":")]
+              [:span (get-in provenance [:kixi/user :kixi.user/name])]]]
+            (when description
+              [:div.field-entry
+               [:strong (get-string :string/file-description ":")]
+               (format-description description)])
+            ;; ----------------------------------------------
+            [:hr]
+            [:div.sharing-controls
+             [:h2 (get-string :string/sharing)]
+             [:div.sharing-activity
+              [:div.selected-groups
+               [shared/sharing-matrix activities->string
+                (reverse-group->activity-map (keys activities->string) sharing)
+                {:on-change
+                 (fn [[group activities] activity target-state]
+                   (controller/raise! :data/sharing-change
+                                      {:current current
+                                       :group group
+                                       :activity activity
+                                       :target-state target-state}))
+                 :on-add
+                 (fn [group]
+                   (controller/raise! :data/sharing-add-group
+                                      {:current current :group group}))}
+                {:exclusions sharing-groups}]]]]
+            ;; ----------------------------------------------
+            [:hr]
+            [:div.actions
+             [:a {:href (str
+                         "http://"
+                         (or (cljs-env :witan-api-url) "localhost:30015")
+                         "/download?id="
+                         current)
+                  :target "_blank"} (shared/button {:id :button-a
+                                                    :icon icons/download
+                                                    :txt :string/file-actions-download-file
+                                                    :class "file-action-download"}
+                                                   #())]]]])))))

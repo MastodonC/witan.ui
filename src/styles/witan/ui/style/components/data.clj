@@ -93,7 +93,12 @@
                    :color colour/body-bg}]]]]]]
 
             [:#data-view
-             {:max-width (px 1024)}
+             {:width (percent 100)
+              :height (percent 100)
+              :overflow-y :auto}
+             [:.container
+              {:position :relative
+               :max-width (px 1024)}]
              [:.field-entry
               {:margin [[(em 0.5) (em 0)]]}]
              [:.sharing-controls
