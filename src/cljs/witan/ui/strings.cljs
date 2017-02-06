@@ -233,7 +233,10 @@
    :string/file-actions-download-file       "Download this file"
    :string/sharing-matrix-group-name        "Group Name"
    :string/sharing-matrix-group-search-ph   "Search for users and/or groups..."
-   :string/file-inaccessible                "The file could not be accessed. Either it does not exist or you do not have permission to view it."} )
+   :string/file-inaccessible                "The file could not be accessed. Either it does not exist or you do not have permission to view it."
+   :string/title-data-dashboard             "Your Files"
+   :string/title-data-create                "Upload File"
+   :string/title-data-loading               "Loading..."} )
 
 (defn resolve-string
   ([r]
