@@ -31,7 +31,7 @@
               [:tr
                {:transition (transition :background-color "0.15s"
                                         :color "0.15s")
-                :height (em 3)}
+                :height (px 40)}
                [:&:hover
                 {:background-color colour/table-row-hover-bg
                  :color colour/table-row-hover-text
@@ -55,10 +55,10 @@
              [:thead
               [:th
                [:&:first-child {:width "50%"}]]]
-             [:tbody              
+             [:tbody
               [:tr
                {:height (em 3)}
-               [:td                
+               [:td
                 [:&:first-child {:width "50%"}]]]]]
 
 ;;;;;;;;;;;;;;

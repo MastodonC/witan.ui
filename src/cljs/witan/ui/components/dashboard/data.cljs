@@ -33,19 +33,33 @@
             modified-fn #(vector :div (utils/iso-time-as-moment (:data/created-at %)))
             datasets (mapv file-metadata->dash-display (:items raw-data))
             selected-id' @selected-id
-            icon-fn #(vector :div.text-center (icons/workspace (if (:data/local %) :error :dark)))]
-        [:div.dashboard
+            navigate-fn #(route/navigate! :app/data {:id (str (:data/id %))})
+            actions-fn (fn [d] (when (= (:data/id d) selected-id')
+                                 (vector :div (shared/button {:icon icons/search
+                                                              :txt :string/view
+                                                              :id (:data/id d)}
+                                                             #(navigate-fn {:data/id %})))))
+            name-fn #(vector :div.data-name (icons/workspace (if (:data/local %) :error :dark)) (:data/name %))]
+        [:div#data-dash.dashboard
          (shared-dash/header {:title :string/data-dash-title
                               :filter-txt :string/data-dash-filter
                               :filter-fn nil
                               :buttons buttons
                               :on-button-click (partial button-press (str selected-id'))})
          [:div.content
-          (shared/table {:headers [{:content-fn icon-fn            :title ""              :weight 0.03}
-                                   {:content-fn :data/name         :title (get-string :string/forecast-name)          :weight 0.3}
-                                   {:content-fn :data/owner-name   :title (get-string :string/author)         :weight 0.2}
-                                   {:content-fn modified-fn        :title (get-string :string/created-at) :weight 0.2}]
+          (shared/table {:headers [{:content-fn name-fn
+                                    :title (get-string :string/forecast-name)
+                                    :weight 0.45}
+                                   {:content-fn :data/owner-name
+                                    :title (get-string :string/author)
+                                    :weight 0.2}
+                                   {:content-fn modified-fn
+                                    :title (get-string :string/created-at)
+                                    :weight 0.2}
+                                   {:content-fn actions-fn
+                                    :title ""
+                                    :weight 0.15}]
                          :content datasets
                          :selected?-fn #(= (:data/id %) selected-id')
                          :on-select #(reset! selected-id (:data/id %))
-                         :on-double-click #(route/navigate! :app/data {:id (str (:data/id %))})})]]))))
+                         :on-double-click navigate-fn})]]))))
