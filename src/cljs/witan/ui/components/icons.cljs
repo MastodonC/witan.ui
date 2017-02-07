@@ -11,6 +11,7 @@
                 :dark "md-dark"
                 :light "md-light"
                 :disabled "md-inactive"
+                :tiny "md-t"
                 :small "md-s"
                 :medium "md-m"
                 :large "md-l"

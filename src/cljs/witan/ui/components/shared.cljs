@@ -92,15 +92,18 @@
        txt)]]])
 
 (defn inline-group
-  [{:keys [kixi.group/name kixi.group/type]}]
-  [:div.shared-inline-group
-   (let [icon-fn (condp = (str type)
-                   "user" icons/user
-                   "group" icons/organisation
-                   icons/help)]
-     [:div.group-icon
-      (icon-fn :small :dark)])
-   [:span name]])
+  [{:keys [kixi.group/name kixi.group/type kixi.group/id]}]
+  (let [you? (= (data/get-in-app-state :app/user :kixi.user/self-group) id)]
+    [:div.shared-inline-group
+     (let [icon-fn (condp = (str type)
+                     "user" icons/user
+                     "group" icons/organisation
+                     icons/help)]
+       [:div.group-icon
+        (icon-fn :small :dark)])
+     [:span name]
+     (when you? [:span.you {:title (get-string :string/this-is-you)}
+                 (icons/star :tiny :dark)])]))
 
 (defn inline-schema
   [{:keys [schema/name]}]
@@ -254,19 +257,21 @@
          (for [[key title] sharing-activites]
            [:th {:key title} title]))]]
       [:tbody
-       (for [[group activities :as row] (sort-by (comp :kixi.group/name first) group->activities)]
-         (let [group-name (:kixi.group/name group)]
-           [:tr
-            {:key (str row)}
-            [:td {:key group-name}
-             (inline-group group)]
-            (for [[activity-k activity-t] sharing-activites]
-              [:td
-               {:key (str group-name "-" activity-t)}
-               [:input {:type "checkbox"
-                        :checked (get activities activity-k)
-                        :on-change #(let [new-value (.-checked (.-target %))]
-                                      (on-change row activity-k new-value))}]])]))]])])
+       (doall
+        (for [[group activities :as row] (sort-by (comp :kixi.group/name first) group->activities)]
+          (let [group-name (:kixi.group/name group)]
+            [:tr
+             {:key (str row)}
+             [:td {:key group-name}
+              (inline-group group)]
+             (for [[activity-k activity-t] sharing-activites]
+               [:td
+                {:key (str group-name "-" activity-t)}
+                [:input {:type "checkbox"
+                         :disabled (contains? (:locked activities) activity-k)
+                         :checked (get (:values activities) activity-k)
+                         :on-change #(let [new-value (.-checked (.-target %))]
+                                       (on-change row activity-k new-value))}]])])))]])])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS
@@ -421,19 +426,20 @@
          (fn [[group activities] activity target-state]
            (swap! data
                   #(assoc-in %
-                             [:group->activites group activity]
+                             [:group->activites group :values activity]
                              target-state)))
          :on-add #()}])]))
   {:sharing-activites {:meta-read (get-string :string/file-sharing-meta-read)
                        :file-read (get-string :string/file-sharing-file-read)}
    :group->activites {{:kixi.group/id "123"
                        :kixi.group/name "balh"
-                       :kixi.group/type :group} {:meta-read true
-                                                 :file-read false}
+                       :kixi.group/type "group"} {:values {:meta-read true
+                                                           :file-read false}
+                                                  :locked #{:meta-read}}
                       {:kixi.group/id "34531"
                        :kixi.group/name "ploop"
-                       :kixi.group/type :user} {:meta-read false
-                                                :file-read true}}}
+                       :kixi.group/type "user"} {:values {:meta-read false
+                                                          :file-read true}}}}
   {:inspect-data true
    :frame true
    :history false})
