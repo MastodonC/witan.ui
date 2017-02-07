@@ -96,7 +96,9 @@
                     :ds/query-tries 0
                     :ds/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
                                     :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
-                                    :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)}}}
+                                    :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)}
+                    :ds/locked-activities [:kixi.datastore.metadatastore/meta-update
+                                           :kixi.datastore.metadatastore/meta-read]}}
    (s/validate ws/AppStateSchema)
    (atomize-map)))
 

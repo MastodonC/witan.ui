@@ -49,7 +49,7 @@
   (zipmap activities
           (map (fn [activity]
                  (vec (keep (fn [[group group-activities]]
-                              (when (get group-activities activity)
+                              (when (get (:values group-activities) activity)
                                 (:kixi.group/id group))) groups))) activities)))
 
 (defn send-dashboard-query!

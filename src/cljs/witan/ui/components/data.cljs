@@ -19,16 +19,27 @@
      (fn [group->activities group]
        (assoc group->activities
               group
-              (reduce
-               (fn [a activity]
-                 (assoc a
-                        activity
-                        (not (nil? ((get sharing-sets activity #{})
-                                    group)))))
-               {}
-               all-activities)))
+              {:values
+               (reduce
+                (fn [a activity]
+                  (assoc a
+                         activity
+                         (not (nil? ((get sharing-sets activity #{})
+                                     group)))))
+                {}
+                all-activities)}))
      {}
      all-groups)))
+
+(defn lock-activities
+  [sharing user-sg]
+  (reduce (fn [a [group activities]]
+            (let [new-activities
+                  (merge activities
+                         (when (= (:kixi.group/id group) user-sg)
+                           {:locked (set (data/get-in-app-state
+                                          :app/datastore :ds/locked-activities))}))]
+              (assoc a group new-activities))) {} sharing))
 
 (defn format-description
   [description-str]
@@ -46,7 +57,8 @@
   (let [{:keys [ds/current ds/download-pending? ds/error] :as ds}
         (data/get-in-app-state :app/datastore)
         activities->string (:ds/activities ds)
-        md (data/get-in-app-state :app/datastore :ds/file-metadata current)]
+        md (data/get-in-app-state :app/datastore :ds/file-metadata current)
+        user-sg (data/get-in-app-state :app/user :kixi.user/self-group)]
     (if error
       [:div.text-center.padded-content
        [:div
@@ -94,7 +106,9 @@
              [:div.sharing-activity
               [:div.selected-groups
                [shared/sharing-matrix activities->string
-                (reverse-group->activity-map (keys activities->string) sharing)
+                (-> (keys activities->string)
+                    (reverse-group->activity-map sharing)
+                    (lock-activities user-sg))
                 {:on-change
                  (fn [[group activities] activity target-state]
                    (controller/raise! :data/sharing-change

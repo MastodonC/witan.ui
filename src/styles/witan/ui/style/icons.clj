@@ -6,6 +6,8 @@
 (def style
   [[:.material-icons
     {:font-size (px 32)}]
+   [:.material-icons.md-t
+    {:font-size (px 10)}]
    [:.material-icons.md-s
     {:font-size (px 18)}]
    [:.material-icons.md-m

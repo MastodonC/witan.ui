@@ -79,5 +79,6 @@
                    :ds/pending? s/Bool
                    :ds/file-metadata {uuid? s/Any}
                    :ds/activities {s/Keyword s/Str}
+                   :ds/locked-activities [s/Keyword]
                    :ds/query-tries s/Num
                    (s/optional-key :ds/error) s/Keyword}})

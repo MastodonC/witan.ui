@@ -56,7 +56,7 @@
            [:span (nth body el)]))])]))
 
 (defn empty-form-data
-  [activities]
+  [activities locked-activities]
   (let [user (data/get-in-app-state :app/user)]
     {:pending-file nil
      :wants-schema? 2
@@ -67,13 +67,17 @@
      :selected-groups {{:kixi.group/id (:kixi.user/self-group user)
                         :kixi.group/name (:kixi.user/name user)
                         :kixi.group/type "user"}
-                       (zipmap (keys activities) (repeat true))}}))
+                       {:values
+                        (zipmap (keys activities) (repeat true))
+                        :locked (set locked-activities)}}}))
 
 (defn view
   [this]
   (let [activities->string (data/get-in-app-state :app/datastore :ds/activities)
+        locked-activities (data/get-in-app-state :app/datastore :ds/locked-activities)
         form-data (r/atom (empty-form-data
-                           activities->string))]
+                           activities->string
+                           locked-activities))]
     (fn [this]
       (let [{:keys [cd/pending?
                     cd/message]} (data/get-app-state :app/create-data)
@@ -107,7 +111,8 @@
                                #(do
                                   ;; TODO it'd be nice to maintain the form data but right now the search boxes and radios don't work, so we kill it all.
                                   (reset! form-data (empty-form-data
-                                                     activities->string))
+                                                     activities->string
+                                                     locked-activities))
                                   (controller/raise! :data/reset-errors)))]]
               :else
               [:div.upload-phases
@@ -185,9 +190,9 @@
                     (:selected-groups @form-data)
                     {:on-change
                      (fn [[group activities] activity target-state]
-                       (swap! form-data assoc-in [:selected-groups group activity] target-state))
+                       (swap! form-data assoc-in [:selected-groups group :values activity] target-state))
                      :on-add
-                     #(swap! form-data assoc-in [:selected-groups %]
+                     #(swap! form-data assoc-in [:selected-groups % :values]
                              {:kixi.datastore.metadatastore/meta-read true})}
                     {:exclusions (keys (:selected-groups @form-data))}]]))
 

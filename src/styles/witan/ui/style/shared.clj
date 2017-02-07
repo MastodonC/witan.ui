@@ -101,7 +101,10 @@
              [:.group-icon :.schema-icon
               {:display :inline
                :vertical-align :sub
-               :margin-right (em 0.2)}]]
+               :margin-right (em 0.2)}]
+             [:.you
+              {:margin-left (px 4)
+               :cursor :default}]]
 
 ;;;;;;;;;;;;;;
 
