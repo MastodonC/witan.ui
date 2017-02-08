@@ -49,3 +49,6 @@ for line in string_kws:
 
 if not(unused_intro or undefined_intro):
     "All strings are accounted for!"
+    sys.exit(0)
+else:
+    sys.exit(1)
