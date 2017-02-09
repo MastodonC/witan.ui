@@ -27,13 +27,11 @@
    :string/view                           "View"
    :string/api-failure                    "Sorry, we're having a problem with the service. Please try again. If the problem persists, please contact us at witan@mastodonc.com"
    :string/thanks                         "Thanks"
-   :string/forecast-public?               "Public?"
    :string/upload                         "Upload"
    :string/create-account                 "Create Account"
    :string/email                          "Email"
    :string/sign-up-token                  "Invite code"
    :string/forecast-owner                 "Owner"
-   :string/forecast-public?-explain       "Tick this box to make the Projection visible to everyone"
    :string/progress                       "Progress"
    :string/forgotten-question             "forgotten your password?"
    :string/witan-tagline                  "Make more sense of your city"
@@ -50,7 +48,10 @@
    :string/tooltip-logout                 "Log out from your account"
    :string/tooltip-help                   "Get help"
    :string/tooltip-request-to-share       "Request that datasets be shared with you or a group you belong to"
-   :string/workspace-dash-title           "Workspaces"
+   :string/data                           "Datasets"
+   :string/workspace-noun-plural          "Workspaces"
+   :string/workspace-dash-title           :string/workspace-noun-plural
+   :string/go-to                          "Go to"
    :string/go-to-data                     [:string/go-to :string/data]
    :string/data-dash-title                "Datasets"
    :string/workspace-dash-filter          ["Filter your" :string/workspace-noun-plural]
@@ -128,6 +129,7 @@
                                            "Please submit the data directly into the City Datastore using the link provided below.\n\n"
                                            "If you feel you've received this requesst in error, please reply directly or liase with other members of the group.")
    :string/author                          "Author"
+   :string/datastore-name                  "City Data Store"
    :string/data-upload-intro               ["This step-by-step process will guide you through uploading a dataset into the" :string/datastore-name "- if you're unsure about any of the steps, please don't hesistate to use our interactive support system and we can offer additional guidance."]
    :string/data-upload-selected-file       "Selected dataset"
    :string/data-upload-step-1              "Select the dataset you'd like to upload..."
