@@ -18,15 +18,6 @@
 
 (defmethod
   login-state-view
-  :waiting
-  [_ data]
-  [:div
-   [:h3 (get-string :string/waiting-msg)]
-   [:div#loading
-    [:i.material-icons.anim-spin "settings"]]])
-
-(defmethod
-  login-state-view
   :sign-up
   [_ {:keys [set-phase-fn message]}]
   [:div.sub-page-div
