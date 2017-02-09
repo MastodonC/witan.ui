@@ -23,7 +23,7 @@
    [:p (get-string :string/create-rts-message-created)]
    [:div
     {:style {:display :flex}}
-    (shared/button {:id :mail :icon icons/email :txt :string/mail} #())
+    (shared/button {:id :mail :icon icons/email :txt :string/email} #())
     (shared/button {:id :dash :icon icons/request-to-share :txt :string/return-to-dash} #())]])
 
 (defn requests-email-body

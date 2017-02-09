@@ -39,9 +39,8 @@
                                              (= (:wants-to-share? d) :no))))
 
 (defn phase
-  [n data & body]
+  [n data header-kw & body]
   (let [id (str "step-"n)
-        header-kw (keyword "string" (str "data-upload-" id))
         show? (phase-validation n @data)]
     [:div.upload-phase
      {:id id
@@ -122,6 +121,7 @@
                {:style {:display (if pending? :none nil)}}
                (phase
                 1 form-data
+                :string/data-upload-step-1
                 [:input.hidden-file-input {:key "input-thing"
                                            :id "upload-filename"
                                            :type "file"
@@ -152,6 +152,7 @@
                ;; Step 2 - Information
                (phase
                 2 form-data
+                :string/data-upload-step-2
                 [:form.pure-form.pure-form-stacked
                  {:on-submit #(.preventDefault %)}
                  [:field-set
@@ -175,6 +176,7 @@
                ;; Step 3 - Sharing
                (phase
                 3 form-data
+                :string/data-upload-step-3
                 [:input {:id  "step-4-yes" :type "radio" :name "share" :value 1
                          :on-change #(swap! form-data assoc :wants-to-share? :yes)}]
                 [:label {:for "step-4-yes"} (get-string :string/data-upload-step-3-radio-1)][:br]
@@ -200,6 +202,7 @@
                ;; Step 4 - Confirm
                (phase
                 4 form-data
+                :string/data-upload-step-4
                 [:p (get-string :string/data-upload-step-4-decl-unsure)]
                 (when true
                   (shared/button {:id  :continue

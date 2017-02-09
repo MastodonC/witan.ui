@@ -30,7 +30,7 @@
 ;;      (vec (interpose {:on-click #(close-dialog "add-model-dialog")} (icons/close :medium :dark)))]
 ;;     (if model-list
 ;;       [:div
-;;        [:h2 (get-string :string/select-a-model)]
+;;        [:h2 (get-string :string/workspace-select-a-model)]
 ;;        [:ul
 ;;         (for [{:keys [witan/name
 ;;                       witan/version

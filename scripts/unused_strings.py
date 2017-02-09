@@ -47,8 +47,8 @@ for line in string_kws:
             print("The follwing strings are defined but not used:")
         print("", line)
 
-if not(unused_intro or undefined_intro):
-    "All strings are accounted for!"
+if not unused_intro and not undefined_intro:
+    print("All strings are accounted for!")
     sys.exit(0)
 else:
     sys.exit(1)
