@@ -19,6 +19,10 @@
 (def config {:gateway/address (or (cljs-env :witan-api-url) "localhost:30015")
              :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")})
 
+(defn sleep [msec]
+  (let [deadline (+ msec (.getTime (js/Date.)))]
+    (while (> deadline (.getTime (js/Date.))))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (def transit-encoding-level :json-verbose) ;; DO NOT CHANGE
@@ -257,7 +261,8 @@
 
 (defn send-ping!
   []
-  (send-ws! {:kixi.comms.message/type "ping"}))
+  (when @ws-conn
+    (send-ws! {:kixi.comms.message/type "ping"})))
 
 (defn manage-token-validity
   [completed-cb]
@@ -393,9 +398,10 @@
      (drain-buffered-messages))))
 
 (defn connect!
-  [{:keys [on-connect]}]
+  [{:keys [on-connect] :as opts}]
   (log/debug "Connecting to gateway...")
-  (go
+  (go-loop []
+    (reset! ws-conn nil)
     (let [{:keys [ws-channel error]} (<! (ws-ch (str "ws://"
                                                      (get config :gateway/address)
                                                      "/ws")
@@ -403,18 +409,24 @@
       (if-not error
         (do
           (reset! ws-conn ws-channel)
-          (on-connect)
-          (go-loop []
-            (let [{:keys [message] :as resp} (<! ws-channel)
-                  message (transit-decode message)]
-              (if message
-                (if (contains? message :error)
-                  (panic! (str "Received message error: " message))
-                  (do
-                    (handle-server-message message)
-                    (recur)))
-                (log/warn "Websocket connection lost" resp)))))
-        (panic! (str "WS connection error: " (pr-str error)))))))
+          (when on-connect
+            (on-connect))
+          (<! (go-loop []
+                (let [{:keys [message] :as resp} (<! ws-channel)
+                      message (transit-decode message)]
+                  (if message
+                    (if (contains? message :error)
+                      (panic! (str "Received message error: " message))
+                      (do
+                        (handle-server-message message)
+                        (recur)))
+                    (log/warn "Websocket connection lost" resp)))))
+          (sleep 2000)
+          (recur))
+        (do
+          (log/warn "Websocket connection failed")
+          (sleep 2000)
+          (recur))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Data Mutations - we should remove as many of these are possible
