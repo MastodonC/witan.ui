@@ -223,17 +223,16 @@
   (if-let [data (.getItem (.-localStorage js/window) storage-key)]
     (when @wants-to-load?
       (reset! wants-to-load? false)
-      (let [unencoded (->> data b64/decodeString reader/read-string)]
-        (try
-          (do
-            (s/validate ws/AppStateSchema unencoded)
-            (run! (fn [[k v]] (reset-app-state! k v)) unencoded)
-            (custom-resets!)
-            (log/debug "Restored app state from local storage")
-            (publish-topic :data/app-state-restored))
-          (catch js/Object e
-            (log/warn "Failed to restore app state from local storage:" (str e))
-            (delete-data!)))))
+      (try
+        (let [unencoded (->> data b64/decodeString reader/read-string)]
+          (s/validate ws/AppStateSchema unencoded)
+          (run! (fn [[k v]] (reset-app-state! k v)) unencoded)
+          (custom-resets!)
+          (log/debug "Restored app state from local storage")
+          (publish-topic :data/app-state-restored))
+        (catch js/Object e
+          (log/warn "Failed to restore app state from local storage:" (str e))
+          (delete-data!))))
     (log/debug "(No existing token was found.)")))
 
 
