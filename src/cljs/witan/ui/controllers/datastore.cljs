@@ -1,6 +1,6 @@
 (ns witan.ui.controllers.datastore
   (:require [schema.core :as s]
-            [ajax.core :as ajax]
+            [witan.ui.ajax :as ajax]
             [witan.ui.data :as data]
             [witan.ui.utils :as utils]
             [witan.ui.time :as time]
@@ -205,10 +205,11 @@
         (log/debug "Sleeping, copy file!")
         (time/sleep 20000)
         (api-response {:event :upload :status :success :id id} 14))
-      (ajax/PUT upload-link
-                {:body pending-file
-                 :handler (partial api-response {:event :upload :status :success :id id})
-                 :error-handler (partial api-response {:event :upload :status :failure})}))))
+      (ajax/PUT* upload-link
+                 {:body pending-file
+                  :progress-handler #(log/info "progress" (.-loaded %) "/" (.-total %))
+                  :handler (partial api-response {:event :upload :status :success :id id})
+                  :error-handler (partial api-response {:event :upload :status :failure})}))))
 
 (defmethod on-event
   [:kixi.datastore.file/created "1.0.0"]
