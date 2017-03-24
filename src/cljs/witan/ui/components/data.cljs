@@ -6,6 +6,7 @@
             [witan.ui.strings :refer [get-string]]
             [witan.ui.controller :as controller]
             [witan.ui.utils :as utils]
+            [witan.ui.time :as time]
             [goog.string :as gstring])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
@@ -88,7 +89,7 @@
               [:span (:kixi.datastore.metadatastore/source provenance)]]
              [:div.field-entry
               [:strong (get-string :string/created-at ":")]
-              [:span (utils/iso-time-as-moment (:kixi.datastore.metadatastore/created provenance))]]
+              [:span (time/iso-time-as-moment (:kixi.datastore.metadatastore/created provenance))]]
              [:div.field-entry
               [:strong (get-string :string/file-size ":")]
               [:span (js/filesize size-bytes)]]

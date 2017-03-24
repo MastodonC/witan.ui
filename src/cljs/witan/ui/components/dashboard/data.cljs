@@ -4,6 +4,7 @@
             [witan.ui.components.dashboard.shared  :as shared-dash]
             [witan.ui.components.icons :as icons]
             [witan.ui.utils :as utils]
+            [witan.ui.time :as time]
             [witan.ui.route   :as route]
             [witan.ui.strings :refer [get-string]]
             [witan.ui.data :as data])
@@ -30,7 +31,7 @@
     (fn []
       (let [raw-data (data/get-app-state :app/data-dash)
             buttons [{:id :upload :icon icons/upload :txt :string/upload :class "data-upload"}]
-            modified-fn #(vector :div (utils/iso-time-as-moment (:data/created-at %)))
+            modified-fn #(vector :div (time/iso-time-as-moment (:data/created-at %)))
             datasets (mapv file-metadata->dash-display (:items raw-data))
             selected-id' @selected-id
             navigate-fn #(route/navigate! :app/data {:id (str (:data/id %))})

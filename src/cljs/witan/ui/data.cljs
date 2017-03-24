@@ -11,17 +11,14 @@
             [cognitect.transit :as tr]
             [outpace.schema-transit :as st]
             [cljs-time.coerce :as tc]
-            [cljs-time.core :as t])
+            [cljs-time.core :as t]
+            [witan.ui.time :as time])
   (:require-macros [cljs-log.core :as log]
                    [cljs.core.async.macros :refer [go go-loop]]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
 (def config {:gateway/address (or (cljs-env :witan-api-url) "localhost:30015")
              :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")})
-
-(defn sleep [msec]
-  (let [deadline (+ msec (.getTime (js/Date.)))]
-    (while (> deadline (.getTime (js/Date.))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -420,11 +417,11 @@
                         (handle-server-message message)
                         (recur)))
                     (log/warn "Websocket connection lost" resp)))))
-          (sleep 2000)
+          (time/sleep 2000)
           (recur))
         (do
           (log/warn "Websocket connection failed")
-          (sleep 2000)
+          (time/sleep 2000)
           (recur))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

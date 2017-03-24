@@ -4,6 +4,7 @@
             [witan.ui.components.dashboard.shared  :as shared-dash]
             [witan.ui.components.icons :as icons]
             [witan.ui.utils :as utils]
+            [witan.ui.time :as time]
             [witan.ui.strings :refer [get-string]]
             [witan.ui.data :as data]
             [witan.ui.route :as route]
@@ -67,7 +68,7 @@
                                         :content-fn (comp get-progress-status get-progress)}
                                        {:title (get-string :string/date)
                                         :weight 0.3
-                                        :content-fn (comp utils/iso-time-as-moment :kixi.data-acquisition.request-to-share/created-at)}
+                                        :content-fn (comp time/iso-time-as-moment :kixi.data-acquisition.request-to-share/created-at)}
                                        {:title (get-string :string/schema)
                                         :weight 0.35
                                         :content-fn (comp :schema/name :kixi.data-acquisition.request-to-share/schema)}

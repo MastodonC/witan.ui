@@ -3,6 +3,7 @@
             [ajax.core :as ajax]
             [witan.ui.data :as data]
             [witan.ui.utils :as utils]
+            [witan.ui.time :as time]
             [witan.ui.route :as route])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
@@ -78,7 +79,7 @@
                            :kixi.data-acquisition.request-to-share/schema schema
                            :kixi.data-acquisition.request-to-share/message message
                            :kixi.data-acquisition.request-to-share/request-id req-id
-                           :kixi.data-acquisition.request-to-share/created-at (utils/jstime->str)
+                           :kixi.data-acquisition.request-to-share/created-at (time/jstime->str)
                            :kixi.data-acquisition.request-to-share/requester-id user-id})
     (data/command!
      :kixi.data-acquisition.request-to-share/create "1.0.0"

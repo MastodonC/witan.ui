@@ -3,6 +3,7 @@
            [cljs.test :refer-macros [is async]]
            [sablono.core :as sab :include-macros true]
            [witan.ui.utils :as utils]
+           [witan.ui.time :as time]
            [witan.ui.data :as data]
            [witan.ui.controller :as controller]
            [witan.ui.components.icons :as icons]
@@ -56,7 +57,7 @@
                       (sort-by :result/created-at results))]
                  ^{:key created-at}
                  [:tr
-                  [:td.col-results-time {:key "time"} (utils/iso-time-as-moment created-at)]
+                  [:td.col-results-time {:key "time"} (time/iso-time-as-moment created-at)]
                   [:td.col-results-actions {:key "actions"}
                    [:button.pure-button
                     {:class (when downloading? "pure-button-disabled")
