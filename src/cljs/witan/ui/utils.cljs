@@ -1,21 +1,8 @@
 (ns witan.ui.utils
-  (:require [cljsjs.moment]
-            [witan.ui.data :as data]
+  (:require [witan.ui.data :as data]
             [cljs.reader :as reader]
-            [cljs-time.core :as t]
-            [cljs-time.format :as tf]
             [cljsjs.mustache])
   (:require-macros [cljs-log.core :as log]))
-
-(defn iso-time-as-moment
-  [time]
-  (.calendar (js/moment. (str time) "YYYYMMDD HHmmss")))
-
-(defn jstime->str
-  ([]
-   (jstime->str (t/now)))
-  ([time]
-   (tf/unparse (tf/formatters :basic-date-time) time)))
 
 (defn query-param
   [k]
@@ -38,10 +25,6 @@
   "Removed slashes from a filename"
   [filename]
   (.replace filename #".*[\\\/]" ""))
-
-(defn sleep [msec]
-  (let [deadline (+ msec (.getTime (js/Date.)))]
-    (while (> deadline (.getTime (js/Date.))))))
 
 (defn keys*
   [m]

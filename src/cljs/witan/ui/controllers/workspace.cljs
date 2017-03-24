@@ -3,6 +3,7 @@
             [ajax.core :as ajax]
             [witan.ui.data :as data]
             [witan.ui.utils :as utils]
+            [witan.ui.time :as time]
             [cljs-time.core :as t]
             [cljs-time.format :as tf]
             [witan.ui.route :as route]
@@ -23,7 +24,7 @@
 (defn ->transport
   [m]
   (-> m
-      #_(update :workspace/modified utils/jstime->str)
+      #_(update :workspace/modified time/jstime->str)
       (dissoc :workspace/local)))
 
 (defn find-workspace-by-id
@@ -259,7 +260,7 @@
               :workspace/description desc
               :workspace/owner-id    id
               :workspace/owner-name "Me" ;; TODO
-              :workspace/modified (utils/jstime->str (t/now))}]
+              :workspace/modified (time/jstime->str (t/now))}]
     (data/swap-app-state! :app/workspace-dash update-in [:wd/workspaces] #(conj % wsp))
     (data/swap-app-state! :app/workspace assoc :workspace/current wsp)
     (data/swap-app-state! :app/workspace assoc :workspace/pending? false)

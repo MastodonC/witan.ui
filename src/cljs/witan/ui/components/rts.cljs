@@ -7,6 +7,7 @@
             [witan.ui.controller :as controller]
             [witan.ui.route :as route]
             [witan.ui.utils :as utils]
+            [witan.ui.time :as time]
             [goog.string :as gstring]
             [clojure.string :as str])
   (:require-macros [cljs-log.core :as log]))
@@ -94,7 +95,7 @@
          [:span (get-string :string/rts-info-paragraph-1)]
          [:strong (:schema/name schema)]
          [:span (get-string :string/rts-info-paragraph-2)]
-         [:strong (utils/iso-time-as-moment created-at)]
+         [:strong (time/iso-time-as-moment created-at)]
          [:span (get-string :string/rts-info-paragraph-3)]
          [:strong noof-submitters]
          [:strong (get-string :string/rts-info-paragraph-4)]

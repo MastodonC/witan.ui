@@ -3,6 +3,7 @@
             [ajax.core :as ajax]
             [witan.ui.data :as data]
             [witan.ui.utils :as utils]
+            [witan.ui.time :as time]
             [cljs-time.core :as t]
             [cljs-time.format :as tf]
             [witan.ui.route :as route]
@@ -129,10 +130,11 @@
     (let [id (first (get-in data [:original :params]))
           tries (data/get-in-app-state :app/datastore :ds/query-tries)]
       (if (< tries 3)
-        (do
-          (utils/sleep 1000)
-          (data/swap-app-state! :app/datastore update :ds/query-tries inc)
-          (send-single-file-item-query! id))
+        (js/setTimeout
+         #(do
+            (data/swap-app-state! :app/datastore update :ds/query-tries inc)
+            (send-single-file-item-query! id))
+         1000)
         (do
           (log/warn "File" id "is not accessible.")
           (data/swap-app-state! :app/datastore assoc :ds/error :string/file-inaccessible)
@@ -201,7 +203,7 @@
       (do
                                         ;for testing locally, so you can manually copy the metadata-one-valid.csv file
         (log/debug "Sleeping, copy file!")
-        (utils/sleep 20000)
+        (time/sleep 20000)
         (api-response {:event :upload :status :success :id id} 14))
       (ajax/PUT upload-link
                 {:body pending-file
@@ -214,9 +216,10 @@
   (let [{:keys [kixi.comms.event/payload]} args
         {:keys [kixi.datastore.metadatastore/id]} payload]
     (save-file-metadata! payload)
-    (utils/sleep 500)
-    (data/swap-app-state! :app/create-data assoc :cd/pending? false)
-    (route/navigate! :app/data {:id id})))
+    (js/setTimeout
+     #(do
+        (data/swap-app-state! :app/create-data assoc :cd/pending? false)
+        (route/navigate! :app/data {:id id})) 500)))
 
 (defmethod on-event
   [:kixi.datastore.metadatastore/sharing-change-rejected "1.0.0"]

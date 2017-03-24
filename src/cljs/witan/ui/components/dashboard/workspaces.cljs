@@ -3,6 +3,7 @@
             [witan.ui.components.shared  :as shared]
             [witan.ui.components.dashboard.shared  :as shared-dash]
             [witan.ui.utils   :as utils]
+            [witan.ui.time :as time]
             [witan.ui.data :as data]
             [witan.ui.components.icons   :as icons]
             [witan.ui.route   :as route]
@@ -28,7 +29,7 @@
             selected-id' @selected-id
             icon-fn #(vector :div.text-center (icons/workspace (if (:workspace/local %) :error :dark)))
             modified-fn #(vector :div
-                                 (utils/iso-time-as-moment (:workspace/modified %)))
+                                 (time/iso-time-as-moment (:workspace/modified %)))
             buttons (concat (when selected-id' [{:id :view :icon icons/open :txt :string/view :class "workspace-view"}])
                             [{:id :create :icon icons/plus :txt :string/create :class "workspace-create"}])]
         [:div.dashboard
