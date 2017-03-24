@@ -42,3 +42,12 @@
 (defn sleep [msec]
   (let [deadline (+ msec (.getTime (js/Date.)))]
     (while (> deadline (.getTime (js/Date.))))))
+
+(defn keys*
+  [m]
+  (let [r (map #(condp = (type %)
+                  cljs.core/Keyword %
+                  schema.core.OptionalKey (:k %)
+                  (throw (js/Error. (str "Unknown key type in: " (keys m) " - " (type %)))))
+               (keys m))]
+    r))

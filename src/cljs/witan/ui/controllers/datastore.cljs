@@ -130,7 +130,7 @@
           tries (data/get-in-app-state :app/datastore :ds/query-tries)]
       (if (< tries 3)
         (do
-          (utils/sleep 500)
+          (utils/sleep 1000)
           (data/swap-app-state! :app/datastore update :ds/query-tries inc)
           (send-single-file-item-query! id))
         (do

@@ -6,7 +6,8 @@
             [goog.string :as gstring]
             [cljs.reader :as reader]
             [witan.ui.data :refer [transit-decode]]
-            [witan.ui.schema :as ws])
+            [witan.ui.schema :as ws]
+            [witan.ui.utils :as utils])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
@@ -114,7 +115,7 @@
 
 (defmethod handle :refresh-groups
   [event {:keys [email pass]}]
-  (data/query {:groups/search [[] (keys ws/GroupSchema)]} on-query-response))
+  (data/query {:groups/search [[] (utils/keys* ws/GroupSchema)]} on-query-response))
 
 (defmethod handle :search-groups
   [event {:keys [search]}]

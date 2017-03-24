@@ -9,7 +9,8 @@
 (def GroupSchema
   {:kixi.group/name   s/Str
    :kixi.group/type   s/Str
-   :kixi.group/id     uuid?})
+   :kixi.group/id     uuid?
+   (s/optional-key :kixi.group/created) s/Str})
 
 (def UserSchema
   {:kixi.user/name   (s/maybe s/Str)
