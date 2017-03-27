@@ -79,6 +79,7 @@
                            locked-activities))]
     (fn [this]
       (let [{:keys [cd/pending?
+                    cd/pending-message
                     cd/message]} (data/get-app-state :app/create-data)
             disabled? pending?]
         [:div#create-data
@@ -93,7 +94,10 @@
               pending?
               [:div.uploading
                [:h2 (get-string :string/please-wait)]
-               (icons/loading :large)]
+               [:h3 (get-string (:message pending-message))]
+               (icons/loading :large)
+               [:div.progress-bar
+                (shared/progress-bar (:progress pending-message))]]
               message
               [:div.upload-error
                [:h2 (get-string :string/error)]

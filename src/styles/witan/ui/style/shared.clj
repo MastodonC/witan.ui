@@ -211,4 +211,20 @@
                {:color 'silver
                 :cursor :pointer}
                [:&:hover
-                {:color colour/side-bg}]]]]])
+                {:color colour/side-bg}]]]]
+
+;;;;;;;;;;;;;;;
+
+            [:.shared-progress-bar
+             {:border [[(px 1) 'solid colour/progress-bar-border]]
+              :border-radius (em 0.3)
+              :margin [[(em 1) 0]]
+              :height (px 14)
+              :overflow :hidden
+              }]
+            [:.shared-progress-bar-inner
+             {:background-color colour/progress-bar-fill
+              :border [[(px 10) 'solid colour/progress-bar-fill]]
+              :margin-left (px -5)
+              :margin-top (px -5)
+              :height (percent 100)}]])

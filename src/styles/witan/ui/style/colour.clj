@@ -117,7 +117,12 @@
 ;; hero
 (def hero-bg (color/lighten lol-color-3 22))
 
+;; info
 (def info-border lol-color-7)
 (def info-text (color/darken lol-color-7 20))
 (def info-icon info-text)
 (def info-bg (color/lighten lol-color-7 40))
+
+;; progress bar
+(def progress-bar-border (color/lighten lol-color-4 20))
+(def progress-bar-fill lol-color-4)
