@@ -1,6 +1,6 @@
 (ns witan.ui.controllers.datastore
   (:require [schema.core :as s]
-            [ajax.core :as ajax]
+            [witan.ui.ajax :as ajax]
             [witan.ui.data :as data]
             [witan.ui.utils :as utils]
             [witan.ui.time :as time]
@@ -77,6 +77,10 @@
   [:upload :success]
   [{:keys [id file-size]} response]
   (log/info "Upload succeeded:" id)
+  (data/swap-app-state! :app/create-data assoc
+                        :cd/pending-message
+                        {:message :string/upload-finalizing
+                         :progress 1})
   ;; now upload metadata
   (let [{:keys [pending-file
                 info-name
@@ -205,10 +209,16 @@
         (log/debug "Sleeping, copy file!")
         (time/sleep 20000)
         (api-response {:event :upload :status :success :id id} 14))
-      (ajax/PUT upload-link
-                {:body pending-file
-                 :handler (partial api-response {:event :upload :status :success :id id})
-                 :error-handler (partial api-response {:event :upload :status :failure})}))))
+      (ajax/PUT* upload-link
+                 {:body pending-file
+                  :progress-handler #(let [upload-frac (/ (.-loaded %) (.-total %))]
+                                       (data/swap-app-state! :app/create-data assoc
+                                                             :cd/pending-message
+                                                             {:message :string/uploading
+                                                              :progress upload-frac})
+                                       (log/debug "progress" upload-frac))
+                  :handler (partial api-response {:event :upload :status :success :id id})
+                  :error-handler (partial api-response {:event :upload :status :failure})}))))
 
 (defmethod on-event
   [:kixi.datastore.file/created "1.0.0"]
@@ -250,6 +260,8 @@
   [event data]
   (data/swap-app-state! :app/create-data assoc :cd/pending? true)
   (data/swap-app-state! :app/create-data assoc :cd/pending-data data)
+  (data/swap-app-state! :app/create-data assoc :cd/pending-message {:message :string/preparing-upload
+                                                                    :progress 0})
   (data/command! :kixi.datastore.filestore/create-upload-link "1.0.0" nil))
 
 (defmethod handle

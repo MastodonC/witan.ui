@@ -45,7 +45,12 @@
                 [:.pure-button
                  {:margin 0}]
                 [:.error
-                 {:margin (em 1)}]]
+                 {:margin (em 1)}]
+                [:.progress-bar
+                 {:width (percent 60)
+                  :display :block
+                  :margin [[0 :auto]]
+                  :margin-top (em 2)}]]
                [:.upload-phase
                 {:margin-top (em 2)}
                 [:.upload-phase-heading

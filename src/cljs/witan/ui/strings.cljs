@@ -159,7 +159,10 @@
    :string/title-data-dashboard             "Your Datasets"
    :string/title-data-create                "Upload Dataset"
    :string/title-data-loading               "Loading..."
-   :string/this-is-you                      "This is you!"} )
+   :string/this-is-you                      "This is you!"
+   :string/upload-finalizing                "Confirming the upload succeeded"
+   :string/uploading                        "Uploading"
+   :string/preparing-upload                 "Preparing to upload"} )
 
 (defn resolve-string
   ([r]

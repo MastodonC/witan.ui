@@ -273,6 +273,12 @@
                          :on-change #(let [new-value (.-checked (.-target %))]
                                        (on-change row activity-k new-value))}]])])))]])])
 
+(defn progress-bar
+  [value]
+  [:div.shared-progress-bar
+   [:div.shared-progress-bar-inner
+    {:style {:width (str (* value 100) "%")}}]])
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -440,6 +446,18 @@
                        :kixi.group/name "ploop"
                        :kixi.group/type "user"} {:values {:meta-read false
                                                           :file-read true}}}}
+  {:inspect-data true
+   :frame true
+   :history false})
+
+(defcard progress-bar
+  (fn [data _]
+    (sab/html
+     [:div
+      {:style {:width "100%"}}
+      (for [v (:values @data)]
+        (progress-bar v))]))
+  {:values [0 0.1 0.5 0.75 1.0]}
   {:inspect-data true
    :frame true
    :history false})
