@@ -7,13 +7,12 @@
   (:import java.util.zip.GZIPOutputStream)
   (:gen-class))
 
-(def region "eu-central-1")
 (def dir "target/build")
 (def blacklist #{"cards.html"})
 
 (defn -main
   "Uploads the data to S3"
-  [bucket]
+  [bucket region]
   (println "Uploading to...\nbucket:" bucket "\nregion:" region "\ndir:" dir)
   (time
    (let [aak (env :aws-access-key)
