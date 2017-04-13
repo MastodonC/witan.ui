@@ -104,7 +104,8 @@
   [event {:keys [email pass]}]
   (let [args {:username email :password pass}]
     (data/swap-app-state! :app/login assoc :login/pending? true)
-    (POST (str "http://" (:gateway/address data/config) "/login")
+    (POST (str (if (:gateway/secure? data/config) "https://" "http://")
+               (:gateway/address data/config) "/login")
           {:id event
            :params (s/validate Login args)
            :result-cb (route-api-response event)})))
