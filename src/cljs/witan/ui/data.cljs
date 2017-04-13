@@ -17,7 +17,8 @@
                    [cljs.core.async.macros :refer [go go-loop]]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
-(def config {:gateway/address (or (cljs-env :witan-api-url) "localhost:30015")
+(def config {:gateway/secure? (or (boolean (cljs-env :witan-api-secure)) false)
+             :gateway/address (or (cljs-env :witan-api-url) "localhost:30015")
              :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -398,7 +399,7 @@
   (log/debug "Connecting to gateway...")
   (go-loop []
     (reset! ws-conn nil)
-    (let [{:keys [ws-channel error]} (<! (ws-ch (str "ws://"
+    (let [{:keys [ws-channel error]} (<! (ws-ch (str (if (get config :gateway/secure?) "wss://" "ws://")
                                                      (get config :gateway/address)
                                                      "/ws")
                                                 {:format :str}))]

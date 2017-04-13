@@ -126,8 +126,8 @@
             [:hr]
             [:div.actions
              [:a {:href (str
-                         "http://"
-                         (or (cljs-env :witan-api-url) "localhost:30015")
+                         (if (:gateway/secure? data/config) "https://" "http://")
+                         (or (:gateway/address data/config) "localhost:30015")
                          "/download?id="
                          current)
                   :target "_blank"} (shared/button {:id :button-a
