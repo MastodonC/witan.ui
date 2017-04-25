@@ -35,8 +35,9 @@
              (:query (url/url (-> js/window .-location .-href)))))
 
 (defn dispatch-path!
-  [path]
-  (let [route (if (= "/" path)
+  [_]
+  (let [path (.getToken accountant/history)
+        route (if (= "/" path)
                 {:handler :app/data-dash} ;; default
                 (bidi/match-route route-patterns path))]
     (if route
