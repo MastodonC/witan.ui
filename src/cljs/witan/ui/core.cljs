@@ -18,7 +18,7 @@
         (.log js/console
               (str "Witan For Cities\n"
                    "ENV:  " (or (cljs-env :environment) "development") "\n"
-                   "SHA:  " (or (cljs-env :circle-sha1) "?") "\n"
+                   "SHA:  " (or (cljs-env :build-sha) "?") "\n"
                    "DATE: " (or (cljs-env :build-dt)    "?"))))
 
       ;; data
