@@ -36,6 +36,7 @@
               transformer))
       (accountant/configure-navigation! {:nav-handler route/dispatch-path!
                                          :path-exists? route/path-exists?})
+      (.setUseFragment accountant/history true)
       (route/dispatch-path! (route/path))))
 
   (r/render [app/root-view] node))
