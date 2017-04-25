@@ -6,8 +6,9 @@ export WITAN_VIZ_URL=$2 # URL to load Witan Viz
 export WITAN_DOMAIN=$3  # The host domain (e.g. witanforcities.com)
 export ENVIRONMENT=$4   # Environment
 export WITAN_API_SECURE=$5 # tls for witan api
-export INTERCOM=1       # Intercom enabled
+export BUILD_SHA=$6 # SHA
 export BUILD_DT=$(date) # Build Date and Time
+export INTERCOM=1       # Intercom enabled
 
 if [ "$ENVIRONMENT" == "production" ]
 then
