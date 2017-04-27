@@ -25,7 +25,8 @@
    :string/forecast-lastmodified          "Last Modified"
    :string/create-account-header          "Need an account?"
    :string/view                           "View"
-   :string/api-failure                    "Sorry, we're having a problem with the service. Please try again. If the problem persists, please contact us at witan@mastodonc.com"
+   :string/if-persists                    "If the problem persists, please contact us at witan@mastodonc.com"
+   :string/api-failure                    ["Sorry, we're having a problem with the service. Please try again." :string/if-persists]
    :string/thanks                         "Thanks"
    :string/upload                         "Upload"
    :string/create-account                 "Create Account"
@@ -162,7 +163,10 @@
    :string/this-is-you                      "This is you!"
    :string/upload-finalizing                "Confirming the upload succeeded"
    :string/uploading                        "Uploading"
-   :string/preparing-upload                 "Preparing to upload"} )
+   :string/preparing-upload                 "Preparing to upload"
+   :string/sign-up-error-usernames-match    "Email addresses do not match"
+   :string/sign-up-error-passwords-match    "Passwords do not match"
+   :string/sign-up-failure                  ["There was an issue signing up. Please check your invite code and email address, and try again." :string/if-persists]} )
 
 (defn resolve-string
   ([r]
