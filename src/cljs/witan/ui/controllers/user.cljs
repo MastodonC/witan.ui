@@ -162,15 +162,17 @@
     (data/swap-app-state! :app/user assoc :user/group-search-filtered filtered-groups)))
 
 (defmethod handle :signup
-  [event {:keys [username password] :as payload}]
+  [event {:keys [usernames passwords] :as payload}]
   (if-let [error (cond
-                   (not (apply = username)) :string/sign-up-error-usernames-match
-                   (not (apply = password)) :string/sign-up-error-passwords-match
+                   (not (apply = usernames)) :string/sign-up-error-usernames-match
+                   (not (apply = passwords)) :string/sign-up-error-passwords-match
                    :else nil)]
     (data/swap-app-state! :app/login assoc :login/message error)
-    (let [p (assoc payload
-                   :username (first username)
-                   :password (first password))]
+    (let [p (-> payload
+                (dissoc :usernames
+                        :passwords)
+                (assoc :username (first usernames)
+                       :password (first passwords)))]
       (data/swap-app-state! :app/login assoc :login/pending? true)
       (POST (str (if (:gateway/secure? data/config) "https://" "http://")
                  (:gateway/address data/config) "/signup")

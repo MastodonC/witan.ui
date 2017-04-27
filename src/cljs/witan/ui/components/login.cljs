@@ -17,10 +17,10 @@
   []
   {:invite-code (.-value (.querySelector js/document ".sign-up-form #token"))
    :name (.-value (.querySelector js/document ".sign-up-form #name"))
-   :username [(.-value (.querySelector js/document ".sign-up-form #login-email"))
-              (.-value (.querySelector js/document ".sign-up-form #confirm-email"))]
-   :password [(.-value (.querySelector js/document ".sign-up-form #password"))
-              (.-value (.querySelector js/document ".sign-up-form #confirm-password"))]})
+   :usernames [(.-value (.querySelector js/document ".sign-up-form #login-email"))
+               (.-value (.querySelector js/document ".sign-up-form #confirm-email"))]
+   :passwords [(.-value (.querySelector js/document ".sign-up-form #password"))
+               (.-value (.querySelector js/document ".sign-up-form #confirm-password"))]})
 
 (defmulti login-state-view
   (fn [phase data] phase))
