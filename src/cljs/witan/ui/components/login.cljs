@@ -13,6 +13,15 @@
   {:pattern "(?=.*\\d.*)(?=.*[a-z].*)(?=.*[A-Z].*).{8,}"
    :title "8 characters minimum, at least one number, lowercase letter, and uppercase letter"})
 
+(defn get-form-payload
+  []
+  {:invite-code (.-value (.querySelector js/document ".sign-up-form #token"))
+   :name (.-value (.querySelector js/document ".sign-up-form #name"))
+   :usernames [(.-value (.querySelector js/document ".sign-up-form #login-email"))
+               (.-value (.querySelector js/document ".sign-up-form #confirm-email"))]
+   :passwords [(.-value (.querySelector js/document ".sign-up-form #password"))
+               (.-value (.querySelector js/document ".sign-up-form #confirm-password"))]})
+
 (defmulti login-state-view
   (fn [phase data] phase))
 
@@ -22,16 +31,12 @@
   [_ {:keys [set-phase-fn message]}]
   [:div.sub-page-div
    [:h3 (get-string :string/create-account)]
-   [:span#error-message (if (string? message) message "")]
-   [:form {:class "pure-form pure-form-stacked"
+   (when message
+     [:span#error-message (get-string message)])
+   [:form {:class "sign-up-form pure-form pure-form-stacked"
            :key "sign-up"
            :on-submit (fn [e]
-                        #_(venue/raise! owner :event/attempt-sign-up {:email [(.-value (om/get-node owner "email"))
-                                                                              (.-value (om/get-node owner "confirm-email"))]
-                                                                      :password [(.-value (om/get-node owner "password"))
-                                                                                 (.-value (om/get-node owner "confirm-password"))]
-                                                                      :invite-token (.-value (om/get-node owner "token"))
-                                                                      :name (.-value (om/get-node owner "name"))})
+                        (controller/raise! :user/signup (get-form-payload))
                         (.preventDefault e))}
     [:input {:tab-index 1
              :ref "token"
@@ -166,7 +171,10 @@
 (defn root-view
   []
   (fn []
-    (let [phase (r/atom :prompt)]
+    (let [phase (r/atom :prompt)
+          phase-fn (fn [ph]
+                     (controller/raise! :user/reset-message)
+                     (reset! phase ph))]
       (r/create-class
        {:reagent-render
         (fn []
@@ -184,4 +192,4 @@
                 [:h1 {:key "login-title-main"} (get-string :string/witan) ]
                 [:h2 {:key "login-title-sub"} (get-string :string/witan-tagline)]]
                [:div#witan-login.trans-bg {:key "login-state"}
-                [login-state-view @phase {:message message :set-phase-fn (partial reset! phase) :pending? pending?}]]]]]))}))))
+                (login-state-view @phase {:message message :set-phase-fn phase-fn :pending? pending?})]]]]))}))))

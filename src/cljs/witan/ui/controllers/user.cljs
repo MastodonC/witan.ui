@@ -19,6 +19,11 @@
   {:username email-regex
    :password password-regex})
 
+(def SignUp
+  (merge Login
+         {:name s/Str
+          :invite-code s/Str}))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn kill-login-screen!
@@ -29,6 +34,7 @@
 
 (defn login-success!
   [{:keys [token-pair] :as response}]
+  (data/swap-app-state! :app/login assoc :login/message nil)
   (if response
     ;; if response, we assume everything is shiny and new
     (let [auth-info    (data/deconstruct-token (:auth-token token-pair))
@@ -59,6 +65,8 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(declare login)
+
 (defmulti api-response
   (fn [{:keys [event status]} response] [event status]))
 
@@ -78,10 +86,38 @@
     (data/swap-app-state! :app/login assoc :login/message :string/sign-in-failure)
     (data/swap-app-state! :app/login assoc :login/message :string/api-failure)))
 
+(defmethod api-response
+  [:signup :success]
+  [{:keys [opts]} {:keys [token-pair] :as response}]
+  (data/swap-app-state! :app/login assoc :login/message nil)
+  (login (:username opts) (:password opts)))
+
+(defmethod api-response
+  [:signup :failure]
+  [_ response]
+  (data/swap-app-state! :app/login assoc :login/pending? false)
+  (if (= 400 (:status response))
+    (data/swap-app-state! :app/login assoc :login/message :string/sign-up-failure)
+    (data/swap-app-state! :app/login assoc :login/message :string/api-failure)))
+
 (defn route-api-response
-  [event]
-  (fn [status response]
-    (api-response {:event event :status status} response)))
+  ([event opts]
+   (fn [status response]
+     (api-response {:event event :status status :opts opts} response)))
+  ([event]
+   (route-api-response event nil)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn login
+  [email pass]
+  (let [args {:username email :password pass}]
+    (data/swap-app-state! :app/login assoc :login/pending? true)
+    (POST (str (if (:gateway/secure? data/config) "https://" "http://")
+               (:gateway/address data/config) "/login")
+          {:id :login
+           :params (s/validate Login args)
+           :result-cb (route-api-response :login)})))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query Response
@@ -101,21 +137,19 @@
   (fn [event args] event))
 
 (defmethod handle :login
-  [event {:keys [email pass]}]
-  (let [args {:username email :password pass}]
-    (data/swap-app-state! :app/login assoc :login/pending? true)
-    (POST (str (if (:gateway/secure? data/config) "https://" "http://")
-               (:gateway/address data/config) "/login")
-          {:id event
-           :params (s/validate Login args)
-           :result-cb (route-api-response event)})))
+  [_ {:keys [email pass]}]
+  (login email pass))
 
 (defmethod handle :logout
-  [event {:keys [email pass]}]
+  [event _]
   (data/reset-everything!))
 
+(defmethod handle :reset-message
+  [event _]
+  (data/swap-app-state! :app/login assoc :login/message nil))
+
 (defmethod handle :refresh-groups
-  [event {:keys [email pass]}]
+  [event _]
   (data/query {:groups/search [[] (utils/keys* ws/GroupSchema)]} on-query-response))
 
 (defmethod handle :search-groups
@@ -126,6 +160,25 @@
                            (:kixi.group/name %)
                            search) groups)]
     (data/swap-app-state! :app/user assoc :user/group-search-filtered filtered-groups)))
+
+(defmethod handle :signup
+  [event {:keys [usernames passwords] :as payload}]
+  (if-let [error (cond
+                   (not (apply = usernames)) :string/sign-up-error-usernames-match
+                   (not (apply = passwords)) :string/sign-up-error-passwords-match
+                   :else nil)]
+    (data/swap-app-state! :app/login assoc :login/message error)
+    (let [p (-> payload
+                (dissoc :usernames
+                        :passwords)
+                (assoc :username (first usernames)
+                       :password (first passwords)))]
+      (data/swap-app-state! :app/login assoc :login/pending? true)
+      (POST (str (if (:gateway/secure? data/config) "https://" "http://")
+                 (:gateway/address data/config) "/signup")
+            {:id event
+             :params (s/validate SignUp p)
+             :result-cb (route-api-response event p)}))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
