@@ -18,6 +18,10 @@
   (:require-macros [cljs-log.core :as log]
                    [cljs.core.async.macros :as am :refer [go-loop]]))
 
+(defn empty-view
+  []
+  [:div.empty])
+
 (def route->component
   {:app/workspace-dash   workspace-dash/view
    :app/data-dash        data-dash/view
@@ -27,7 +31,9 @@
    :app/create-workspace create-ws/view
    :app/request-to-share rts-dash/view
    :app/rts-create       create-rts/view
-   :app/rts              rts/view})
+   :app/rts              rts/view
+   ;;
+   :reset/form           empty-view})
 
 (defn root-view
   []

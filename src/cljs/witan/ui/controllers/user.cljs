@@ -148,6 +148,15 @@
   [event _]
   (data/swap-app-state! :app/login assoc :login/message nil))
 
+(defmethod handle :reset-password
+  [event username]
+  (POST (str (if (:gateway/secure? data/config) "https://" "http://")
+             (:gateway/address data/config) "/reset")
+        {:id :reset
+         :params {:username username}
+
+         :result-cb (route-api-response :login)}))
+
 (defmethod handle :refresh-groups
   [event _]
   (data/query {:groups/search [[] (utils/keys* ws/GroupSchema)]} on-query-response))

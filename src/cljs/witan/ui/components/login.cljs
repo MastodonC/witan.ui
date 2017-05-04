@@ -95,16 +95,11 @@
     [:span {:id "reset-instructions"} (get-string :string/forgotten-instruction)]]
    [:form {:class "pure-form"
            :on-submit (fn [e]
-                        (comment (set! (.-innerText (. js/document (getElementById "reset-instructions"))) (get-string :string/reset-submitted))
-                                 (set! (.-innerText (. js/document (getElementById "reset-button"))) (get-string :string/thanks))
-                                 (set! (.-disabled (. js/document (getElementById "reset-button"))) true)
-                                 (set! (.-disabled (. js/document (getElementById "reset-input"))) true))
-                        (.open js/window
-                               (str
-                                "mailto:witan@mastodonc.com?subject=[Witan Password Reset Request]"
-                                "&body=Please reset the password for the following email address: "
-                                (.-value (.getElementById js/document "reset-input"))) "resetEmailWindow" "height=400,width=600,left=10,top=10")
-                        #_(venue/raise! owner :event/reset-password (.-value (om/get-node owner "reset-email")))
+                        (set! (.-innerText (. js/document (getElementById "reset-instructions"))) (get-string :string/reset-submitted))
+                        (set! (.-innerText (. js/document (getElementById "reset-button"))) (get-string :string/thanks))
+                        (set! (.-disabled (. js/document (getElementById "reset-button"))) true)
+                        (set! (.-disabled (. js/document (getElementById "reset-input"))) true)
+                        (controller/raise! :user/reset-password (.-value (. js/document (getElementById "reset-input"))))
                         (.preventDefault e))}
     [:input {:tab-index 1
              :ref "reset-email"
@@ -122,6 +117,46 @@
                            (set-phase-fn :prompt)
                            (.preventDefault e))} (get-string :string/back)]]]])
 
+(defmethod
+  login-state-view
+  :reset-complete
+  [_ {:keys [set-phase-fn]}]
+  [:div.sub-page-div
+   [:h3 (get-string :string/reset-your-password)]
+   [:p
+    [:span {:id "reset-instructions"} (get-string :string/reset-your-password-instructions)]]
+   [:form {:class "pure-form"
+           :on-submit (fn [e]
+                        (set! (.-innerText (. js/document (getElementById "reset-instructions"))) (get-string :string/reset-submitted))
+                        (set! (.-innerText (. js/document (getElementById "reset-button"))) (get-string :string/thanks))
+                        (set! (.-disabled (. js/document (getElementById "reset-button"))) true)
+                        (set! (.-disabled (. js/document (getElementById "reset-input"))) true)
+                        (controller/raise! :user/reset-password (.-value (. js/document (getElementById "reset-input"))))
+                        (.preventDefault e))}
+    [:input {:tab-index 1
+             :id "reset-password-code"
+             :type "email"
+             :placeholder (get-string :string/email)
+             :required :required}]
+    [:input {:tab-index 1
+             :id "reset-password-email"
+             :type "email"
+             :placeholder (get-string :string/email)
+             :required :required}]
+    [:input {:tab-index 1
+             :id "reset-password-new"
+             :type "email"
+             :placeholder (get-string :string/email)
+             :required :required}]
+    [:input {:tab-index 1
+             :id "reset-password-new-confirm"
+             :type "email"
+             :placeholder (get-string :string/email)
+             :required :required}]
+    [:div
+     [:button {:tab-index 2
+               :id "reset-button"
+               :class "pure-button pure-button-primary"} (get-string :string/reset-password)]]]])
 (defmethod
   login-state-view
   :prompt
@@ -170,26 +205,30 @@
 
 (defn root-view
   []
-  (fn []
-    (let [phase (r/atom :prompt)
-          phase-fn (fn [ph]
-                     (controller/raise! :user/reset-message)
-                     (reset! phase ph))]
-      (r/create-class
-       {:reagent-render
-        (fn []
-          (let [{:keys [login/message login/pending?]} (data/get-app-state :app/login)]
-            [:div
-             [:div#login-bg {:key "login-bg"}
-              [:span#bg-attribution.trans-bg
-               "Photo by "
-               [:a {:href "https://www.flickr.com/photos/fico86/" :target "_blank" :key "photo-attr1"}
-                "Binayak Dasgupta"] " - "
-               [:a {:href "https://creativecommons.org/licenses/by/2.0/" :target "_blank" :key "photo-attr2"} "CC BY 2.0"]]]
-             [:div#content-container {:key "login-content"}
-              [:div#relative-container
-               [:div.login-title.trans-bg {:key "login-title"}
-                [:h1 {:key "login-title-main"} (get-string :string/witan) ]
-                [:h2 {:key "login-title-sub"} (get-string :string/witan-tagline)]]
-               [:div#witan-login.trans-bg {:key "login-state"}
-                (login-state-view @phase {:message message :set-phase-fn phase-fn :pending? pending?})]]]]))}))))
+  (let [route (data/get-app-state :app/route)
+        start-phase (case (:route/path route)
+                      :reset/form :reset-complete
+                      :prompt)]
+    (fn []
+      (let [phase (r/atom start-phase)
+            phase-fn (fn [ph]
+                       (controller/raise! :user/reset-message)
+                       (reset! phase ph))]
+        (r/create-class
+         {:reagent-render
+          (fn []
+            (let [{:keys [login/message login/pending?]} (data/get-app-state :app/login)]
+              [:div
+               [:div#login-bg {:key "login-bg"}
+                [:span#bg-attribution.trans-bg
+                 "Photo by "
+                 [:a {:href "https://www.flickr.com/photos/fico86/" :target "_blank" :key "photo-attr1"}
+                  "Binayak Dasgupta"] " - "
+                 [:a {:href "https://creativecommons.org/licenses/by/2.0/" :target "_blank" :key "photo-attr2"} "CC BY 2.0"]]]
+               [:div#content-container {:key "login-content"}
+                [:div#relative-container
+                 [:div.login-title.trans-bg {:key "login-title"}
+                  [:h1 {:key "login-title-main"} (get-string :string/witan) ]
+                  [:h2 {:key "login-title-sub"} (get-string :string/witan-tagline)]]
+                 [:div#witan-login.trans-bg {:key "login-state"}
+                  (login-state-view @phase {:message message :set-phase-fn phase-fn :pending? pending?})]]]]))})))))

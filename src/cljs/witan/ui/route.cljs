@@ -13,17 +13,20 @@
   (.. js/document -location -pathname))
 
 (def route-patterns
-  ["/app/" {"" nil
-            "data/"      {"dashboard"     :app/data-dash
-                          "create"        :app/data-create
-                          [:id ""]        :app/data}
-            "workspace/" {"create"        :app/create-workspace
-                          "dashboard"     :app/workspace-dash
-                          [:id ""]        :app/workspace}
-            "rts/"       {"create"        :app/rts-create
-                          "dashboard"     :app/request-to-share
-                          [:id ""]        :app/rts
-                          [:id "/submit"] :app/rts-submit}}])
+  ["/" {"app/" {""                            :app/data-dash ;;
+                "data/"      {"dashboard"     :app/data-dash
+                              "create"        :app/data-create
+                              [:id ""]        :app/data}
+                "workspace/" {"create"        :app/create-workspace
+                              "dashboard"     :app/workspace-dash
+                              [:id ""]        :app/workspace}
+                "rts/"       {"create"        :app/rts-create
+                              "dashboard"     :app/request-to-share
+                              [:id ""]        :app/rts
+                              [:id "/submit"] :app/rts-submit}}
+
+        "reset" {"" :reset/form
+                 [:id ""] :reset/form}}])
 
 (defn path-exists?
   [path]
@@ -31,8 +34,10 @@
 
 (defn query-string->map
   []
-  (reduce-kv (fn [a k v] (assoc a (keyword k) v)) {}
-             (:query (url/url (-> js/window .-location .-href)))))
+  (let [url (-> js/window .-location .-href)
+        url' (clojure.string/replace url #"/#" "")]
+    (reduce-kv (fn [a k v] (assoc a (keyword k) v)) {}
+               (:query (url/url url')))))
 
 (defn dispatch-path!
   [alt-path]
