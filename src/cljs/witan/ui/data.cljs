@@ -78,7 +78,8 @@
                :kixi.user/self-group nil}
     :app/route {:route/path nil
                 :route/params nil
-                :route/query nil}
+                :route/query nil
+                :route/address ""}
     ;; component data
     :app/workspace {:workspace/temp-variables {}
                     :workspace/running? false

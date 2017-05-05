@@ -51,6 +51,7 @@
       (let [{:keys [handler route-params]} route
             m {:route/path handler
                :route/params route-params
+               :route/address path
                :route/query (query-string->map)}]
         (log/debug "Dispatching to route:" path "=>" handler)
         (data/reset-app-state! :app/route m)

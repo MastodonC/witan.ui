@@ -6,7 +6,8 @@
             [witan.ui.route :refer [swap-query-string!]]
             ;;
             [witan.ui.controller :as controller]
-            [witan.ui.data :as data])
+            [witan.ui.data :as data]
+            [goog.string :as gstr])
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))
 
@@ -236,8 +237,8 @@
   []
   (fn []
     (let [route (data/get-app-state :app/route)
-          start-phase (case (:route/path route)
-                        :reset/form :reset-complete
+          start-phase (if (gstr/contains (:route/address route) "/reset")
+                        :reset-complete
                         :prompt)
           phase (r/atom start-phase)
           phase-fn (fn [ph]
