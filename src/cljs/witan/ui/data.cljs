@@ -69,7 +69,8 @@
                 :login/token nil
                 :login/message nil
                 :login/auth-expiry -1
-                :login/refresh-expiry -1}
+                :login/refresh-expiry -1
+                :login/reset-complete? false}
     :app/user {:kixi.user/name nil
                :kixi.user/username nil
                :kixi.user/id nil

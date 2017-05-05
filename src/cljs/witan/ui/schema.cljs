@@ -47,7 +47,8 @@
                                       :refresh-token s/Str})
                :login/message (s/maybe s/Str)
                :login/auth-expiry s/Num
-               :login/refresh-expiry s/Num}
+               :login/refresh-expiry s/Num
+               :login/reset-complete? s/Bool}
    :app/user UserSchema
    :app/route {:route/path (s/maybe s/Keyword)
                :route/params (s/maybe s/Any)

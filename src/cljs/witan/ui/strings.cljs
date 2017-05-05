@@ -168,7 +168,10 @@
    :string/sign-up-error-passwords-match    "Passwords do not match"
    :string/sign-up-failure                  ["There was an issue signing up. Please check your invite code and email address, and try again." :string/if-persists]
    :string/reset-your-password              "Reset Your Password"
-   :string/reset-your-password-instructions "Please provide the necessary details, including a new password"} )
+   :string/reset-your-password-instructions "Please provide the necessary details, including a new password"
+   :string/reset-code                       "Reset Code"
+   :string/reset-password-completion        "Your password was changed. Press 'Back' to log in to your account."} )
+
 
 (defn resolve-string
   ([r]
