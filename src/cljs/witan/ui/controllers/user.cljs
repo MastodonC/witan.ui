@@ -87,8 +87,31 @@
     (data/swap-app-state! :app/login assoc :login/message :string/api-failure)))
 
 (defmethod api-response
+  [:reset :success]
+  [_ response])
+
+(defmethod api-response
+  [:reset :failure]
+  [_ response]
+  (data/swap-app-state! :app/login assoc :login/message :string/api-failure))
+
+(defmethod api-response
+  [:reset-complete :success]
+  [_ response]
+  (data/swap-app-state! :app/login assoc :login/pending? false)
+  (data/swap-app-state! :app/login assoc :login/reset-complete? true))
+
+(defmethod api-response
+  [:reset-complete :failure]
+  [_ response]
+  (data/swap-app-state! :app/login assoc :login/pending? false)
+  (if (= 400 (:status response))
+    (data/swap-app-state! :app/login assoc :login/message :string/sign-in-failure)
+    (data/swap-app-state! :app/login assoc :login/message :string/api-failure)))
+
+(defmethod api-response
   [:signup :success]
-  [{:keys [opts]} {:keys [token-pair] :as response}]
+  [{:keys [opts]} _]
   (data/swap-app-state! :app/login assoc :login/message nil)
   (login (:username opts) (:password opts)))
 
@@ -147,6 +170,28 @@
 (defmethod handle :reset-message
   [event _]
   (data/swap-app-state! :app/login assoc :login/message nil))
+
+(defmethod handle :reset-password
+  [event username]
+  (POST (str (if (:gateway/secure? data/config) "https://" "http://")
+             (:gateway/address data/config) "/reset")
+        {:id :reset
+         :params {:username username}
+         :result-cb (route-api-response :reset)}))
+
+(defmethod handle :reset-password-complete
+  [event {:keys [username reset-code passwords]}]
+  (data/swap-app-state! :app/login assoc :login/pending? true)
+  (data/swap-app-state! :app/login assoc :login/reset-complete? false)
+  (if (not (apply = passwords))
+    (data/swap-app-state! :app/login assoc :login/message :string/sign-up-error-passwords-match)
+    (POST (str (if (:gateway/secure? data/config) "https://" "http://")
+               (:gateway/address data/config) "/complete-reset")
+          {:id :reset-complete
+           :params {:username username
+                    :password (first passwords)
+                    :reset-code reset-code}
+           :result-cb (route-api-response :reset-complete)})))
 
 (defmethod handle :refresh-groups
   [event _]

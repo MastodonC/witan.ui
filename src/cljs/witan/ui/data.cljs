@@ -69,7 +69,8 @@
                 :login/token nil
                 :login/message nil
                 :login/auth-expiry -1
-                :login/refresh-expiry -1}
+                :login/refresh-expiry -1
+                :login/reset-complete? false}
     :app/user {:kixi.user/name nil
                :kixi.user/username nil
                :kixi.user/id nil
@@ -77,7 +78,8 @@
                :kixi.user/self-group nil}
     :app/route {:route/path nil
                 :route/params nil
-                :route/query nil}
+                :route/query nil
+                :route/address ""}
     ;; component data
     :app/workspace {:workspace/temp-variables {}
                     :workspace/running? false

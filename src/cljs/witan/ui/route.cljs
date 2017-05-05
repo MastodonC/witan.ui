@@ -7,23 +7,27 @@
   (:require-macros [cljs-log.core :as log]))
 
 (defonce app-route-chan (chan))
+(def default-view :app/data-dash)
 
 (defn path
   []
   (.. js/document -location -pathname))
 
 (def route-patterns
-  ["/app/" {"" nil
-            "data/"      {"dashboard"     :app/data-dash
-                          "create"        :app/data-create
-                          [:id ""]        :app/data}
-            "workspace/" {"create"        :app/create-workspace
-                          "dashboard"     :app/workspace-dash
-                          [:id ""]        :app/workspace}
-            "rts/"       {"create"        :app/rts-create
-                          "dashboard"     :app/request-to-share
-                          [:id ""]        :app/rts
-                          [:id "/submit"] :app/rts-submit}}])
+  ["/" {"app/" {""                            default-view
+                "data/"      {"dashboard"     :app/data-dash
+                              "create"        :app/data-create
+                              [:id ""]        :app/data}
+                "workspace/" {"create"        :app/create-workspace
+                              "dashboard"     :app/workspace-dash
+                              [:id ""]        :app/workspace}
+                "rts/"       {"create"        :app/rts-create
+                              "dashboard"     :app/request-to-share
+                              [:id ""]        :app/rts
+                              [:id "/submit"] :app/rts-submit}}
+
+        "reset" {"" default-view
+                 [:id ""] default-view}}])
 
 (defn path-exists?
   [path]
@@ -31,8 +35,10 @@
 
 (defn query-string->map
   []
-  (reduce-kv (fn [a k v] (assoc a (keyword k) v)) {}
-             (:query (url/url (-> js/window .-location .-href)))))
+  (let [url (-> js/window .-location .-href)
+        url' (clojure.string/replace url #"/#" "")]
+    (reduce-kv (fn [a k v] (assoc a (keyword k) v)) {}
+               (:query (url/url url')))))
 
 (defn dispatch-path!
   [alt-path]
@@ -45,6 +51,7 @@
       (let [{:keys [handler route-params]} route
             m {:route/path handler
                :route/params route-params
+               :route/address path
                :route/query (query-string->map)}]
         (log/debug "Dispatching to route:" path "=>" handler)
         (data/reset-app-state! :app/route m)
