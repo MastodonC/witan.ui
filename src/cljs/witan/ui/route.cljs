@@ -7,13 +7,14 @@
   (:require-macros [cljs-log.core :as log]))
 
 (defonce app-route-chan (chan))
+(def default-view :app/data-dash)
 
 (defn path
   []
   (.. js/document -location -pathname))
 
 (def route-patterns
-  ["/" {"app/" {""                            :app/data-dash ;;
+  ["/" {"app/" {""                            default-view
                 "data/"      {"dashboard"     :app/data-dash
                               "create"        :app/data-create
                               [:id ""]        :app/data}
@@ -25,8 +26,8 @@
                               [:id ""]        :app/rts
                               [:id "/submit"] :app/rts-submit}}
 
-        "reset" {"" :reset/form
-                 [:id ""] :reset/form}}])
+        "reset" {"" default-view
+                 [:id ""] default-view}}])
 
 (defn path-exists?
   [path]
