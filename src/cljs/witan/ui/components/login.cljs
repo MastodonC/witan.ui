@@ -123,7 +123,6 @@
   login-state-view
   :reset-complete
   [_ {:keys [set-phase-fn params message pending?]}]
-  (log/info params)
   (let [reset-complete? (data/get-in-app-state :app/login :login/reset-complete?)]
     [:div.sub-page-div
      [:h3 (get-string :string/reset-your-password)]
