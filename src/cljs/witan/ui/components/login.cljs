@@ -30,7 +30,7 @@
 (defmethod
   login-state-view
   :sign-up
-  [_ {:keys [set-phase-fn message]}]
+  [_ {:keys [set-phase-fn params message]}]
   [:div.sub-page-div
    [:h3 (get-string :string/create-account)]
    (when message
@@ -44,17 +44,15 @@
              :ref "token"
              :type "text"
              :id "token"
+             :value (:ic params)
+             :read-only (:ic params)
              :placeholder (get-string :string/sign-up-token)
-             :required :required}]
-    [:input {:tab-index 2
-             :ref "name"
-             :type "text"
-             :id "name"
-             :placeholder (get-string :string/name)
              :required :required}]
     [:input {:tab-index 3
              :ref "email"
              :type "email"
+             :value (:un params)
+             :read-only (:un params)
              :id "login-email"
              :placeholder (get-string :string/email)
              :required :required}]
@@ -63,6 +61,12 @@
              :type "email"
              :id "confirm-email"
              :placeholder (get-string :string/confirm-email)
+             :required :required}]
+    [:input {:tab-index 2
+             :ref "name"
+             :type "text"
+             :id "name"
+             :placeholder (get-string :string/name)
              :required :required}]
     [:input (merge password-validation
                    {:tab-index 5
@@ -236,9 +240,10 @@
   []
   (fn []
     (let [route (data/get-app-state :app/route)
-          start-phase (if (gstr/contains (:route/address route) "/reset")
-                        :reset-complete
-                        :prompt)
+          start-phase (cond
+                        (gstr/startsWith (:route/address route) "/reset") :reset-complete
+                        (gstr/startsWith (:route/address route) "/invite") :sign-up
+                        :else :prompt)
           phase (r/atom start-phase)
           phase-fn (fn [ph]
                      (controller/raise! :user/reset-message)

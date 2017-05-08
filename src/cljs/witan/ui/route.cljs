@@ -26,8 +26,8 @@
                               [:id ""]        :app/rts
                               [:id "/submit"] :app/rts-submit}}
 
-        "reset" {"" default-view
-                 [:id ""] default-view}}])
+        "reset" {"" default-view}
+        "invite" {"" default-view}}])
 
 (defn path-exists?
   [path]
