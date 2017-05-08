@@ -48,7 +48,7 @@
              :read-only (:ic params)
              :placeholder (get-string :string/sign-up-token)
              :required :required}]
-    [:input {:tab-index 3
+    [:input {:tab-index 2
              :ref "email"
              :type "email"
              :value (:un params)
@@ -56,13 +56,13 @@
              :id "login-email"
              :placeholder (get-string :string/email)
              :required :required}]
-    [:input {:tab-index 4
+    [:input {:tab-index 3
              :ref "confirm-email"
              :type "email"
              :id "confirm-email"
              :placeholder (get-string :string/confirm-email)
              :required :required}]
-    [:input {:tab-index 2
+    [:input {:tab-index 4
              :ref "name"
              :type "text"
              :id "name"
