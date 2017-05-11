@@ -5,7 +5,8 @@
 
 (defn iso-time-as-moment
   [time]
-  (.calendar (js/moment. (str time) "YYYYMMDD HHmmss")))
+  (let [hoffset (- (/ (.getTimezoneOffset (js/Date.)) 60))]
+    (.calendar (.add (js/moment. (str time) "YYYYMMDD HHmmss") hoffset "hours"))))
 
 (defn jstime->str
   ([]
