@@ -35,8 +35,7 @@
 
 (def transit-writer
   (tr/writer
-   transit-encoding-level
-   {:handlers st/cross-platform-read-handlers}))
+   transit-encoding-level))
 
 (defn transit-encode
   [s]
