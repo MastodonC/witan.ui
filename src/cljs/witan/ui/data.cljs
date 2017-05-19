@@ -9,7 +9,6 @@
             [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all put! close!]]
             [cljs.reader :as reader]
             [cognitect.transit :as tr]
-            [outpace.schema-transit :as st]
             [cljs-time.coerce :as tc]
             [cljs-time.core :as t]
             [witan.ui.time :as time])
@@ -28,14 +27,11 @@
 (def transit-reader
   (tr/reader
    transit-encoding-level
-   {:handlers st/cross-platform-read-handlers}))
+   {:handlers {"n" (fn [x] (js/parseInt x))}}))
 
 (defn transit-decode
-  ([s key-fn]
-   (reduce-kv (fn [a k v] (assoc a (key-fn k) v)) {}
-              (tr/read transit-reader s)))
-  ([s]
-   (tr/read transit-reader s)))
+  [s]
+  (tr/read transit-reader s))
 
 (def transit-writer
   (tr/writer
@@ -198,7 +194,7 @@
       (clojure.string/split #"\.")
       (second)
       (b64/decodeString)
-      (transit-decode keyword)))
+      (transit-decode)))
 
 (defn save-token-pair!
   [token-pair]
