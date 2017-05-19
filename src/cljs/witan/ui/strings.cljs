@@ -5,6 +5,7 @@
 
 (def strings
   {:string/name                             "Name"
+   :string/full-name                        "Full Name"
    :string/file-name                        "Dataset Name"
    :string/file-type                        "Dataset Type"
    :string/file-provenance-source           "Source"

@@ -66,7 +66,7 @@
              :ref "name"
              :type "text"
              :id "name"
-             :placeholder (get-string :string/name)
+             :placeholder (get-string :string/full-name)
              :required :required}]
     [:input (merge password-validation
                    {:tab-index 5
