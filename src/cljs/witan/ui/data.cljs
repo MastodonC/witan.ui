@@ -408,9 +408,7 @@
             (on-connect))
           (<! (go-loop []
                 (let [{:keys [message] :as resp} (<! ws-channel)
-                      _ (log/info "$$$$$" message)
-                      message (transit-decode message)
-                      _ (log/info "#####" message)]
+                      message (transit-decode message)]
                   (if message
                     (if (contains? message :error)
                       (panic! (str "Received message error: " message))
