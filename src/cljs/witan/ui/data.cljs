@@ -189,11 +189,12 @@
 
 (defn deconstruct-token
   [tkn]
-  (-> tkn
-      (clojure.string/split #"\.")
-      (second)
-      (b64/decodeString)
-      (transit-decode)))
+  (let [r (-> tkn
+              (clojure.string/split #"\.")
+              (second)
+              (b64/decodeString)
+              (transit-decode))]
+    (reduce-kv (fn [a k v] (assoc a (keyword k) v)) {} r)))
 
 (defn save-token-pair!
   [token-pair]
