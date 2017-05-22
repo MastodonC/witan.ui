@@ -67,6 +67,12 @@
                [[id] (:full query-fields)]}
               on-query-response))
 
+(defn upload-error->string
+  [e]
+  (case e
+    :metadata-invalid :string/file-upload-metadata-invalid
+    :string/file-upload-unknown-error))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; API responses
 
@@ -173,6 +179,7 @@
 (defmethod on-route-change
   :app/data-create
   [_]
+  (data/swap-app-state! :app/datastore dissoc :cd/error)
   (set-title! (get-string :string/title-data-create)))
 
 (defmethod on-route-change
@@ -232,6 +239,14 @@
         (route/navigate! :app/data {:id id})) 500)))
 
 (defmethod on-event
+  [:kixi.datastore.file-metadata/rejected "1.0.0"]
+  [{:keys [args]}]
+  (let [{:keys [kixi.comms.event/payload]} args
+        {:keys [reason]} payload]
+    (data/swap-app-state! :app/create-data assoc :cd/error (upload-error->string reason))
+    (data/swap-app-state! :app/create-data assoc :cd/pending? false)))
+
+(defmethod on-event
   [:kixi.datastore.metadatastore/sharing-change-rejected "1.0.0"]
   [{:keys [args]}]
   (let [{:keys [kixi.comms.event/payload]} args
@@ -253,7 +268,9 @@
 (defmethod handle
   :reset-errors
   [_ _]
-  (data/swap-app-state! :app/create-data dissoc :cd/message))
+  (data/swap-app-state! :app/create-data dissoc :cd/message)
+  (data/swap-app-state! :app/create-data dissoc :cd/error)
+  (data/swap-app-state! :app/create-data assoc :cd/pending? false))
 
 (defmethod handle
   :upload

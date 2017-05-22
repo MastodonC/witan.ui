@@ -58,7 +58,7 @@
   [activities locked-activities]
   (let [user (data/get-in-app-state :app/user)]
     {:pending-file nil
-     :wants-schema? 2
+     :wants-schema? nil
      :selected-schema nil
      :info-name ""
      :info-description ""
@@ -80,7 +80,8 @@
     (fn [this]
       (let [{:keys [cd/pending?
                     cd/pending-message
-                    cd/message]} (data/get-app-state :app/create-data)
+                    cd/message
+                    cd/error]} (data/get-app-state :app/create-data)
             disabled? pending?]
         [:div#create-data
          [:div.container
@@ -91,22 +92,12 @@
             (shared/info-panel :string/data-upload-intro)
 
             (cond
-              pending?
-              [:div.uploading
-               [:h2 (get-string :string/please-wait)]
-               [:h3 (get-string (:message pending-message))]
-               (icons/loading :large)
-               [:div.progress-bar
-                (shared/progress-bar (:progress pending-message))]]
-              message
+              error
               [:div.upload-error
                [:h2 (get-string :string/error)]
                (icons/error :large :dark)
                [:div.error
-                (get-string
-                 (case message
-                   :upload-failed :string/browser-upload-error
-                   :api-failure   :string/api-failure))]
+                (get-string error)]
                [:div
                 (shared/button {:id :retry-upload
                                 :icon icons/retry
@@ -117,6 +108,13 @@
                                                      activities->string
                                                      locked-activities))
                                   (controller/raise! :data/reset-errors)))]]
+              pending?
+              [:div.uploading
+               [:h2 (get-string :string/please-wait)]
+               [:h3 (get-string (:message pending-message))]
+               (icons/loading :large)
+               [:div.progress-bar
+                (shared/progress-bar (:progress pending-message))]]
               :else
               [:div.upload-phases
 
