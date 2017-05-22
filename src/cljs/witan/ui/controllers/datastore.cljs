@@ -9,7 +9,8 @@
             [witan.ui.route :as route]
             [witan.ui.strings :refer [get-string]]
             [witan.ui.title :refer [set-title!]]
-            [goog.string :as gstring])
+            [goog.string :as gstring]
+            [cljsjs.toastr])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
@@ -72,6 +73,10 @@
   (case e
     :metadata-invalid :string/file-upload-metadata-invalid
     :string/file-upload-unknown-error))
+
+(defn get-local-file
+  [id]
+  (data/get-in-app-state :app/datastore :ds/file-metadata id))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; API responses
@@ -252,6 +257,9 @@
   (let [{:keys [kixi.comms.event/payload]} args
         {:keys [kixi.datastore.metadatastore/id]} payload]
     (log/warn "An adjustment to the sharing properties of" id "was rejected. Restoring...")
+    (.error js/toastr (str "An adjustment to the sharing properties of '"
+                           (:kixi.datastore.metadatastore/name (get-local-file id))
+                           "' was rejected."))
     (send-single-file-item-query! id)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
