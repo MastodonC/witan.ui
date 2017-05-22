@@ -171,7 +171,9 @@
    :string/reset-your-password              "Reset Your Password"
    :string/reset-your-password-instructions "Please provide the necessary details, including a new password"
    :string/reset-code                       "Reset Code"
-   :string/reset-password-completion        "Your password was changed. Press 'Back' to log in to your account."} )
+   :string/reset-password-completion        "Your password was changed. Press 'Back' to log in to your account."
+   :string/file-upload-unknown-error        "An unknown error occurred whilst uploading your file. Please contact support."
+   :string/file-upload-metadata-invalid     "The name and/or description field provided was rejected by the system. Please ensure that only standard characters are used (A-Z, a-z, 0-9, spaces, tabs, punctuation). If the problem persists, please contact support."} )
 
 
 (defn resolve-string

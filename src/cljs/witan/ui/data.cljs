@@ -27,7 +27,8 @@
 (def transit-reader
   (tr/reader
    transit-encoding-level
-   {:handlers {"n" (fn [x] (js/parseInt x))}}))
+   {:handlers {"n" (fn [x] (js/parseInt x))
+               "regex" (fn [x] (re-pattern x))}}))
 
 (defn transit-decode
   [s]
