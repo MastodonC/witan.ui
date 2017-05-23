@@ -126,6 +126,10 @@
   (log/severe "App has panicked:" msg)
   (reset-app-state! :app/panic-message msg))
 
+(.addEventListener js/window "error"
+                   (fn [e]
+                     (panic! (.. e -error -message))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PubSub
 
