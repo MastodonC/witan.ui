@@ -227,4 +227,46 @@
               :border [[(px 10) 'solid colour/progress-bar-fill]]
               :margin-left (px -5)
               :margin-top (px -5)
-              :height (percent 100)}]])
+              :height (percent 100)}]
+
+            [:.shared-tabs
+             {:display :flex
+              :justify-content :center
+              :background-color "#eee"
+              :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]}
+             [:.shared-tab
+              {:margin [[(em 0.0) (em 0.75)]]
+               :margin-top (em 0.6)
+               :color colour/subtle-grey3
+               :cursor :pointer}
+              [:&:hover
+               {:color colour/clickable}]]
+             [:.shared-tab-selected
+              {:color colour/title-fonts-colour
+               :border-bottom [[(px 2) 'solid colour/switcher-button-selected]]}]]
+
+            [:.shared-tag
+             {:display :inline
+              :margin (em 0.3)
+              :padding (em 0.3)
+              :font-size (em 0.7)
+              :background-color colour/tag-bg
+              :border [[(px 1) 'solid colour/tag-border]]}
+             [:i
+              {:font-size (px 10)
+               :font-weight 700
+               :margin-top (px 7)
+               :margin-right (px 3)}
+              [:&:hover
+               {:color 'white}]]]
+            [:.shared-tag-clickable
+             {:cursor :pointer}
+             [:span
+              [:&:hover
+               {:color colour/body-bg}]]]
+
+            [:.clickable-text
+             {:color colour/clickable
+              :cursor :pointer}
+             [:&:hover
+              {:color colour/clickable-hovered}]]])

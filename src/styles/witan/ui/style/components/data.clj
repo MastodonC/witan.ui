@@ -110,10 +110,63 @@
               :overflow-y :auto}
              [:.container
               {:position :relative
-               :max-width (px 1024)}]
+               :max-width (px 1024)
+               :width (percent 100)}]
              [:.field-entry
               {:margin [[(em 0.5) (em 0)]]}]
              [:.sharing-controls
               [:.sharing-activity
                [:.selected-groups
-                {:margin [[(em 0.5) (em 0)]]}]]]]])
+                {:margin [[(em 0.5) (em 0)]]}]]]]
+
+            [:.file-title
+             {:margin [[(em 0.0) (em 0.2)]]
+              :line-height (em 1.6)
+              :white-space :nowrap
+              :overflow :hidden
+              :text-overflow :ellipsis}]
+
+            [:.file-metadata-table
+             {:width (percent 100)
+              :display :flex
+              :justify-content :space-around}
+             [:table
+              {:margin-bottom (em 2)}]]
+
+            [:.file-description
+             {:font-family fonts/base-fonts}]
+
+            [:.file-tags
+             [:h3
+              {:margin [[(em 0.0) (em 0.2)]]
+               :line-height (em 1.6)}]]
+
+            [:.file-sharing
+             [:h3
+              {:margin [[(em 0.0) (em 0.2)]]
+               :line-height (em 1.6)}]]
+
+            [:.editable-field
+             {:padding [[(em 1) (px 0) (em 1) (em 1)]]
+              :margin-bottom (em 1)
+              :width (percent 100)
+              :line-height (em 1.7)
+              :border-color colour/subtle-grey
+              :border-radius (px 2)
+              :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]}
+             [:&:hover
+              {}]
+             [:span.clickable-text
+              {:font-size (px 12)
+               :height (em 0.75)
+               :line-height (em 0.75)
+               :position :absolute
+               :right (px 10)}]
+
+             [:.editable-field-content
+              {:display :flex
+               :justify-content :space-between
+               :vertical-align :bottom
+               :align-items :flex-end}]]
+            [:.editable-field-editing
+             {}]])

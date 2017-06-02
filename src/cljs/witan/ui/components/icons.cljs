@@ -192,6 +192,15 @@
   [& args]
   (apply create-key "undo" args))
 
+(defn title
+  [& args]
+  (let [[a b] (apply create-key "format_title" args)]
+    [a {:style {:margin-left (str (- 24 192) "px")}} b]))
+
+(defn description
+  [& args]
+  (apply create-key "message_text_outline" args))
+
 
 ;;
 
@@ -259,7 +268,9 @@
                     ["tick-circle"   tick-circle]
                     ["warning"       warning]
                     ["file"          file]
-                    ["retry"         retry]]]
+                    ["retry"         retry]
+                    ["title"         title]
+                    ["description"   description]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div

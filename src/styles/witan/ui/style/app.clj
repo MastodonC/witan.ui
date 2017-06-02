@@ -32,12 +32,18 @@
                :border-bottom [[(px 1) 'solid "#ddd"]]}]
 
              [:.padded-content
-              {:padding [[(em 0) (em 1)]]}]
+              {:padding [[(em 1) (em 1)]]
+               :margin (em 1)}]
 
              [:.flex
               {:display :flex
                :align-items :flex-start
                :justify-content :space-between}]
+
+             [:.flex-center
+              {:display :flex
+               :align-items :flex-start
+               :justify-content :center}]
 
              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
              ;; Create Workspace

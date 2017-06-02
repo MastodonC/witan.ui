@@ -10,7 +10,8 @@
   {:kixi.group/name   s/Str
    :kixi.group/type   s/Str
    :kixi.group/id     uuid?
-   (s/optional-key :kixi.group/created) s/Str})
+   (s/optional-key :kixi.group/created) s/Str
+   (s/optional-key :kixi.group/created-by) s/Str})
 
 (def UserSchema
   {:kixi.user/name   (s/maybe s/Str)

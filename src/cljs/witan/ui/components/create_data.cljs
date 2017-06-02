@@ -118,7 +118,7 @@
               :else
               [:div.upload-phases
 
-               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                ;; Step 1 - Select files
                {:style {:display (if pending? :none nil)}}
                (phase
@@ -150,7 +150,7 @@
                      (js/filesize (.-size (:pending-file @form-data))) ")"]]]))
 
 
-               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                ;; Step 2 - Information
                (phase
                 2 form-data
@@ -172,9 +172,72 @@
                                :value (:info-description @form-data)
                                :placeholder
                                (get-string :string/data-upload-step-2-input-2-ph)
-                               :on-change #(swap! form-data assoc :info-description (.. % -target -value))}]]]])
+                               :on-change #(swap! form-data assoc :info-description (.. % -target -value))}]]
+                  [:div.pure-control-group
+                   [:label {:for "author"} (get-string :string/data-upload-step-2-input-3-title)]
+                   [:textarea {:id  "author"
+                               :value (:info-author @form-data)
+                               :placeholder
+                               (get-string :string/data-upload-step-2-input-3-ph)
+                               :on-change #(swap! form-data assoc :info-author (.. % -target -value))}]]
+                  [:div.pure-control-group
+                   [:label {:for "maintainer"} (get-string :string/data-upload-step-2-input-4-title)]
+                   [:textarea {:id  "maintainer"
+                               :value (:info-maintainer @form-data)
+                               :placeholder
+                               (get-string :string/data-upload-step-2-input-4-ph)
+                               :on-change #(swap! form-data assoc :info-maintainer (.. % -target -value))}]]
+                  [:div.pure-control-group
+                   [:label {:for "source"} (get-string :string/data-upload-step-2-input-5-title)]
+                   [:textarea {:id  "source"
+                               :value (:info-source @form-data)
+                               :placeholder
+                               (get-string :string/data-upload-step-2-input-5-ph)
+                               :on-change #(swap! form-data assoc :info-source (.. % -target -value))}]]
+                  [:div.pure-control-group
+                   [:label {:for "geo-smallest"} (get-string :string/data-upload-step-2-input-6-title)]
+                   [:textarea {:id  "geo-smallest"
+                               :value (:info-geo-smallest @form-data)
+                               :placeholder
+                               (get-string :string/data-upload-step-2-input-6-ph)
+                               :on-change #(swap! form-data assoc :info-geo-smallest (.. % -target -value))}]]             
+                  [:div.pure-control-group
+                   [:label {:for "temporal-cov-from"} (get-string :string/data-upload-step-2-input-7-title)]
+                   [:textarea {:id  "temporal-from"
+                               :value (:info-temporal-cov-from @form-data)
+                               :placeholder
+                               (get-string :string/data-upload-step-2-input-7-ph)
+                               :on-change #(swap! form-data assoc :info-temporal-cov-from (.. % -target -value))}]]
+                  [:div.pure-control-group
+                   [:label {:for "temporal-cov-to"} (get-string :string/data-upload-step-2-input-8-title)]
+                   [:textarea {:id  "temporal-to"
+                               :value (:info-temporal-cov-to @form-data)
+                               :placeholder
+                               (get-string :string/data-upload-step-2-input-8-ph)
+                               :on-change #(swap! form-data assoc :info-temporal-cov-to (.. % -target -value))}]]
+                  [:div.pure-control-group
+                   [:label {:for "tags"} (get-string :string/data-upload-step-2-input-9-title)]
+                   [:textarea {:id  "tags"
+                               :value (:info-tags @form-data)
+                               :placeholder
+                               (get-string :string/data-upload-step-2-input-9-ph)
+                               :on-change #(swap! form-data assoc :info-tags (.. % -target -value))}]]
+                  [:div.pure-control-group
+                   [:label {:for "license-type"} (get-string :string/data-upload-step-2-input-10-title)]
+                   [:textarea {:id  "license-type"
+                               :value (:info-license-type @form-data)
+                               :placeholder
+                               (get-string :string/data-upload-step-2-input-10-ph)
+                               :on-change #(swap! form-data assoc :info-license-type (.. % -target -value))}]]
+                  [:div.pure-control-group
+                   [:label {:for "license-usage"} (get-string :string/data-upload-step-2-input-11-title)]
+                   [:textarea {:id  "license-usage"
+                               :value (:info-license-usage @form-data)
+                               :placeholder
+                               (get-string :string/data-upload-step-2-input-11-ph)
+                               :on-change #(swap! form-data assoc :info-license-usage (.. % -target -value))}]]]])
 
-               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                ;; Step 3 - Sharing
                (phase
                 3 form-data
@@ -200,7 +263,7 @@
                              {:kixi.datastore.metadatastore/meta-read true})}
                     {:exclusions (keys (:selected-groups @form-data))}]]))
 
-               ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
                ;; Step 4 - Confirm
                (phase
                 4 form-data

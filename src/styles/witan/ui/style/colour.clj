@@ -42,6 +42,9 @@
 (def lol-color-6 "#F3A86C")
 (def lol-color-7 "#429491")
 
+(def subtle-grey "#dfe3e9")
+(def subtle-grey2 (color/darken subtle-grey 10))
+(def subtle-grey3 (color/darken subtle-grey 20))
 ;;
 (def error   color-complement-0)
 (def warning color-secondary-2-0)
@@ -66,6 +69,8 @@
 ;; fonts
 (def title-fonts-colour lol-color-4)
 (def icon-colour lol-color-4)
+(def clickable lol-color-7)
+(def clickable-hovered (color/lighten lol-color-7 20))
 
 ;; side
 (def side-bg lol-color-4)
@@ -126,3 +131,10 @@
 ;; progress bar
 (def progress-bar-border (color/lighten lol-color-4 20))
 (def progress-bar-fill lol-color-4)
+
+;; editing
+(def editing-bg body-bg)
+
+;; tags
+(def tag-bg lol-color-3)
+(def tag-border (color/darken lol-color-3 20))

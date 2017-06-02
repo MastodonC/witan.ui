@@ -63,15 +63,21 @@
                                                  (on-double-click row)))}
                  (when content-fn (content-fn row))])))]))]])])
 
-(defn header
-  ([title]
-   (header title nil))
-  ([title subtitle]
+(defn header-string
+  ([title-string]
+   (header-string title-string nil))
+  ([title-string subtitle-string]
    [:div.shared-heading
     {:key "heading"}
-    [:h1 (get-string title)]
-    (when subtitle
-      [:h2 (get-string subtitle)])]))
+    [:h1 title-string]
+    (when subtitle-string
+      [:h2 subtitle-string])]))
+
+(defn header
+  ([title]
+   (header-string (get-string title) nil))
+  ([title subtitle]
+   (header-string (get-string title) (get-string subtitle))))
 
 (defn button
   [{:keys [icon txt class id prevent? disabled?]} on-button-click]
@@ -279,6 +285,28 @@
    [:div.shared-progress-bar-inner
     {:style {:width (str (* value 100) "%")}}]])
 
+(defn tabs
+  [{:keys [tabs selected-tab on-click]}]
+  [:div.shared-tabs
+   (doall
+    (for [[id label] tabs]
+      [:div
+       {:class (str "shared-tab " (when (= id selected-tab) "shared-tab-selected"))
+        :on-click #(when on-click (on-click id))}
+       label]))])
+
+(defn tag
+  ([tag-string]
+   (tag tag-string nil nil))
+  ([tag-string on-click-fn]
+   (tag tag-string on-click-fn nil))
+  ([tag-string on-click-fn on-cross-fn]
+   [:div
+    {:class (str "shared-tag " (when on-click-fn "shared-tag-clickable"))}
+    (when on-cross-fn
+      (icons/close))
+    [:span tag-string]]))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -461,3 +489,36 @@
   {:inspect-data true
    :frame true
    :history false})
+
+(defcard tabs
+  (fn [data _]
+    (sab/html
+     [:div
+      {:style {:width "100%"}}
+      (tabs (assoc @data
+                   :on-click #(swap! data assoc :selected-tab %)))]))
+  {:tabs {:foo "Overview" :bar "Sharing" :baz "Edit"}
+   :selected-tab :foo}
+  {:inspect-data true
+   :frame true
+   :history false})
+
+(defcard tags
+  (fn [data _]
+    (let [state-names (map :name states)]
+      (sab/html
+       [:div
+        {:style {:width "100%"}}
+        [:div
+         "Standard"
+         (doall (for [t (take 5 state-names)]
+                  (tag t)))]
+        [:div
+         "Clickable"
+         (doall (for [t (take 5 (drop 5 state-names))]
+                  (tag t identity)))]
+
+        [:div
+         "Closeable"
+         (doall (for [t (take 5 (drop 10 state-names))]
+                  (tag t identity identity)))]]))))

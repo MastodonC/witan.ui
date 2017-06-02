@@ -84,6 +84,23 @@
 (defmulti api-response
   (fn [{:keys [event status]} response] [event status]))
 
+(defn content?
+  [v]
+  (and v 
+       (if (or (coll? v) (string? v))
+         (not-empty v)
+         v)))
+
+(defn filled-map
+  [& keys-vals]
+  (reduce
+   (fn [acc [k v]]
+     (if (content? v)
+       (assoc acc k v)
+       acc))
+   {}
+   (partition 2 keys-vals)))
+
 (defmethod api-response
   [:upload :success]
   [{:keys [id file-size]} response]
@@ -96,23 +113,44 @@
   (let [{:keys [pending-file
                 info-name
                 info-description
+                info-author
+                info-maintainer
+                info-source
+                info-geo-smallest
+                info-license-type
+                info-license-usage
+                info-temporal-cov-from
+                info-temporal-cov-to
+                info-tags
                 selected-schema
                 selected-groups]} (data/get-in-app-state :app/create-data :cd/pending-data)
         user-groups [(data/get-in-app-state :app/user :kixi.user/self-group)]
         user-id (data/get-in-app-state :app/user :kixi.user/id)
         ext (last (clojure.string/split (.-name pending-file) #"\."))
-        payload {:kixi.datastore.metadatastore/name info-name
-                 :kixi.datastore.metadatastore/description info-description
-                 :kixi.datastore.metadatastore/id id
-                 :kixi.datastore.metadatastore/type "stored"
-                 :kixi.datastore.metadatastore/file-type ext
-                 :kixi.datastore.metadatastore/sharing (selected-groups->sharing-activities
-                                                        selected-groups
-                                                        (keys (data/get-in-app-state :app/datastore :ds/activities)))
-                 :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
-                                                           :kixi.user/id user-id}
-                 :kixi.datastore.metadatastore/size-bytes (.-size pending-file)
-                 :kixi.datastore.metadatastore/header true}
+        tag-coll (when (not-empty info-tags) (clojure.string/split info-tags #","))
+        payload (merge (filled-map :kixi.datastore.metadatastore/name info-name
+                                   :kixi.datastore.metadatastore/description info-description                     
+                                   :kixi.datastore.metadatastore/id id
+                                   :kixi.datastore.metadatastore/type "stored"
+                                   :kixi.datastore.metadatastore/file-type ext
+                                   :kixi.datastore.metadatastore/sharing (selected-groups->sharing-activities
+                                                                          selected-groups
+                                                                          (keys (data/get-in-app-state :app/datastore :ds/activities)))
+                                   :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
+                                                                             :kixi.user/id user-id}
+                                   :kixi.datastore.metadatastore/size-bytes (.-size pending-file)
+                                   :kixi.datastore.metadatastore/header true                       
+                                   :kixi.datastore.metadatastore/author info-author
+                                   :kixi.datastore.metadatastore/maintainer info-maintainer                       
+                                   :kixi.datastore.metadatastore/source info-source                       
+                                   :kixi.datastore.metadatastore/tags tag-coll
+                                   :kixi.datastore.metadatastore.license/license (filled-map :kixi.datastore.metadatastore.license/type info-license-type
+                                                                                             :kixi.datastore.metadatastore.license/usage info-license-usage)
+                                   :kixi.datastore.metadatastore.time/temporal-coverage (filled-map :kixi.datastore.metadatastore.time/from info-temporal-cov-from
+                                                                                                    :kixi.datastore.metadatastore.time/to info-temporal-cov-to))
+                       (when (not-empty info-geo-smallest)
+                         {:kixi.datastore.metadatastore.geography/geography (filled-map :kixi.datastore.metadatastore.geography/type "smallest"
+                                                                                        :kixi.datastore.metadatastore.geography/level info-geo-smallest)}))
         payload (if selected-schema (assoc payload :kixi.datastore.schemastore/id selected-schema) payload)]
     (data/command! :kixi.datastore.filestore/create-file-metadata "1.0.0" payload)))
 
