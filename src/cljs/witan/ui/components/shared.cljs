@@ -218,10 +218,11 @@
                       results)
             close-fn (fn [& _]
                        (aset (.getElementById js/document id) "value" nil)
+                       (reset! selected-group nil)
                        (reset! show-breakout? false))
             select-fn (fn [final? group]
-                        (reset! selected-group group)
                         (on-click group final?)
+                        (reset! selected-group group)
                         (when final?
                           (close-fn)))]
         [:div.shared-group-search-area
@@ -242,7 +243,7 @@
                             {:content-fn inline-group  :title "Name"          :weight 0.88}]
                   :content results
                   :selected?-fn #(= (:kixi.group/id %) (:kixi.group/id @selected-group))
-                  :on-select (partial select-fn false)
+                  :on-select (partial select-fn true)
                   :on-double-click (partial select-fn true)})
           [:div.close
            {:on-click close-fn}
@@ -250,34 +251,39 @@
 
 (defn sharing-matrix
   [sharing-activites group->activities {:keys [on-change on-add]} & opts]
-  [:div.sharing-matrix
-   [group-search-area
-    :string/sharing-matrix-group-search-ph
-    on-add (first opts)]
-   (when (not-empty group->activities)
-     [:table.pure-table.pure-table-horizontal.sharing-matrix-table-headers
-      [:thead
-       [:tr
-        (cons
-         [:th {:key "group-name"} (get-string :string/sharing-matrix-group-name)]
-         (for [[key title] sharing-activites]
-           [:th {:key title} title]))]]
-      [:tbody
-       (doall
-        (for [[group activities :as row] (sort-by (comp :kixi.group/name first) group->activities)]
-          (let [group-name (:kixi.group/name group)]
-            [:tr
-             {:key (str row)}
-             [:td {:key group-name}
-              (inline-group group)]
-             (for [[activity-k activity-t] sharing-activites]
-               [:td
-                {:key (str group-name "-" activity-t)}
-                [:input {:type "checkbox"
-                         :disabled (contains? (:locked activities) activity-k)
-                         :checked (get (:values activities) activity-k)
-                         :on-change #(let [new-value (.-checked (.-target %))]
-                                       (on-change row activity-k new-value))}]])])))]])])
+  (let [debounce (atom false)]
+    [:div.sharing-matrix
+     [group-search-area
+      :string/sharing-matrix-group-search-ph
+      (fn [& args]
+        (when-not @debounce
+          (apply on-add args)
+          (reset! debounce true)))
+      (first opts)]
+     (when (not-empty group->activities)
+       [:table.pure-table.pure-table-horizontal.sharing-matrix-table-headers
+        [:thead
+         [:tr
+          (cons
+           [:th {:key "group-name"} (get-string :string/sharing-matrix-group-name)]
+           (for [[key title] sharing-activites]
+             [:th {:key title} title]))]]
+        [:tbody
+         (doall
+          (for [[group activities :as row] (sort-by (comp :kixi.group/name first) group->activities)]
+            (let [group-name (:kixi.group/name group)]
+              [:tr
+               {:key (str row)}
+               [:td {:key group-name}
+                (inline-group group)]
+               (for [[activity-k activity-t] sharing-activites]
+                 [:td
+                  {:key (str group-name "-" activity-t)}
+                  [:input {:type "checkbox"
+                           :disabled (contains? (:locked activities) activity-k)
+                           :checked (get (:values activities) activity-k)
+                           :on-change #(let [new-value (.-checked (.-target %))]
+                                         (on-change row activity-k new-value))}]])])))]])]))
 
 (defn progress-bar
   [value]
@@ -291,7 +297,8 @@
    (doall
     (for [[id label] tabs]
       [:div
-       {:class (str "shared-tab " (when (= id selected-tab) "shared-tab-selected"))
+       {:key (name id)
+        :class (str "shared-tab " (when (= id selected-tab) "shared-tab-selected"))
         :on-click #(when on-click (on-click id))}
        label]))])
 

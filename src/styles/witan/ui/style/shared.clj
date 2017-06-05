@@ -236,7 +236,7 @@
               :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]}
              [:.shared-tab
               {:margin [[(em 0.0) (em 0.75)]]
-               :margin-top (em 0.6)
+               :margin-top (em 0.8)
                :color colour/subtle-grey3
                :cursor :pointer}
               [:&:hover

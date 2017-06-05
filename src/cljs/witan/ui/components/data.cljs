@@ -14,7 +14,7 @@
                    [devcards.core :as dc :refer [defcard]]))
 
 (def query-param :d)
-(defonce subview-idx (r/atom nil))
+(defonce subview-tab (r/atom :overview))
 
 (defn reverse-group->activity-map
   [all-activities sharing]
@@ -166,6 +166,34 @@
                     :txt :string/file-actions-download-file
                     :prevent? true} identity)]])
 
+(defn sharing-detailed
+  [{:keys [kixi.datastore.metadatastore/sharing kixi.datastore.metadatastore/id]}]
+  (let [activities->string (data/get-in-app-state :app/datastore :ds/activities)
+        user-sg (data/get-in-app-state :app/user :kixi.user/self-group)
+        sharing-groups (set (reduce concat [] (vals sharing)))]
+    [editable-field
+     nil
+     [:div.file-sharing-detailed
+      [:h2.heading (get-string :string/sharing)]
+      [:div.sharing-activity
+       [:div.selected-groups
+        [shared/sharing-matrix activities->string
+         (-> (keys activities->string)
+             (reverse-group->activity-map sharing)
+             (lock-activities user-sg))
+         {:on-change
+          (fn [[group activities] activity target-state]
+            (controller/raise! :data/sharing-change
+                               {:current id
+                                :group group
+                                :activity activity
+                                :target-state target-state}))
+          :on-add
+          (fn [group]
+            (controller/raise! :data/sharing-add-group
+                               {:current id :group group}))}
+         {:exclusions sharing-groups}]]]]]))
+
 (def tabs
   [[0 :overview]
    [1 :sharing]
@@ -181,22 +209,23 @@
 
 (defn switch-primary-view!
   [k]
-  (let [x (if (keyword? k) (tab->idx k) k)]
-    (route/swap-query-string! #(assoc % query-param x))
-    (reset! subview-idx x)))
+  (let [i (tab->idx k)]
+    (route/swap-query-string! #(assoc % query-param i))
+    (reset! subview-tab k)))
 
 ;;
 
 
 (defn view
   []
-  (reset! subview-idx (or (utils/query-param-int query-param 0 2) 0))
+  (reset! subview-tab (idx->tab (or (utils/query-param-int query-param 0 2) 0)))
   (fn []
     (let [{:keys [ds/current ds/download-pending? ds/error] :as ds}
           (data/get-in-app-state :app/datastore)
           activities->string (:ds/activities ds)
           md (data/get-in-app-state :app/datastore :ds/file-metadata current)
-          user-sg (data/get-in-app-state :app/user :kixi.user/self-group)]
+          go-to-edit (partial switch-primary-view! :edit)
+          go-to-sharing (partial switch-primary-view! :sharing)]
       (if error
         [:div.text-center.padded-content
          [:div
@@ -205,85 +234,69 @@
         (if-not md
           [:div.loading
            (icons/loading :large)]
-          (let [#_{:keys [kixi.datastore.metadatastore/sharing]} #_md
-                #_sharing-groups #_(set (reduce concat [] (vals sharing)))]
-            [:div#data-view
-             (shared/header-string (:kixi.datastore.metadatastore/name md))
-             (shared/tabs {:tabs {:overview (get-string :string/overview)
-                                  :sharing (get-string :string/sharing)
-                                  :edit (get-string :string/edit)}
-                           :selected-tab (idx->tab @subview-idx)
-                           :on-click switch-primary-view!})
-             [:div.flex-center
-              [:div.container.padded-content
-               (case @subview-idx
-                 0 [:div
-                    (title md identity)
-                    (description md identity)
-                    (metadata md identity)
-                    (tags md identity)
-                    (sharing md identity)
-                    (actions)]
-                 [:div])]]
-             #_[:div.container.padded-content
-                [:h2 (get-string :string/file-name ":" name)]
-                ;; ----------------------------------------------
-                [:hr]
-                [:div.field-entries
-                 [:div.field-entry
-                  [:strong (get-string :string/file-type ":")]
-                  [:span file-type]]
-                 [:div.field-entry
-                  [:strong (get-string :string/file-provenance-source ":")]
-                  [:span (:kixi.datastore.metadatastore/source provenance)]]
-                 [:div.field-entry
-                  [:strong (get-string :string/created-at ":")]
-                  [:span (time/iso-time-as-moment (:kixi.datastore.metadatastore/created provenance))]]
-                 [:div.field-entry
-                  [:strong (get-string :string/file-size ":")]
-                  [:span (js/filesize size-bytes)]]
-                 [:div.field-entry
-                  [:strong (get-string :string/file-uploader ":")]
-                  [:span (get-in provenance [:kixi/user :kixi.user/name])]]]
-                (when description
-                  [:div.field-entry
-                   [:strong (get-string :string/file-description ":")]
-                   (format-description description)])
-                ;; ----------------------------------------------
-                #_[:hr]
-                #_[:div.sharing-controls
-                   [:h2 (get-string :string/sharing)]
-                   [:div.sharing-activity
-                    [:div.selected-groups
-                     [shared/sharing-matrix activities->string
-                      (-> (keys activities->string)
-                          (reverse-group->activity-map sharing)
-                          (lock-activities user-sg))
-                      {:on-change
-                       (fn [[group activities] activity target-state]
-                         (controller/raise! :data/sharing-change
-                                            {:current current
-                                             :group group
-                                             :activity activity
-                                             :target-state target-state}))
-                       :on-add
-                       (fn [group]
-                         (controller/raise! :data/sharing-add-group
-                                            {:current current :group group}))}
-                      {:exclusions sharing-groups}]]]]
-                ;; ----------------------------------------------
-                [:hr]
-                [:div.actions
-                 [:a {:href (str
-                             (if (:gateway/secure? data/config) "https://" "http://")
-                             (or (:gateway/address data/config) "localhost:30015")
-                             "/download?id="
-                             current)
-                      :target "_blank"} (shared/button {:id :button-a
-                                                        :icon icons/download
-                                                        :txt :string/file-actions-download-file
-                                                        :class "file-action-download"}
-                                                       #())]]]]))))))
+          [:div#data-view
+           (shared/header-string (:kixi.datastore.metadatastore/name md))
+           (shared/tabs {:tabs {:overview (get-string :string/overview)
+                                :sharing (get-string :string/sharing)
+                                :edit (get-string :string/edit)}
+                         :selected-tab @subview-tab
+                         :on-click switch-primary-view!})
+           [:div.flex-center
+            [:div.container.padded-content
+             (case @subview-tab
+               :sharing [:div
+                         (sharing-detailed md)]
+               :edit [:div]
+               ;; :overview & default
+               [:div
+                (title md go-to-edit)
+                (description md go-to-edit)
+                (metadata md go-to-edit)
+                (tags md go-to-edit)
+                (sharing md go-to-sharing)
+                (actions)])]]
+           #_[:div.container.padded-content
+              [:h2 (get-string :string/file-name ":" name)]
+              ;; ----------------------------------------------
+              [:hr]
+              [:div.field-entries
+               [:div.field-entry
+                [:strong (get-string :string/file-type ":")]
+                [:span file-type]]
+               [:div.field-entry
+                [:strong (get-string :string/file-provenance-source ":")]
+                [:span (:kixi.datastore.metadatastore/source provenance)]]
+               [:div.field-entry
+                [:strong (get-string :string/created-at ":")]
+                [:span (time/iso-time-as-moment (:kixi.datastore.metadatastore/created provenance))]]
+               [:div.field-entry
+                [:strong (get-string :string/file-size ":")]
+                [:span (js/filesize size-bytes)]]
+               [:div.field-entry
+                [:strong (get-string :string/file-uploader ":")]
+                [:span (get-in provenance [:kixi/user :kixi.user/name])]]]
+              (when description
+                [:div.field-entry
+                 [:strong (get-string :string/file-description ":")]
+                 (format-description description)])
+              ;; ----------------------------------------------
+              #_[:hr]
+              #_[:div.sharing-controls
+                 [:h2 (get-string :string/sharing)]
+                 ]
+              ;; ----------------------------------------------
+              [:hr]
+              [:div.actions
+               [:a {:href (str
+                           (if (:gateway/secure? data/config) "https://" "http://")
+                           (or (:gateway/address data/config) "localhost:30015")
+                           "/download?id="
+                           current)
+                    :target "_blank"} (shared/button {:id :button-a
+                                                      :icon icons/download
+                                                      :txt :string/file-actions-download-file
+                                                      :class "file-action-download"}
+                                                     #())]]]])))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

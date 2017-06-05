@@ -150,6 +150,10 @@
               {:margin [[(em 0.0) (em 0.2)]]
                :line-height (em 1.6)}]]
 
+            [:.file-sharing-detailed
+             {:width (percent 100)
+              :margin-right (em 1)}]
+
             [:.editable-field
              {:padding [[(em 1) (px 0) (em 1) (em 1)]]
               :margin-bottom (em 1)
@@ -166,6 +170,8 @@
                :line-height (em 0.75)
                :position :absolute
                :right (px 10)}]
+             [:.heading
+              {:margin [[(em 0) (em 0) (em 1) (em 0)]]}]
 
              [:.editable-field-content
               {:display :flex
