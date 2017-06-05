@@ -136,8 +136,10 @@
    on-edit-fn
    [:div.file-tags
     [:h3 (get-string :string/tags)]
-    (for [tag tags]
-      (shared/tag tag identity))]])
+    (if (zero? (count tags))
+      [:i (get-string :string/no-tags)]
+      (for [tag tags]
+        (shared/tag tag identity)))]])
 
 (defn sharing
   [{:keys [kixi.datastore.metadatastore/sharing]} on-edit-fn]

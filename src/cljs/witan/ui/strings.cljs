@@ -203,7 +203,8 @@
    :string/tags                             "Tags"
    :string/sharing-summary                  "This file is currently visible to %d other users or organisations."
    :string/sharing-summary-single           "This file is currently visible to just 1 other user or organisation."
-   :string/overview                         "Overview"} )
+   :string/overview                         "Overview"
+   :string/no-tags                          "There are currently no tags."} )
 
 
 (defn resolve-string
