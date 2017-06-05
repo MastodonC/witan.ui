@@ -129,9 +129,13 @@
             [:.file-metadata-table
              {:width (percent 100)
               :display :flex
-              :justify-content :space-around}
+              :justify-content :space-around
+              :padding-right (em 1)}
+             [:.row-title {:width (percent 15)}]
+             [:.row-value {:width (percent 35)}]
              [:table
-              {:margin-bottom (em 2)}]]
+              {:margin-bottom (em 2)
+               :width (percent 100)}]]
 
             [:.file-description
              {:font-family fonts/base-fonts}]

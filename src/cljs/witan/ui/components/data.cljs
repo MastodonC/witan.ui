@@ -105,26 +105,30 @@
         lc-type         (:kixi.datastore.metadatastore.license/type license)
         lc-usage        (:kixi.datastore.metadatastore.license/usage license)
         row             (fn [string-id value-fn]
-                          [:tr [:td [:strong (get-string string-id)]] [:td (value-fn)]])]
+                          [[:td.row-title [:strong (get-string string-id)]] [:td.row-value (value-fn)]])]
     [editable-field
      on-edit-fn
      [:div.file-metadata-table
       [:table.pure-table.pure-table-bordered.pure-table-odd
        [:tbody
-        (row :string/file-type (fn [] [:span file-type]))
-        (row :string/file-uploader (fn [] [:span (:kixi.user/name prov-created-by)]))
-        (row :string/author (fn [] [:span author]))
-        (row :string/source (fn [] [:span source]))        
-        (row :string/maintainer (fn [] [:span maintainer]))        
-        (row :string/created-at (fn [] [:span (time/iso-time-as-moment prov-created-at)]))
-        (row :string/file-size (fn [] [:span (js/filesize size-bytes)]))]]
-      [:table.pure-table.pure-table-bordered.pure-table-odd
-       [:tbody
-        (row :string/file-provenance-source (fn [] [:span prov-source]))
-        (row :string/license-type (fn [] [:span lc-type]))
-        (row :string/license-usage (fn [] [:span lc-usage]))
-        (row :string/smallest-geography (fn [] [:span geo-level]))
-        (row :string/temporal-coverage (fn [] [:span (when tc-from (time/iso-time-as-moment tc-from)) " - " (when tc-to (time/iso-time-as-moment tc-to))]))]]]]))
+        (vec (concat [:tr]
+                     (row :string/file-type (fn [] [:span file-type]))
+                     (row :string/file-provenance-source (fn [] [:span prov-source]))))
+        (vec (concat [:tr]
+                     (row :string/file-uploader (fn [] [:span (:kixi.user/name prov-created-by)]))
+                     (row :string/license-type (fn [] [:span lc-type]))))
+        (vec (concat [:tr]
+                     (row :string/author (fn [] [:span author]))
+                     (row :string/license-usage (fn [] [:span lc-usage]))))
+        (vec (concat [:tr]
+                     (row :string/source (fn [] [:span source]))
+                     (row :string/smallest-geography (fn [] [:span geo-level]))))
+        (vec (concat [:tr]
+                     (row :string/maintainer (fn [] [:span maintainer]))
+                     (row :string/temporal-coverage (fn [] [:span (when tc-from (time/iso-time-as-moment tc-from)) " - " (when tc-to (time/iso-time-as-moment tc-to))]))))
+        (vec (concat [:tr]
+                     (row :string/created-at (fn [] [:span (time/iso-time-as-moment prov-created-at)]))
+                     (row :string/file-size (fn [] [:span (js/filesize size-bytes)]))))]]]]))
 
 (defn tags
   [{:keys [kixi.datastore.metadatastore/tags]} on-edit-fn]
