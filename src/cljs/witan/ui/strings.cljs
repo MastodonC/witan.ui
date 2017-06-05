@@ -202,7 +202,8 @@
    :string/temporal-coverage                "Temporal Coverage"
    :string/tags                             "Tags"
    :string/sharing-summary                  "This file is currently visible to %d other users or organisations."
-   :string/sharing-summary-single           "This file is currently visible to just 1 other user or organisation."} )
+   :string/sharing-summary-single           "This file is currently visible to just 1 other user or organisation."
+   :string/overview                         "Overview"} )
 
 
 (defn resolve-string

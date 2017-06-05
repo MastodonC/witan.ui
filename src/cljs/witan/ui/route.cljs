@@ -14,20 +14,23 @@
   (.. js/document -location -pathname))
 
 (def route-patterns
-  ["/" {"app/" {""                            default-view
-                "data/"      {"dashboard"     :app/data-dash
+  ["/" {"app" {""                             default-view
+               "/"                            default-view
+               "/data/"      {"dashboard"     :app/data-dash
                               "create"        :app/data-create
                               [:id ""]        :app/data}
-                "workspace/" {"create"        :app/create-workspace
+               "/workspace/" {"create"        :app/create-workspace
                               "dashboard"     :app/workspace-dash
                               [:id ""]        :app/workspace}
-                "rts/"       {"create"        :app/rts-create
+               "/rts/"       {"create"        :app/rts-create
                               "dashboard"     :app/request-to-share
                               [:id ""]        :app/rts
                               [:id "/submit"] :app/rts-submit}}
 
-        "reset" {"" default-view}
-        "invite" {"" default-view}}])
+        "reset" {""  default-view
+                 "/" default-view}
+        "invite" {""  default-view
+                  "/" default-view}}])
 
 (defn path-exists?
   [path]
@@ -42,7 +45,8 @@
 
 (defn dispatch-path!
   [alt-path]
-  (let [path (or (.getToken accountant/history) alt-path)
+  (let [patht (or (.getToken accountant/history) alt-path)
+        path (:path (url/url (clojure.string/replace patht #"/#" "")))
         route (if (or (= "/" path)
                       (clojure.string/blank? path))
                 {:handler :app/data-dash} ;; default
@@ -80,9 +84,9 @@
 
 (defn swap-query-string!
   [fn]
-  (let [{:keys [route/query]} (data/get-app-state :app/route)
+  (let [{:keys [route/query route/address] :as r} (data/get-app-state :app/route)
         m   (fn query)
         ms  (accountant/map->params m)
-        uri (str (path) "?" ms)]
+        uri (str "/#" address "?" ms)]
     (.replaceState js/history nil nil uri)
     (data/swap-app-state! :app/route assoc-in [:route/query] m)))
