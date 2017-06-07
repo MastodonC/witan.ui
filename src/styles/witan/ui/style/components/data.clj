@@ -154,22 +154,47 @@
              {:width (percent 100)
               :margin-right (em 1)}]
 
+            [:.file-edit-metadata-container
+             [:.flex
+              [:div
+               {:flex [[0.315 1 :auto]]
+                :align-self :auto}]]]
+            [:.file-edit-metadata
+             {:width (percent 100)
+              :padding-right (em 1)}
+             [:h3 :h4
+              {:margin-bottom (em 0.3)}]
+             [:input :textarea
+              {:width (percent 100)
+               :resize :vertical}]
+             [:#license-usage
+              {:margin-top (em 0.6)}]
+             [:#license-usage-reveal
+              {:margin-left (em 0.3)}]
+             [:.add-tag-container
+              {:margin-top (em 0.7)}
+              [:input
+               {:width (px 120)}]
+              [:.button-container
+               {:display :inline
+                :width (px 30)}]]]
+
             [:.editable-field
              {:padding [[(em 1) (px 0) (em 1) (em 1)]]
               :margin-bottom (em 1)
-              :width (percent 100)
+              ;;:width (percent 100)
               :line-height (em 1.7)
               :border-color colour/subtle-grey
               :border-radius (px 2)
               :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]}
              [:&:hover
               {}]
-             [:span.clickable-text
+             [:span.clickable-text.edit-label
               {:font-size (px 12)
                :height (em 0.75)
                :line-height (em 0.75)
                :position :absolute
-               :right (px 10)}]
+               :right (px 20)}]
              [:.heading
               {:margin [[(em 0) (em 0) (em 1) (em 0)]]}]
 

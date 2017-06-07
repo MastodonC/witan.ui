@@ -9,7 +9,8 @@
             [witan.ui.controller :as controller]
             [witan.ui.utils :as utils]
             [witan.ui.time :as time]
-            [goog.string :as gstring])
+            [goog.string :as gstring]
+            [cljsjs.pikaday.with-moment])
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))
 
@@ -69,7 +70,7 @@
                   (conj
                    (vec render-fns)
                    (when (and on-edit-fn (= :hovered @state))
-                     [:span.clickable-text
+                     [:span.clickable-text.edit-label
                       {:on-click on-edit-fn}
                       (get-string :string/edit)]))))])))
 
@@ -194,6 +195,157 @@
                                {:current id :group group}))}
          {:exclusions sharing-groups}]]]]]))
 
+(defn input-wrapper
+  [& inputs]
+  [:form.pure-form
+   {:on-submit #(.preventDefault %)}
+   (vec (cons :div inputs))])
+
+(defn edit-title-description
+  [{:keys [kixi.datastore.metadatastore/name
+           kixi.datastore.metadatastore/description] :as md}]
+  [editable-field
+   nil
+   [:div.file-edit-metadata
+    [:h2.heading (get-string :string/file-sharing-meta-update)]
+    (input-wrapper
+     [:h3 (get-string :string/file-name)]
+     [:input {:id  "title"
+              :type "text"
+              :value name
+              :placeholder nil
+              :on-change #()}]
+     [:h3 (get-string :string/file-description)]
+     [:textarea {:id  "description"
+                 :value description
+                 :placeholder nil
+                 :on-change #()}])]])
+
+(defn edit-license
+  [{:keys [kixi.datastore.metadatastore.license/license] :as md} showing-atom]
+  (let [lc-type  (:kixi.datastore.metadatastore.license/type license)
+        lc-usage (:kixi.datastore.metadatastore.license/usage license)]
+    [editable-field
+     nil
+     [:div.file-edit-metadata
+      [:h2.heading (get-string :string/license)]
+      (input-wrapper
+       [:h3 (get-string :string/type)]
+       [:input {:id  "license-type"
+                :type "text"
+                :value lc-type
+                :placeholder nil
+                :on-change #()}]
+       (if @showing-atom
+         [:textarea {:id  "license-usage"
+                     :value lc-usage
+                     :placeholder (get-string :string/license-usage-placeholder)
+                     :on-change #()}]
+         [:span.clickable-text
+          {:id "license-usage-reveal"
+           :on-click #(reset! showing-atom true)}
+          (get-string :string/license-usage-reveal)]))]]))
+
+(defn edit-tags
+  [{:keys [kixi.datastore.metadatastore/tags]}]
+  [editable-field
+   nil
+   [:div.file-edit-metadata
+    [:h2.heading (get-string :string/tags)]
+    (if (zero? (count tags))
+      [:i (get-string :string/no-tags)]
+      (for [tag tags]
+        (shared/tag tag identity)))
+    (input-wrapper
+     [:div.add-tag-container
+      [:input {:id  "add-tag"
+               :type "text"
+               :placeholder (get-string :string/add-a-tag)
+               :on-change #()}]
+      (shared/button {:icon icons/plus
+                      :class "add-tag-button"
+                      :id :add-tag} #())])]])
+
+(defn edit-temporal-coverage
+  [md]
+  (let []
+    (r/create-class
+     {:component-did-mount (fn []
+                             (js/Pikaday. #js {:field (.getElementById js/document "tc-from")})
+                             (js/Pikaday. #js {:field (.getElementById js/document "tc-to")}))
+      :reagent-render (fn [{:keys [kixi.datastore.metadatastore.time/temporal-coverage]}]
+                        (let [tc-from         (:kixi.datastore.metadatastore.time/from temporal-coverage)
+                              tc-to           (:kixi.datastore.metadatastore.time/to temporal-coverage)]
+                          [editable-field
+                           nil
+                           [:div.file-edit-metadata
+                            [:h3.heading (get-string :string/temporal-coverage)]
+                            (input-wrapper
+                             [:h4 (get-string :string/from)]
+                             [:input {:id  "tc-from"
+                                      :type "text"
+                                      :value tc-from
+                                      :placeholder nil
+                                      :on-change #()}]
+                             [:h4 (get-string :string/to)]
+                             [:input {:id  "tc-to"
+                                      :type "text"
+                                      :value tc-to
+                                      :placeholder nil
+                                      :on-change #()}])]]))})))
+
+(defn edit-geography
+  [{:keys [kixi.datastore.metadatastore.geography/geography]}]
+  (let [geo-type        (:kixi.datastore.metadatastore.geography/type geography)
+        geo-level       (:kixi.datastore.metadatastore.geography/level geography)]
+    [editable-field
+     nil
+     [:div.file-edit-metadata
+      [:h3.heading (get-string :string/geography)]
+      (input-wrapper
+       [:h4 (get-string :string/smallest-geography)]
+       [:input {:id  "smallest-geography"
+                :type "text"
+                :value geo-level
+                :placeholder nil
+                :on-change #()}])]]))
+
+(defn edit-sources
+  [{:keys [kixi.datastore.metadatastore/author
+           kixi.datastore.metadatastore/maintainer]}]
+  [editable-field
+   nil
+   [:div.file-edit-metadata
+    [:h3.heading (get-string :string/source-plural)]
+    (input-wrapper
+     [:h4 (get-string :string/author)]
+     [:input {:id  "author"
+              :type "text"
+              :value author
+              :placeholder nil
+              :on-change #()}]
+     [:h4 (get-string :string/maintainer)]
+     [:input {:id  "maintainer"
+              :type "text"
+              :value maintainer
+              :placeholder nil
+              :on-change #()}])]])
+
+(defn edit-metadata
+  [md]
+  (let [lc-usage (get-in md [:kixi.datastore.metadatastore.license/license :kixi.datastore.metadatastore.license/usage])
+        show-license-usage (r/atom lc-usage)]
+    (fn [md]
+      [:div.file-edit-metadata-container
+       (edit-title-description md)
+       (edit-tags md)
+       (edit-license md show-license-usage)
+       [:div.flex
+        {:style {:align-items :stretch}}
+        (edit-sources md)
+        [edit-temporal-coverage]
+        (edit-geography md)]])))
+
 (def tabs
   [[0 :overview]
    [1 :sharing]
@@ -244,9 +396,8 @@
            [:div.flex-center
             [:div.container.padded-content
              (case @subview-tab
-               :sharing [:div
-                         (sharing-detailed md)]
-               :edit [:div]
+               :sharing (sharing-detailed md)
+               :edit [edit-metadata md]
                ;; :overview & default
                [:div
                 (title md go-to-edit)
@@ -254,49 +405,7 @@
                 (metadata md go-to-edit)
                 (tags md go-to-edit)
                 (sharing md go-to-sharing)
-                (actions)])]]
-           #_[:div.container.padded-content
-              [:h2 (get-string :string/file-name ":" name)]
-              ;; ----------------------------------------------
-              [:hr]
-              [:div.field-entries
-               [:div.field-entry
-                [:strong (get-string :string/file-type ":")]
-                [:span file-type]]
-               [:div.field-entry
-                [:strong (get-string :string/file-provenance-source ":")]
-                [:span (:kixi.datastore.metadatastore/source provenance)]]
-               [:div.field-entry
-                [:strong (get-string :string/created-at ":")]
-                [:span (time/iso-time-as-moment (:kixi.datastore.metadatastore/created provenance))]]
-               [:div.field-entry
-                [:strong (get-string :string/file-size ":")]
-                [:span (js/filesize size-bytes)]]
-               [:div.field-entry
-                [:strong (get-string :string/file-uploader ":")]
-                [:span (get-in provenance [:kixi/user :kixi.user/name])]]]
-              (when description
-                [:div.field-entry
-                 [:strong (get-string :string/file-description ":")]
-                 (format-description description)])
-              ;; ----------------------------------------------
-              #_[:hr]
-              #_[:div.sharing-controls
-                 [:h2 (get-string :string/sharing)]
-                 ]
-              ;; ----------------------------------------------
-              [:hr]
-              [:div.actions
-               [:a {:href (str
-                           (if (:gateway/secure? data/config) "https://" "http://")
-                           (or (:gateway/address data/config) "localhost:30015")
-                           "/download?id="
-                           current)
-                    :target "_blank"} (shared/button {:id :button-a
-                                                      :icon icons/download
-                                                      :txt :string/file-actions-download-file
-                                                      :class "file-action-download"}
-                                                     #())]]]])))))
+                (actions)])]]])))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

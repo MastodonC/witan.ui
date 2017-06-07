@@ -86,7 +86,7 @@
 
 (defn content?
   [v]
-  (and v 
+  (and v
        (if (or (coll? v) (string? v))
          (not-empty v)
          v)))
@@ -129,7 +129,7 @@
         ext (last (clojure.string/split (.-name pending-file) #"\."))
         tag-coll (when (not-empty info-tags) (clojure.string/split info-tags #","))
         payload (merge (filled-map :kixi.datastore.metadatastore/name info-name
-                                   :kixi.datastore.metadatastore/description info-description                     
+                                   :kixi.datastore.metadatastore/description info-description
                                    :kixi.datastore.metadatastore/id id
                                    :kixi.datastore.metadatastore/type "stored"
                                    :kixi.datastore.metadatastore/file-type ext
@@ -139,10 +139,10 @@
                                    :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
                                                                              :kixi.user/id user-id}
                                    :kixi.datastore.metadatastore/size-bytes (.-size pending-file)
-                                   :kixi.datastore.metadatastore/header true                       
+                                   :kixi.datastore.metadatastore/header true
                                    :kixi.datastore.metadatastore/author info-author
-                                   :kixi.datastore.metadatastore/maintainer info-maintainer                       
-                                   :kixi.datastore.metadatastore/source info-source                       
+                                   :kixi.datastore.metadatastore/maintainer info-maintainer
+                                   :kixi.datastore.metadatastore/source info-source
                                    :kixi.datastore.metadatastore/tags tag-coll
                                    :kixi.datastore.metadatastore.license/license (filled-map :kixi.datastore.metadatastore.license/type info-license-type
                                                                                              :kixi.datastore.metadatastore.license/usage info-license-usage)
@@ -333,10 +333,10 @@
   (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current
                                                   :kixi.datastore.metadatastore/sharing activity]
                         (fn [groups]
-                          (let [g-set (set groups)]
-                            (if target-state
-                              (conj g-set group)
-                              (disj g-set group)))))
+                          (vec (let [g-set (set groups)]
+                                 (if target-state
+                                   (conj g-set group)
+                                   (disj g-set group))))))
   (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
                  {:kixi.datastore.metadatastore/id current
                   :kixi.datastore.metadatastore/activity activity

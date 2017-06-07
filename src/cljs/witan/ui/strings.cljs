@@ -5,8 +5,9 @@
 
 (def strings
   {:string/name                             "Name"
+   :string/type                             "Type"
    :string/full-name                        "Full Name"
-   :string/file-name                        "Dataset Name"
+   :string/file-name                        "Title"
    :string/file-type                        "Dataset Type"
    :string/file-provenance-source           "Source"
    :string/sign-in-failure                  "There was a problem with your details. Please try again."
@@ -171,7 +172,7 @@
    :string/file-uploader                    "Uploader"
    :string/sharing                          "Sharing"
    :string/file-sharing-meta-read           "Read Metadata"
-   :string/file-sharing-meta-update         "Update Metadata"
+   :string/file-sharing-meta-update         "Edit Metadata"
    :string/file-sharing-file-read           "Download Dataset"
    :string/file-actions-download-file       "Download this dataset"
    :string/sharing-matrix-group-name        "Group Name"
@@ -196,15 +197,22 @@
    :string/license                          "License"
    :string/license-type                     "License Type"
    :string/license-usage                    "License Usage"
+   :string/license-usage-reveal             "Add additional license usage information"
+   :string/license-usage-placeholder        "Add any additional information regarding the license that applies to this file, such as restrictions, constraints and expirations"
    :string/source                           "Source"
+   :string/source-plural                    "Sources"
    :string/maintainer                       "Maintainer"
+   :string/geography                        "Geography"
    :string/smallest-geography               "Smallest Geography"
    :string/temporal-coverage                "Temporal Coverage"
    :string/tags                             "Tags"
    :string/sharing-summary                  "This file is currently visible to %d other users or organisations."
    :string/sharing-summary-single           "This file is currently visible to just 1 other user or organisation."
    :string/overview                         "Overview"
-   :string/no-tags                          "There are currently no tags."} )
+   :string/no-tags                          "There are currently no tags."
+   :string/add-a-tag                        "Add a tag"
+   :string/from                             "From"
+   :string/to                               "To"} )
 
 
 (defn resolve-string

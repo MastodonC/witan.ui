@@ -91,11 +91,12 @@
                   (when on-button-click (on-button-click id))
                   (when prevent? (.preventDefault %)))}
     (when icon (icon :small))
-    [:span
-     {:key (str "txt-" (name id))}
-     (if (keyword? txt)
-       (get-string txt)
-       txt)]]])
+    (when txt
+      [:span
+       {:key (str "txt-" (name id))}
+       (if (keyword? txt)
+         (get-string txt)
+         txt)])]])
 
 (defn inline-group
   [{:keys [kixi.group/name kixi.group/type kixi.group/id]}]
