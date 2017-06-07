@@ -310,7 +310,8 @@
    (tag tag-string on-click-fn nil))
   ([tag-string on-click-fn on-cross-fn]
    [:div
-    {:class (str "shared-tag " (when on-click-fn "shared-tag-clickable"))}
+    {:key (str "tag-" tag-string)
+     :class (str "shared-tag " (when on-click-fn "shared-tag-clickable"))}
     (when on-cross-fn
       (icons/close))
     [:span tag-string]]))

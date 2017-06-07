@@ -202,28 +202,30 @@
    (vec (cons :div inputs))])
 
 (defn edit-title-description
-  [{:keys [kixi.datastore.metadatastore/name
-           kixi.datastore.metadatastore/description] :as md}]
-  [editable-field
-   nil
-   [:div.file-edit-metadata
-    [:h2.heading (get-string :string/file-sharing-meta-update)]
-    (input-wrapper
-     [:h3 (get-string :string/file-name)]
-     [:input {:id  "title"
-              :type "text"
-              :value name
-              :placeholder nil
-              :on-change #()}]
-     [:h3 (get-string :string/file-description)]
-     [:textarea {:id  "description"
-                 :value description
-                 :placeholder nil
-                 :on-change #()}])]])
+  [md]
+  (let [{:keys [kixi.datastore.metadatastore/name
+                kixi.datastore.metadatastore/description]} @md]
+    [editable-field
+     nil
+     [:div.file-edit-metadata
+      [:h2.heading (get-string :string/file-sharing-meta-update)]
+      (input-wrapper
+       [:h3 (get-string :string/file-name)]
+       [:input {:id  "title"
+                :type "text"
+                :value name
+                :placeholder nil
+                :on-change #(swap! md assoc :kixi.datastore.metadatastore/name (.. % -target -value))}]
+       [:h3 (get-string :string/file-description)]
+       [:textarea {:id  "description"
+                   :value description
+                   :placeholder nil
+                   :on-change #(swap! md assoc :kixi.datastore.metadatastore/description (.. % -target -value))}])]]))
 
 (defn edit-license
-  [{:keys [kixi.datastore.metadatastore.license/license] :as md} showing-atom]
-  (let [lc-type  (:kixi.datastore.metadatastore.license/type license)
+  [md showing-atom]
+  (let [{:keys [kixi.datastore.metadatastore.license/license]} @md
+        lc-type  (:kixi.datastore.metadatastore.license/type license)
         lc-usage (:kixi.datastore.metadatastore.license/usage license)]
     [editable-field
      nil
@@ -235,46 +237,61 @@
                 :type "text"
                 :value lc-type
                 :placeholder nil
-                :on-change #()}]
+                :on-change #(swap! md assoc-in [:kixi.datastore.metadatastore.license/license
+                                                :kixi.datastore.metadatastore.license/type] (.. % -target -value))}]
        (if @showing-atom
          [:textarea {:id  "license-usage"
                      :value lc-usage
                      :placeholder (get-string :string/license-usage-placeholder)
-                     :on-change #()}]
+                     :on-change #(swap! md assoc-in [:kixi.datastore.metadatastore.license/license
+                                                     :kixi.datastore.metadatastore.license/usage] (.. % -target -value))}]
          [:span.clickable-text
           {:id "license-usage-reveal"
            :on-click #(reset! showing-atom true)}
           (get-string :string/license-usage-reveal)]))]]))
 
 (defn edit-tags
-  [{:keys [kixi.datastore.metadatastore/tags]}]
-  [editable-field
-   nil
-   [:div.file-edit-metadata
-    [:h2.heading (get-string :string/tags)]
-    (if (zero? (count tags))
-      [:i (get-string :string/no-tags)]
-      (for [tag tags]
-        (shared/tag tag identity)))
-    (input-wrapper
-     [:div.add-tag-container
-      [:input {:id  "add-tag"
-               :type "text"
-               :placeholder (get-string :string/add-a-tag)
-               :on-change #()}]
-      (shared/button {:icon icons/plus
-                      :class "add-tag-button"
-                      :id :add-tag} #())])]])
+  [md]
+  (let [{:keys [kixi.datastore.metadatastore/tags]} @md]
+    [editable-field
+     nil
+     [:div.file-edit-metadata
+      [:h2.heading (get-string :string/tags)]
+      (if (zero? (count tags))
+        [:i (get-string :string/no-tags)]
+        (for [tag tags]
+          (shared/tag tag identity identity)))
+      (input-wrapper
+       [:div.add-tag-container
+        [:input {:id  "add-tag-input"
+                 :type "text"
+                 :placeholder (get-string :string/add-a-tag)
+                 :on-change #()}]
+        (shared/button {:icon icons/plus
+                        :class "add-tag-button"
+                        :id :add-tag} (fn []
+                                        (when-let [el (.getElementById js/document "add-tag-input")]
+                                          (when-not (clojure.string/blank? (.. el -value))
+                                            (swap! md update :kixi.datastore.metadatastore/tags #(set (conj % (.. el -value))))
+                                            (set! (.. el -value) nil)
+                                            (.focus el)))))])]]))
 
 (defn edit-temporal-coverage
   [md]
-  (let []
+  (let [swap-fn (fn [loc]
+                  (fn [v]
+                    (swap! md assoc-in [:kixi.datastore.metadatastore.time/temporal-coverage loc]
+                           (time/jstime->vstr (goog.date.DateTime. v)))))]
     (r/create-class
      {:component-did-mount (fn []
-                             (js/Pikaday. #js {:field (.getElementById js/document "tc-from")})
-                             (js/Pikaday. #js {:field (.getElementById js/document "tc-to")}))
-      :reagent-render (fn [{:keys [kixi.datastore.metadatastore.time/temporal-coverage]}]
-                        (let [tc-from         (:kixi.datastore.metadatastore.time/from temporal-coverage)
+                             (let [opts {:format "DD/MM/YYYY"}]
+                               (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "tc-from")
+                                                                  :onSelect (swap-fn :kixi.datastore.metadatastore.time/from)})))
+                               (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "tc-to")
+                                                                  :onSelect (swap-fn :kixi.datastore.metadatastore.time/to)})))))
+      :reagent-render (fn [md]
+                        (let [{:keys [kixi.datastore.metadatastore.time/temporal-coverage]} md
+                              tc-from         (:kixi.datastore.metadatastore.time/from temporal-coverage)
                               tc-to           (:kixi.datastore.metadatastore.time/to temporal-coverage)]
                           [editable-field
                            nil
@@ -295,8 +312,9 @@
                                       :on-change #()}])]]))})))
 
 (defn edit-geography
-  [{:keys [kixi.datastore.metadatastore.geography/geography]}]
-  (let [geo-type        (:kixi.datastore.metadatastore.geography/type geography)
+  [md]
+  (let [{:keys [kixi.datastore.metadatastore.geography/geography]} @md
+        geo-type        (:kixi.datastore.metadatastore.geography/type geography)
         geo-level       (:kixi.datastore.metadatastore.geography/level geography)]
     [editable-field
      nil
@@ -308,43 +326,65 @@
                 :type "text"
                 :value geo-level
                 :placeholder nil
-                :on-change #()}])]]))
+                :on-change #(do
+                              (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
+                                                  :kixi.datastore.metadatastore.geography/type] "smallest")
+                              (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
+                                                  :kixi.datastore.metadatastore.geography/level] (.. % -target -value)))}])]]))
 
 (defn edit-sources
-  [{:keys [kixi.datastore.metadatastore/author
-           kixi.datastore.metadatastore/maintainer]}]
+  [md]
+  (let [{:keys [kixi.datastore.metadatastore/author
+                kixi.datastore.metadatastore/maintainer]} @md]
+    [editable-field
+     nil
+     [:div.file-edit-metadata
+      [:h3.heading (get-string :string/source-plural)]
+      (input-wrapper
+       [:h4 (get-string :string/author)]
+       [:input {:id  "author"
+                :type "text"
+                :value author
+                :placeholder nil
+                :on-change #(swap! md assoc :kixi.datastore.metadatastore/author (.. % -target -value))}]
+       [:h4 (get-string :string/maintainer)]
+       [:input {:id  "maintainer"
+                :type "text"
+                :value maintainer
+                :placeholder nil
+                :on-change #(swap! md assoc :kixi.datastore.metadatastore/maintainer (.. % -target -value))}])]]))
+
+(defn edit-actions
+  [md flags]
   [editable-field
    nil
-   [:div.file-edit-metadata
-    [:h3.heading (get-string :string/source-plural)]
-    (input-wrapper
-     [:h4 (get-string :string/author)]
-     [:input {:id  "author"
-              :type "text"
-              :value author
-              :placeholder nil
-              :on-change #()}]
-     [:h4 (get-string :string/maintainer)]
-     [:input {:id  "maintainer"
-              :type "text"
-              :value maintainer
-              :placeholder nil
-              :on-change #()}])]])
+   [:div.file-actions
+    (shared/button {:icon icons/tick
+                    :id :save
+                    :txt :string/save
+                    :class "btn-success"
+                    :prevent? true}
+                   #(controller/raise! :data/metadata-change @md))
+    (when (contains? flags :metadata-saving)
+      [:span.success "Saving..."])]])
 
 (defn edit-metadata
-  [md]
+  [current md]
   (let [lc-usage (get-in md [:kixi.datastore.metadatastore.license/license :kixi.datastore.metadatastore.license/usage])
-        show-license-usage (r/atom lc-usage)]
-    (fn [md]
-      [:div.file-edit-metadata-container
-       (edit-title-description md)
-       (edit-tags md)
-       (edit-license md show-license-usage)
-       [:div.flex
-        {:style {:align-items :stretch}}
-        (edit-sources md)
-        [edit-temporal-coverage]
-        (edit-geography md)]])))
+        show-license-usage (r/atom lc-usage)
+        local-md (r/atom md)]
+    (fn [_ _]
+      (let [flags (data/get-in-app-state :app/datastore :ds/file-flags current)]
+        [:div.file-edit-metadata-container
+         (edit-title-description local-md)
+         (edit-tags local-md)
+         (edit-license local-md show-license-usage)
+         [:div.flex
+          {:style {:align-items :stretch}}
+          (edit-sources local-md)
+          [edit-temporal-coverage local-md]
+          (edit-geography local-md)]
+         (edit-actions local-md flags)]))))
 
 (def tabs
   [[0 :overview]
@@ -397,7 +437,7 @@
             [:div.container.padded-content
              (case @subview-tab
                :sharing (sharing-detailed md)
-               :edit [edit-metadata md]
+               :edit [edit-metadata current md]
                ;; :overview & default
                [:div
                 (title md go-to-edit)

@@ -46,6 +46,14 @@
   [{:keys [kixi.datastore.metadatastore/id] :as payload}]
   (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload))
 
+(defn add-file-flag!
+  [id flag]
+  (data/swap-app-state! :app/datastore update-in [:ds/file-flags id] #(conj (set %) flag)))
+
+(defn remove-file-flag!
+  [id flag]
+  (data/swap-app-state! :app/datastore update-in [:ds/file-flags id] #(disj (set %) flag)))
+
 (defn selected-groups->sharing-activities
   [groups activities]
   (zipmap activities
@@ -77,6 +85,13 @@
 (defn get-local-file
   [id]
   (data/get-in-app-state :app/datastore :ds/file-metadata id))
+
+(defn ldiff
+  [a b]
+  (reduce-kv (fn [agg k v]
+               (if (not= v (get b k))
+                 (assoc agg k v)
+                 agg)) {} a))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; API responses
@@ -359,6 +374,20 @@
                   :kixi.datastore.metadatastore/activity :kixi.datastore.metadatastore/meta-read
                   :kixi.group/id (:kixi.group/id group)
                   :kixi.datastore.metadatastore/sharing-update :kixi.datastore.metadatastore/sharing-conj}))
+
+(defmethod handle
+  :metadata-change
+  [event {:keys [kixi.datastore.metadatastore/id] :as md}]
+  (let [current-md (data/get-in-app-state :app/datastore :ds/file-metadata id)
+        md-diff (ldiff md current-md)]
+    (when-not (empty? md-diff)
+      (add-file-flag! id :metadata-saving)
+      (save-file-metadata! md))
+    #_(data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
+                     {:kixi.datastore.metadatastore/id current
+                      :kixi.datastore.metadatastore/activity :kixi.datastore.metadatastore/meta-read
+                      :kixi.group/id (:kixi.group/id group)
+                      :kixi.datastore.metadatastore/sharing-update :kixi.datastore.metadatastore/sharing-conj})))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-user-logged-in

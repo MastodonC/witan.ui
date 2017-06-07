@@ -154,11 +154,20 @@
              {:width (percent 100)
               :margin-right (em 1)}]
 
+            [:.file-actions
+             {:width (percent 100)
+              :display :flex
+              :justify-contents :flex-start
+              :align-items :center}
+             [:span
+              {:margin-left (px 5)}]]
+
             [:.file-edit-metadata-container
              [:.flex
               [:div
                {:flex [[0.315 1 :auto]]
                 :align-self :auto}]]]
+
             [:.file-edit-metadata
              {:width (percent 100)
               :padding-right (em 1)}

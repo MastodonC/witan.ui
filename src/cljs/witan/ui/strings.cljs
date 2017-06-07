@@ -212,7 +212,8 @@
    :string/no-tags                          "There are currently no tags."
    :string/add-a-tag                        "Add a tag"
    :string/from                             "From"
-   :string/to                               "To"} )
+   :string/to                               "To"
+   :string/save                             "Save"} )
 
 
 (defn resolve-string

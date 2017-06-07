@@ -124,6 +124,9 @@
              {:color colour/error}]
             [:.success
              {:color colour/success}]
+            [:.btn-success
+             {:background-color colour/success
+              :color 'white}]
 
 ;;;;;;;;;;;;;;
 
@@ -248,14 +251,14 @@
             [:.shared-tag
              {:display :inline
               :margin (em 0.3)
-              :padding (em 0.3)
-              :font-size (em 0.7)
+              :padding [[(em 0.4) (em 0.3)]]
+              :font-size (em 0.9)
               :background-color colour/tag-bg
               :border [[(px 1) 'solid colour/tag-border]]}
              [:i
               {:font-size (px 10)
                :font-weight 700
-               :margin-top (px 7)
+               :padding (px 1)
                :margin-right (px 3)}
               [:&:hover
                {:color 'white}]]]
