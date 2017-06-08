@@ -14,7 +14,8 @@
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))
 
-(def query-param :d)
+(def subview-query-param :d)
+(def new-query-param :new)
 (defonce subview-tab (r/atom :overview))
 
 (defn reverse-group->activity-map
@@ -406,7 +407,7 @@
 (defn switch-primary-view!
   [k]
   (let [i (tab->idx k)]
-    (route/swap-query-string! #(assoc % query-param i))
+    (route/swap-query-string! #(assoc % subview-query-param i))
     (reset! subview-tab k)))
 
 ;;
@@ -414,42 +415,62 @@
 
 (defn view
   []
-  (reset! subview-tab (idx->tab (or (utils/query-param-int query-param 0 2) 0)))
-  (fn []
-    (let [{:keys [ds/current ds/download-pending? ds/error] :as ds}
-          (data/get-in-app-state :app/datastore)
-          activities->string (:ds/activities ds)
-          md (data/get-in-app-state :app/datastore :ds/file-metadata current)
-          go-to-edit (partial switch-primary-view! :edit)
-          go-to-sharing (partial switch-primary-view! :sharing)]
-      (if error
-        [:div.text-center.padded-content
-         [:div
-          (icons/error :dark :large)]
-         [:div [:h3 (get-string error)]]]
-        (if-not md
-          [:div.loading
-           (icons/loading :large)]
-          [:div#data-view
-           (shared/header-string (:kixi.datastore.metadatastore/name md))
-           (shared/tabs {:tabs {:overview (get-string :string/overview)
-                                :sharing (get-string :string/sharing)
-                                :edit (get-string :string/edit)}
-                         :selected-tab @subview-tab
-                         :on-click switch-primary-view!})
-           [:div.flex-center
-            [:div.container.padded-content
-             (case @subview-tab
-               :sharing (sharing-detailed md)
-               :edit [edit-metadata current md]
-               ;; :overview & default
-               [:div
-                (title md go-to-edit)
-                (description md go-to-edit)
-                (metadata md go-to-edit)
-                (tags md go-to-edit)
-                (sharing md go-to-sharing)
-                (actions)])]]])))))
+  (reset! subview-tab (idx->tab (or (utils/query-param-int subview-query-param 0 2) 0)))
+  (let [new? (r/atom (= 1 (or (utils/query-param-int new-query-param 0 1) 0)))]
+    (fn []
+      (let [{:keys [ds/current ds/download-pending? ds/error] :as ds}
+            (data/get-in-app-state :app/datastore)
+            activities->string (:ds/activities ds)
+            md (data/get-in-app-state :app/datastore :ds/file-metadata current)
+            remove-new-fn (fn []
+                            (route/swap-query-string! (fn [x] (dissoc x :new)))
+                            (reset! new? false))
+            go-to-edit (fn []
+                         (remove-new-fn)
+                         (switch-primary-view! :edit))
+            go-to-sharing (fn []
+                            (remove-new-fn)
+                            (switch-primary-view! :sharing))]
+        (if error
+          [:div.text-center.padded-content
+           [:div
+            (icons/error :dark :large)]
+           [:div [:h3 (get-string error)]]]
+          (if-not md
+            [:div.loading
+             (icons/loading :large)]
+            [:div#data-view
+             (shared/header-string (:kixi.datastore.metadatastore/name md))
+             (shared/tabs {:tabs {:overview (get-string :string/overview)
+                                  :sharing (get-string :string/sharing)
+                                  :edit (get-string :string/edit)}
+                           :selected-tab @subview-tab
+                           :on-click switch-primary-view!})
+             [:div.flex-center
+              [:div.container.padded-content
+               (when @new?
+                 [:div.hero-notification
+                  [:div.hero-close
+                   {:on-click remove-new-fn}
+                   (icons/close)]
+                  (icons/tick :success)
+                  [:div.hero-content
+                   (get-string :string/new-upload-information-hero)
+                   [:div
+                    [:i.clickable-text
+                     {:on-click go-to-edit}
+                     (get-string :string/click-here-to-edit-metadata)]]]])
+               (case @subview-tab
+                 :sharing (sharing-detailed md)
+                 :edit [edit-metadata current md]
+                 ;; :overview & default
+                 [:div
+                  (title md go-to-edit)
+                  (description md go-to-edit)
+                  (metadata md go-to-edit)
+                  (tags md go-to-edit)
+                  (sharing md go-to-sharing)
+                  (actions)])]]]))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
