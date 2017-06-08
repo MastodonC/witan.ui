@@ -34,3 +34,15 @@
                   (throw (js/Error. (str "Unknown key type in: " (keys m) " - " (type %)))))
                (keys m))]
     r))
+
+(defn add-file-flag!
+  [id flag]
+  (data/swap-app-state! :app/datastore update-in [:ds/file-properties id :flags] #(conj (set %) flag)))
+
+(defn remove-file-flag!
+  [id flag]
+  (data/swap-app-state! :app/datastore update-in [:ds/file-properties id :flags] #(disj (set %) flag)))
+
+(defn check-file-flag?
+  [id flag]
+  (contains? (data/get-in-app-state! :app/datastore [:ds/file-properties id :flags]) flag))

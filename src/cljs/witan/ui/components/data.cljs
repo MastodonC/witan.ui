@@ -127,7 +127,7 @@
                      (row :string/author (fn [] [:span author]))
                      (row :string/license-usage (fn [] [:span lc-usage]))))
         (vec (concat [:tr]
-                     (row :string/source (fn [] [:span source]))
+                     (row :string/file-source (fn [] [:span source]))
                      (row :string/smallest-geography (fn [] [:span geo-level]))))
         (vec (concat [:tr]
                      (row :string/maintainer (fn [] [:span maintainer]))
@@ -340,7 +340,8 @@
 (defn edit-sources
   [md]
   (let [{:keys [kixi.datastore.metadatastore/author
-                kixi.datastore.metadatastore/maintainer]} @md]
+                kixi.datastore.metadatastore/maintainer
+                kixi.datastore.metadatastore/source]} @md]
     [editable-field
      nil
      [:div.file-edit-metadata
@@ -357,21 +358,29 @@
                 :type "text"
                 :value maintainer
                 :placeholder nil
-                :on-change #(swap! md assoc :kixi.datastore.metadatastore/maintainer (.. % -target -value))}])]]))
+                :on-change #(swap! md assoc :kixi.datastore.metadatastore/maintainer (.. % -target -value))}]
+       [:h4 (get-string :string/file-source)]
+       [:input {:id  "source"
+                :type "text"
+                :value source
+                :placeholder nil
+                :on-change #(swap! md assoc :kixi.datastore.metadatastore/source (.. % -target -value))}])]]))
 
 (defn edit-actions
   [md flags]
-  [editable-field
-   nil
-   [:div.file-actions
-    (shared/button {:icon icons/tick
-                    :id :save
-                    :txt :string/save
-                    :class "btn-success"
-                    :prevent? true}
-                   #(controller/raise! :data/metadata-change @md))
-    (when (contains? flags :metadata-saving)
-      [:span.success "Saving..."])]])
+  (let [saving? (contains? flags :metadata-saving)]
+    [editable-field
+     nil
+     [:div.file-actions
+      (shared/button {:icon icons/tick
+                      :id :save
+                      :txt :string/save
+                      :class "btn-success"
+                      :prevent? true
+                      :disabled? saving?}
+                     #(controller/raise! :data/metadata-change @md))
+      (when saving?
+        [:span.success "Saving..."])]]))
 
 (defn edit-metadata
   [current md]
@@ -379,7 +388,7 @@
         show-license-usage (r/atom lc-usage)
         local-md (r/atom md)]
     (fn [_ _]
-      (let [flags (data/get-in-app-state :app/datastore :ds/file-flags current)]
+      (let [flags (data/get-in-app-state :app/datastore :ds/file-properties current :flags)]
         [:div.file-edit-metadata-container
          (edit-title-description local-md)
          (edit-tags local-md)
