@@ -213,7 +213,8 @@
    :string/add-a-tag                        "Add a tag"
    :string/from                             "From"
    :string/to                               "To"
-   :string/save                             "Save"} )
+   :string/save                             "Save"
+   :string/edit-to-add-description          "Add a description by clicking here"} )
 
 
 (defn resolve-string

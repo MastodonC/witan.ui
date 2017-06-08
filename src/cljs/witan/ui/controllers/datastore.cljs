@@ -381,6 +381,7 @@
   (let [current-md (data/get-in-app-state :app/datastore :ds/file-metadata id)
         md-diff (ldiff md current-md)]
     (when-not (empty? md-diff)
+      (set-title! (:kixi.datastore.metadatastore/name md))
       (add-file-flag! id :metadata-saving)
       (save-file-metadata! md))
     #_(data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"

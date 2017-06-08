@@ -84,7 +84,11 @@
   [{:keys [kixi.datastore.metadatastore/description]} on-edit-fn]
   [editable-field
    on-edit-fn
-   [:span.file-description description]])
+   (if description
+     [:span.file-description description]
+     [:i.file-description.clickable-text
+      {:on-click on-edit-fn}
+      (get-string :string/edit-to-add-description)])])
 
 (defn metadata
   [{:keys [kixi.datastore.metadatastore/provenance
