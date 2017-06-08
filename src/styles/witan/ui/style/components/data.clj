@@ -111,7 +111,10 @@
              [:.container
               {:position :relative
                :max-width (px 1024)
-               :width (percent 100)}]
+               :width (percent 100)}
+              [:div.hero-notification
+               {:padding (px 10)
+                :margin (px 4)}]]
              [:.field-entry
               {:margin [[(em 0.5) (em 0)]]}]
              [:.sharing-controls

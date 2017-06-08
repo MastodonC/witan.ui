@@ -204,9 +204,14 @@
              {:position :relative
               :margin [[(px 0) (px 0)]]
               :border [[(px 1) 'silver 'solid]]
-              :border-right 0
               :background-color colour/hero-bg
-              :padding [[(px 0) (px 10) (px 10) (px 10)]]}
+              :padding [[(px 0) (px 10) (px 10) (px 10)]]
+              :display :flex
+              :align-items :flex-start}
+             [:i
+              {:margin-right (px 6)}]
+             [:div.hero-content
+              {:margin (px 5)}]
              [:div.hero-close
               {:position :absolute
                :right (px 1)

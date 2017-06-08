@@ -214,7 +214,9 @@
    :string/from                             "From"
    :string/to                               "To"
    :string/save                             "Save"
-   :string/edit-to-add-description          "Add a description by clicking here"} )
+   :string/edit-to-add-description          "Add a description by clicking here"
+   :string/new-upload-information-hero      "Congratulations, your file was uploaded successfully. Please consider adding additional information about this file such as a description, license and tags."
+   :string/click-here-to-edit-metadata      "Click here to add metadata to your file."} )
 
 
 (defn resolve-string
