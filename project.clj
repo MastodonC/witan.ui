@@ -30,7 +30,8 @@
                  [cljsjs/mustache "1.1.0-0"]
                  [cljsjs/filesaverjs "1.1.20151003-0"]
                  [cljsjs/clipboard "1.5.9-0"]
-                 [cljsjs/toastr "2.1.2-0"]]
+                 [cljsjs/toastr "2.1.2-0"]
+                 [cljsjs/pikaday "1.5.1-2"]]
 
   :plugins [[lein-figwheel "0.5.4-3" :exclusions [org.clojure/tools.reader]]
             [lein-cljsbuild "1.1.2" :exclusions [[org.clojure/clojure]]]

@@ -85,6 +85,7 @@
                    :ds/current (s/maybe uuid?)
                    :ds/pending? s/Bool
                    :ds/file-metadata {uuid? s/Any}
+                   :ds/file-flags {uuid? #{s/Keyword}}
                    :ds/activities {s/Keyword s/Str}
                    :ds/locked-activities [s/Keyword]
                    :ds/query-tries s/Num

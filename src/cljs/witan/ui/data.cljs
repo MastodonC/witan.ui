@@ -93,6 +93,7 @@
     :app/datastore {:ds/current nil
                     :ds/pending? false
                     :ds/file-metadata {}
+                    :ds/file-flags {}
                     :ds/query-tries 0
                     :ds/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
                                     :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)

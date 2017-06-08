@@ -46,6 +46,14 @@
   [{:keys [kixi.datastore.metadatastore/id] :as payload}]
   (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload))
 
+(defn add-file-flag!
+  [id flag]
+  (data/swap-app-state! :app/datastore update-in [:ds/file-flags id] #(conj (set %) flag)))
+
+(defn remove-file-flag!
+  [id flag]
+  (data/swap-app-state! :app/datastore update-in [:ds/file-flags id] #(disj (set %) flag)))
+
 (defn selected-groups->sharing-activities
   [groups activities]
   (zipmap activities
@@ -78,6 +86,13 @@
   [id]
   (data/get-in-app-state :app/datastore :ds/file-metadata id))
 
+(defn ldiff
+  [a b]
+  (reduce-kv (fn [agg k v]
+               (if (not= v (get b k))
+                 (assoc agg k v)
+                 agg)) {} a))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; API responses
 
@@ -86,7 +101,7 @@
 
 (defn content?
   [v]
-  (and v 
+  (and v
        (if (or (coll? v) (string? v))
          (not-empty v)
          v)))
@@ -129,7 +144,7 @@
         ext (last (clojure.string/split (.-name pending-file) #"\."))
         tag-coll (when (not-empty info-tags) (clojure.string/split info-tags #","))
         payload (merge (filled-map :kixi.datastore.metadatastore/name info-name
-                                   :kixi.datastore.metadatastore/description info-description                     
+                                   :kixi.datastore.metadatastore/description info-description
                                    :kixi.datastore.metadatastore/id id
                                    :kixi.datastore.metadatastore/type "stored"
                                    :kixi.datastore.metadatastore/file-type ext
@@ -139,10 +154,10 @@
                                    :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
                                                                              :kixi.user/id user-id}
                                    :kixi.datastore.metadatastore/size-bytes (.-size pending-file)
-                                   :kixi.datastore.metadatastore/header true                       
+                                   :kixi.datastore.metadatastore/header true
                                    :kixi.datastore.metadatastore/author info-author
-                                   :kixi.datastore.metadatastore/maintainer info-maintainer                       
-                                   :kixi.datastore.metadatastore/source info-source                       
+                                   :kixi.datastore.metadatastore/maintainer info-maintainer
+                                   :kixi.datastore.metadatastore/source info-source
                                    :kixi.datastore.metadatastore/tags tag-coll
                                    :kixi.datastore.metadatastore.license/license (filled-map :kixi.datastore.metadatastore.license/type info-license-type
                                                                                              :kixi.datastore.metadatastore.license/usage info-license-usage)
@@ -333,10 +348,10 @@
   (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current
                                                   :kixi.datastore.metadatastore/sharing activity]
                         (fn [groups]
-                          (let [g-set (set groups)]
-                            (if target-state
-                              (conj g-set group)
-                              (disj g-set group)))))
+                          (vec (let [g-set (set groups)]
+                                 (if target-state
+                                   (conj g-set group)
+                                   (disj g-set group))))))
   (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
                  {:kixi.datastore.metadatastore/id current
                   :kixi.datastore.metadatastore/activity activity
@@ -359,6 +374,21 @@
                   :kixi.datastore.metadatastore/activity :kixi.datastore.metadatastore/meta-read
                   :kixi.group/id (:kixi.group/id group)
                   :kixi.datastore.metadatastore/sharing-update :kixi.datastore.metadatastore/sharing-conj}))
+
+(defmethod handle
+  :metadata-change
+  [event {:keys [kixi.datastore.metadatastore/id] :as md}]
+  (let [current-md (data/get-in-app-state :app/datastore :ds/file-metadata id)
+        md-diff (ldiff md current-md)]
+    (when-not (empty? md-diff)
+      (set-title! (:kixi.datastore.metadatastore/name md))
+      (add-file-flag! id :metadata-saving)
+      (save-file-metadata! md))
+    #_(data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
+                     {:kixi.datastore.metadatastore/id current
+                      :kixi.datastore.metadatastore/activity :kixi.datastore.metadatastore/meta-read
+                      :kixi.group/id (:kixi.group/id group)
+                      :kixi.datastore.metadatastore/sharing-update :kixi.datastore.metadatastore/sharing-conj})))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-user-logged-in

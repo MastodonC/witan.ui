@@ -15,7 +15,7 @@
     {:font-family base-fonts
      :font-size (px 12.4)}]
    [:h1 :h2 :h3 :h4 :h5 :strong
-    {:font-family title-fonts
+    {;;:font-family title-fonts
      :color colour/title-fonts-colour}]
    [:.text-center
     {:text-align :center}]])

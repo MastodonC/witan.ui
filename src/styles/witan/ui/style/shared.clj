@@ -124,6 +124,9 @@
              {:color colour/error}]
             [:.success
              {:color colour/success}]
+            [:.btn-success
+             {:background-color colour/success
+              :color 'white}]
 
 ;;;;;;;;;;;;;;
 
@@ -236,7 +239,7 @@
               :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]}
              [:.shared-tab
               {:margin [[(em 0.0) (em 0.75)]]
-               :margin-top (em 0.6)
+               :margin-top (em 0.8)
                :color colour/subtle-grey3
                :cursor :pointer}
               [:&:hover
@@ -248,14 +251,14 @@
             [:.shared-tag
              {:display :inline
               :margin (em 0.3)
-              :padding (em 0.3)
-              :font-size (em 0.7)
+              :padding [[(em 0.4) (em 0.3)]]
+              :font-size (em 0.9)
               :background-color colour/tag-bg
               :border [[(px 1) 'solid colour/tag-border]]}
              [:i
               {:font-size (px 10)
                :font-weight 700
-               :margin-top (px 7)
+               :padding (px 1)
                :margin-right (px 3)}
               [:&:hover
                {:color 'white}]]]
