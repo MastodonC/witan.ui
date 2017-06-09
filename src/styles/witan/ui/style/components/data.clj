@@ -171,6 +171,11 @@
                {:flex [[0.315 1 :auto]]
                 :align-self :auto}]]]
 
+            [:.file-edit-metadata-error-list
+             [:.file-edit-metadata-error
+              [:i
+               {:margin-right (px 2)}]]]
+
             [:.file-edit-metadata
              {:width (percent 100)
               :padding-right (em 1)}

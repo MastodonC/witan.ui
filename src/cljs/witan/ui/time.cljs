@@ -22,6 +22,12 @@
   ([time]
    (tf/unparse (tf/formatters :date-time) time)))
 
+(defn jstime->date-str
+  ([]
+   (jstime->vstr (t/now)))
+  ([time]
+   (tf/unparse (tf/formatters :basic-date) time)))
+
 (defn sleep [msec]
   (let [deadline (+ msec (.getTime (js/Date.)))]
     (while (> deadline (.getTime (js/Date.))))))

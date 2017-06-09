@@ -52,7 +52,7 @@
                                     :title (get-string :string/forecast-name)
                                     :weight 0.45}
                                    {:content-fn :data/owner-name
-                                    :title (get-string :string/author)
+                                    :title (get-string :string/file-uploader)
                                     :weight 0.2}
                                    {:content-fn modified-fn
                                     :title (get-string :string/created-at)

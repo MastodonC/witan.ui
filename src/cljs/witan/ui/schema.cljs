@@ -39,6 +39,10 @@
    :kixi.data-acquisition.request-to-share/destinations [GroupSchema]
    :kixi.data-acquisition.request-to-share/message s/Str})
 
+(def FilePropertiesSchema
+  {uuid? {:flags #{s/Keyword}
+          :update-errors {s/Keyword s/Str}}})
+
 ;; app state schema
 (def AppStateSchema
   {:app/side {:side/upper [[s/Keyword]]
@@ -85,7 +89,7 @@
                    :ds/current (s/maybe uuid?)
                    :ds/pending? s/Bool
                    :ds/file-metadata {uuid? s/Any}
-                   :ds/file-flags {uuid? #{s/Keyword}}
+                   :ds/file-properties FilePropertiesSchema
                    :ds/activities {s/Keyword s/Str}
                    :ds/locked-activities [s/Keyword]
                    :ds/query-tries s/Num
