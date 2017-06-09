@@ -330,7 +330,8 @@
            :kixi.comms.command/version version
            :kixi.comms.command/id id
            :kixi.comms.command/payload params}]
-    (send-ws! m)))
+    (send-ws! m)
+    (publish-topic :data/command-sent m)))
 
 ;;
 

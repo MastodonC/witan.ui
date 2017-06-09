@@ -101,4 +101,5 @@
                    :ds/query-tries s/Num
                    (s/optional-key :ds/error) s/Keyword}
    :app/activities {:activities/log [ActivityLogSchema]
-                    :activities/pending {uuid? s/Any}}})
+                    :activities/pending {uuid? {:activity s/Keyword
+                                                :state }}}})
