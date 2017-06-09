@@ -24,6 +24,7 @@
                  [prismatic/schema "1.1.2"]
                  [com.cognitect/transit-cljs "0.8.239"]
                  [com.cemerick/url "0.1.1"]
+                 [automat "0.2.2"]
                  ;;
                  [cljsjs/dialog-polyfill "0.4.3-0"]
                  [cljsjs/moment "2.10.6-4"]

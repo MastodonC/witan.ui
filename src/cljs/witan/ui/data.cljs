@@ -101,7 +101,9 @@
                                     :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
                                     :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)}
                     :ds/locked-activities [:kixi.datastore.metadatastore/meta-update
-                                           :kixi.datastore.metadatastore/meta-read]}}
+                                           :kixi.datastore.metadatastore/meta-read]}
+    :app/activities {:activities/log []
+                     :activities/pending {}}}
    (s/validate ws/AppStateSchema)
    (atomize-map)))
 
