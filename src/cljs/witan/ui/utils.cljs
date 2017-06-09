@@ -45,4 +45,4 @@
 
 (defn check-file-flag?
   [id flag]
-  (contains? (data/get-in-app-state! :app/datastore [:ds/file-properties id :flags]) flag))
+  (contains? (data/get-in-app-state :app/datastore [:ds/file-properties id :flags]) flag))

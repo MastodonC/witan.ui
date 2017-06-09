@@ -206,14 +206,25 @@
    {:on-submit #(.preventDefault %)}
    (vec (cons :div inputs))])
 
+(defn list-any-errors
+  [update-errors ks]
+  (when-let [ers (not-empty (select-keys update-errors ks))]
+    [:div.file-edit-metadata-error-list
+     (for [error ers]
+       [:div.file-edit-metadata-error
+        {:key (hash error)}
+        (icons/close :error :tiny)
+        [:span.error error]])]))
+
 (defn edit-title-description
-  [md]
+  [md update-errors]
   (let [{:keys [kixi.datastore.metadatastore/name
                 kixi.datastore.metadatastore/description]} @md]
     [editable-field
      nil
      [:div.file-edit-metadata
       [:h2.heading (get-string :string/file-sharing-meta-update)]
+      (list-any-errors update-errors [:kixi.datastore.metadatastore/name :kixi.datastore.metadatastore/description])
       (input-wrapper
        [:h3 (get-string :string/file-name)]
        [:input {:id  "title"
@@ -228,7 +239,7 @@
                    :on-change #(swap! md assoc :kixi.datastore.metadatastore/description (.. % -target -value))}])]]))
 
 (defn edit-license
-  [md showing-atom]
+  [md showing-atom update-errors]
   (let [{:keys [kixi.datastore.metadatastore.license/license]} @md
         lc-type  (:kixi.datastore.metadatastore.license/type license)
         lc-usage (:kixi.datastore.metadatastore.license/usage license)]
@@ -236,6 +247,7 @@
      nil
      [:div.file-edit-metadata
       [:h2.heading (get-string :string/license)]
+      (list-any-errors update-errors [:kixi.datastore.metadatastore.license/license])
       (input-wrapper
        [:h3 (get-string :string/type)]
        [:input {:id  "license-type"
@@ -256,12 +268,13 @@
           (get-string :string/license-usage-reveal)]))]]))
 
 (defn edit-tags
-  [md]
+  [md update-errors]
   (let [{:keys [kixi.datastore.metadatastore/tags]} @md]
     [editable-field
      nil
      [:div.file-edit-metadata
       [:h2.heading (get-string :string/tags)]
+      (list-any-errors update-errors [:kixi.datastore.metadatastore/tags])
       (if (zero? (count tags))
         [:i (get-string :string/no-tags)]
         (for [tag tags]
@@ -281,43 +294,52 @@
                                             (set! (.. el -value) nil)
                                             (.focus el)))))])]]))
 
+(defn date-str->pikaday
+  [t]
+  (let [[year rest] (split-at 4 t)
+        [month day] (split-at 2 rest)]
+    (str (apply str day) "/" (apply str month) "/" (apply str year))))
+
 (defn edit-temporal-coverage
-  [md]
+  [md update-errors]
   (let [swap-fn (fn [loc]
                   (fn [v]
-                    (swap! md assoc-in [:kixi.datastore.metadatastore.time/temporal-coverage loc]
-                           (time/jstime->vstr (goog.date.DateTime. v)))))]
+                    (let [t (time/jstime->date-str (goog.date.DateTime. v))]
+                      (swap! md assoc-in [:kixi.datastore.metadatastore.time/temporal-coverage loc] t))))
+        tc-from-el (atom nil)
+        tc-to-el (atom nil)]
     (r/create-class
      {:component-did-mount (fn []
                              (let [opts {:format "DD/MM/YYYY"}]
-                               (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "tc-from")
-                                                                  :onSelect (swap-fn :kixi.datastore.metadatastore.time/from)})))
-                               (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "tc-to")
-                                                                  :onSelect (swap-fn :kixi.datastore.metadatastore.time/to)})))))
-      :reagent-render (fn [md]
-                        (let [{:keys [kixi.datastore.metadatastore.time/temporal-coverage]} md
+                               (reset! tc-from-el (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "tc-from")
+                                                                                     :onSelect (swap-fn :kixi.datastore.metadatastore.time/from)}))))
+                               (reset! tc-to-el (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "tc-to")
+                                                                                   :onSelect (swap-fn :kixi.datastore.metadatastore.time/to)}))))))
+      :reagent-render (fn [md update-errors]
+                        (let [{:keys [kixi.datastore.metadatastore.time/temporal-coverage]} @md
                               tc-from         (:kixi.datastore.metadatastore.time/from temporal-coverage)
                               tc-to           (:kixi.datastore.metadatastore.time/to temporal-coverage)]
                           [editable-field
                            nil
                            [:div.file-edit-metadata
                             [:h3.heading (get-string :string/temporal-coverage)]
+                            (list-any-errors update-errors [:kixi.datastore.metadatastore.time/temporal-coverage])
                             (input-wrapper
                              [:h4 (get-string :string/from)]
                              [:input {:id  "tc-from"
                                       :type "text"
-                                      :value tc-from
+                                      :value (date-str->pikaday tc-from)
                                       :placeholder nil
                                       :on-change #()}]
                              [:h4 (get-string :string/to)]
                              [:input {:id  "tc-to"
                                       :type "text"
-                                      :value tc-to
+                                      :value (date-str->pikaday tc-to)
                                       :placeholder nil
                                       :on-change #()}])]]))})))
 
 (defn edit-geography
-  [md]
+  [md update-errors]
   (let [{:keys [kixi.datastore.metadatastore.geography/geography]} @md
         geo-type        (:kixi.datastore.metadatastore.geography/type geography)
         geo-level       (:kixi.datastore.metadatastore.geography/level geography)]
@@ -325,6 +347,7 @@
      nil
      [:div.file-edit-metadata
       [:h3.heading (get-string :string/geography)]
+      (list-any-errors update-errors [:kixi.datastore.metadatastore.geography/geography])
       (input-wrapper
        [:h4 (get-string :string/smallest-geography)]
        [:input {:id  "smallest-geography"
@@ -338,7 +361,7 @@
                                                   :kixi.datastore.metadatastore.geography/level] (.. % -target -value)))}])]]))
 
 (defn edit-sources
-  [md]
+  [md update-errors]
   (let [{:keys [kixi.datastore.metadatastore/author
                 kixi.datastore.metadatastore/maintainer
                 kixi.datastore.metadatastore/source]} @md]
@@ -346,6 +369,9 @@
      nil
      [:div.file-edit-metadata
       [:h3.heading (get-string :string/source-plural)]
+      (list-any-errors update-errors [:kixi.datastore.metadatastore/author
+                                      :kixi.datastore.metadatastore/maintainer
+                                      :kixi.datastore.metadatastore/source])
       (input-wrapper
        [:h4 (get-string :string/author)]
        [:input {:id  "author"
@@ -367,7 +393,7 @@
                 :on-change #(swap! md assoc :kixi.datastore.metadatastore/source (.. % -target -value))}])]]))
 
 (defn edit-actions
-  [md flags]
+  [md flags update-errors]
   (let [saving? (contains? flags :metadata-saving)]
     [editable-field
      nil
@@ -379,8 +405,10 @@
                       :prevent? true
                       :disabled? saving?}
                      #(controller/raise! :data/metadata-change @md))
-      (when saving?
-        [:span.success "Saving..."])]]))
+      (cond saving?
+            [:span.success (get-string :string/saving "...")]
+            (not-empty update-errors)
+            [:span.error (get-string :string/md-not-saved-due-to-errors)])]]))
 
 (defn edit-metadata
   [current md]
@@ -388,17 +416,17 @@
         show-license-usage (r/atom lc-usage)
         local-md (r/atom md)]
     (fn [_ _]
-      (let [flags (data/get-in-app-state :app/datastore :ds/file-properties current :flags)]
+      (let [{:keys [flags update-errors]} (data/get-in-app-state :app/datastore :ds/file-properties current)]
         [:div.file-edit-metadata-container
-         (edit-title-description local-md)
-         (edit-tags local-md)
-         (edit-license local-md show-license-usage)
+         (edit-title-description local-md update-errors)
+         (edit-tags local-md update-errors)
+         (edit-license local-md show-license-usage update-errors)
          [:div.flex
           {:style {:align-items :stretch}}
-          (edit-sources local-md)
-          [edit-temporal-coverage local-md]
-          (edit-geography local-md)]
-         (edit-actions local-md flags)]))))
+          (edit-sources local-md update-errors)
+          [edit-temporal-coverage local-md update-errors]
+          (edit-geography local-md update-errors)]
+         (edit-actions local-md flags update-errors)]))))
 
 (def tabs
   [[0 :overview]

@@ -336,18 +336,34 @@
         {:keys [kixi.datastore.communication-specs/file-metadata-update-type]} payload]
     (on-metadata-updated payload)))
 
+(defn metadata-invalid-field->error-string
+  [field]
+  (get {:kixi.datastore.metadatastore.license/license (get-string :string/field-invalid-error (get-string :string/license))
+        :kixi.datastore.metadatastore.time/temporal-coverage (get-string :string/field-invalid-error (get-string :string/temporal-coverage))}
+       field (get-string :string/unknown-error)))
+
+(defn collect-metadata-update-errors
+  [{:keys [reason explanation]}]
+  (case reason
+    :unauthorised {:unauthorised :string/unauthorised-error}
+    :invalid (let [{:keys [clojure.spec/problems]} explanation]
+               (into {} (map (fn [{:keys [path]}]
+                               (let [fp (first path)]
+                                 (hash-map fp (metadata-invalid-field->error-string fp)))) problems)))))
+
 (defmethod on-event
   [:kixi.datastore.metadatastore/update-rejected "1.0.0"]
   [{:keys [args]}]
   (let [{:keys [kixi.comms.event/payload]} args
-        {:keys [reason explanation original]} payload
+        {:keys [original]} payload
         {:keys [kixi.datastore.metadatastore/id]} original]
     (log/warn "An adjustment to the metadata of" id "was rejected.")
     (utils/remove-file-flag! id :metadata-saving)
     (.error js/toastr (str "An adjustment to the metadata of '"
                            (:kixi.datastore.metadatastore/name (get-local-file id))
                            "' was rejected."))
-    #_(send-single-file-item-query! id)))
+    (let [errors (collect-metadata-update-errors payload)]
+      (data/swap-app-state! :app/datastore assoc-in [:ds/file-properties id :update-errors] errors))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -417,9 +433,10 @@
     (when-not (empty? md-diff)
       (set-title! (:kixi.datastore.metadatastore/name md))
       (utils/add-file-flag! id :metadata-saving)
-      (save-file-metadata! md))
-    (data/command! :kixi.datastore.metadatastore/update "1.0.0"
-                   (merge md-diff {:kixi.datastore.metadatastore/id id}))))
+      (save-file-metadata! md)
+      (data/command! :kixi.datastore.metadatastore/update "1.0.0"
+                     (merge md-diff {:kixi.datastore.metadatastore/id id}))
+      (data/swap-app-state! :app/datastore update-in [:ds/file-properties id] dissoc :update-errors))))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-user-logged-in

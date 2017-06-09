@@ -201,7 +201,7 @@
    :string/license-usage-placeholder        "Add any additional information regarding the license that applies to this file, such as restrictions, constraints and expirations"
    :string/source                           "Source"
    :string/source-plural                    "Sources"
-   :string/file-source                      "File Source"
+   :string/file-source                      "Source"
    :string/maintainer                       "Maintainer"
    :string/geography                        "Geography"
    :string/smallest-geography               "Smallest Geography"
@@ -215,9 +215,14 @@
    :string/from                             "From"
    :string/to                               "To"
    :string/save                             "Save"
+   :string/saving                           "Saving"
    :string/edit-to-add-description          "Add a description by clicking here"
    :string/new-upload-information-hero      "Congratulations, your file was uploaded successfully. Please consider adding additional information about this file such as a description, license and tags."
-   :string/click-here-to-edit-metadata      "Click here to add metadata to your file."} )
+   :string/click-here-to-edit-metadata      "Click here to add metadata to your file."
+   :string/unauthorised-error               "You are not authorised to perform this action."
+   :string/unknown-error                    "An unknown error occurred and the operation could not be completed."
+   :string/field-invalid-error              "The following field supplied an invalid value: "
+   :string/md-not-saved-due-to-errors       "The metadata could not be saved due to one or more invalid values."} )
 
 
 (defn resolve-string
