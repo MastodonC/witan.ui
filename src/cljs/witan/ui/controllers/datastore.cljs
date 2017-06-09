@@ -329,6 +329,15 @@
   (utils/remove-file-flag! id :metadata-saving)
   (.info js/toastr "Metadata was saved successfully!"))
 
+(defmethod on-metadata-updated
+  :kixi.datastore.communication-specs/file-metadata-created
+  [args])
+
+(defmethod on-metadata-updated
+  :default
+  [p]
+  (log/warn "Unknown metadata-updated type:" p))
+
 (defmethod on-event
   [:kixi.datastore.file-metadata/updated "1.0.0"]
   [{:keys [args]}]
