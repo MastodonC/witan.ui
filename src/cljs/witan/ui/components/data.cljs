@@ -98,9 +98,11 @@
            kixi.datastore.metadatastore/author
            kixi.datastore.metadatastore/maintainer
            kixi.datastore.metadatastore/source
-           kixi.datastore.metadatastore.time/temporal-coverage
            kixi.datastore.metadatastore.license/license
-           kixi.datastore.metadatastore.geography/geography]} on-edit-fn]
+           kixi.datastore.metadatastore.time/temporal-coverage
+           kixi.datastore.metadatastore.geography/geography
+           kixi.datastore.metadatastore/source-created-at
+           kixi.datastore.metadatastore/source-updated-at]} on-edit-fn]
   (let [prov-source     (:kixi.datastore.metadatastore/source provenance)
         prov-created-at (:kixi.datastore.metadatastore/created provenance)
         prov-created-by (:kixi/user provenance)
@@ -119,22 +121,26 @@
        [:tbody
         (vec (concat [:tr]
                      (row :string/file-type (fn [] [:span file-type]))
-                     (row :string/file-provenance-source (fn [] [:span prov-source]))))
+                     (row :string/file-size (fn [] [:span (js/filesize size-bytes)]))
+                     ))
         (vec (concat [:tr]
                      (row :string/file-uploader (fn [] [:span (:kixi.user/name prov-created-by)]))
                      (row :string/license-type (fn [] [:span lc-type]))))
         (vec (concat [:tr]
-                     (row :string/author (fn [] [:span author]))
+                     (row :string/file-uploaded-at (fn [] [:span (time/iso-time-as-moment prov-created-at)]))
                      (row :string/license-usage (fn [] [:span lc-usage]))))
         (vec (concat [:tr]
-                     (row :string/file-source (fn [] [:span source]))
+                     (row :string/file-provenance-source (fn [] [:span prov-source]))
                      (row :string/smallest-geography (fn [] [:span geo-level]))))
         (vec (concat [:tr]
                      (row :string/maintainer (fn [] [:span maintainer]))
                      (row :string/temporal-coverage (fn [] [:span (when tc-from (time/iso-time-as-moment tc-from)) " - " (when tc-to (time/iso-time-as-moment tc-to))]))))
         (vec (concat [:tr]
-                     (row :string/created-at (fn [] [:span (time/iso-time-as-moment prov-created-at)]))
-                     (row :string/file-size (fn [] [:span (js/filesize size-bytes)]))))]]]]))
+                     (row :string/author (fn [] [:span author]))
+                     (row :string/source-created-at (fn [] [:span source-created-at]))))
+        (vec (concat [:tr]
+                     (row :string/file-source (fn [] [:span source]))
+                     (row :string/source-updated-at (fn [] [:span source-updated-at]))))]]]]))
 
 (defn tags
   [{:keys [kixi.datastore.metadatastore/tags]} on-edit-fn]
@@ -173,7 +179,7 @@
                     :prevent? true} identity)]])
 
 (defn sharing-detailed
-  [{:keys [kixi.datastore.metadatastore/sharing kixi.datastore.metadatastore/id]}]
+  [{:keys [kixi.datastore.metadatastore/sharing kixi.datastore.metadatastore/id]} has-edit?]
   (let [activities->string (data/get-in-app-state :app/datastore :ds/activities)
         user-sg (data/get-in-app-state :app/user :kixi.user/self-group)
         sharing-groups (set (reduce concat [] (vals sharing)))]
@@ -197,7 +203,8 @@
           :on-add
           (fn [group]
             (controller/raise! :data/sharing-add-group
-                               {:current id :group group}))}
+                               {:current id :group group}))
+          :all-disabled? (not has-edit?)}
          {:exclusions sharing-groups}]]]]]))
 
 (defn input-wrapper
@@ -328,13 +335,13 @@
                              [:h4 (get-string :string/from)]
                              [:input {:id  "tc-from"
                                       :type "text"
-                                      :value (date-str->pikaday tc-from)
+                                      :value (when tc-from (date-str->pikaday tc-from))
                                       :placeholder nil
                                       :on-change #()}]
                              [:h4 (get-string :string/to)]
                              [:input {:id  "tc-to"
                                       :type "text"
-                                      :value (date-str->pikaday tc-to)
+                                      :value (when tc-to (date-str->pikaday tc-to))
                                       :placeholder nil
                                       :on-change #()}])]]))})))
 
@@ -416,7 +423,8 @@
         show-license-usage (r/atom lc-usage)
         local-md (r/atom md)]
     (fn [_ _]
-      (let [{:keys [flags update-errors]} (data/get-in-app-state :app/datastore :ds/file-properties current)]
+      (let [props (data/get-in-app-state :app/datastore :ds/file-properties current)
+            {:keys [flags update-errors]} props]
         [:div.file-edit-metadata-container
          (edit-title-description local-md update-errors)
          (edit-tags local-md update-errors)
@@ -447,6 +455,18 @@
     (route/swap-query-string! #(assoc % subview-query-param i))
     (reset! subview-tab k)))
 
+(defn user-has-permission?
+  [permission user file-metadata]
+  (let [ug (:kixi.user/groups user)
+        vg (set (map :kixi.group/id (get-in file-metadata [:kixi.datastore.metadatastore/sharing permission])))]
+    (some vg ug)))
+
+(def user-has-edit?
+  (partial user-has-permission? :kixi.datastore.metadatastore/meta-update))
+
+(def user-has-download?
+  (partial user-has-permission? :kixi.datastore.metadatastore/file-read))
+
 ;;
 
 
@@ -459,15 +479,17 @@
             (data/get-in-app-state :app/datastore)
             activities->string (:ds/activities ds)
             md (data/get-in-app-state :app/datastore :ds/file-metadata current)
+            has-edit? (user-has-edit? (data/get-in-app-state :app/user) md)
+            can-download? (user-has-download? (data/get-in-app-state :app/user) md)
             remove-new-fn (fn []
                             (route/swap-query-string! (fn [x] (dissoc x :new)))
                             (reset! new? false))
-            go-to-edit (fn []
-                         (remove-new-fn)
-                         (switch-primary-view! :edit))
-            go-to-sharing (fn []
-                            (remove-new-fn)
-                            (switch-primary-view! :sharing))]
+            go-to-edit (when has-edit? (fn []
+                                         (remove-new-fn)
+                                         (switch-primary-view! :edit)))
+            go-to-sharing (when has-edit? (fn []
+                                            (remove-new-fn)
+                                            (switch-primary-view! :sharing)))]
         (if error
           [:div.text-center.padded-content
            [:div
@@ -478,9 +500,12 @@
              (icons/loading :large)]
             [:div#data-view
              (shared/header-string (:kixi.datastore.metadatastore/name md))
-             (shared/tabs {:tabs {:overview (get-string :string/overview)
-                                  :sharing (get-string :string/sharing)
-                                  :edit (get-string :string/edit)}
+             (shared/tabs {:tabs (if has-edit?
+                                   {:overview (get-string :string/overview)
+                                    :sharing (get-string :string/sharing)
+                                    :edit (get-string :string/edit)}
+                                   {:overview (get-string :string/overview)
+                                    :sharing (get-string :string/sharing)})
                            :selected-tab @subview-tab
                            :on-click switch-primary-view!})
              [:div.flex-center
@@ -498,7 +523,7 @@
                      {:on-click go-to-edit}
                      (get-string :string/click-here-to-edit-metadata)]]]])
                (case @subview-tab
-                 :sharing (sharing-detailed md)
+                 :sharing (sharing-detailed md has-edit?)
                  :edit [edit-metadata current md]
                  ;; :overview & default
                  [:div
@@ -507,7 +532,7 @@
                   (metadata md go-to-edit)
                   (tags md go-to-edit)
                   (sharing md go-to-sharing)
-                  (actions)])]]]))))))
+                  (when can-download? (actions))])]]]))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -307,19 +307,6 @@
                            "' was rejected."))
     (send-single-file-item-query! id)))
 
-(defmethod on-event
-  [:kixi.datastore.metadatastore/update-rejected "1.0.0"]
-  [{:keys [args]}]
-  (let [{:keys [kixi.comms.event/payload]} args
-        {:keys [reason explanation original]} payload
-        {:keys [kixi.datastore.metadatastore/id]} original]
-    (log/warn "An adjustment to the metadata of" id "was rejected.")
-    (utils/remove-file-flag! id :metadata-saving)
-    (.error js/toastr (str "An adjustment to the metadata of '"
-                           (:kixi.datastore.metadatastore/name (get-local-file id))
-                           "' was rejected."))
-    #_(send-single-file-item-query! id)))
-
 (defmulti on-metadata-updated
   (fn [payload] (:kixi.datastore.communication-specs/file-metadata-update-type payload)))
 
@@ -364,9 +351,9 @@
   [:kixi.datastore.metadatastore/update-rejected "1.0.0"]
   [{:keys [args]}]
   (let [{:keys [kixi.comms.event/payload]} args
-        {:keys [original]} payload
+        {:keys [original reason explanation]} payload
         {:keys [kixi.datastore.metadatastore/id]} original]
-    (log/warn "An adjustment to the metadata of" id "was rejected.")
+    (log/warn "An adjustment to the metadata of" id "was rejected:" reason explanation)
     (utils/remove-file-flag! id :metadata-saving)
     (.error js/toastr (str "An adjustment to the metadata of '"
                            (:kixi.datastore.metadatastore/name (get-local-file id))
@@ -446,6 +433,7 @@
       (data/command! :kixi.datastore.metadatastore/update "1.0.0"
                      (merge md-diff {:kixi.datastore.metadatastore/id id}))
       (data/swap-app-state! :app/datastore update-in [:ds/file-properties id] dissoc :update-errors))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-user-logged-in
