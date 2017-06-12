@@ -100,7 +100,7 @@
 
 (defn inline-group
   [{:keys [kixi.group/name kixi.group/type kixi.group/id]}]
-  (let [you? (= (data/get-in-app-state :app/user :kixi.user/self-group) id)]
+  (let [you? (contains? (set (data/get-in-app-state :app/user :kixi.user/groups)) id)]
     [:div.shared-inline-group
      (let [icon-fn (condp = (str type)
                      "user" icons/user
@@ -251,7 +251,7 @@
            (icons/close)]]]))))
 
 (defn sharing-matrix
-  [sharing-activites group->activities {:keys [on-change on-add]} & opts]
+  [sharing-activites group->activities {:keys [on-change on-add all-disabled?]} & opts]
   (let [debounce (atom false)]
     [:div.sharing-matrix
      [group-search-area
@@ -281,7 +281,7 @@
                  [:td
                   {:key (str group-name "-" activity-t)}
                   [:input {:type "checkbox"
-                           :disabled (contains? (:locked activities) activity-k)
+                           :disabled (or all-disabled? (contains? (:locked activities) activity-k))
                            :checked (get (:values activities) activity-k)
                            :on-change #(let [new-value (.-checked (.-target %))]
                                          (on-change row activity-k new-value))}]])])))]])]))

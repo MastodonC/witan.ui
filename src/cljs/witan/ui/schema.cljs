@@ -40,8 +40,8 @@
    :kixi.data-acquisition.request-to-share/message s/Str})
 
 (def FilePropertiesSchema
-  {uuid? {:flags #{s/Keyword}
-          :update-errors {s/Keyword s/Str}}})
+  {uuid? {(s/optional-key :flags) #{s/Keyword}
+          (s/optional-key :update-errors) {s/Keyword s/Str}}})
 
 ;; app state schema
 (def AppStateSchema
