@@ -345,6 +345,46 @@
                                       :placeholder nil
                                       :on-change #()}])]]))})))
 
+(defn edit-source-dates
+  [md update-errors]
+  (let [swap-fn (fn [loc]
+                  (fn [v]
+                    (let [t (time/jstime->date-str (goog.date.DateTime. v))]
+                      (swap! md assoc loc t))))
+        date-created-el (atom nil)
+        date-updated-el (atom nil)]
+    (r/create-class
+     {:component-did-mount (fn []
+                             (let [opts {:format "DD/MM/YYYY"}]
+                               (reset! date-created-el
+                                       (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "date-created")
+                                                                          :onSelect (swap-fn :kixi.datastore.metadatastore/source-file-created)}))))
+                               (reset! date-updated-el
+                                       (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "date-updated")
+                                                                          :onSelect (swap-fn :kixi.datastore.metadatastore/source-file-updated)}))))))
+      :reagent-render (fn [md update-errors]
+                        (let [date-created (:kixi.datastore.metadatastore/source-file-created md)
+                              date-updated (:kixi.datastore.metadatastore/source-file-updated md)]
+                          [editable-field
+                           nil
+                           [:div.file-edit-metadata
+                            [:h3.heading (get-string :string/source-dates)]
+                            (list-any-errors update-errors [:kixi.datastore.metadatastore/source-file-created
+                                                            :kixi.datastore.metadatastore/source-file-updated])
+                            (input-wrapper
+                             [:h4 (get-string :string/source-created-at)]
+                             [:input {:id  "date-created"
+                                      :type "text"
+                                      :value (when date-created (date-str->pikaday date-created))
+                                      :placeholder nil
+                                      :on-change #()}]
+                             [:h4 (get-string :string/source-updated-at)]
+                             [:input {:id  "date-updated"
+                                      :type "text"
+                                      :value (when date-updated (date-str->pikaday date-updated))
+                                      :placeholder nil
+                                      :on-change #()}])]]))})))
+
 (defn edit-geography
   [md update-errors]
   (let [{:keys [kixi.datastore.metadatastore.geography/geography]} @md
@@ -431,9 +471,11 @@
          (edit-license local-md show-license-usage update-errors)
          [:div.flex
           {:style {:align-items :stretch}}
+          [:div
+           [edit-source-dates local-md update-errors]
+           (edit-geography local-md update-errors)]
           (edit-sources local-md update-errors)
-          [edit-temporal-coverage local-md update-errors]
-          (edit-geography local-md update-errors)]
+          [edit-temporal-coverage local-md update-errors]]
          (edit-actions local-md flags update-errors)]))))
 
 (def tabs

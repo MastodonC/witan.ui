@@ -202,6 +202,7 @@
    :string/license-usage-placeholder        "Add any additional information regarding the license that applies to this file, such as restrictions, constraints and expirations"
    :string/source                           "Source"
    :string/source-plural                    "Sources"
+   :string/source-dates                     "Source Dates"
    :string/file-source                      "Publisher"
    :string/maintainer                       "Maintainer"
    :string/geography                        "Geography"

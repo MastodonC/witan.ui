@@ -345,15 +345,16 @@
     :invalid (let [{:keys [clojure.spec/problems]} explanation]
                (into {} (map (fn [{:keys [path]}]
                                (let [fp (first path)]
-                                 (hash-map fp (metadata-invalid-field->error-string fp)))) problems)))))
+                                 (when (keyword? fp)
+                                   (hash-map fp (metadata-invalid-field->error-string fp))))) problems)))))
 
 (defmethod on-event
   [:kixi.datastore.metadatastore/update-rejected "1.0.0"]
   [{:keys [args]}]
   (let [{:keys [kixi.comms.event/payload]} args
         {:keys [original reason explanation]} payload
-        {:keys [kixi.datastore.metadatastore/id]} original]
-    (log/warn "An adjustment to the metadata of" id "was rejected:" reason explanation)
+        id (get-in original [:kixi.datastore.metadatastore/payload :kixi.comms.command/payload :kixi.datastore.metadatastore/id])]
+    (log/warn "An adjustment to the metadata of" id "was rejected:" reason original )
     (utils/remove-file-flag! id :metadata-saving)
     (.error js/toastr (str "An adjustment to the metadata of '"
                            (:kixi.datastore.metadatastore/name (get-local-file id))
