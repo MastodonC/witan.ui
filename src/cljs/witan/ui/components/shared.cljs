@@ -251,16 +251,19 @@
            (icons/close)]]]))))
 
 (defn sharing-matrix
-  [sharing-activites group->activities {:keys [on-change on-add all-disabled?]} & opts]
+  [sharing-activites group->activities
+   {:keys [on-change on-add all-disabled? show-search?]
+    :or {show-search? true}} & opts]
   (let [debounce (atom false)]
     [:div.sharing-matrix
-     [group-search-area
-      :string/sharing-matrix-group-search-ph
-      (fn [& args]
-        (when-not @debounce
-          (apply on-add args)
-          (reset! debounce true)))
-      (first opts)]
+     (when show-search?
+       [group-search-area
+        :string/sharing-matrix-group-search-ph
+        (fn [& args]
+          (when-not @debounce
+            (apply on-add args)
+            (reset! debounce true)))
+        (first opts)])
      (when (not-empty group->activities)
        [:table.pure-table.pure-table-horizontal.sharing-matrix-table-headers
         [:thead

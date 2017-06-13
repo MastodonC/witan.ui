@@ -85,11 +85,16 @@
   [{:keys [kixi.datastore.metadatastore/description]} on-edit-fn]
   [editable-field
    on-edit-fn
-   (if description
+   (if (not (clojure.string/blank? description))
      [:span.file-description description]
-     [:i.file-description.clickable-text
-      {:on-click on-edit-fn}
-      (get-string :string/edit-to-add-description)])])
+     [:i
+      {:class (if on-edit-fn
+                "file-description clickable-text"
+                "file-description")
+       :on-click on-edit-fn}
+      (get-string (if on-edit-fn
+                    :string/edit-to-add-description
+                    :string/no-description))])])
 
 (defn metadata
   [{:keys [kixi.datastore.metadatastore/provenance
@@ -204,7 +209,8 @@
           (fn [group]
             (controller/raise! :data/sharing-add-group
                                {:current id :group group}))
-          :all-disabled? (not has-edit?)}
+          :all-disabled? (not has-edit?)
+          :show-search? has-edit?}
          {:exclusions sharing-groups}]]]]]))
 
 (defn input-wrapper
