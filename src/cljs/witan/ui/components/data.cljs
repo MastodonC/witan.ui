@@ -16,6 +16,35 @@
 
 (def subview-query-param :d)
 (def new-query-param :new)
+(def licenses
+  ["Creative Commons Attribution"
+   "Creative Commons Attribution Share-Alike"
+   "Creative Commons CCZero"
+   "Creative Commons Non-Commercial (Any)"
+   "GNU Free Documentation License"
+   "Open Data Commons Attribution License"
+   "Open Data Commons Open Database License (ODbL)"
+   "Open Data Commons Public Domain Dedication and License (PDDL)"
+   "Other (Attribution)"
+   "Other (Non-Commercial)"
+   "Other (Not Open)"
+   "Other (Open)"
+   "Other (Public Domain)"
+   "UK Open Government Licence (OGL v2)"
+   "UK Open Government Licence (OGL v3)"])
+
+(def geographies
+  ["Borough"
+   "County"
+   "Country"
+   "Local Authority"
+   "Ward"
+   "LSOA"
+   "MSOA"
+   "Output Area"
+   "Region"])
+
+
 (defonce subview-tab (r/atom :overview))
 
 (defn reverse-group->activity-map
@@ -252,7 +281,7 @@
                    :on-change #(swap! md assoc :kixi.datastore.metadatastore/description (.. % -target -value))}])]]))
 
 (defn edit-license
-  [md showing-atom update-errors]
+  [md showing-atom licenses update-errors]
   (let [{:keys [kixi.datastore.metadatastore.license/license]} @md
         lc-type  (:kixi.datastore.metadatastore.license/type license)
         lc-usage (:kixi.datastore.metadatastore.license/usage license)]
@@ -263,19 +292,21 @@
       (list-any-errors update-errors [:kixi.datastore.metadatastore.license/license])
       (input-wrapper
        [:h3 (get-string :string/type)]
-       [:input {:id  "license-type"
-                :type "text"
-                :value lc-type
-                :placeholder nil
-                :on-change #(swap! md assoc-in [:kixi.datastore.metadatastore.license/license
-                                                :kixi.datastore.metadatastore.license/type] (.. % -target -value))}]
+       [:select {:id  "license-type"
+                 :type "text"
+                 :value lc-type
+                 :placeholder nil
+                 :on-change #(swap! md assoc-in [:kixi.datastore.metadatastore.license/license
+                                                 :kixi.datastore.metadatastore.license/type] (.. % -target -value))}
+        (for [license (cons "" licenses)]
+          [:option {:key license :value license} license])]
        (if @showing-atom
          [:textarea {:id  "license-usage"
                      :value lc-usage
                      :placeholder (get-string :string/license-usage-placeholder)
                      :on-change #(swap! md assoc-in [:kixi.datastore.metadatastore.license/license
                                                      :kixi.datastore.metadatastore.license/usage] (.. % -target -value))}]
-         [:span.clickable-text
+         [:div.clickable-text
           {:id "license-usage-reveal"
            :on-click #(reset! showing-atom true)}
           (get-string :string/license-usage-reveal)]))]]))
@@ -392,7 +423,7 @@
                                       :on-change #()}])]]))})))
 
 (defn edit-geography
-  [md update-errors]
+  [md geographies update-errors]
   (let [{:keys [kixi.datastore.metadatastore.geography/geography]} @md
         geo-type        (:kixi.datastore.metadatastore.geography/type geography)
         geo-level       (:kixi.datastore.metadatastore.geography/level geography)]
@@ -403,15 +434,17 @@
       (list-any-errors update-errors [:kixi.datastore.metadatastore.geography/geography])
       (input-wrapper
        [:h4 (get-string :string/smallest-geography)]
-       [:input {:id  "smallest-geography"
-                :type "text"
-                :value geo-level
-                :placeholder nil
-                :on-change #(do
-                              (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
-                                                  :kixi.datastore.metadatastore.geography/type] "smallest")
-                              (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
-                                                  :kixi.datastore.metadatastore.geography/level] (.. % -target -value)))}])]]))
+       [:select {:id  "smallest-geography"
+                 :type "text"
+                 :value geo-level
+                 :placeholder nil
+                 :on-change #(do
+                               (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
+                                                   :kixi.datastore.metadatastore.geography/type] "smallest")
+                               (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
+                                                   :kixi.datastore.metadatastore.geography/level] (.. % -target -value)))}
+       (for [geography (cons "" geographies)]
+         [:option {:key geography :value geography} geography])])]]))
 
 (defn edit-sources
   [md update-errors]
@@ -474,12 +507,12 @@
         [:div.file-edit-metadata-container
          (edit-title-description local-md update-errors)
          (edit-tags local-md update-errors)
-         (edit-license local-md show-license-usage update-errors)
+         (edit-license local-md show-license-usage licenses update-errors)
          [:div.flex
           {:style {:align-items :stretch}}
           [:div
            [edit-source-dates local-md update-errors]
-           (edit-geography local-md update-errors)]
+           (edit-geography local-md geographies update-errors)]
           (edit-sources local-md update-errors)
           [edit-temporal-coverage local-md update-errors]]
          (edit-actions local-md flags update-errors)]))))
