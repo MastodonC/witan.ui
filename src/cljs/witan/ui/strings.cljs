@@ -226,7 +226,8 @@
    :string/unauthorised-error               "You are not authorised to perform this action."
    :string/unknown-error                    "An unknown error occurred and the operation could not be completed."
    :string/field-invalid-error              "The following field supplied an invalid value: "
-   :string/md-not-saved-due-to-errors       "The metadata could not be saved due to one or more invalid values."} )
+   :string/md-not-saved-due-to-errors       "The metadata could not be saved due to one or more invalid values."
+   :string/no-description                   "No description was provided."} )
 
 
 (defn resolve-string
