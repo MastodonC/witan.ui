@@ -181,9 +181,11 @@
               :padding-right (em 1)}
              [:h3 :h4
               {:margin-bottom (em 0.3)}]
-             [:input :textarea
+             [:input :textarea :select
               {:width (percent 100)
                :resize :vertical}]
+             [:select
+              {:height (px 32)}]
              [:#license-usage
               {:margin-top (em 0.6)}]
              [:#license-usage-reveal
