@@ -10,7 +10,7 @@ export BUILD_SHA=$6 # SHA
 export BUILD_DT=$(date) # Build Date and Time
 export INTERCOM=1       # Intercom enabled
 
-if [ "$ENVIRONMENT" == "production" ]
+if [ "$ENVIRONMENT" == "prod" ]
 then
     export LOG_LEVEL=2
 fi
