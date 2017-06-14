@@ -42,9 +42,22 @@
   (when id
     (data/swap-app-state! :app/datastore assoc :ds/current id)))
 
+(defn reset-properties!
+  [id]
+  (when id
+    (data/swap-app-state! :app/datastore update :ds/file-properties dissoc id)))
+
+(defn reset-file-edit-metadata!
+  [md]
+  (data/swap-app-state! :app/datastore assoc :ds/file-metadata-editing md))
+
 (defn save-file-metadata!
   [{:keys [kixi.datastore.metadatastore/id] :as payload}]
-  (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload))
+  (log/debug "Saving file metadata..." id)
+  (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload)
+  (when (= id (data/get-in-app-state :app/datastore :ds/file-metadata-editing :kixi.datastore.metadatastore/id))
+    (reset-file-edit-metadata! payload))
+  (data/save-data!))
 
 (defn selected-groups->sharing-activities
   [groups activities]
@@ -239,8 +252,10 @@
   (data/swap-app-state! :app/datastore assoc :ds/pending? true)
   (let [id (get-in args [:route/params :id])]
     (send-single-file-item-query! id)
+    (reset-properties! id)
     (select-current! id)
-    (set-title! :string/title-data-loading)))
+    (set-title! :string/title-data-loading)
+    ))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -354,7 +369,7 @@
   (let [{:keys [kixi.comms.event/payload]} args
         {:keys [original reason explanation]} payload
         id (get-in original [:kixi.datastore.metadatastore/payload :kixi.comms.command/payload :kixi.datastore.metadatastore/id])]
-    (log/warn "An adjustment to the metadata of" id "was rejected:" reason original )
+    (log/warn "An adjustment to the metadata of" id "was rejected:" reason original)
     (utils/remove-file-flag! id :metadata-saving)
     (.error js/toastr (str "An adjustment to the metadata of '"
                            (:kixi.datastore.metadatastore/name (get-local-file id))
@@ -431,9 +446,23 @@
       (set-title! (:kixi.datastore.metadatastore/name md))
       (utils/add-file-flag! id :metadata-saving)
       (save-file-metadata! md)
+      (reset-file-edit-metadata! md)
       (data/command! :kixi.datastore.metadatastore/update "1.0.0"
                      (merge md-diff {:kixi.datastore.metadatastore/id id}))
       (data/swap-app-state! :app/datastore update-in [:ds/file-properties id] dissoc :update-errors))))
+
+(defmethod handle
+  :reset-edit-metadata
+  [event _]
+  (let [current (data/get-in-app-state :app/datastore :ds/current)
+        md (data/get-in-app-state :app/datastore :ds/file-metadata current)]
+    (reset-file-edit-metadata! md)))
+
+(defmethod handle
+  :swap-edit-metadata
+  [event [operation & args]]
+  (let [edit-md (data/get-in-app-state :app/datastore :ds/file-metadata-editing)]
+    (reset-file-edit-metadata! (apply operation edit-md args))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
