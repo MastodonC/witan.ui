@@ -146,6 +146,7 @@
             [:.file-tags
              [:h3
               {:margin [[(em 0.0) (em 0.2)]]
+               :margin-bottom (em 0.2)
                :line-height (em 1.6)}]]
 
             [:.file-sharing

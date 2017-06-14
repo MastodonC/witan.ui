@@ -10,6 +10,7 @@
             [witan.ui.utils :as utils]
             [witan.ui.time :as time]
             [goog.string :as gstring]
+            [inflections.core :as i]
             [cljsjs.pikaday.with-moment])
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))
@@ -17,32 +18,32 @@
 (def subview-query-param :d)
 (def new-query-param :new)
 (def licenses
-  #{"Creative Commons Attribution"
-    "Creative Commons Attribution Share-Alike"
-    "Creative Commons CCZero"
-    "Creative Commons Non-Commercial (Any)"
-    "GNU Free Documentation License"
-    "Open Data Commons Attribution License"
-    "Open Data Commons Open Database License (ODbL)"
-    "Open Data Commons Public Domain Dedication and License (PDDL)"
-    "Other (Attribution)"
-    "Other (Non-Commercial)"
-    "Other (Not Open)"
-    "Other (Open)"
-    "Other (Public Domain)"
-    "UK Open Government Licence (OGL v2)"
-    "UK Open Government Licence (OGL v3)"})
+  ["Creative Commons Attribution"
+   "Creative Commons Attribution Share-Alike"
+   "Creative Commons CCZero"
+   "Creative Commons Non-Commercial (Any)"
+   "GNU Free Documentation License"
+   "Open Data Commons Attribution License"
+   "Open Data Commons Open Database License (ODbL)"
+   "Open Data Commons Public Domain Dedication and License (PDDL)"
+   "Other (Attribution)"
+   "Other (Non-Commercial)"
+   "Other (Not Open)"
+   "Other (Open)"
+   "Other (Public Domain)"
+   "UK Open Government Licence (OGL v2)"
+   "UK Open Government Licence (OGL v3)"])
 
 (def geographies
-  #{"Ward"
-    "Borough"
-    "Local Authority"
-    "Output Area"
-    "LSOA"
-    "MSOA"
-    "County"
-    "Region"
-    "Country"})
+  ["Ward"
+   "Borough"
+   "Local Authority"
+   "Output Area"
+   "LSOA"
+   "MSOA"
+   "County"
+   "Region"
+   "Country"])
 
 (def other-geography
   "Other (please specify)")
@@ -167,7 +168,7 @@
                      (row :string/file-uploaded-at (fn [] [:span (time/iso-time-as-moment prov-created-at)]))
                      (row :string/license-usage (fn [] [:span lc-usage]))))
         (vec (concat [:tr]
-                     (row :string/file-provenance-source (fn [] [:span prov-source]))
+                     (row :string/file-provenance-source (fn [] [:span (i/capitalize prov-source)]))
                      (row :string/smallest-geography (fn [] [:span geo-level]))))
         (vec (concat [:tr]
                      (row :string/maintainer (fn [] [:span maintainer]))
@@ -434,7 +435,7 @@
             :value level
             :placeholder nil
             :on-change #(on-change (.. % -target -value))}
-   (for [geography (conj (vec (cons "" geographies)) other-geography)]
+   (for [geography (concat (cons "" geographies) [other-geography])]
      [:option {:key geography :value geography} geography])])
 
 (defn edit-geography
@@ -449,7 +450,7 @@
             geo-type  (:kixi.datastore.metadatastore.geography/type geography)
             geo-level (:kixi.datastore.metadatastore.geography/level geography)]
         (let [otherx? (not (or (clojure.string/blank? geo-level)
-                               (contains? geographies geo-level)))]
+                               (contains? (set geographies) geo-level)))]
           [editable-field
            nil
            [:div.file-edit-metadata.file-edit-geography
