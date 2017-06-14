@@ -89,6 +89,7 @@
                    :ds/current (s/maybe uuid?)
                    :ds/pending? s/Bool
                    :ds/file-metadata {uuid? s/Any}
+                   :ds/file-metadata-editing s/Any ;; TODO: metadata schema
                    :ds/file-properties FilePropertiesSchema
                    :ds/activities {s/Keyword s/Str}
                    :ds/locked-activities [s/Keyword]

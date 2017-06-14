@@ -199,7 +199,7 @@
 
             [:.file-edit-geography
              [:input
-              {:margin-top (px -10)}]]
+              {:margin-top (em 0.3)}]]
 
             [:.editable-field
              {:padding [[(em 1) (px 0) (em 1) (em 1)]]
