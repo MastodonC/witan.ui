@@ -10,6 +10,12 @@
                               (.-language js/navigator))
                      hoffset "hours"))))
 
+(defn iso-date-as-slash-date
+  [time]
+  (->> time
+       (tf/parse (tf/formatters :basic-date))
+       (tf/unparse (tf/formatter "dd'/'MM'/'YYYY"))))
+
 (defn jstime->str
   ([]
    (jstime->str (t/now)))

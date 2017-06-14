@@ -172,7 +172,10 @@
                      (row :string/smallest-geography (fn [] [:span geo-level]))))
         (vec (concat [:tr]
                      (row :string/maintainer (fn [] [:span maintainer]))
-                     (row :string/temporal-coverage (fn [] [:span (when tc-from (time/iso-time-as-moment tc-from)) " - " (when tc-to (time/iso-time-as-moment tc-to))]))))
+                     (row :string/temporal-coverage (fn [] [:span
+                                                            (when tc-from (time/iso-date-as-slash-date tc-from))
+                                                            " - "
+                                                            (when tc-to (time/iso-date-as-slash-date tc-to))]))))
         (vec (concat [:tr]
                      (row :string/author (fn [] [:span author]))
                      (row :string/source-created-at (fn [] [:span source-created-at]))))
