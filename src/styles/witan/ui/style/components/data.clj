@@ -166,10 +166,9 @@
               {:margin-left (px 5)}]]
 
             [:.file-edit-metadata-container
-             [:.flex
-              [:div
-               {:flex [[0.315 1 :auto]]
-                :align-self :auto}]]]
+             [:div.flex-3
+              {:flex [[0.315 1 :auto]]
+               :align-self :auto}]]
 
             [:.file-edit-metadata-error-list
              [:.file-edit-metadata-error
@@ -197,6 +196,10 @@
               [:.button-container
                {:display :inline
                 :width (px 30)}]]]
+
+            [:.file-edit-geography
+             [:input
+              {:margin-top (px -10)}]]
 
             [:.editable-field
              {:padding [[(em 1) (px 0) (em 1) (em 1)]]

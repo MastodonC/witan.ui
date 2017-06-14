@@ -17,32 +17,35 @@
 (def subview-query-param :d)
 (def new-query-param :new)
 (def licenses
-  ["Creative Commons Attribution"
-   "Creative Commons Attribution Share-Alike"
-   "Creative Commons CCZero"
-   "Creative Commons Non-Commercial (Any)"
-   "GNU Free Documentation License"
-   "Open Data Commons Attribution License"
-   "Open Data Commons Open Database License (ODbL)"
-   "Open Data Commons Public Domain Dedication and License (PDDL)"
-   "Other (Attribution)"
-   "Other (Non-Commercial)"
-   "Other (Not Open)"
-   "Other (Open)"
-   "Other (Public Domain)"
-   "UK Open Government Licence (OGL v2)"
-   "UK Open Government Licence (OGL v3)"])
+  #{"Creative Commons Attribution"
+    "Creative Commons Attribution Share-Alike"
+    "Creative Commons CCZero"
+    "Creative Commons Non-Commercial (Any)"
+    "GNU Free Documentation License"
+    "Open Data Commons Attribution License"
+    "Open Data Commons Open Database License (ODbL)"
+    "Open Data Commons Public Domain Dedication and License (PDDL)"
+    "Other (Attribution)"
+    "Other (Non-Commercial)"
+    "Other (Not Open)"
+    "Other (Open)"
+    "Other (Public Domain)"
+    "UK Open Government Licence (OGL v2)"
+    "UK Open Government Licence (OGL v3)"})
 
 (def geographies
-  ["Borough"
-   "County"
-   "Country"
-   "Local Authority"
-   "Ward"
-   "LSOA"
-   "MSOA"
-   "Output Area"
-   "Region"])
+  #{"Ward"
+    "Borough"
+    "Local Authority"
+    "Output Area"
+    "LSOA"
+    "MSOA"
+    "County"
+    "Region"
+    "Country"})
+
+(def other-geography
+  "Other (please specify)")
 
 
 (defonce subview-tab (r/atom :overview))
@@ -423,28 +426,65 @@
                                       :on-change #()}])]]))})))
 
 (defn edit-geography
-  [md geographies update-errors]
-  (let [{:keys [kixi.datastore.metadatastore.geography/geography]} @md
-        geo-type        (:kixi.datastore.metadatastore.geography/type geography)
-        geo-level       (:kixi.datastore.metadatastore.geography/level geography)]
-    [editable-field
-     nil
-     [:div.file-edit-metadata
-      [:h3.heading (get-string :string/geography)]
-      (list-any-errors update-errors [:kixi.datastore.metadatastore.geography/geography])
-      (input-wrapper
-       [:h4 (get-string :string/smallest-geography)]
-       [:select {:id  "smallest-geography"
-                 :type "text"
-                 :value geo-level
-                 :placeholder nil
-                 :on-change #(do
-                               (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
-                                                   :kixi.datastore.metadatastore.geography/type] "smallest")
-                               (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
-                                                   :kixi.datastore.metadatastore.geography/level] (.. % -target -value)))}
-       (for [geography (cons "" geographies)]
-         [:option {:key geography :value geography} geography])])]]))
+  [md update-errors]
+  (let [other?          (r/atom false)
+        other-specified (r/atom nil)
+        current-level   (r/atom nil)]
+    (fn [md update-errors]
+      (let [{:keys [kixi.datastore.metadatastore.geography/geography]} @md
+            geo-type  (:kixi.datastore.metadatastore.geography/type geography)
+            geo-level (:kixi.datastore.metadatastore.geography/level geography)]
+        (when-not @current-level
+          (if (contains? geographies geo-level)
+            (reset! current-level geo-level)
+            (do
+              (reset! other? true)
+              (reset! other-specified geo-level)
+              (reset! current-level other-geography))))
+        [editable-field
+         nil
+         [:div.file-edit-metadata.file-edit-geography
+          [:h3.heading (get-string :string/geography)]
+          (list-any-errors update-errors [:kixi.datastore.metadatastore.geography/geography])
+          (input-wrapper
+           [:h4 (get-string :string/smallest-geography)]
+           [:select {:id  "smallest-geography"
+                     :type "text"
+                     :value @current-level
+                     :placeholder nil
+                     :on-change #(let [v (.. % -target -value)]
+                                   (reset! other? (= other-geography v))
+                                   (reset! current-level v)
+                                   (when-not (= other-geography v)
+                                     (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
+                                                         :kixi.datastore.metadatastore.geography/type] "smallest")
+                                     (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
+                                                         :kixi.datastore.metadatastore.geography/level] v)))}
+            (for [geography (conj (vec (cons "" geographies)) other-geography)]
+              [:option {:key geography :value geography} geography])]
+           (when @other?
+             [:div
+              [:h4] ;; hack
+              [:input {:id  "smallest-geog-txt"
+                       :type "text"
+                       :value @other-specified
+                       :placeholder nil
+                       :on-change #(do
+                                     (reset! other-specified (.. % -target -value))
+                                     (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
+                                                         :kixi.datastore.metadatastore.geography/type] "smallest")
+                                     (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
+                                                         :kixi.datastore.metadatastore.geography/level] (.. % -target -value)))}]])
+           #_(when @other?
+               [:input {:id  "smallest-geog-txt"
+                        :type "text"
+                        :value geo-level
+                        :placeholder nil
+                        :on-change #(do
+                                      (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
+                                                          :kixi.datastore.metadatastore.geography/type] "smallest")
+                                      (swap! md assoc-in [:kixi.datastore.metadatastore.geography/geography
+                                                          :kixi.datastore.metadatastore.geography/level] (.. % -target -value)))}]))]]))))
 
 (defn edit-sources
   [md update-errors]
@@ -504,17 +544,19 @@
     (fn [_ _]
       (let [props (data/get-in-app-state :app/datastore :ds/file-properties current)
             {:keys [flags update-errors]} props]
-        [:div.file-edit-metadata-container
+        [:div.file-edit-metadata-content-container
          (edit-title-description local-md update-errors)
          (edit-tags local-md update-errors)
          (edit-license local-md show-license-usage licenses update-errors)
-         [:div.flex
+         [:div.file-edit-metadata-container.flex
           {:style {:align-items :stretch}}
-          [:div
+          [:div.flex-3
            [edit-source-dates local-md update-errors]
-           (edit-geography local-md geographies update-errors)]
-          (edit-sources local-md update-errors)
-          [edit-temporal-coverage local-md update-errors]]
+           [edit-geography local-md update-errors]]
+          [:div.flex-3
+           (edit-sources local-md update-errors)]
+          [:div.flex-3
+           [edit-temporal-coverage local-md update-errors]]]
          (edit-actions local-md flags update-errors)]))))
 
 (def tabs
