@@ -139,8 +139,8 @@
            kixi.datastore.metadatastore.license/license
            kixi.datastore.metadatastore.time/temporal-coverage
            kixi.datastore.metadatastore.geography/geography
-           kixi.datastore.metadatastore/source-created-at
-           kixi.datastore.metadatastore/source-updated-at]} on-edit-fn]
+           kixi.datastore.metadatastore/source-created
+           kixi.datastore.metadatastore/source-updated]} on-edit-fn]
   (let [prov-source     (:kixi.datastore.metadatastore/source provenance)
         prov-created-at (:kixi.datastore.metadatastore/created provenance)
         prov-created-by (:kixi/user provenance)
@@ -178,10 +178,10 @@
                                                             (when tc-to (time/iso-date-as-slash-date tc-to))]))))
         (vec (concat [:tr]
                      (row :string/author (fn [] [:span author]))
-                     (row :string/source-created-at (fn [] [:span source-created-at]))))
+                     (row :string/source-created-at (fn [] [:span (when source-created (time/iso-date-as-slash-date source-created))]))))
         (vec (concat [:tr]
                      (row :string/file-source (fn [] [:span source]))
-                     (row :string/source-updated-at (fn [] [:span source-updated-at]))))]]]]))
+                     (row :string/source-updated-at (fn [] [:span (when source-updated (time/iso-date-as-slash-date source-updated))]))))]]]]))
 
 (defn tags
   [{:keys [kixi.datastore.metadatastore/tags]} on-edit-fn]
