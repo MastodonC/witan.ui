@@ -102,4 +102,4 @@
                    (s/optional-key :ds/error) s/Keyword}
    :app/activities {:activities/log [ActivityLogSchema]
                     :activities/pending {uuid? {:activity s/Keyword
-                                                :state }}}})
+                                                :state s/Any}}}})

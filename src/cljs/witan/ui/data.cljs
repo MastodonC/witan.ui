@@ -146,8 +146,7 @@
    (publish-topic topic {}))
   ([topic args]
    (let [payload (merge {:topic topic} (when args {:args args}))]
-     (go (>! publisher payload))
-     (log/debug "Publishing topic:" payload))))
+     (go (>! publisher payload)))))
 
 (defn subscribe-topic
   [topic cb]
@@ -331,8 +330,8 @@
            :kixi.comms.command/id id
            :kixi.comms.command/payload params}]
     (send-ws! m)
-    (publish-topic :data/command-sent m)))
-
+    (publish-topic :data/command-sent m)
+    m))
 ;;
 
 (defmulti handle-server-message
