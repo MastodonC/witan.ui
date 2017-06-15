@@ -355,7 +355,7 @@
   [k]
   (let [ns (namespace k)
         i (.lastIndexOf ns ".")]
-    (if pos?
+    (if (pos? i)
       (keyword (subs ns 0 i) (name k))
       k)))
 
