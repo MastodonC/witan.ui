@@ -51,6 +51,10 @@
   [md]
   (data/swap-app-state! :app/datastore assoc :ds/file-metadata-editing md))
 
+(defn reset-file-edit-metadata-command!
+  []
+  (data/swap-app-state! :app/datastore assoc :ds/file-metadata-editing-command nil))
+
 (defn save-file-metadata!
   [{:keys [kixi.datastore.metadatastore/id] :as payload}]
   (log/debug "Saving file metadata..." id)
@@ -90,13 +94,6 @@
 (defn get-local-file
   [id]
   (data/get-in-app-state :app/datastore :ds/file-metadata id))
-
-(defn ldiff
-  [a b]
-  (reduce-kv (fn [agg k v]
-               (if (not= v (get b k))
-                 (assoc agg k v)
-                 agg)) {} a))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; API responses
@@ -437,18 +434,23 @@
                   :kixi.group/id (:kixi.group/id group)
                   :kixi.datastore.metadatastore/sharing-update :kixi.datastore.metadatastore/sharing-conj}))
 
+(defn md-key->update-command-key
+  [k]
+  (keyword (str (namespace k) ".update") (name k)))
+
 (defmethod handle
   :metadata-change
   [event {:keys [kixi.datastore.metadatastore/id] :as md}]
-  (let [current-md (data/get-in-app-state :app/datastore :ds/file-metadata id)
-        md-diff (ldiff md current-md)]
-    (when-not (empty? md-diff)
+  (let [md      (data/get-in-app-state :app/datastore :ds/file-metadata-editing)
+        command (data/get-in-app-state :app/datastore :ds/file-metadata-editing-command)]
+    (when-not (empty? command)
+      ;; is this a good order?
       (set-title! (:kixi.datastore.metadatastore/name md))
       (utils/add-file-flag! id :metadata-saving)
       (save-file-metadata! md)
       (reset-file-edit-metadata! md)
-      (data/command! :kixi.datastore.metadatastore/update "1.0.0"
-                     (merge md-diff {:kixi.datastore.metadatastore/id id}))
+      (reset-file-edit-metadata-command!)
+      (data/command! :kixi.datastore.metadatastore/update "1.0.0" (assoc command :kixi.datastore.metadatastore/id id))
       (data/swap-app-state! :app/datastore update-in [:ds/file-properties id] dissoc :update-errors))))
 
 (defmethod handle
@@ -456,13 +458,54 @@
   [event _]
   (let [current (data/get-in-app-state :app/datastore :ds/current)
         md (data/get-in-app-state :app/datastore :ds/file-metadata current)]
-    (reset-file-edit-metadata! md)))
+    (reset-file-edit-metadata! md)
+    (reset-file-edit-metadata-command!)))
+
+(defn kw-op->md-op
+  [operation]
+  (get {:assoc :set
+        :update-conj :conj
+        :update-disj :disj}
+       operation))
+
+(defn kw-op->op-fn
+  [operation path value]
+  (fn [m]
+    (case operation
+      :assoc (assoc-in m path value)
+      :update-conj (update-in m path (comp set conj) value)
+      :update-disj (update-in m path (comp set disj) value))))
+
+(defn kw-op->command-op-fn
+  [operation path value]
+  (fn [old-op]
+    (case operation
+      :assoc (assoc old-op :set value)
+      :update-conj
+      (let [r (if (contains? (:disj old-op) value)
+                (update old-op :disj (comp set disj) value)
+                (update old-op :conj (comp set conj) value))]
+        (if (empty? (:disj r)) (dissoc r :disj) r))
+      :update-disj
+      (let [r (if (contains? (:conj old-op) value)
+                (update old-op :conj (comp set disj) value)
+                (update old-op :disj (comp set conj) value))]
+        (if (empty? (:conj r)) (dissoc r :conj) r)))))
 
 (defmethod handle
   :swap-edit-metadata
-  [event [operation & args]]
-  (let [edit-md (data/get-in-app-state :app/datastore :ds/file-metadata-editing)]
-    (reset-file-edit-metadata! (apply operation edit-md args))))
+  [event [operation path value]]
+  (let [op-fn (kw-op->op-fn operation path value)
+        command-op-fn (kw-op->command-op-fn operation path value)
+        edit-md (data/get-in-app-state :app/datastore :ds/file-metadata-editing)]
+    (reset-file-edit-metadata! (op-fn edit-md))
+    (data/swap-app-state! :app/datastore update-in
+                          (cons :ds/file-metadata-editing-command (map md-key->update-command-key path))
+                          command-op-fn)
+    (data/swap-app-state! :app/datastore update
+                          :ds/file-metadata-editing-command
+                          utils/remove-nil-or-empty-vals))
+  (log/debug "Current command:" (data/get-in-app-state :app/datastore :ds/file-metadata-editing-command)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

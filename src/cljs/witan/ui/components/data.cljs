@@ -280,12 +280,12 @@
                 :type "text"
                 :value name
                 :placeholder nil
-                :on-change #(controller/raise! :data/swap-edit-metadata [assoc :kixi.datastore.metadatastore/name (.. % -target -value)])}]
+                :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/name] (.. % -target -value)])}]
        [:h3 (get-string :string/file-description)]
        [:textarea {:id  "description"
                    :value description
                    :placeholder nil
-                   :on-change #(controller/raise! :data/swap-edit-metadata [assoc :kixi.datastore.metadatastore/description (.. % -target -value)])}])]]))
+                   :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/description] (.. % -target -value)])}])]]))
 
 (defn edit-license
   [md showing-atom licenses update-errors]
@@ -303,16 +303,16 @@
                  :type "text"
                  :value lc-type
                  :placeholder nil
-                 :on-change #(controller/raise! :data/swap-edit-metadata [assoc-in [:kixi.datastore.metadatastore.license/license
-                                                                                    :kixi.datastore.metadatastore.license/type] (.. % -target -value)])}
+                 :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.license/license
+                                                                                  :kixi.datastore.metadatastore.license/type] (.. % -target -value)])}
         (for [license (cons "" licenses)]
           [:option {:key license :value license} license])]
        (if @showing-atom
          [:textarea {:id  "license-usage"
                      :value lc-usage
                      :placeholder (get-string :string/license-usage-placeholder)
-                     :on-change #(controller/raise! :data/swap-edit-metadata [assoc-in [:kixi.datastore.metadatastore.license/license
-                                                                                        :kixi.datastore.metadatastore.license/usage] (.. % -target -value)])}]
+                     :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.license/license
+                                                                                      :kixi.datastore.metadatastore.license/usage] (.. % -target -value)])}]
          [:div.clickable-text
           {:id "license-usage-reveal"
            :on-click #(reset! showing-atom true)}
@@ -332,7 +332,7 @@
           (shared/tag tag identity
                       (fn [v]
                         (controller/raise! :data/swap-edit-metadata
-                                           [update :kixi.datastore.metadatastore/tags #(set (disj % v))])))))
+                                           [:update-disj [:kixi.datastore.metadatastore/tags] v])))))
       (input-wrapper
        [:div.add-tag-container
         [:input {:id  "add-tag-input"
@@ -346,7 +346,7 @@
                                           (when-not (clojure.string/blank? (.. el -value))
                                             (let [v (.. el -value)]
                                               (controller/raise! :data/swap-edit-metadata
-                                                                 [update :kixi.datastore.metadatastore/tags #(set (conj % v))]))
+                                                                 [:update-conj [:kixi.datastore.metadatastore/tags] v]))
                                             (set! (.. el -value) nil)
                                             (.focus el)))))])]]))
 
@@ -361,7 +361,7 @@
   (let [swap-fn (fn [loc]
                   (fn [v]
                     (let [t (time/jstime->date-str (goog.date.DateTime. v))]
-                      (controller/raise! :data/swap-edit-metadata [assoc-in [:kixi.datastore.metadatastore.time/temporal-coverage loc] t]))))
+                      (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.time/temporal-coverage loc] t]))))
         tc-from-el (atom nil)
         tc-to-el (atom nil)]
     (r/create-class
@@ -399,7 +399,7 @@
   (let [swap-fn (fn [loc]
                   (fn [v]
                     (let [t (time/jstime->date-str (goog.date.DateTime. v))]
-                      (controller/raise! :data/swap-edit-metadata [assoc loc t]))))
+                      (controller/raise! :data/swap-edit-metadata [:assoc loc t]))))
         date-created-el (atom nil)
         date-updated-el (atom nil)]
     (r/create-class
@@ -407,10 +407,10 @@
                              (let [opts {:format "DD/MM/YYYY"}]
                                (reset! date-created-el
                                        (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "date-created")
-                                                                          :onSelect (swap-fn :kixi.datastore.metadatastore/source-file-created)}))))
+                                                                          :onSelect (swap-fn [:kixi.datastore.metadatastore/source-file-created])}))))
                                (reset! date-updated-el
                                        (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "date-updated")
-                                                                          :onSelect (swap-fn :kixi.datastore.metadatastore/source-file-updated)}))))))
+                                                                          :onSelect (swap-fn [:kixi.datastore.metadatastore/source-file-updated])}))))))
       :reagent-render (fn [md update-errors]
                         (let [date-created (:kixi.datastore.metadatastore/source-file-created md)
                               date-updated (:kixi.datastore.metadatastore/source-file-updated md)]
@@ -469,10 +469,10 @@
               #(do
                  (reset! other? (= % other-geography))
                  (when-not (= % other-geography)
-                   (controller/raise! :data/swap-edit-metadata [assoc-in [:kixi.datastore.metadatastore.geography/geography
-                                                                          :kixi.datastore.metadatastore.geography/type] "smallest"])
-                   (controller/raise! :data/swap-edit-metadata [assoc-in [:kixi.datastore.metadatastore.geography/geography
-                                                                          :kixi.datastore.metadatastore.geography/level] %]))))
+                   (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
+                                                                        :kixi.datastore.metadatastore.geography/type] "smallest"])
+                   (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
+                                                                        :kixi.datastore.metadatastore.geography/level] %]))))
              (when (or @other? otherx?)
                [:div
                 [:input {:id  "smallest-geog-txt"
@@ -481,10 +481,10 @@
                          :placeholder nil
                          :on-change #(do
                                        (reset! other-specified (.. % -target -value))
-                                       (controller/raise! :data/swap-edit-metadata [assoc-in [:kixi.datastore.metadatastore.geography/geography
-                                                                                              :kixi.datastore.metadatastore.geography/type] "smallest"])
-                                       (controller/raise! :data/swap-edit-metadata [assoc-in [:kixi.datastore.metadatastore.geography/geography
-                                                                                              :kixi.datastore.metadatastore.geography/level] (.. % -target -value)]))}]]))]])))))
+                                       (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
+                                                                                            :kixi.datastore.metadatastore.geography/type] "smallest"])
+                                       (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
+                                                                                            :kixi.datastore.metadatastore.geography/level] (.. % -target -value)]))}]]))]])))))
 
 (defn edit-sources
   [md update-errors]
@@ -504,19 +504,19 @@
                 :type "text"
                 :value author
                 :placeholder nil
-                :on-change #(controller/raise! :data/swap-edit-metadata [assoc :kixi.datastore.metadatastore/author (.. % -target -value)])}]
+                :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/author] (.. % -target -value)])}]
        [:h4 (get-string :string/maintainer)]
        [:input {:id  "maintainer"
                 :type "text"
                 :value maintainer
                 :placeholder nil
-                :on-change #(controller/raise! :data/swap-edit-metadata [assoc :kixi.datastore.metadatastore/maintainer (.. % -target -value)])}]
+                :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/maintainer] (.. % -target -value)])}]
        [:h4 (get-string :string/file-source)]
        [:input {:id  "source"
                 :type "text"
                 :value source
                 :placeholder nil
-                :on-change #(controller/raise! :data/swap-edit-metadata [assoc :kixi.datastore.metadatastore/source (.. % -target -value)])}])]]))
+                :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/source] (.. % -target -value)])}])]]))
 
 (defn edit-actions
   [md flags update-errors]
