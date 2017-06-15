@@ -329,7 +329,10 @@
       (if (zero? (count tags))
         [:i (get-string :string/no-tags)]
         (for [tag tags]
-          (shared/tag tag identity identity)))
+          (shared/tag tag identity
+                      (fn [v]
+                        (controller/raise! :data/swap-edit-metadata
+                                           [update :kixi.datastore.metadatastore/tags #(set (disj % v))])))))
       (input-wrapper
        [:div.add-tag-container
         [:input {:id  "add-tag-input"

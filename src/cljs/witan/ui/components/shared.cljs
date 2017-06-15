@@ -316,7 +316,8 @@
     {:key (str "tag-" tag-string)
      :class (str "shared-tag " (when on-click-fn "shared-tag-clickable"))}
     (when on-cross-fn
-      (icons/close))
+      [:div.tag-close {:on-click #(on-cross-fn tag-string)}
+       (icons/close)])
     [:span tag-string]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

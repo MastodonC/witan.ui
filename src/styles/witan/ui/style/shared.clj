@@ -255,6 +255,8 @@
               :font-size (em 0.9)
               :background-color colour/tag-bg
               :border [[(px 1) 'solid colour/tag-border]]}
+             [:.tag-close
+              {:display :inline}]
              [:i
               {:font-size (px 10)
                :font-weight 700
