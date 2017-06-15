@@ -345,20 +345,29 @@
     (on-metadata-updated payload)))
 
 (defn metadata-invalid-field->error-string
-  [field]
+  [field val]
   (get {:kixi.datastore.metadatastore.license/license (get-string :string/field-invalid-error (get-string :string/license))
-        :kixi.datastore.metadatastore.time/temporal-coverage (get-string :string/field-invalid-error (get-string :string/temporal-coverage))}
+        :kixi.datastore.metadatastore.time/temporal-coverage (get-string :string/field-invalid-error (get-string :string/temporal-coverage))
+        :kixi.datastore.metadatastore/name (get-string :string/field-invalid-error (get-string :string/file-name) (str "(" val ")"))}
        field (get-string :string/unknown-error)))
+
+(defn remove-update-from-key
+  [k]
+  (let [ns (namespace k)
+        i (.lastIndexOf ns ".")]
+    (if pos?
+      (keyword (subs ns 0 i) (name k))
+      k)))
 
 (defn collect-metadata-update-errors
   [{:keys [reason explanation]}]
   (case reason
     :unauthorised {:unauthorised :string/unauthorised-error}
     :invalid (let [{:keys [clojure.spec/problems]} explanation]
-               (into {} (map (fn [{:keys [path]}]
-                               (let [fp (first path)]
+               (into {} (map (fn [{:keys [path val]}]
+                               (let [fp (remove-update-from-key (second path))]
                                  (when (keyword? fp)
-                                   (hash-map fp (metadata-invalid-field->error-string fp))))) problems)))))
+                                   (hash-map fp (metadata-invalid-field->error-string fp val))))) problems)))))
 
 (defmethod on-event
   [:kixi.datastore.metadatastore/update-rejected "1.0.0"]
