@@ -46,3 +46,13 @@
 (defn check-file-flag?
   [id flag]
   (contains? (data/get-in-app-state :app/datastore [:ds/file-properties id :flags]) flag))
+
+(defn remove-nil-or-empty-vals
+  [m]
+  (reduce
+   (fn [a [k v]]
+     (if (or (nil? v)
+             (and (coll? v)
+                  (empty? v)))
+       (dissoc a k)
+       a)) m m))

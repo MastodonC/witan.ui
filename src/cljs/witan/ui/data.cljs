@@ -94,6 +94,7 @@
                     :ds/pending? false
                     :ds/file-metadata {}
                     :ds/file-metadata-editing nil
+                    :ds/file-metadata-editing-command nil
                     :ds/file-properties {}
                     :ds/query-tries 0
                     :ds/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
