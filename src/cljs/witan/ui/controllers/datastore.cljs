@@ -353,11 +353,12 @@
 
 (defn remove-update-from-key
   [k]
-  (let [ns (namespace k)
-        i (.lastIndexOf ns ".")]
-    (if (pos? i)
-      (keyword (subs ns 0 i) (name k))
-      k)))
+  (when (keyword? k)
+    (let [ns (namespace k)
+          i (.lastIndexOf ns ".")]
+      (if (pos? i)
+        (keyword (subs ns 0 i) (name k))
+        k))))
 
 (defn collect-metadata-update-errors
   [{:keys [reason explanation]}]
@@ -365,9 +366,8 @@
     :unauthorised {:unauthorised :string/unauthorised-error}
     :invalid (let [{:keys [clojure.spec/problems]} explanation]
                (into {} (map (fn [{:keys [path val]}]
-                               (let [fp (remove-update-from-key (second path))]
-                                 (when (keyword? fp)
-                                   (hash-map fp (metadata-invalid-field->error-string fp val))))) problems)))))
+                               (when-let [fp (remove-update-from-key (second path))]
+                                 (hash-map fp (metadata-invalid-field->error-string fp val)))) problems)))))
 
 (defmethod on-event
   [:kixi.datastore.metadatastore/update-rejected "1.0.0"]
@@ -513,8 +513,7 @@
                           command-op-fn)
     (data/swap-app-state! :app/datastore update
                           :ds/file-metadata-editing-command
-                          utils/remove-nil-or-empty-vals))
-  (log/debug "Current command:" (data/get-in-app-state :app/datastore :ds/file-metadata-editing-command)))
+                          utils/remove-nil-or-empty-vals)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -407,19 +407,19 @@
                              (let [opts {:format "DD/MM/YYYY"}]
                                (reset! date-created-el
                                        (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "date-created")
-                                                                          :onSelect (swap-fn [:kixi.datastore.metadatastore/source-file-created])}))))
+                                                                          :onSelect (swap-fn [:kixi.datastore.metadatastore/source-created])}))))
                                (reset! date-updated-el
                                        (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "date-updated")
-                                                                          :onSelect (swap-fn [:kixi.datastore.metadatastore/source-file-updated])}))))))
+                                                                          :onSelect (swap-fn [:kixi.datastore.metadatastore/source-updated])}))))))
       :reagent-render (fn [md update-errors]
-                        (let [date-created (:kixi.datastore.metadatastore/source-file-created md)
-                              date-updated (:kixi.datastore.metadatastore/source-file-updated md)]
+                        (let [date-created (:kixi.datastore.metadatastore/source-created md)
+                              date-updated (:kixi.datastore.metadatastore/source-updated md)]
                           [editable-field
                            nil
                            [:div.file-edit-metadata
                             [:h3.heading (get-string :string/source-dates)]
-                            (list-any-errors update-errors [:kixi.datastore.metadatastore/source-file-created
-                                                            :kixi.datastore.metadatastore/source-file-updated])
+                            (list-any-errors update-errors [:kixi.datastore.metadatastore/source-created
+                                                            :kixi.datastore.metadatastore/source-updated])
                             (input-wrapper
                              [:h4 (get-string :string/source-created-at)]
                              [:input {:id  "date-created"
