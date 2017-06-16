@@ -166,10 +166,7 @@
               [:span
                {:margin-left (px 5)}]]
 
-             [:.file-edit-metadata-container
-              [:div.flex-3
-               {:flex [[0.315 1 :auto]]
-                :align-self :auto}]]
+             [:.file-edit-metadata-container]
 
              [:.file-edit-metadata-error-list
               [:.file-edit-metadata-error
@@ -180,10 +177,12 @@
               {:width (percent 100)
                :padding-right (em 1)}
               [:h3 :h4
-               {:margin-bottom (em 0.3)}]
+               {:margin-bottom (em 0.3)
+                :margin-top 0}]
               [:input :textarea :select
                {:width (percent 100)
-                :resize :vertical}]
+                :resize :vertical
+                :margin-bottom (em 1)}]
               [:select
                {:height (px 32)}]
               [:#license-usage
@@ -195,7 +194,8 @@
               [:.add-tag-container
                {:margin-top (em 0.7)}
                [:input
-                {:width (px 120)}]
+                {:width (px 120)
+                 :margin-bottom 0}]
                [:.button-container
                 {:display :inline
                  :width (px 30)}]]]

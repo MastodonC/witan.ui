@@ -208,6 +208,7 @@
    :string/geography                        "Geography"
    :string/smallest-geography               "Smallest Geography"
    :string/temporal-coverage                "Temporal Coverage"
+   :string/time-and-geog-coverage           "Time & Geographical Coverage"
    :string/tags                             "Tags"
    :string/source-created-at                "Source created at"
    :string/source-updated-at                "Source updated at"

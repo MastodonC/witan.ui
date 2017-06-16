@@ -45,6 +45,14 @@
                :align-items :flex-start
                :justify-content :center}]
 
+             [:.flex-3
+              {:flex [[0.315 1 :auto]]
+               :align-self :auto}]
+
+             [:.flex-2
+              {:flex [[0.485 1 :auto]]
+               :align-self :auto}]
+
              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
              ;; Create Workspace
 
