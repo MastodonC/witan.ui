@@ -470,17 +470,13 @@
     (reset-file-edit-metadata! md)
     (reset-file-edit-metadata-command!)))
 
-(defn kw-op->md-op
-  [operation]
-  (get {:assoc :set
-        :update-conj :conj
-        :update-disj :disj}
-       operation))
-
 (defn kw-op->op-fn
   [operation path value]
   (fn [m]
     (case operation
+      :dissoc (if (= 1 (count path))
+                (dissoc m (first path))
+                (update-in m (butlast path) dissoc (last path)))
       :assoc (assoc-in m path value)
       :update-conj (update-in m path (comp set conj) value)
       :update-disj (update-in m path (comp set disj) value))))
@@ -489,7 +485,8 @@
   [operation path value]
   (fn [old-op]
     (case operation
-      :assoc (assoc old-op :set value)
+      :dissoc :rm ;; TODO ideally we'd remove any ':rm' values for keys that don't appear in the original metadata
+      :assoc {:set value}
       :update-conj
       (let [r (if (contains? (:disj old-op) value)
                 (update old-op :disj (comp set disj) value)
@@ -501,10 +498,20 @@
                 (update old-op :disj (comp set conj) value))]
         (if (empty? (:conj r)) (dissoc r :conj) r)))))
 
+(defn conform-op
+  [operation path value]
+  (cond
+    (and (= :assoc operation)
+         (string? value)
+         (clojure.string/blank? value))
+    [:dissoc path nil]
+    :else [operation path value]))
+
 (defmethod handle
   :swap-edit-metadata
-  [event [operation path value]]
-  (let [op-fn (kw-op->op-fn operation path value)
+  [event args]
+  (let [[operation path value] (apply conform-op args)
+        op-fn (kw-op->op-fn operation path value)
         command-op-fn (kw-op->command-op-fn operation path value)
         edit-md (data/get-in-app-state :app/datastore :ds/file-metadata-editing)]
     (reset-file-edit-metadata! (op-fn edit-md))

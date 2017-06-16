@@ -49,10 +49,12 @@
 
 (defn remove-nil-or-empty-vals
   [m]
-  (reduce
-   (fn [a [k v]]
-     (if (or (nil? v)
-             (and (coll? v)
-                  (empty? v)))
-       (dissoc a k)
-       a)) m m))
+  (if (map? m)
+    (reduce
+     (fn [a [k v]]
+       (if (or (nil? v)
+               (and (coll? v)
+                    (empty? v)))
+         (dissoc a k)
+         a)) m m)
+    m))
