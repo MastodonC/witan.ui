@@ -362,57 +362,7 @@
    {:on-click on-click}
    (icons/close :tiny)])
 
-(defn edit-temporal-coverage
-  [md update-errors]
-  (let [swap-fn (fn [loc]
-                  (fn [v]
-                    (let [t (time/jstime->date-str (goog.date.DateTime. v))]
-                      (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.time/temporal-coverage loc] t]))))
-        tc-from-el (atom nil)
-        tc-to-el (atom nil)]
-    (r/create-class
-     {:component-did-mount (fn []
-                             (let [opts {:format "DD/MM/YYYY"}]
-                               (reset! tc-from-el (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "tc-from")
-                                                                                     :onSelect (swap-fn :kixi.datastore.metadatastore.time/from)}))))
-                               (reset! tc-to-el (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "tc-to")
-                                                                                   :onSelect (swap-fn :kixi.datastore.metadatastore.time/to)}))))))
-      :reagent-render (fn [md update-errors]
-                        (let [{:keys [kixi.datastore.metadatastore.time/temporal-coverage]} md
-                              tc-from         (:kixi.datastore.metadatastore.time/from temporal-coverage)
-                              tc-to           (:kixi.datastore.metadatastore.time/to temporal-coverage)]
-                          [editable-field
-                           nil
-                           [:div.file-edit-metadata
-                            [:h3.heading (get-string :string/temporal-coverage)]
-                            (list-any-errors update-errors [:kixi.datastore.metadatastore.time/temporal-coverage])
-                            (input-wrapper
-                             [:div.flex.clear-input
-                              [:h4 (get-string :string/from)]
-                              (when tc-from (clear-input-button
-                                             #(controller/raise! :data/swap-edit-metadata
-                                                                 [:dissoc
-                                                                  [:kixi.datastore.metadatastore.time/temporal-coverage
-                                                                   :kixi.datastore.metadatastore.time/from]])))]
-                             [:input {:id  "tc-from"
-                                      :type "text"
-                                      :value (when tc-from (date-str->pikaday tc-from))
-                                      :placeholder nil
-                                      :on-change #()}]
-                             [:div.flex.clear-input
-                              [:h4 (get-string :string/to)]
-                              (when tc-to (clear-input-button
-                                           #(controller/raise! :data/swap-edit-metadata
-                                                               [:dissoc
-                                                                [:kixi.datastore.metadatastore.time/temporal-coverage
-                                                                 :kixi.datastore.metadatastore.time/to]])))]
-                             [:input {:id  "tc-to"
-                                      :type "text"
-                                      :value (when tc-to (date-str->pikaday tc-to))
-                                      :placeholder nil
-                                      :on-change #()}])]]))})))
-
-(defn edit-source-dates
+(defn edit-source
   [md update-errors]
   (let [swap-fn (fn [loc]
                   (fn [v]
@@ -431,11 +381,37 @@
                                                                           :onSelect (swap-fn [:kixi.datastore.metadatastore/source-updated])}))))))
       :reagent-render (fn [md update-errors]
                         (let [date-created (:kixi.datastore.metadatastore/source-created md)
-                              date-updated (:kixi.datastore.metadatastore/source-updated md)]
+                              date-updated (:kixi.datastore.metadatastore/source-updated md)
+                              {:keys [kixi.datastore.metadatastore/author
+                                      kixi.datastore.metadatastore/maintainer
+                                      kixi.datastore.metadatastore/source]} md]
                           [editable-field
                            nil
                            [:div.file-edit-metadata
-                            [:h3.heading (get-string :string/source-dates)]
+                            [:h2.heading (get-string :string/source-plural)]
+                            (list-any-errors update-errors [:kixi.datastore.metadatastore/author
+                                                            :kixi.datastore.metadatastore/maintainer
+                                                            :kixi.datastore.metadatastore/source])
+                            (input-wrapper
+                             [:h4 (get-string :string/author)]
+                             [:input {:id  "author"
+                                      :type "text"
+                                      :value author
+                                      :placeholder nil
+                                      :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/author] (.. % -target -value)])}]
+                             [:h4 (get-string :string/maintainer)]
+                             [:input {:id  "maintainer"
+                                      :type "text"
+                                      :value maintainer
+                                      :placeholder nil
+                                      :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/maintainer] (.. % -target -value)])}]
+                             [:h4 (get-string :string/file-source)]
+                             [:input {:id  "source"
+                                      :type "text"
+                                      :value source
+                                      :placeholder nil
+                                      :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/source] (.. % -target -value)])}])
+                            [:hr]
                             (list-any-errors update-errors [:kixi.datastore.metadatastore/source-created
                                                             :kixi.datastore.metadatastore/source-updated])
                             (input-wrapper
@@ -461,7 +437,6 @@
                                       :value (when date-updated (date-str->pikaday date-updated))
                                       :placeholder nil
                                       :on-change #()}])]]))})))
-
 (defn edit-geography-input
   [level on-change]
   [:select {:id  "smallest-geography"
@@ -472,79 +447,91 @@
    (for [geography (concat (cons "" geographies) [other-geography])]
      [:option {:key geography :value geography} geography])])
 
-(defn edit-geography
+(defn edit-temporal-coverage-and-geography
   [md update-errors]
   (let [other? (r/atom false)
-        other-specified (r/atom nil)]
-    (add-watch other? :resetter
-               (fn [_ a old new]
-                 (reset! other-specified "")))
-    (fn [md update-errors]
-      (let [{:keys [kixi.datastore.metadatastore.geography/geography]} md
-            geo-type  (:kixi.datastore.metadatastore.geography/type geography)
-            geo-level (:kixi.datastore.metadatastore.geography/level geography)]
-        (let [otherx? (not (or (clojure.string/blank? geo-level)
-                               (contains? (set geographies) geo-level)))]
-          [editable-field
-           nil
-           [:div.file-edit-metadata.file-edit-geography
-            [:h3.heading (get-string :string/geography)]
-            (list-any-errors update-errors [:kixi.datastore.metadatastore.geography/geography])
-            (input-wrapper
-             [:h4 (get-string :string/smallest-geography)]
-             (edit-geography-input
-              (if (or @other? otherx?) other-geography geo-level)
-              #(do
-                 (reset! other? (= % other-geography))
-                 (when-not (= % other-geography)
-                   (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
-                                                                        :kixi.datastore.metadatastore.geography/type] "smallest"])
-                   (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
-                                                                        :kixi.datastore.metadatastore.geography/level] %]))))
-             (when (or @other? otherx?)
-               [:div
-                [:input {:id  "smallest-geog-txt"
-                         :type "text"
-                         :value (or @other-specified geo-level)
-                         :placeholder nil
-                         :on-change #(do
-                                       (reset! other-specified (.. % -target -value))
-                                       (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
-                                                                                            :kixi.datastore.metadatastore.geography/type] "smallest"])
-                                       (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
-                                                                                            :kixi.datastore.metadatastore.geography/level] (.. % -target -value)]))}]]))]])))))
-
-(defn edit-sources
-  [md update-errors]
-  (let [{:keys [kixi.datastore.metadatastore/author
-                kixi.datastore.metadatastore/maintainer
-                kixi.datastore.metadatastore/source]} md]
-    [editable-field
-     nil
-     [:div.file-edit-metadata
-      [:h3.heading (get-string :string/source-plural)]
-      (list-any-errors update-errors [:kixi.datastore.metadatastore/author
-                                      :kixi.datastore.metadatastore/maintainer
-                                      :kixi.datastore.metadatastore/source])
-      (input-wrapper
-       [:h4 (get-string :string/author)]
-       [:input {:id  "author"
-                :type "text"
-                :value author
-                :placeholder nil
-                :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/author] (.. % -target -value)])}]
-       [:h4 (get-string :string/maintainer)]
-       [:input {:id  "maintainer"
-                :type "text"
-                :value maintainer
-                :placeholder nil
-                :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/maintainer] (.. % -target -value)])}]
-       [:h4 (get-string :string/file-source)]
-       [:input {:id  "source"
-                :type "text"
-                :value source
-                :placeholder nil
-                :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/source] (.. % -target -value)])}])]]))
+        other-specified (r/atom nil)
+        swap-fn (fn [loc]
+                  (fn [v]
+                    (let [t (time/jstime->date-str (goog.date.DateTime. v))]
+                      (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.time/temporal-coverage loc] t]))))
+        tc-from-el (atom nil)
+        tc-to-el (atom nil)]
+    (r/create-class
+     {:component-did-mount (fn []
+                             (add-watch other? :resetter
+                                        (fn [_ a old new]
+                                          (reset! other-specified "")))
+                             (let [opts {:format "DD/MM/YYYY"}]
+                               (reset! tc-from-el (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "tc-from")
+                                                                                     :onSelect (swap-fn :kixi.datastore.metadatastore.time/from)}))))
+                               (reset! tc-to-el (js/Pikaday. (clj->js (merge opts {:field (.getElementById js/document "tc-to")
+                                                                                   :onSelect (swap-fn :kixi.datastore.metadatastore.time/to)}))))))
+      :reagent-render (fn [md update-errors]
+                        (let [{:keys [kixi.datastore.metadatastore.time/temporal-coverage]} md
+                              tc-from         (:kixi.datastore.metadatastore.time/from temporal-coverage)
+                              tc-to           (:kixi.datastore.metadatastore.time/to temporal-coverage)
+                              {:keys [kixi.datastore.metadatastore.geography/geography]} md
+                              geo-type  (:kixi.datastore.metadatastore.geography/type geography)
+                              geo-level (:kixi.datastore.metadatastore.geography/level geography)
+                              otherx? (not (or (clojure.string/blank? geo-level)
+                                               (contains? (set geographies) geo-level)))]
+                          [editable-field
+                           nil
+                           [:div.file-edit-metadata
+                            [:h2.heading (get-string :string/time-and-geog-coverage)]
+                            (list-any-errors update-errors [:kixi.datastore.metadatastore.time/temporal-coverage])
+                            (input-wrapper
+                             [:div.flex.clear-input
+                              [:h4 (get-string :string/from)]
+                              (when tc-from (clear-input-button
+                                             #(controller/raise! :data/swap-edit-metadata
+                                                                 [:dissoc
+                                                                  [:kixi.datastore.metadatastore.time/temporal-coverage
+                                                                   :kixi.datastore.metadatastore.time/from]])))]
+                             [:input {:id  "tc-from"
+                                      :type "text"
+                                      :value (when tc-from (date-str->pikaday tc-from))
+                                      :placeholder nil
+                                      :on-change #()}]
+                             [:div.flex.clear-input
+                              [:h4 (get-string :string/to)]
+                              (when tc-to (clear-input-button
+                                           #(controller/raise! :data/swap-edit-metadata
+                                                               [:dissoc
+                                                                [:kixi.datastore.metadatastore.time/temporal-coverage
+                                                                 :kixi.datastore.metadatastore.time/to]])))]
+                             [:input {:id  "tc-to"
+                                      :type "text"
+                                      :value (when tc-to (date-str->pikaday tc-to))
+                                      :placeholder nil
+                                      :on-change #()}])
+                            [:div.file-edit-geography
+                             [:hr]
+                             (list-any-errors update-errors [:kixi.datastore.metadatastore.geography/geography])
+                             (input-wrapper
+                              [:h4 (get-string :string/smallest-geography)]
+                              (edit-geography-input
+                               (if (or @other? otherx?) other-geography geo-level)
+                               #(do
+                                  (reset! other? (= % other-geography))
+                                  (when-not (= % other-geography)
+                                    (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
+                                                                                         :kixi.datastore.metadatastore.geography/type] "smallest"])
+                                    (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
+                                                                                         :kixi.datastore.metadatastore.geography/level] %]))))
+                              (when (or @other? otherx?)
+                                [:div
+                                 [:input {:id  "smallest-geog-txt"
+                                          :type "text"
+                                          :value (or @other-specified geo-level)
+                                          :placeholder nil
+                                          :on-change #(do
+                                                        (reset! other-specified (.. % -target -value))
+                                                        (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
+                                                                                                             :kixi.datastore.metadatastore.geography/type] "smallest"])
+                                                        (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.geography/geography
+                                                                                                             :kixi.datastore.metadatastore.geography/level] (.. % -target -value)]))}]]))]]]))})))
 
 (defn edit-actions
   [md flags update-errors]
@@ -578,13 +565,10 @@
          (edit-license local-md show-license-usage licenses update-errors)
          [:div.file-edit-metadata-container.flex
           {:style {:align-items :stretch}}
-          [:div.flex-3
-           [edit-source-dates local-md update-errors]
-           [edit-geography local-md update-errors]]
-          [:div.flex-3
-           (edit-sources local-md update-errors)]
-          [:div.flex-3
-           [edit-temporal-coverage local-md update-errors]]]
+          [:div.flex-2
+           [edit-source local-md update-errors]]
+          [:div.flex-2
+           [edit-temporal-coverage-and-geography local-md update-errors]]]
          (edit-actions local-md flags update-errors)]))))
 
 (def tabs
