@@ -227,7 +227,7 @@
     [editable-field
      nil
      [:div.file-sharing-detailed
-      [:h2.heading (get-string :string/sharing)]
+      [:h2.heading.space-after (get-string :string/sharing)]
       [:div.sharing-activity
        [:div.selected-groups
         [shared/sharing-matrix activities->string
@@ -324,7 +324,7 @@
     [editable-field
      nil
      [:div.file-edit-metadata
-      [:h2.heading (get-string :string/tags)]
+      [:h2.heading.space-after (get-string :string/tags)]
       (list-any-errors update-errors [:kixi.datastore.metadatastore/tags])
       (if (zero? (count tags))
         [:i (get-string :string/no-tags)]
@@ -356,6 +356,12 @@
         [month day] (split-at 2 rest)]
     (str (apply str day) "/" (apply str month) "/" (apply str year))))
 
+(defn clear-input-button
+  [on-click]
+  [:span.clickable-text
+   {:on-click on-click}
+   (icons/close :tiny)])
+
 (defn edit-temporal-coverage
   [md update-errors]
   (let [swap-fn (fn [loc]
@@ -381,13 +387,25 @@
                             [:h3.heading (get-string :string/temporal-coverage)]
                             (list-any-errors update-errors [:kixi.datastore.metadatastore.time/temporal-coverage])
                             (input-wrapper
-                             [:h4 (get-string :string/from)]
+                             [:div.flex.clear-input
+                              [:h4 (get-string :string/from)]
+                              (when tc-from (clear-input-button
+                                             #(controller/raise! :data/swap-edit-metadata
+                                                                 [:dissoc
+                                                                  [:kixi.datastore.metadatastore.time/temporal-coverage
+                                                                   :kixi.datastore.metadatastore.time/from]])))]
                              [:input {:id  "tc-from"
                                       :type "text"
                                       :value (when tc-from (date-str->pikaday tc-from))
                                       :placeholder nil
                                       :on-change #()}]
-                             [:h4 (get-string :string/to)]
+                             [:div.flex.clear-input
+                              [:h4 (get-string :string/to)]
+                              (when tc-to (clear-input-button
+                                           #(controller/raise! :data/swap-edit-metadata
+                                                               [:dissoc
+                                                                [:kixi.datastore.metadatastore.time/temporal-coverage
+                                                                 :kixi.datastore.metadatastore.time/to]])))]
                              [:input {:id  "tc-to"
                                       :type "text"
                                       :value (when tc-to (date-str->pikaday tc-to))
@@ -421,13 +439,23 @@
                             (list-any-errors update-errors [:kixi.datastore.metadatastore/source-created
                                                             :kixi.datastore.metadatastore/source-updated])
                             (input-wrapper
-                             [:h4 (get-string :string/source-created-at)]
+                             [:div.flex.clear-input
+                              [:h4 (get-string :string/source-created-at)]
+                              (when date-created (clear-input-button
+                                                  #(controller/raise! :data/swap-edit-metadata
+                                                                      [:dissoc
+                                                                       [:kixi.datastore.metadatastore/source-created]])))]
                              [:input {:id  "date-created"
                                       :type "text"
                                       :value (when date-created (date-str->pikaday date-created))
                                       :placeholder nil
                                       :on-change #()}]
-                             [:h4 (get-string :string/source-updated-at)]
+                             [:div.flex.clear-input
+                              [:h4 (get-string :string/source-updated-at)]
+                              (when date-updated (clear-input-button
+                                                  #(controller/raise! :data/swap-edit-metadata
+                                                                      [:dissoc
+                                                                       [:kixi.datastore.metadatastore/source-updated]])))]
                              [:input {:id  "date-updated"
                                       :type "text"
                                       :value (when date-updated (date-str->pikaday date-updated))

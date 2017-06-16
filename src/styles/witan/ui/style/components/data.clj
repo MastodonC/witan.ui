@@ -120,111 +120,113 @@
              [:.sharing-controls
               [:.sharing-activity
                [:.selected-groups
-                {:margin [[(em 0.5) (em 0)]]}]]]]
+                {:margin [[(em 0.5) (em 0)]]}]]]
 
-            [:.file-title
-             {:margin [[(em 0.0) (em 0.2)]]
-              :line-height (em 1.6)
-              :white-space :nowrap
-              :overflow :hidden
-              :text-overflow :ellipsis}]
-
-            [:.file-metadata-table
-             {:width (percent 100)
-              :display :flex
-              :justify-content :space-around
-              :padding-right (em 1)}
-             [:.row-title {:width (percent 15)}]
-             [:.row-value {:width (percent 35)}]
-             [:table
-              {:margin-bottom (em 2)
-               :width (percent 100)}]]
-
-            [:.file-description
-             {:font-family fonts/base-fonts}]
-
-            [:.file-tags
-             [:h3
+             [:.file-title
               {:margin [[(em 0.0) (em 0.2)]]
-               :margin-bottom (em 0.2)
-               :line-height (em 1.6)}]]
+               :line-height (em 1.6)
+               :white-space :nowrap
+               :overflow :hidden
+               :text-overflow :ellipsis}]
 
-            [:.file-sharing
-             [:h3
-              {:margin [[(em 0.0) (em 0.2)]]
-               :line-height (em 1.6)}]]
-
-            [:.file-sharing-detailed
-             {:width (percent 100)
-              :margin-right (em 1)}]
-
-            [:.file-actions
-             {:width (percent 100)
-              :display :flex
-              :justify-contents :flex-start
-              :align-items :center}
-             [:span
-              {:margin-left (px 5)}]]
-
-            [:.file-edit-metadata-container
-             [:div.flex-3
-              {:flex [[0.315 1 :auto]]
-               :align-self :auto}]]
-
-            [:.file-edit-metadata-error-list
-             [:.file-edit-metadata-error
-              [:i
-               {:margin-right (px 2)}]]]
-
-            [:.file-edit-metadata
-             {:width (percent 100)
-              :padding-right (em 1)}
-             [:h3 :h4
-              {:margin-bottom (em 0.3)}]
-             [:input :textarea :select
+             [:.file-metadata-table
               {:width (percent 100)
-               :resize :vertical}]
-             [:select
-              {:height (px 32)}]
-             [:#license-usage
-              {:margin-top (em 0.6)}]
-             [:#license-usage-reveal
-              {:margin-left (em 0.3)}]
-             [:.add-tag-container
-              {:margin-top (em 0.7)}
+               :display :flex
+               :justify-content :space-around
+               :padding-right (em 1)}
+              [:.row-title {:width (percent 15)}]
+              [:.row-value {:width (percent 35)}]
+              [:table
+               {:margin-bottom (em 2)
+                :width (percent 100)}]]
+
+             [:.file-description
+              {:font-family fonts/base-fonts}]
+
+             [:.file-tags
+              [:h3
+               {:margin [[(em 0.0) (em 0.2)]]
+                :margin-bottom (em 0.2)
+                :line-height (em 1.6)}]]
+
+             [:.file-sharing
+              [:h3
+               {:margin [[(em 0.0) (em 0.2)]]
+                :line-height (em 1.6)}]]
+
+             [:.file-sharing-detailed
+              {:width (percent 100)
+               :margin-right (em 1)}]
+
+             [:.file-actions
+              {:width (percent 100)
+               :display :flex
+               :justify-contents :flex-start
+               :align-items :center}
+              [:span
+               {:margin-left (px 5)}]]
+
+             [:.file-edit-metadata-container
+              [:div.flex-3
+               {:flex [[0.315 1 :auto]]
+                :align-self :auto}]]
+
+             [:.file-edit-metadata-error-list
+              [:.file-edit-metadata-error
+               [:i
+                {:margin-right (px 2)}]]]
+
+             [:.file-edit-metadata
+              {:width (percent 100)
+               :padding-right (em 1)}
+              [:h3 :h4
+               {:margin-bottom (em 0.3)}]
+              [:input :textarea :select
+               {:width (percent 100)
+                :resize :vertical}]
+              [:select
+               {:height (px 32)}]
+              [:#license-usage
+               {:margin-top (em 0.6)}]
+              [:#license-usage-reveal
+               {:margin-left (em 0.3)}]
+              [:.flex.clear-input
+               {:align-items :flex-end}]
+              [:.add-tag-container
+               {:margin-top (em 0.7)}
+               [:input
+                {:width (px 120)}]
+               [:.button-container
+                {:display :inline
+                 :width (px 30)}]]]
+
+             [:.file-edit-geography
               [:input
-               {:width (px 120)}]
-              [:.button-container
-               {:display :inline
-                :width (px 30)}]]]
+               {:margin-top (em 0.3)}]]
 
-            [:.file-edit-geography
-             [:input
-              {:margin-top (em 0.3)}]]
+             [:.editable-field
+              {:padding [[(em 1) (px 0) (em 1) (em 1)]]
+               :margin-bottom (em 1)
+               ;;:width (percent 100)
+               :line-height (em 1.7)
+               :border-color colour/subtle-grey
+               :border-radius (px 2)
+               :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]}
+              [:&:hover
+               {}]
+              [:span.clickable-text.edit-label
+               {:font-size (px 12)
+                :height (em 0.75)
+                :line-height (em 0.75)
+                :position :absolute
+                :right (px 20)}]
+              [:.heading
+               {:margin-top (em 0)}]
 
-            [:.editable-field
-             {:padding [[(em 1) (px 0) (em 1) (em 1)]]
-              :margin-bottom (em 1)
-              ;;:width (percent 100)
-              :line-height (em 1.7)
-              :border-color colour/subtle-grey
-              :border-radius (px 2)
-              :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]}
-             [:&:hover
-              {}]
-             [:span.clickable-text.edit-label
-              {:font-size (px 12)
-               :height (em 0.75)
-               :line-height (em 0.75)
-               :position :absolute
-               :right (px 20)}]
-             [:.heading
-              {:margin [[(em 0) (em 0) (em 1) (em 0)]]}]
-
-             [:.editable-field-content
-              {:display :flex
-               :justify-content :space-between
-               :vertical-align :bottom
-               :align-items :flex-end}]]
-            [:.editable-field-editing
-             {}]])
+              [:.editable-field-content
+               {:display :flex
+                :justify-content :space-between
+                :vertical-align :bottom
+                :align-items :flex-end}]]
+             [:.editable-field-editing
+              {}]]])

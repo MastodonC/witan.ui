@@ -127,6 +127,10 @@
             [:.btn-success
              {:background-color colour/success
               :color 'white}]
+;;;;;;;;;;;;;;
+
+            [:.space-after
+             {:margin-bottom (em 1)}]
 
 ;;;;;;;;;;;;;;
 
