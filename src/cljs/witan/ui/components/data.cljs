@@ -389,6 +389,7 @@
                            nil
                            [:div.file-edit-metadata
                             [:h2.heading (get-string :string/source-plural)]
+                            [:span.intro (get-string :string/file-edit-metadata-source-intro)]
                             (list-any-errors update-errors [:kixi.datastore.metadatastore/author
                                                             :kixi.datastore.metadatastore/maintainer
                                                             :kixi.datastore.metadatastore/source])

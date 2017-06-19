@@ -228,7 +228,8 @@
    :string/unknown-error                    "An unknown error occurred and the operation could not be completed."
    :string/field-invalid-error              "The following field supplied an invalid value: "
    :string/md-not-saved-due-to-errors       "The metadata could not be saved due to one or more invalid values."
-   :string/no-description                   "No description was provided."} )
+   :string/no-description                   "No description was provided."
+   :string/file-edit-metadata-source-intro  "This section allows you to record who creates, maintains and publishes the data, when the data was originally published or created, and when it was last updated."} )
 
 
 (defn resolve-string
