@@ -214,16 +214,15 @@
   [editable-field
    nil
    [:div.file-actions
-    [:a {:href (str
-                (if (:gateway/secure? data/config) "https://" "http://")
-                (or (:gateway/address data/config) "localhost:30015")
-                "/download?id="
-                current)
-         :target "_blank"}
-     (shared/button {:icon icons/tick
-                     :id :download
-                     :txt :string/file-actions-download-file
-                     :prevent? true} #())]]])
+    (shared/button {:icon icons/tick
+                    :id :download
+                    :txt :string/file-actions-download-file
+                    :prevent? true} #(set! (.. js/window -location -href)
+                                           (str
+                                            (if (:gateway/secure? data/config) "https://" "http://")
+                                            (or (:gateway/address data/config) "localhost:30015")
+                                            "/download?id="
+                                            current)))]])
 
 (defn sharing-detailed
   [{:keys [kixi.datastore.metadatastore/sharing kixi.datastore.metadatastore/id]} has-edit?]
