@@ -6,7 +6,7 @@
 
 (defn query-param
   [k]
-  (-> (data/get-app-state :app/route) :route/query (get k)))
+  (data/get-in-app-state :app/route :route/query k))
 
 (defn query-param-int
   ([k]

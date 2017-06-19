@@ -3,9 +3,13 @@
             [cljs-time.core :as t]
             [cljs-time.format :as tf]))
 
+(defn hours-offset
+  []
+  (- (/ (.getTimezoneOffset (js/Date.)) 60)))
+
 (defn iso-time-as-moment
   [time]
-  (let [hoffset (- (/ (.getTimezoneOffset (js/Date.)) 60))]
+  (let [hoffset (hours-offset)]
     (.calendar (.add (.locale (js/moment. (str time) "YYYYMMDD HHmmss")
                               (.-language js/navigator))
                      hoffset "hours"))))
