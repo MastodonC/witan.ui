@@ -35,7 +35,8 @@
 
   :plugins [[lein-figwheel "0.5.4-3" :exclusions [org.clojure/tools.reader]]
             [lein-cljsbuild "1.1.2" :exclusions [[org.clojure/clojure]]]
-            [lein-garden "0.2.6"]]
+            [lein-garden "0.2.6"]
+            [lein-doo "0.1.7"]]
 
   :profiles {:uberjar {:auto-clean false}
              :data {:source-paths ["data-src"]
