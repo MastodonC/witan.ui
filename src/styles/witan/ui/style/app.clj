@@ -47,11 +47,13 @@
 
              [:.flex-3
               {:flex [[0.315 1 :auto]]
-               :align-self :auto}]
+               :align-self :auto
+               :width 0}]
 
              [:.flex-2
-              {:flex [[0.485 1 :auto]]
-               :align-self :auto}]
+              {:flex [[0.493 1 :auto]]
+               :align-self :auto
+               :width 0}]
 
              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
              ;; Create Workspace

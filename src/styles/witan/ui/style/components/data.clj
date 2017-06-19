@@ -222,6 +222,12 @@
                 :right (px 20)}]
               [:.heading
                {:margin-top (em 0)}]
+              [:.intro
+               {:line-height (em 1.5)
+                :display :block
+                :font-size (px 11)
+                :color 'dimgrey
+                :margin-bottom (em 1)}]
 
               [:.editable-field-content
                {:display :flex
