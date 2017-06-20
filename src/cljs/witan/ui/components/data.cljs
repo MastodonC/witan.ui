@@ -210,14 +210,19 @@
                (gstring/format (get-string :string/sharing-summary) unique-count))]]]))
 
 (defn actions
-  []
+  [current]
   [editable-field
    nil
    [:div.file-actions
     (shared/button {:icon icons/tick
                     :id :download
                     :txt :string/file-actions-download-file
-                    :prevent? true} identity)]])
+                    :prevent? true} #(set! (.. js/window -location -href)
+                                           (str
+                                            (if (:gateway/secure? data/config) "https://" "http://")
+                                            (or (:gateway/address data/config) "localhost:30015")
+                                            "/download?id="
+                                            current)))]])
 
 (defn sharing-detailed
   [{:keys [kixi.datastore.metadatastore/sharing kixi.datastore.metadatastore/id]} has-edit?]
@@ -668,7 +673,7 @@
                   (metadata md go-to-edit)
                   (tags md go-to-edit)
                   (sharing md go-to-sharing)
-                  (when can-download? (actions))])]]]))))))
+                  (when can-download? (actions current))])]]]))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
