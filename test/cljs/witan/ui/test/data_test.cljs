@@ -30,43 +30,27 @@
     (data/reset-app-state! :app/user {:bar 3})
     (is (= 3 (data/get-in-app-state :app/user :bar)))))
 
-;; TODO need to fix async testing!??!?!?!
-;; https://github.com/clojure/clojurescript/wiki/Testing#async-testing
-#_(deftest pubsub-test
-    (let [result (atom nil)]
+#_(deftest async-test
+    (let [result (atom nil)
+          foo (chan)]
       (async done
-             (data/subscribe-topic :foo #(reset! result %))
              (go
-               (data/publish-topic :foo 123)
-               (loop [tries 5]
-                 (if (pos? tries)
-                   (if-not (= 123 @result)
-                     (recur (dec tries))
-                     (done))
-                   (done)))))
-      (is (= 123 @result))))
+               (>! foo 123))
+             (go
+               (reset! result (<! foo))
+               (is (= 123 @result))
+               (done)))))
 
-(deftest async-test
-  (let [result (atom nil)
-        foo (chan)]
-    (async done
-           (go
-             (>! foo 123))
-           (go
-             (reset! result (<! foo))
-             (is (= 123 @result))
-             (done)))))
-
-(deftest async-test2
+(deftest pubsub-test
+  "Cant fully test the pubsub code due to async test weirdness"
   (let [result (atom nil)
         subscriber (chan)
-        payload {:topic :foo :args 123}
-        cb #(reset! result %)]
+        payload 123
+        cb #(reset! result (:args %))]
     (async done
            (sub data/publication :foo subscriber)
            (go
              (cb (<! subscriber))
              (is (= payload @result))
              (done))
-           (go
-             (>! data/publisher payload)))))
+           (data/publish-topic :foo payload))))

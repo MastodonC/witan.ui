@@ -6,6 +6,7 @@
            [witan.ui.test.strings-test]
            [witan.ui.test.route-test]
            [witan.ui.test.data-test]
+           [witan.ui.test.controllers.datastore-test]
            ;;
            [witan.ui.route :as route]
            [accountant.core :as accountant]))
@@ -20,4 +21,5 @@
            'witan.ui.test.time-test
            'witan.ui.test.strings-test
            'witan.ui.test.route-test
-           'witan.ui.test.data-test)
+           'witan.ui.test.data-test
+           'witan.ui.test.controllers.datastore-test)
