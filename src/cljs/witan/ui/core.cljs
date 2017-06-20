@@ -50,7 +50,4 @@
 ;;
 
 (defn on-js-reload
-  []
-  #_(.forceUpdate (-> login-reconciler :state @deref :root))
-  #_(.forceUpdate (-> side-reconciler :state @deref :root))
-  #_(.forceUpdate (-> app-reconciler :state @deref :root)))
+  [])

@@ -139,29 +139,27 @@
 (def publisher (chan))
 (def publication (pub publisher #(:topic %)))
 
-(def topics
-  #{:data/app-state-restored
-    :data/route-changed
-    :data/user-logged-in
-    :data/event-received})
-
 (defn publish-topic
   ([topic]
    (publish-topic topic {}))
   ([topic args]
-   (if (contains? topics topic)
-     (let [payload (merge {:topic topic} (when (not-empty args) {:args args}))]
-       (go (>! publisher (merge {:topic topic} (when (not-empty args) {:args args}))))
-       (log/debug "Publishing topic:" payload))
-     (log/severe "Couldn't publish topic" topic "because it's not on the whitelist."))))
+   (let [payload (merge {:topic topic} (when args {:args args}))]
+     (go (>! publisher payload))
+     (log/debug "Publishing topic:" payload))))
 
 (defn subscribe-topic
   [topic cb]
-  (let [subscriber (chan)
-        _ (sub publication topic subscriber)]
+  (let [subscriber (chan)]
+    (sub publication topic subscriber)
     (go-loop []
       (cb (<! subscriber))
       (recur))))
+
+(defn subscribe-topic*
+  [topic cb]
+  (let [subscriber (chan)
+        _ (sub publication topic subscriber)]
+    (go (cb (<! subscriber)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Cookies
@@ -430,23 +428,3 @@
           (log/warn "Websocket connection failed")
           (time/sleep 2000)
           (recur))))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Data Mutations - we should remove as many of these are possible
-
-(defmulti mutate
-  (fn [f _] f))
-
-;;;;;;;;;;;;;;;;;;;;;;;
-;; login state changes
-
-(defmethod mutate 'login/goto-phase!
-  [_ {:keys [phase]}]
-  (log/debug "Remove me!!")
-  (swap-app-state! :app/login assoc-in [:login/phase] phase))
-
-;;;;
-
-(defn transact!
-  [f args]
-  (mutate f args))

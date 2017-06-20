@@ -249,8 +249,8 @@
   (if (contains? strings keywd)
     (let [r (resolve-string keywd)]
       (if add
-        (str r (first add) (clojure.string/join " " (concat " " (rest add))))
+        (clojure.string/join " " (cons (str r (first add)) (rest add)))
         r))
     (do
-      (log/severe "Failed to find string " (str keywd))
+      (log/warn "Failed to find string " (str keywd))
       "## ERROR ##")))

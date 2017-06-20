@@ -35,7 +35,8 @@
 
   :plugins [[lein-figwheel "0.5.4-3" :exclusions [org.clojure/tools.reader]]
             [lein-cljsbuild "1.1.2" :exclusions [[org.clojure/clojure]]]
-            [lein-garden "0.2.6"]]
+            [lein-garden "0.2.6"]
+            [lein-doo "0.1.7"]]
 
   :profiles {:uberjar {:auto-clean false}
              :data {:source-paths ["data-src"]
@@ -84,6 +85,11 @@
                            :externs ["../js/externs.js"]
                            :optimizations :advanced
                            :pretty-print false
+                           :warnings {:single-segment-namespace false}}}
+               {:id "test"
+                :source-paths ["src/cljs" "test/cljs"]
+                :compiler {:main witan.ui.runner
+                           :output-to "resources/public/js/compiled/testable.js"
                            :warnings {:single-segment-namespace false}}}]}
 
   :garden {:builds [{;; Optional name of the build:
@@ -110,4 +116,6 @@
                   ["change" "version" "leiningen.release/bump-version"]
                   ["vcs" "commit"]
                   ["vcs" "push"]]
-  :aliases {"upload-data" ["with-profile" "data" "run" "-m" "witan.ui.upload-data"]})
+  :aliases {"upload-data" ["with-profile" "data" "run" "-m" "witan.ui.upload-data"]
+            "test" ["doo" "phantom" "test" "once"]
+            "test-auto" ["doo" "phantom" "test" "auto"]})

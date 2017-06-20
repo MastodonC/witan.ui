@@ -66,5 +66,3 @@
 (defn PUT* [method {:keys [params] :as args}]
   (log/debug "PUT" method params)
   (ajax/PUT method args))
-
-;; {"Authorization" (str "Token " @api-token)}

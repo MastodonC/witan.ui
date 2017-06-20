@@ -48,8 +48,10 @@
     (data/swap-app-state! :app/datastore update :ds/file-properties dissoc id)))
 
 (defn reset-file-edit-metadata!
-  [md]
-  (data/swap-app-state! :app/datastore assoc :ds/file-metadata-editing md))
+  ([]
+   (reset-file-edit-metadata! nil))
+  ([md]
+   (data/swap-app-state! :app/datastore assoc :ds/file-metadata-editing md)))
 
 (defn reset-file-edit-metadata-command!
   []
@@ -251,8 +253,7 @@
     (send-single-file-item-query! id)
     (reset-properties! id)
     (select-current! id)
-    (set-title! :string/title-data-loading)
-    ))
+    (set-title! :string/title-data-loading)))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -354,10 +355,12 @@
 (defn remove-update-from-key
   [k]
   (when (keyword? k)
-    (let [ns (namespace k)
-          i (.lastIndexOf ns ".")]
+    (let [up ".update"
+          upl (count up)
+          ns (or (namespace k) "")
+          i (.lastIndexOf ns up)]
       (if (pos? i)
-        (keyword (subs ns 0 i) (name k))
+        (keyword (str (subs ns 0 i) (subs ns (+ i upl))) (name k))
         k))))
 
 (defn collect-metadata-update-errors
@@ -445,7 +448,9 @@
 
 (defn md-key->update-command-key
   [k]
-  (keyword (str (namespace k) ".update") (name k)))
+  (if (and (keyword? k) (namespace k))
+    (keyword (str (namespace k) ".update") (name k))
+    k))
 
 (defmethod handle
   :metadata-change
@@ -482,7 +487,7 @@
       :update-disj (update-in m path (comp set disj) value))))
 
 (defn kw-op->command-op-fn
-  [operation path value]
+  [operation _ value]
   (fn [old-op]
     (case operation
       :dissoc :rm ;; TODO ideally we'd remove any ':rm' values for keys that don't appear in the original metadata
