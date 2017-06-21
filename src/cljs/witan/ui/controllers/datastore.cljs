@@ -2,6 +2,7 @@
   (:require [schema.core :as s]
             [witan.ui.ajax :as ajax]
             [witan.ui.data :as data]
+            [witan.ui.activities :as activities]
             [witan.ui.utils :as utils]
             [witan.ui.time :as time]
             [cljs-time.core :as t]
@@ -285,8 +286,7 @@
                                        (data/swap-app-state! :app/create-data assoc
                                                              :cd/pending-message
                                                              {:message :string/uploading
-                                                              :progress upload-frac})
-                                       (log/debug "progress" upload-frac))
+                                                              :progress upload-frac}))
                   :handler (partial api-response {:event :upload :status :success :id id})
                   :error-handler (partial api-response {:event :upload :status :failure})}))))
 
@@ -411,7 +411,11 @@
   (data/swap-app-state! :app/create-data assoc :cd/pending-data data)
   (data/swap-app-state! :app/create-data assoc :cd/pending-message {:message :string/preparing-upload
                                                                     :progress 0})
-  (data/command! :kixi.datastore.filestore/create-upload-link "1.0.0" nil))
+  (activities/start-activity!
+   :upload-file
+   (data/command! :kixi.datastore.filestore/create-upload-link "1.0.0" nil)
+   {:failed #(gstring/format (get-string :string.activity.upload-file/failed) (:info-name data))
+    :completed #(gstring/format (get-string :string.activity.upload-file/completed) (:info-name data))}))
 
 (defmethod handle
   :sharing-change

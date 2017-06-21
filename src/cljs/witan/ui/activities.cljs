@@ -1,5 +1,6 @@
 (ns witan.ui.activities
   (:require [witan.ui.data :as data]
+            [witan.ui.time :as t]
             [automat.core :as a]
             [cljs.core.async :refer [chan put! close!]])
   (:require-macros [cljs-log.core :as log]))
@@ -60,16 +61,32 @@
   (get compiled-activities a))
 
 (defn start-activity!
-  [activity message]
+  [activity message reporters]
+  (assert (every? fn? (vals reporters)))
   (if-let [command-id (:kixi.comms.command/id message)]
     (try
-      (let [state (a/advance (activity-fsm activity) :pending message)]
+      (let [state (a/advance (activity-fsm activity) :pending message)
+            id (random-uuid)]
         (data/swap-app-state! :app/activities assoc-in [:activities/pending command-id] {:activity activity
-                                                                                         :state state}))
-      (data/publish-topic :activity/activity-started {:message message :activity activity})
+                                                                                         :state state
+                                                                                         :reporters reporters
+                                                                                         :id id})
+        (data/publish-topic :activity/activity-started {:message message :activity activity})
+        (log/debug "Started activity" activity id))
       (catch js/Error e
         (log/severe "Failed to start activity" activity "- message did not match fsm")))
     (log/severe "Failed to start activity" activity "- message did not contain a command ID")))
+
+(defn- finish-activity!
+  [final-message result command-id]
+  (let [{:keys [activity reporters id]} (data/get-in-app-state :app/activities :activities/pending command-id)
+        reporter (get reporters result)]
+    (data/swap-app-state! :app/activities update :activities/pending dissoc command-id)
+    (data/swap-app-state! :app/activities update :activities/log conj {:status result
+                                                                       :message (when reporter (reporter final-message))
+                                                                       :time (t/jstime->str)})
+    (data/publish-topic :activity/activity-finished {:message final-message :activity activity :result result})
+    (log/debug "Finished activity" activity id)))
 
 (defn process-event
   [{:keys [args]}]
@@ -82,9 +99,7 @@
               (do
                 (data/swap-app-state! :app/activities assoc-in [:activities/pending command-id :state] new-state)
                 (data/publish-topic :activity/activity-progressed {:message args :activity activity}))
-              (do
-                (data/swap-app-state! :app/activities update :activities/pending dissoc command-id)
-                (data/publish-topic :activity/activity-finished {:message args :activity activity :result value}))))
+              (finish-activity! args value command-id)))
           (catch js/Error e))
         (when (next activities)
           (recur (next activities)))))))
@@ -102,9 +117,7 @@
                                     (assoc existing :state new-state))
               (data/swap-app-state! :app/activities update :activities/pending dissoc command-id)
               (data/publish-topic :activity/activity-progressed {:message args :activity activity}))
-            (do
-              (data/swap-app-state! :app/activities update :activities/pending dissoc command-id)
-              (data/publish-topic :activity/activity-finished {:message args :activity activity :result value}))))
+            (finish-activity! args value command-id)))
         (catch js/Error e
           (when (next activities)
             (recur (next activities))))))))

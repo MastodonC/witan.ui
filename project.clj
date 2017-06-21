@@ -86,6 +86,7 @@
                            :externs ["../js/externs.js"]
                            :optimizations :advanced
                            :pretty-print false
+                           :closure-defines {goog.DEBUG false}
                            :warnings {:single-segment-namespace false}}}
                {:id "test"
                 :source-paths ["src/cljs" "test/cljs"]

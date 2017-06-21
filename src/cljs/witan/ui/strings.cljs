@@ -52,6 +52,7 @@
    :string/tooltip-logout                   "Log out from your account"
    :string/tooltip-help                     "Get help"
    :string/tooltip-request-to-share         "Request that datasets be shared with you or a group you belong to"
+   :string/tooltip-activity                 "View your recent activity"
    :string/data                             "Datasets"
    :string/workspace-noun-plural            "Workspaces"
    :string/workspace-dash-title             :string/workspace-noun-plural
@@ -229,7 +230,10 @@
    :string/field-invalid-error              "The following field supplied an invalid value: "
    :string/md-not-saved-due-to-errors       "The metadata could not be saved due to one or more invalid values."
    :string/no-description                   "No description was provided."
-   :string/file-edit-metadata-source-intro  "This section allows you to record who creates, maintains and publishes the data, when the data was originally published or created, and when it was last updated."} )
+   :string/file-edit-metadata-source-intro  "This section allows you to record who creates, maintains and publishes the data, when the data was originally published or created, and when it was last updated."
+   ;;
+   :string.activity.upload-file/failed      "You failed to upload the file '%s'."
+   :string.activity.upload-file/completed   "You successfully uploaded the file '%s'."})
 
 
 (defn resolve-string

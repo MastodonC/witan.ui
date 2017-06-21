@@ -18,7 +18,8 @@
 
 (def config {:gateway/secure? (or (boolean (cljs-env :witan-api-secure)) false)
              :gateway/address (or (cljs-env :witan-api-url) "localhost:30015")
-             :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")})
+             :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")
+             :debug? ^boolean goog.DEBUG})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -59,7 +60,8 @@
    {:app/side {:side/upper [#_[:button :workspaces]
                             [:button :data]
                             #_[:button :rts]]
-               :side/lower [[:button :help]
+               :side/lower [[:button :activity]
+                            [:button :help]
                             [:button :logout]]}
     :app/login {:login/pending? false
                 :login/token nil
@@ -146,7 +148,8 @@
    (publish-topic topic {}))
   ([topic args]
    (let [payload (merge {:topic topic} (when args {:args args}))]
-     (go (>! publisher payload)))))
+     (go (>! publisher payload))
+     (log/debug "Publishing topic:" payload))))
 
 (defn subscribe-topic
   [topic cb]

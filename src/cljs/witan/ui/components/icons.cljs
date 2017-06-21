@@ -192,14 +192,9 @@
   [& args]
   (apply create-key "undo" args))
 
-(defn title
+(defn activity
   [& args]
-  (let [[a b] (apply create-key "format_title" args)]
-    [a {:style {:margin-left (str (- 24 192) "px")}} b]))
-
-(defn description
-  [& args]
-  (apply create-key "message_text_outline" args))
+  (apply create-key "history" args))
 
 
 ;;
@@ -269,8 +264,7 @@
                     ["warning"       warning]
                     ["file"          file]
                     ["retry"         retry]
-                    ["title"         title]
-                    ["description"   description]]]
+                    ["activity"      activity]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div

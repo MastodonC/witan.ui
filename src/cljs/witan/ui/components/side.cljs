@@ -22,7 +22,8 @@
        :data        icons/data
        :rts         icons/request-to-share
        :help        icons/help
-       :logout      icons/logout}
+       :logout      icons/logout
+       :activity    icons/activity}
       id) props)))
 
 (defn navigate!
@@ -42,7 +43,9 @@
     :help       {:fnc #(controller/raise! :intercom/open-new)
                  :tooltip :string/tooltip-help}
     :logout     {:fnc #(controller/raise! :user/logout)
-                 :tooltip :string/tooltip-logout}}
+                 :tooltip :string/tooltip-logout}
+    :activity   {:fnc (partial navigate! :app/data-dash)
+                 :tooltip :string/tooltip-activity}}
    id))
 
 (defn add-side-elements!
