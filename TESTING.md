@@ -35,4 +35,5 @@ Until there is an automated way to run acceptance tests the only way to catch re
 | Can the user edit sharing details on a file they have permissions on? | The user can adjust the sharing details, reload the file and observe that the edit has persisted.|
 | Is the user prevented from editing metadata on a file for which they don't have permission? | The user is not presented with any options to edit the metadata and cannot navigate to the 'Edit' view.|
 | Is the user prevented from editing sharing details on a file for which they don't have permission? | The user is not presented with any options to adjust the sharing details and cannot use the search facility of the 'Sharing' view.|
+| Is the user prevented from downloading a file for which they don't have permission? | The user is not presented with the download button and cannot download the file.|
 | Does loading a file take < 1s? | When navigating from the dashboard to a file, the loading icon spins for no more than 1s. | Does saving metadata take < 3.5s? | When hitting 'Save' after editing metadata, the button should stay disabled for no more than 3.5s. |
