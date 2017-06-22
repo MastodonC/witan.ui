@@ -101,12 +101,13 @@
 (defn- finish-activity!
   [final-message result command-id]
   (let [{:keys [activity reporters id]} (data/get-in-app-state :app/activities :activities/pending command-id)
-        reporter (get reporters result)]
+        reporter (get reporters result)
+        log-message (when reporter (reporter final-message))]
     (data/swap-app-state! :app/activities update :activities/pending dissoc command-id)
     (data/swap-app-state! :app/activities update :activities/log conj {:status result
-                                                                       :message (when reporter (reporter final-message))
+                                                                       :message log-message
                                                                        :time (t/jstime->str)})
-    (data/publish-topic :activity/activity-finished {:message final-message :activity activity :result result})
+    (data/publish-topic :activity/activity-finished {:log log-message :message final-message :activity activity :result result})
     (log/debug "Finished activity" activity id)
     (js/setTimeout #(data/save-data!) 1000)))
 

@@ -168,10 +168,6 @@
   [& args]
   (apply create-key "done" args))
 
-(defn tick-circle
-  [& args]
-  (apply create-key "check_circle" args))
-
 (defn schema
   [& args]
   (apply create-key "assignment" args))
@@ -265,7 +261,6 @@
                     ["tick-circle"   tick-circle]
                     ["schema"        schema]
                     ["email"         email]
-                    ["tick-circle"   tick-circle]
                     ["warning"       warning]
                     ["file"          file]
                     ["retry"         retry]
