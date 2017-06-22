@@ -168,6 +168,10 @@
   [& args]
   (apply create-key "done" args))
 
+(defn tick-circle
+  [& args]
+  (apply create-key "check_circle" args))
+
 (defn schema
   [& args]
   (apply create-key "assignment" args))
@@ -246,7 +250,7 @@
                     ["grain"         grain ]
                     ["cake"          cake]
                     ["download"      download]
-                    ["pie chart"     pie-chart]
+                    ["pie-chart"     pie-chart]
                     ["link"          link]
                     ["tree-arrow-down" tree-arrow-down]
                     ["unchecked"     unchecked]
@@ -258,6 +262,7 @@
                     ["organisation"  organisation]
                     ["delete"        delete]
                     ["tick"          tick]
+                    ["tick-circle"   tick-circle]
                     ["schema"        schema]
                     ["email"         email]
                     ["tick-circle"   tick-circle]

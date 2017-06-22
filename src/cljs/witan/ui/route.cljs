@@ -25,7 +25,8 @@
                "/rts/"       {"create"        :app/rts-create
                               "dashboard"     :app/request-to-share
                               [:id ""]        :app/rts
-                              [:id "/submit"] :app/rts-submit}}
+                              [:id "/submit"] :app/rts-submit}
+               "/activity" {""                :app/activity}}
 
         "reset" {""  default-view
                  "/" default-view}
