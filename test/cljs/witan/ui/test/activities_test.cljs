@@ -7,6 +7,10 @@
 (deftest extract-command-event-signal-test
   (is (= {:kixi.comms.command/key :foo} (a/extract-command-event-signal {:kixi.comms.command/key :foo})))
   (is (= {:kixi.comms.event/key :foo} (a/extract-command-event-signal {:kixi.comms.event/key :foo})))
+  (is (= {:kixi.comms.event/key :foo
+          :kixi.comms.event/payload {:kixi.datastore.communication-specs/file-metadata-update-type :bar}}
+         (a/extract-command-event-signal {:kixi.comms.event/key :foo
+                                          :kixi.comms.event/payload {:kixi.datastore.communication-specs/file-metadata-update-type :bar}})))
   (is (nil? (a/extract-command-event-signal {:kixi/key :foo}))))
 
 (deftest normal-completion-test
