@@ -20,24 +20,45 @@
 ;;   activities, be aware of commands that appear in existing activities as this could occurr.
 ;;   The code will simply give the new state to the first FSM it comes across that's expecting
 ;;   that command, so long as the activity is pending.
-;;
-;; TODO - add tests for activities
+;;   Note: Adjust `extract-command-event-signal` to further select messages
 
 (def available-activities
-  {:upload-file [{:kixi.comms.command/key :kixi.datastore.filestore/create-upload-link}
-                 {:kixi.comms.event/key   :kixi.datastore.filestore/upload-link-created}
-                 {:kixi.comms.command/key :kixi.datastore.filestore/create-file-metadata}
+  {:upload-file [{:kixi.comms.command/key  :kixi.datastore.filestore/create-upload-link}
+                 {:kixi.comms.event/key    :kixi.datastore.filestore/upload-link-created}
+                 {:kixi.comms.command/key  :kixi.datastore.filestore/create-file-metadata}
                  (a/or
                   [{:kixi.comms.event/key  :kixi.datastore.file/created} (a/$ :completed)]
-                  [{:kixi.comms.event/key  :kixi.datastore.file-metadata/rejected} (a/$ :failed)])]})
+                  [{:kixi.comms.event/key  :kixi.datastore.file-metadata/rejected} (a/$ :failed)])]
+   ;;
+   :update-metadata [{:kixi.comms.command/key  :kixi.datastore.metadatastore/update}
+                     (a/or
+                      [{:kixi.comms.event/key  :kixi.datastore.file-metadata/updated
+                        :kixi.comms.event/payload {:kixi.datastore.communication-specs/file-metadata-update-type :kixi.datastore.communication-specs/file-metadata-update}}
+                       (a/$ :completed)]
+                      [{:kixi.comms.event/key  :kixi.datastore.metadatastore/update-rejected} (a/$ :failed)])]
+   ;;
+   :update-sharing [{:kixi.comms.command/key  :kixi.datastore.metadatastore/sharing-change}
+                    (a/or
+                     [{:kixi.comms.event/key  :kixi.datastore.file-metadata/updated
+                       :kixi.comms.event/payload {:kixi.datastore.communication-specs/file-metadata-update-type :kixi.datastore.communication-specs/file-metadata-sharing-updated}}
+                      (a/$ :completed)]
+                     [{:kixi.comms.event/key  :kixi.datastore.metadatastore/sharing-change-rejected} (a/$ :failed)])]})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn extract-command-event-signal
   [m]
   (cond
+    ;; commands
     (contains? m :kixi.comms.command/key)
     (select-keys m [:kixi.comms.command/key])
+    ;; events with `file-metadata-update-type` in the payload
+    (and (contains? m :kixi.comms.event/key)
+         (contains? m :kixi.comms.event/payload)
+         (contains? (:kixi.comms.event/payload m) :kixi.datastore.communication-specs/file-metadata-update-type))
+    (merge (select-keys m [:kixi.comms.event/key])
+           {:kixi.comms.event/payload (select-keys (:kixi.comms.event/payload m) [:kixi.datastore.communication-specs/file-metadata-update-type])})
+    ;; events
     (contains? m :kixi.comms.event/key)
     (select-keys m [:kixi.comms.event/key])))
 
@@ -86,7 +107,8 @@
                                                                        :message (when reporter (reporter final-message))
                                                                        :time (t/jstime->str)})
     (data/publish-topic :activity/activity-finished {:message final-message :activity activity :result result})
-    (log/debug "Finished activity" activity id)))
+    (log/debug "Finished activity" activity id)
+    (js/setTimeout #(data/save-data!) 1000)))
 
 (defn process-event
   [{:keys [args]}]
@@ -94,6 +116,7 @@
     (loop [[command-id {:keys [activity state]}] (first activities)]
       (if (= command-id (:kixi.comms.command/id args))
         (try
+          (log/debug "TRYING" args)
           (let [{:keys [value] :as new-state} (a/advance (activity-fsm activity) state args)]
             (if (= :pending value)
               (do

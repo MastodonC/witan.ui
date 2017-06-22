@@ -197,6 +197,7 @@
    :string/file-upload-unknown-error        "An unknown error occurred whilst uploading your file. Please contact support."
    :string/file-upload-metadata-invalid     "The name and/or description field provided was rejected by the system. Please ensure that only standard characters are used (A-Z, a-z, 0-9, spaces, tabs, punctuation). If the problem persists, please contact support."
    :string/license                          "License"
+   :string/license-info                     "License Information"
    :string/license-type                     "License Type"
    :string/license-usage                    "License Usage"
    :string/license-usage-reveal             "Add additional license usage information"
@@ -235,8 +236,12 @@
    :string/activity-desc                    "All your activity in this session"
    :string/no-activity                      "There has been no activity recorded in this session"
    ;;
-   :string.activity.upload-file/failed      "You failed to upload the file '%s'."
-   :string.activity.upload-file/completed   "You successfully uploaded the file '%s'."})
+   :string.activity.upload-file/failed          "You failed to upload the file '%s'."
+   :string.activity.upload-file/completed       "You successfully uploaded the file '%s'."
+   :string.activity.update-metadata/failed      "You failed to update the metadata for file '%s' (%s) - %s"
+   :string.activity.update-metadata/completed   "You successfully updated the metadata for file '%s' (%s)"
+   :string.activity.update-sharing/failed       "You failed to update the sharing details for file '%s'"
+   :string.activity.update-sharing/completed    "You successfully updated the sharing details for file '%s' (%s: %s)"})
 
 
 (defn resolve-string
