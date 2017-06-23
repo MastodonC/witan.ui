@@ -263,7 +263,6 @@
 (defn list-any-errors
   [update-errors ks]
   (when-let [ers (not-empty (select-keys update-errors ks))]
-    (log/debug "!!!!!" ers)
     [:div.file-edit-metadata-error-list
      (for [error ers]
        [:div.file-edit-metadata-error
