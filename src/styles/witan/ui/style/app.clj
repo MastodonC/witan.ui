@@ -8,91 +8,113 @@
 (def switcher-height 28)
 
 (def style [[:#app
-             {:background-color colour/body-bg}
+             {:background-color colour/body-bg}]
 
              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-             ;; General
+            ;; General
 
-             [:button.pure-button
-              {:align-self :center
-               :box-shadow [[(px 2) (px 2) (px 4) colour/box-shadow]]}
-              [:.material-icons
-               {:vertical-align :middle}]
-              [:i
-               {:margin [[(px -3) (px 0) (px 0) (px 0)]]}]
-              [:span
-               {:margin-left (px 5)}]]
+            [:button.pure-button
+             {:align-self :center
+              :box-shadow [[(px 2) (px 2) (px 4) colour/box-shadow]]}
+             [:.material-icons
+              {:vertical-align :middle}]
+             [:i
+              {:margin [[(px -3) (px 0) (px 0) (px 0)]]}]
+             [:span
+              {:margin-left (px 5)}]]
 
-             [:hr
-              {:height 0
-               :margin [[(px 15) (px 0)]]
-               :overflow :hidden
-               :background :transparent
-               :border 0
-               :border-bottom [[(px 1) 'solid "#ddd"]]}]
+            [:hr
+             {:height 0
+              :margin [[(px 15) (px 0)]]
+              :overflow :hidden
+              :background :transparent
+              :border 0
+              :border-bottom [[(px 1) 'solid "#ddd"]]}]
 
-             [:.padded-content
-              {:padding [[(em 1) (em 1)]]
-               :margin (em 1)}]
+            [:.padded-content
+             {:padding [[(em 1) (em 1)]]
+              :margin (em 1)}]
 
-             [:.flex
-              {:display :flex
-               :align-items :flex-start
-               :justify-content :space-between}]
+            [:.flex
+             {:display :flex
+              :align-items :flex-start
+              :justify-content :space-between}]
 
-             [:.flex-center
-              {:display :flex
-               :align-items :flex-start
-               :justify-content :center}]
+            [:.flex-center
+             {:display :flex
+              :align-items :flex-start
+              :justify-content :center}]
 
-             [:.flex-3
-              {:flex [[0.315 1 :auto]]
-               :align-self :auto
-               :width 0}]
+            [:.flex-vcenter
+             {:display :flex
+              :align-items :center
+              :justify-content :space-between}]
 
-             [:.flex-2
-              {:flex [[0.493 1 :auto]]
-               :align-self :auto
-               :width 0}]
+            [:.flex-3
+             {:flex [[0.315 1 :auto]]
+              :align-self :auto
+              :width 0}]
+
+            [:.flex-2
+             {:flex [[0.493 1 :auto]]
+              :align-self :auto
+              :width 0}]
 
              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-             ;; Create Workspace
+            ;; Create Workspace
 
-             [:#create-workspace
-              [:#content
-               {:padding [[(em 0) (em 1)]]
-                :max-width (px 700)}
-               [:h2
-                [:em
-                 {:font-size (px 12)
-                  :margin-left (px 5)
-                  :font-style :normal
-                  :color 'gray}]]
+            [:#create-workspace
+             [:#content
+              {:padding [[(em 0) (em 1)]]
+               :max-width (px 700)}
+              [:h2
+               [:em
+                {:font-size (px 12)
+                 :margin-left (px 5)
+                 :font-style :normal
+                 :color 'gray}]]
+              [:button
+               {:background-color colour/button-create
+                :color colour/body-bg}]]]
+
+             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+            ;; Create RTS
+
+            [:.user-list :.schema-list
+             {:display :block}
+             [:& :table
+              {:border "none"}
+              [:thead :th
+               {:background-color colour/switcher-bg}]
+              [:td :th
+               {:border "none"}]]
+             [:.user-list-item :.schema-list-item
+              {:margin-bottom (em 0.4)}
+              [:.button-container
+               {:display :inline
+                :margin-right (em 0.6)}
                [:button
-                {:background-color colour/button-create
-                 :color colour/body-bg}]]]
+                {:background-color colour/button-view
+                 :color colour/button-create}]]]]
 
-             ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-             ;; Create RTS
+            [:.loading
+             {:width pc100
+              :height pc100
+              :background-color colour/body-bg
+              :position :absolute
+              :top (em 2)
+              :display :table
+              :text-align :center}
+             [:div
+              {:display :table-cell
+               :vertical-align :middle}]]
 
-             [:.user-list :.schema-list
-              {:display :block}
-              [:& :table
-               {:border "none"}
-               [:thead :th
-                {:background-color colour/switcher-bg}]
-               [:td :th
-                {:border "none"}]]
-              [:.user-list-item :.schema-list-item
-               {:margin-bottom (em 0.4)}
-               [:.button-container
-                {:display :inline
-                 :margin-right (em 0.6)}
-                [:button
-                 {:background-color colour/button-view
-                  :color colour/button-create}]]]]
-
-             [:.loading
+            [:#split
+             {:height pc100
+              :width  pc100
+              :top (px 0)
+              :position :absolute}
+             [:#loading
               {:width pc100
                :height pc100
                :background-color colour/body-bg
@@ -103,67 +125,50 @@
               [:div
                {:display :table-cell
                 :vertical-align :middle}]]
+             [:#loading-modal
+              {:width pc100
+               :height pc100
+               :position :absolute
+               :top (em 4)
+               :display :table
+               :text-align :center}]]
 
-             [:#split
-              {:height pc100
-               :width  pc100
-               :top (px 0)
-               :position :absolute}
-              [:#loading
-               {:width pc100
-                :height pc100
-                :background-color colour/body-bg
-                :position :absolute
-                :top (em 2)
-                :display :table
-                :text-align :center}
-               [:div
-                {:display :table-cell
-                 :vertical-align :middle}]]
-              [:#loading-modal
-               {:width pc100
-                :height pc100
-                :position :absolute
-                :top (em 4)
-                :display :table
-                :text-align :center}]]
+            [:#primary
+             [:#heading
+              {:margin-left (px 96)
+               :position :fixed
+               :top (px 0)}
+              [:h1
+               {:margin-top (em 0.5)
+                :background-color colour/body-bg}]]
+             [:#overlay
+              {:margin (px 8)
+               :position :absolute
+               :top (px 0)}]
+             [:div#container
+              {:width pc100
+               :height pc100
+               :overflow :hidden}]
+             [:#primary-content
+              {:width pc100
+               :height pc100
+               :position :relative
+               :display :flex}]]
 
-             [:#primary
-              [:#heading
-               {:margin-left (px 96)
-                :position :fixed
-                :top (px 0)}
-               [:h1
-                {:margin-top (em 0.5)
-                 :background-color colour/body-bg}]]
-              [:#overlay
-               {:margin (px 8)
-                :position :absolute
-                :top (px 0)}]
-              [:div#container
-               {:width pc100
-                :height pc100
-                :overflow :hidden}]
-              [:#primary-content
-               {:width pc100
-                :height pc100
-                :position :relative
-                :display :flex}]]
-
-             [:#secondary
-              [:div.secondary-outer-container
-               {:height (percent 100)
-                :position :relative}]
-              [:div.secondary-container
-               {:top (px (+ 2 switcher-height))
-                :overflow :auto
-                :position :absolute
-                :bottom (px 0)
-                :right (px 0)
-                :left (px 0)}]]
-             [:#secondary-left :#secondary-right
+            [:#secondary
+             [:div.secondary-outer-container
               {:height (percent 100)
-               :float :left}]]
+               :position :relative}]
+             [:div.secondary-container
+              {:top (px (+ 2 switcher-height))
+               :overflow :auto
+               :position :absolute
+               :bottom (px 0)
+               :right (px 0)
+               :left (px 0)}]]
+            [:#secondary-left :#secondary-right
+             {:height (percent 100)
+              :float :left}]
 
             [:.primary-switcher
              {:height (px (+ (* switcher-padding 2) switcher-icon-dx))

@@ -2,9 +2,11 @@
   (:require [schema.core :as s]
             [witan.ui.ajax :as ajax]
             [witan.ui.data :as data]
+            [witan.ui.activities :as activities]
             [witan.ui.utils :as utils]
             [witan.ui.time :as time]
             [cljs-time.core :as t]
+            [inflections.core :as i]
             [cljs-time.format :as tf]
             [witan.ui.route :as route]
             [witan.ui.strings :refer [get-string]]
@@ -62,8 +64,7 @@
   (log/debug "Saving file metadata..." id)
   (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload)
   (when (= id (data/get-in-app-state :app/datastore :ds/file-metadata-editing :kixi.datastore.metadatastore/id))
-    (reset-file-edit-metadata! payload))
-  (data/save-data!))
+    (reset-file-edit-metadata! payload)))
 
 (defn selected-groups->sharing-activities
   [groups activities]
@@ -285,8 +286,7 @@
                                        (data/swap-app-state! :app/create-data assoc
                                                              :cd/pending-message
                                                              {:message :string/uploading
-                                                              :progress upload-frac})
-                                       (log/debug "progress" upload-frac))
+                                                              :progress upload-frac}))
                   :handler (partial api-response {:event :upload :status :success :id id})
                   :error-handler (partial api-response {:event :upload :status :failure})}))))
 
@@ -331,6 +331,10 @@
 
 (defmethod on-metadata-updated
   :kixi.datastore.communication-specs/file-metadata-created
+  [args])
+
+(defmethod on-metadata-updated
+  :kixi.datastore.communication-specs/file-metadata-sharing-updated
   [args])
 
 (defmethod on-metadata-updated
@@ -411,40 +415,62 @@
   (data/swap-app-state! :app/create-data assoc :cd/pending-data data)
   (data/swap-app-state! :app/create-data assoc :cd/pending-message {:message :string/preparing-upload
                                                                     :progress 0})
-  (data/command! :kixi.datastore.filestore/create-upload-link "1.0.0" nil))
+  (activities/start-activity!
+   :upload-file
+   (data/command! :kixi.datastore.filestore/create-upload-link "1.0.0" nil)
+   {:failed #(gstring/format (get-string :string.activity.upload-file/failed) (:info-name data))
+    :completed #(gstring/format (get-string :string.activity.upload-file/completed) (:info-name data))}))
 
 (defmethod handle
   :sharing-change
   [event {:keys [current activity target-state group] :as data}]
-  (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current
-                                                  :kixi.datastore.metadatastore/sharing activity]
-                        (fn [groups]
-                          (vec (let [g-set (set groups)]
-                                 (if target-state
-                                   (conj g-set group)
-                                   (disj g-set group))))))
-  (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
-                 {:kixi.datastore.metadatastore/id current
-                  :kixi.datastore.metadatastore/activity activity
-                  :kixi.group/id (:kixi.group/id group)
-                  :kixi.datastore.metadatastore/sharing-update (if target-state
-                                                                 :kixi.datastore.metadatastore/sharing-conj
-                                                                 :kixi.datastore.metadatastore/sharing-disj)}))
+  (let [md (data/get-in-app-state :app/datastore :ds/file-metadata current)]
+    (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current
+                                                    :kixi.datastore.metadatastore/sharing activity]
+                          (fn [groups]
+                            (vec (let [g-set (set groups)]
+                                   (if target-state
+                                     (conj g-set group)
+                                     (disj g-set group))))))
+    (activities/start-activity!
+     :update-sharing
+     (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
+                    {:kixi.datastore.metadatastore/id current
+                     :kixi.datastore.metadatastore/activity activity
+                     :kixi.group/id (:kixi.group/id group)
+                     :kixi.datastore.metadatastore/sharing-update (if target-state
+                                                                    :kixi.datastore.metadatastore/sharing-conj
+                                                                    :kixi.datastore.metadatastore/sharing-disj)})
+     {:failed #(gstring/format (get-string :string.activity.update-sharing/failed)
+                               (:kixi.datastore.metadatastore/name md))
+      :completed #(gstring/format (get-string :string.activity.update-sharing/completed)
+                                  (:kixi.datastore.metadatastore/name md)
+                                  (i/capitalize (:kixi.group/type group))
+                                  (:kixi.group/name group))})))
 
 (defmethod handle
   :sharing-add-group
   [event {:keys [current group] :as data}]
-  (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current
-                                                  :kixi.datastore.metadatastore/sharing
-                                                  :kixi.datastore.metadatastore/meta-read]
-                        (fn [groups]
-                          (let [g-set (set groups)]
-                            (conj g-set group))))
-  (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
-                 {:kixi.datastore.metadatastore/id current
-                  :kixi.datastore.metadatastore/activity :kixi.datastore.metadatastore/meta-read
-                  :kixi.group/id (:kixi.group/id group)
-                  :kixi.datastore.metadatastore/sharing-update :kixi.datastore.metadatastore/sharing-conj}))
+  (let [md (data/get-in-app-state :app/datastore :ds/file-metadata current)]
+    (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current
+                                                    :kixi.datastore.metadatastore/sharing
+                                                    :kixi.datastore.metadatastore/meta-read]
+                          (fn [groups]
+                            (let [g-set (set groups)]
+                              (conj g-set group))))
+    (activities/start-activity!
+     :update-sharing
+     (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
+                    {:kixi.datastore.metadatastore/id current
+                     :kixi.datastore.metadatastore/activity :kixi.datastore.metadatastore/meta-read
+                     :kixi.group/id (:kixi.group/id group)
+                     :kixi.datastore.metadatastore/sharing-update :kixi.datastore.metadatastore/sharing-conj})
+     {:failed #(gstring/format (get-string :string.activity.update-sharing/failed)
+                               (:kixi.datastore.metadatastore/name md))
+      :completed #(gstring/format (get-string :string.activity.update-sharing/completed)
+                                  (:kixi.datastore.metadatastore/name md)
+                                  (i/capitalize (:kixi.group/type group))
+                                  (:kixi.group/name group))})))
 
 (defn md-key->update-command-key
   [k]
@@ -452,11 +478,32 @@
     (keyword (str (namespace k) ".update") (name k))
     k))
 
+(defn command-field->string-key
+  [k]
+  (get {:kixi.datastore.metadatastore.time.update/temporal-coverage :string/time-and-geog-coverage
+        :kixi.datastore.metadatastore.geography.update/geography :string/time-and-geog-coverage
+        :kixi.datastore.metadatastore.update/source-created :string/source-dates
+        :kixi.datastore.metadatastore.update/source-updated :string/source-dates
+        :kixi.datastore.metadatastore.license.update/license :string/license-info
+        :kixi.datastore.metadatastore.update/tags :string/tags
+        :kixi.datastore.metadatastore.update/author :string/author
+        :kixi.datastore.metadatastore.update/name :string/file-name
+        :kixi.datastore.metadatastore.update/source :string/file-source
+        :kixi.datastore.metadatastore.update/maintainer :string/maintainer
+        :kixi.datastore.metadatastore.update/description :string/file-description} k nil))
+
 (defmethod handle
   :metadata-change
   [event {:keys [kixi.datastore.metadatastore/id] :as md}]
   (let [md      (data/get-in-app-state :app/datastore :ds/file-metadata-editing)
-        command (data/get-in-app-state :app/datastore :ds/file-metadata-editing-command)]
+        orig-md (data/get-in-app-state :app/datastore :ds/file-metadata id)
+        command (data/get-in-app-state :app/datastore :ds/file-metadata-editing-command)
+        field-string (->> command
+                          (keys)
+                          (keep command-field->string-key)
+                          (set)
+                          (map get-string)
+                          (clojure.string/join ", "))]
     (when-not (empty? command)
       ;; is this a good order?
       (set-title! (:kixi.datastore.metadatastore/name md))
@@ -464,8 +511,17 @@
       (save-file-metadata! md)
       (reset-file-edit-metadata! md)
       (reset-file-edit-metadata-command!)
-      (data/command! :kixi.datastore.metadatastore/update "1.0.0" (assoc command :kixi.datastore.metadatastore/id id))
-      (data/swap-app-state! :app/datastore update-in [:ds/file-properties id] dissoc :update-errors))))
+      (data/swap-app-state! :app/datastore update-in [:ds/file-properties id] dissoc :update-errors)
+      (activities/start-activity!
+       :update-metadata
+       (data/command! :kixi.datastore.metadatastore/update "1.0.0" (assoc command :kixi.datastore.metadatastore/id id))
+       {:failed #(gstring/format (get-string :string.activity.update-metadata/failed)
+                                 (:kixi.datastore.metadatastore/name orig-md)
+                                 field-string
+                                 (name (get-in % [:kixi.comms.event/payload :reason])))
+        :completed #(gstring/format (get-string :string.activity.update-metadata/completed)
+                                    (:kixi.datastore.metadatastore/name md)
+                                    field-string)}))))
 
 (defmethod handle
   :reset-edit-metadata

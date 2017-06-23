@@ -11,6 +11,7 @@
             [witan.ui.components.create-rts :as create-rts]
             [witan.ui.components.create-data :as create-data]
             [witan.ui.components.data :as data-view]
+            [witan.ui.components.activities :as activities]
             [witan.ui.components.panic :refer [panic-screen]]
             [witan.ui.utils :as utils]
             [witan.ui.data :as data]
@@ -27,7 +28,8 @@
    :app/create-workspace create-ws/view
    :app/request-to-share rts-dash/view
    :app/rts-create       create-rts/view
-   :app/rts              rts/view})
+   :app/rts              rts/view
+   :app/activity         activities/view})
 
 (defn root-view
   []

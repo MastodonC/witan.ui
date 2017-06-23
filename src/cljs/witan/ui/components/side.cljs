@@ -13,18 +13,6 @@
    [devcards.core :as dc :refer [defcard]]
    [cljs-log.core :as log]))
 
-(defn get-icon
-  [id]
-  (let [props [:medium]]
-    (apply
-     (get
-      {:workspaces  icons/workspace
-       :data        icons/data
-       :rts         icons/request-to-share
-       :help        icons/help
-       :logout      icons/logout}
-      id) props)))
-
 (defn navigate!
   [route current-route]
   (when-not (= route current-route)
@@ -34,15 +22,23 @@
   [id]
   (get
    {:workspaces {:fnc (partial navigate! :app/workspace-dash)
-                 :tooltip :string/tooltip-workspace}
+                 :tooltip :string/tooltip-workspace
+                 :icon icons/workspace}
     :data       {:fnc (partial navigate! :app/data-dash)
-                 :tooltip :string/tooltip-data}
+                 :tooltip :string/tooltip-data
+                 :icon icons/data}
     :rts        {:fnc (partial navigate! :app/request-to-share)
-                 :tooltip :string/tooltip-request-to-share}
+                 :tooltip :string/tooltip-request-to-share
+                 :icon icons/request-to-share}
     :help       {:fnc #(controller/raise! :intercom/open-new)
-                 :tooltip :string/tooltip-help}
+                 :tooltip :string/tooltip-help
+                 :icon icons/help}
     :logout     {:fnc #(controller/raise! :user/logout)
-                 :tooltip :string/tooltip-logout}}
+                 :tooltip :string/tooltip-logout
+                 :icon icons/logout}
+    :activity   {:fnc (partial navigate! :app/activity)
+                 :tooltip :string/tooltip-activity
+                 :icon icons/activity}}
    id))
 
 (defn add-side-elements!
@@ -52,7 +48,7 @@
      {:key element-key}
      (condp = element-type
        :button
-       (let [{:keys [route tooltip fnc]} (get-details element-key)]
+       (let [{:keys [route tooltip fnc icon]} (get-details element-key)]
          [:div.side-link
           {:on-click #(when fnc
                         (fnc current-route))
@@ -65,7 +61,7 @@
            :data-ot-contain-in-viewport false
            ;;
            :style {:pointer-events (if disabled? "none" "auto")}}
-          (get-icon element-key)])
+          (icon :medium)])
        :hr [:hr])]))
 
 (defn side-bar

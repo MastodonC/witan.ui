@@ -18,7 +18,8 @@
 
 (def config {:gateway/secure? (or (boolean (cljs-env :witan-api-secure)) false)
              :gateway/address (or (cljs-env :witan-api-url) "localhost:30015")
-             :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")})
+             :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")
+             :debug? ^boolean goog.DEBUG})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -59,7 +60,8 @@
    {:app/side {:side/upper [#_[:button :workspaces]
                             [:button :data]
                             #_[:button :rts]]
-               :side/lower [[:button :help]
+               :side/lower [[:button :activity]
+                            [:button :help]
                             [:button :logout]]}
     :app/login {:login/pending? false
                 :login/token nil
@@ -101,7 +103,9 @@
                                     :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
                                     :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)}
                     :ds/locked-activities [:kixi.datastore.metadatastore/meta-update
-                                           :kixi.datastore.metadatastore/meta-read]}}
+                                           :kixi.datastore.metadatastore/meta-read]}
+    :app/activities {:activities/log []
+                     :activities/pending {}}}
    (s/validate ws/AppStateSchema)
    (atomize-map)))
 
@@ -328,8 +332,9 @@
            :kixi.comms.command/version version
            :kixi.comms.command/id id
            :kixi.comms.command/payload params}]
-    (send-ws! m)))
-
+    (send-ws! m)
+    (publish-topic :data/command-sent m)
+    m))
 ;;
 
 (defmulti handle-server-message

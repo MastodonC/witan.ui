@@ -43,6 +43,18 @@
   {uuid? {(s/optional-key :flags) #{s/Keyword}
           (s/optional-key :update-errors) {s/Keyword s/Str}}})
 
+(def ActivityLogSchema
+  {:status (s/enum :completed :failed)
+   :message s/Str
+   :time s/Any})
+
+(def ActivityPendingSchema
+  {:activity s/Keyword
+   :state s/Any
+   :reporters {:failed s/Str
+               :completed s/Str}
+   :id uuid?})
+
 ;; app state schema
 (def AppStateSchema
   {:app/side {:side/upper [[s/Keyword]]
@@ -95,4 +107,6 @@
                    :ds/activities {s/Keyword s/Str}
                    :ds/locked-activities [s/Keyword]
                    :ds/query-tries s/Num
-                   (s/optional-key :ds/error) s/Keyword}})
+                   (s/optional-key :ds/error) s/Keyword}
+   :app/activities {:activities/log [ActivityLogSchema]
+                    :activities/pending {uuid? ActivityPendingSchema}}})

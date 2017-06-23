@@ -6,6 +6,7 @@
            [witan.ui.test.strings-test]
            [witan.ui.test.route-test]
            [witan.ui.test.data-test]
+           [witan.ui.test.activities-test]
            [witan.ui.test.controllers.datastore-test]
            ;;
            [witan.ui.route :as route]
@@ -22,4 +23,5 @@
            'witan.ui.test.strings-test
            'witan.ui.test.route-test
            'witan.ui.test.data-test
+           'witan.ui.test.activities-test
            'witan.ui.test.controllers.datastore-test)
