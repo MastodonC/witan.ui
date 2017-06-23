@@ -236,6 +236,7 @@
    :string/activity                         "Activity"
    :string/activity-desc                    "All your activity in this session"
    :string/no-activity                      "There has been no activity recorded in this session"
+   :string/file-name-too-short              [:string/file-name " must be at least 3 characters"]
    ;;
    :string.activity.upload-file/failed          "You failed to upload the file '%s'."
    :string.activity.upload-file/completed       "You successfully uploaded the file '%s'."

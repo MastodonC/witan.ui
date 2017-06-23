@@ -493,36 +493,46 @@
         :kixi.datastore.metadatastore.update/maintainer :string/maintainer
         :kixi.datastore.metadatastore.update/description :string/file-description} k nil))
 
+(defn soft-validate!
+  [{:keys [kixi.datastore.metadatastore/id] :as md}]
+  (let [result (atom true)]
+    (when (> 3 (count (:kixi.datastore.metadatastore/name md)))
+      (data/swap-app-state! :app/datastore assoc-in [:ds/file-properties id :update-errors :kixi.datastore.metadatastore/name]
+                            (get-string :string/file-name-too-short))
+      (reset! result false))
+    @result))
+
 (defmethod handle
   :metadata-change
-  [event {:keys [kixi.datastore.metadatastore/id] :as md}]
-  (let [md      (data/get-in-app-state :app/datastore :ds/file-metadata-editing)
-        orig-md (data/get-in-app-state :app/datastore :ds/file-metadata id)
-        command (data/get-in-app-state :app/datastore :ds/file-metadata-editing-command)
-        field-string (->> command
-                          (keys)
-                          (keep command-field->string-key)
-                          (set)
-                          (map get-string)
-                          (clojure.string/join ", "))]
-    (when-not (empty? command)
-      ;; is this a good order?
-      (set-title! (:kixi.datastore.metadatastore/name md))
-      (utils/add-file-flag! id :metadata-saving)
-      (save-file-metadata! md)
-      (reset-file-edit-metadata! md)
-      (reset-file-edit-metadata-command!)
-      (data/swap-app-state! :app/datastore update-in [:ds/file-properties id] dissoc :update-errors)
-      (activities/start-activity!
-       :update-metadata
-       (data/command! :kixi.datastore.metadatastore/update "1.0.0" (assoc command :kixi.datastore.metadatastore/id id))
-       {:failed #(gstring/format (get-string :string.activity.update-metadata/failed)
-                                 (:kixi.datastore.metadatastore/name orig-md)
-                                 field-string
-                                 (name (get-in % [:kixi.comms.event/payload :reason])))
-        :completed #(gstring/format (get-string :string.activity.update-metadata/completed)
-                                    (:kixi.datastore.metadatastore/name md)
-                                    field-string)}))))
+  [event _]
+  (let [{:keys [:kixi.datastore.metadatastore/id] :as md} (data/get-in-app-state :app/datastore :ds/file-metadata-editing)]
+    (when (soft-validate! md)
+      (let [orig-md (data/get-in-app-state :app/datastore :ds/file-metadata id)
+            command (data/get-in-app-state :app/datastore :ds/file-metadata-editing-command)
+            field-string (->> command
+                              (keys)
+                              (keep command-field->string-key)
+                              (set)
+                              (map get-string)
+                              (clojure.string/join ", "))]
+        (when-not (empty? command)
+          ;; is this a good order?
+          (set-title! (:kixi.datastore.metadatastore/name md))
+          (utils/add-file-flag! id :metadata-saving)
+          (save-file-metadata! md)
+          (reset-file-edit-metadata! md)
+          (reset-file-edit-metadata-command!)
+          (data/swap-app-state! :app/datastore update-in [:ds/file-properties id] dissoc :update-errors)
+          (activities/start-activity!
+           :update-metadata
+           (data/command! :kixi.datastore.metadatastore/update "1.0.0" (assoc command :kixi.datastore.metadatastore/id id))
+           {:failed #(gstring/format (get-string :string.activity.update-metadata/failed)
+                                     (:kixi.datastore.metadatastore/name orig-md)
+                                     field-string
+                                     (name (get-in % [:kixi.comms.event/payload :reason])))
+            :completed #(gstring/format (get-string :string.activity.update-metadata/completed)
+                                        (:kixi.datastore.metadatastore/name md)
+                                        field-string)}))))))
 
 (defmethod handle
   :reset-edit-metadata
