@@ -298,6 +298,7 @@
     (save-file-metadata! payload)
     (js/setTimeout
      #(do
+        (data/swap-app-state! :app/create-data dissoc :cd/pending-data)
         (data/swap-app-state! :app/create-data assoc :cd/pending? false)
         (route/navigate! :app/data {:id id} {:new 1})) 500)))
 

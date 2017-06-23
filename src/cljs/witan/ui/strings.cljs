@@ -53,6 +53,7 @@
    :string/tooltip-help                     "Get help"
    :string/tooltip-request-to-share         "Request that datasets be shared with you or a group you belong to"
    :string/tooltip-activity                 "View your recent activity"
+   :string/tooltip-debug                    "Debug"
    :string/data                             "Datasets"
    :string/workspace-noun-plural            "Workspaces"
    :string/workspace-dash-title             :string/workspace-noun-plural

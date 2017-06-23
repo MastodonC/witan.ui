@@ -10,8 +10,7 @@
             [witan.ui.utils :as utils]
             [witan.ui.time :as time]
             [goog.string :as gstring]
-            [inflections.core :as i]
-            [cljsjs.pikaday.with-moment])
+            [inflections.core :as i])
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))
 
@@ -42,12 +41,13 @@
   []
   (fn []
     (let [acts (data/get-in-app-state :app/activities :activities/log)]
-      [:div.container
-       (shared/header :string/activity :string/activity-desc)
-       [:div.padded-content
-        (if (zero? (count acts))
-          [:h3 (get-string :string/no-activity)]
-          (activities (reverse acts)))]])))
+      [:div#activity-view
+       [:div.container
+        (shared/header :string/activity :string/activity-desc)
+        [:div.content
+         (if (zero? (count acts))
+           [:h3 (get-string :string/no-activity)]
+           (activities (reverse acts)))]]])))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

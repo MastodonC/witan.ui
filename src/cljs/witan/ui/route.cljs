@@ -26,7 +26,8 @@
                               "dashboard"     :app/request-to-share
                               [:id ""]        :app/rts
                               [:id "/submit"] :app/rts-submit}
-               "/activity" {""                :app/activity}}
+               "/activity"  {""               :app/activity}
+               "/debug"     {""               :app/debug}}
 
         "reset" {""  default-view
                  "/" default-view}
