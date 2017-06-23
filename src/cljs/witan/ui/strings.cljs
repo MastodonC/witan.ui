@@ -137,10 +137,10 @@
    :string/author                           "Author"
    :string/datastore-name                   "City Data Store"
    :string/data-upload-intro                ["This step-by-step process will guide you through uploading a dataset into the" :string/datastore-name "- if you're unsure about any of the steps, please don't hesistate to use our interactive support system and we can offer additional guidance."]
-   :string/data-upload-selected-file        "Selected dataset"
-   :string/data-upload-step-1               "Select the dataset you'd like to upload..."
-   :string/data-upload-step-2               "Please fill in some information about this data."
-   :string/data-upload-step-2-input-1-title "Name of the data"
+   :string/data-upload-selected-file        "Selected file"
+   :string/data-upload-step-1               "Select the file you'd like to upload..."
+   :string/data-upload-step-2               "Please fill in some information about this file."
+   :string/data-upload-step-2-input-1-title "Title of the file"
    :string/data-upload-step-2-input-1-ph    "e.g. 'Housing Data for London'"
    :string/data-upload-step-2-input-2-title "Description of the data"
    :string/data-upload-step-2-input-2-ph    "e.g. 'This dataset shows housing data across all 33 London boroughs.'"
@@ -236,7 +236,7 @@
    :string/activity                         "Activity"
    :string/activity-desc                    "All your activity in this session"
    :string/no-activity                      "There has been no activity recorded in this session"
-   :string/file-name-too-short              [:string/file-name " must be at least 3 characters"]
+   :string/file-name-too-short              [:string/file-name " must be not be empty"]
    ;;
    :string.activity.upload-file/failed          "You failed to upload the file '%s'."
    :string.activity.upload-file/completed       "You successfully uploaded the file '%s'."

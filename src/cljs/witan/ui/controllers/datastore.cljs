@@ -496,7 +496,7 @@
 (defn soft-validate!
   [{:keys [kixi.datastore.metadatastore/id] :as md}]
   (let [result (atom true)]
-    (when (> 3 (count (:kixi.datastore.metadatastore/name md)))
+    (when (> 1 (count (:kixi.datastore.metadatastore/name md)))
       (data/swap-app-state! :app/datastore assoc-in [:ds/file-properties id :update-errors :kixi.datastore.metadatastore/name]
                             (get-string :string/file-name-too-short))
       (reset! result false))
