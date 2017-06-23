@@ -38,7 +38,10 @@
                  :icon icons/logout}
     :activity   {:fnc (partial navigate! :app/activity)
                  :tooltip :string/tooltip-activity
-                 :icon icons/activity}}
+                 :icon icons/activity}
+    :debug      {:fnc (partial navigate! :app/debug)
+                 :tooltip :string/tooltip-debug
+                 :icon icons/bug}}
    id))
 
 (defn add-side-elements!
@@ -70,7 +73,9 @@
    [:div#side-upper
     (add-side-elements! upper path disabled?)]
    [:div#side-lower
-    (add-side-elements! lower path disabled?)]])
+    (add-side-elements! (if (:debug? data/config)
+                          (cons [:button :debug] lower)
+                          lower) path disabled?)]])
 
 (defn root-view
   []

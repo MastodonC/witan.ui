@@ -173,17 +173,19 @@
 (defonce wants-to-load? (atom true))
 
 (defn custom-resets!
-  []
-  (swap-app-state! :app/workspace assoc :workspace/pending? true)
-  (swap-app-state! :app/workspace dissoc :workspace/current)
-  (reset-app-state! :app/panic-message nil)
-  (swap-app-state! :app/create-data dissoc :cd/pending-data)
-  (swap-app-state! :app/create-data dissoc :cd/pending-data)
-  (swap-app-state! :app/user dissoc :user/group-search-results)
-  (swap-app-state! :app/user dissoc :user/group-search-filtered)
-  (swap-app-state! :app/datastore assoc :ds/query-tries 0)
-  (swap-app-state! :app/datastore assoc :ds/current nil)
-  (swap-app-state! :app/datastore dissoc :ds/error))
+  ([]
+   (swap-app-state! :app/workspace assoc :workspace/pending? true)
+   (swap-app-state! :app/workspace dissoc :workspace/current)
+   (reset-app-state! :app/panic-message nil)
+   (swap-app-state! :app/create-data dissoc :cd/pending-data)
+   (swap-app-state! :app/user dissoc :user/group-search-results)
+   (swap-app-state! :app/user dissoc :user/group-search-filtered)
+   (swap-app-state! :app/datastore assoc :ds/query-tries 0)
+   (swap-app-state! :app/datastore assoc :ds/current nil)
+   (swap-app-state! :app/datastore dissoc :ds/error))
+  ([m]
+   (-> m
+       (update :app/create-data dissoc :cd/pending-data))))
 
 (defn save-data!
   []
@@ -194,6 +196,7 @@
      (.-localStorage js/window)
      storage-key
      (-> unencoded
+         custom-resets!
          pr-str
          b64/encodeString))))
 
