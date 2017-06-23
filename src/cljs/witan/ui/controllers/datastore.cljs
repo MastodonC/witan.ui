@@ -516,7 +516,7 @@
                               (map get-string)
                               (clojure.string/join ", "))]
         (when-not (empty? command)
-          ;; is this a good order?
+          ;; REVIEW: is this a good order?
           (set-title! (:kixi.datastore.metadatastore/name md))
           (utils/add-file-flag! id :metadata-saving)
           (save-file-metadata! md)
