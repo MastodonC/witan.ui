@@ -114,26 +114,27 @@
 (defn process-event
   [{:keys [args]}]
   (let [activities (data/get-in-app-state :app/activities :activities/pending)]
-    (loop [[command-id {:keys [activity state]}] (first activities)]
-      (if (= command-id (:kixi.comms.command/id args))
-        (try
-          (log/debug "TRYING" args)
-          (let [{:keys [value] :as new-state} (a/advance (activity-fsm activity) state args)]
-            (if (= :pending value)
-              (do
-                (data/swap-app-state! :app/activities assoc-in [:activities/pending command-id :state] new-state)
-                (data/publish-topic :activity/activity-progressed {:message args :activity activity}))
-              (finish-activity! args value command-id)))
-          (catch js/Error e))
-        (when (next activities)
-          (recur (next activities)))))))
+    (loop [activities' activities]
+      (let [[command-id {:keys [activity state]}] (first activities')]
+        (if (= command-id (:kixi.comms.command/id args))
+          (try
+            (let [{:keys [value] :as new-state} (a/advance (activity-fsm activity) state args)]
+              (if (= :pending value)
+                (do
+                  (data/swap-app-state! :app/activities assoc-in [:activities/pending command-id :state] new-state)
+                  (data/publish-topic :activity/activity-progressed {:message args :activity activity}))
+                (finish-activity! args value command-id)))
+            (catch js/Error e))
+          (when (next activities')
+            (recur (next activities'))))))))
 
 (defn process-command
   [{:keys [args]}]
   (let [activities (data/get-in-app-state :app/activities :activities/pending)]
-    (loop [[command-id {:keys [activity state]}] (first activities)]
+    (loop [activities' activities]
       (try
-        (let [new-command-id (:kixi.comms.command/id args)
+        (let [[command-id {:keys [activity state]}] (first activities')
+              new-command-id (:kixi.comms.command/id args)
               {:keys [value] :as new-state} (a/advance (activity-fsm activity) state args)]
           (if (= :pending value)
             (let [existing (data/get-in-app-state :app/activities :activities/pending command-id)]
@@ -143,8 +144,8 @@
               (data/publish-topic :activity/activity-progressed {:message args :activity activity}))
             (finish-activity! args value command-id)))
         (catch js/Error e
-          (when (next activities)
-            (recur (next activities))))))))
+          (when (next activities')
+            (recur (next activities'))))))))
 
 (defonce subscriptions
   (do (data/subscribe-topic :data/event-received process-event)
