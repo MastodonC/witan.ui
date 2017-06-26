@@ -118,7 +118,6 @@
       (let [[command-id {:keys [activity state]}] (first activities')]
         (if (= command-id (:kixi.comms.command/id args))
           (try
-            (log/debug "ACT EVENT !!!" args)
             (let [{:keys [value] :as new-state} (a/advance (activity-fsm activity) state args)]
               (if (= :pending value)
                 (do
