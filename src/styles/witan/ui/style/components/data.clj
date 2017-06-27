@@ -95,7 +95,8 @@
                   {:font-style :italic}]
                  [:button.data-upload
                   {:background-color colour/button-create
-                   :color colour/body-bg}]]]]]]
+                   :color colour/body-bg
+                   :margin-bottom (em 1)}]]]]]]
 
             [:#data-dash
              [:.data-name
