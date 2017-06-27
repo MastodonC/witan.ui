@@ -100,6 +100,8 @@
 
             [:#data-dash
              [:.data-name
+              {:display :flex
+               :align-items :center}
               [:span
                {:vertical-align :top
                 :line-height 2.1
@@ -124,11 +126,14 @@
                 {:margin [[(em 0.5) (em 0)]]}]]]
 
              [:.file-title
-              {:margin [[(em 0.0) (em 0.2)]]
-               :line-height (em 1.6)
-               :white-space :nowrap
-               :overflow :hidden
-               :text-overflow :ellipsis}]
+              {:display :flex
+               :align-items :center}
+              [:h1
+               {:margin [[(em 0.0) (em 0.2)]]
+                :line-height (em 1.6)
+                :white-space :nowrap
+                :overflow :hidden
+                :text-overflow :ellipsis}]]
 
              [:.file-metadata-table
               {:width (percent 100)

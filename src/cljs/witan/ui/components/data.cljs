@@ -109,10 +109,13 @@
                       (get-string :string/edit)]))))])))
 
 (defn title
-  [{:keys [kixi.datastore.metadatastore/name]} on-edit-fn]
+  [{:keys [kixi.datastore.metadatastore/name
+           kixi.datastore.metadatastore/file-type]} on-edit-fn]
   [editable-field
    on-edit-fn
-   [:h1.file-title name]])
+   [:div.file-title
+    (icons/file-type file-type)
+    [:h1 name]]])
 
 (defn description
   [{:keys [kixi.datastore.metadatastore/description]} on-edit-fn]

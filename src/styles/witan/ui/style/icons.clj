@@ -40,4 +40,14 @@
    [:.icon-and-text
     [:span
      {:vertical-align :super
-      :margin-left (px 6)}]]])
+      :margin-left (px 6)}]]
+
+   ;;
+
+   [:.icon--file-type
+    {:width (px 48)}
+    [:&.tiny {:width (px 24)}]
+    [:&.small {:width (px 32)}]
+    [:&.medium]
+    [:&.large {:width (px 64)}]
+    [:&.x-large {:width (px 128)}]]])
