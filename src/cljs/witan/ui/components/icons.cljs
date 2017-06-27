@@ -237,8 +237,11 @@
 
 (defn file-type
   [extension & [size]]
-  (let [filename (ext->file-type extension)]
+  (let [filename (ext->file-type extension)
+        attr (str filename " icon (designed by Madebyoliver from Flaticon)")]
     [:img {:src (str "/img/file-types/" filename ".svg")
+           :alt attr
+           :title attr
            :class (str "icon--file-type " (when size (name size)))}]))
 
 ;;
