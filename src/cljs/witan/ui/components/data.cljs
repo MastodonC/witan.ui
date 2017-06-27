@@ -110,12 +110,10 @@
 
 (defn title
   [{:keys [kixi.datastore.metadatastore/name
-           kixi.datastore.metadatastore/file-type]} on-edit-fn]
+           kixi.datastore.metadatastore/file-type] :as md} on-edit-fn]
   [editable-field
    on-edit-fn
-   [:div.file-title
-    (icons/file-type file-type)
-    [:h1 name]]])
+   (shared/inline-file-title md :x-large :medium)])
 
 (defn description
   [{:keys [kixi.datastore.metadatastore/description]} on-edit-fn]
