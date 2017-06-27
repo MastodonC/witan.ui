@@ -117,6 +117,21 @@
   [:div.shared-inline-schema
    [:span name]])
 
+(defn inline-file-title
+  [{:keys [kixi.datastore.metadatastore/name
+           kixi.datastore.metadatastore/file-type]} size-text size-icon]
+  (let [size-el (condp = size-text
+                  :div     :div
+                  :span    :span
+                  :tiny    :h5
+                  :small   :h4
+                  :medium  :h3
+                  :large   :h2
+                  :x-large :h1)]
+    [:div.shared-inline-file-title
+     (icons/file-type file-type size-icon)
+     [size-el name]]))
+
 (defn index
   [data group-by-key render-fn]
   (let [groups (-> (comp first group-by-key)
@@ -368,6 +383,13 @@
   {:inspect-data true
    :frame true
    :history false})
+
+(defcard inline-file-title
+  (sab/html
+   [:div
+    [:div (inline-file-title {:kixi.datastore.metadatastore/name "Foo Bar" :kixi.datastore.metadatastore/file-type "csv"} :large :medium)]
+    [:div (inline-file-title {:kixi.datastore.metadatastore/name "Foo Bar" :kixi.datastore.metadatastore/file-type "csv"} :medium :small)]
+    [:div (inline-file-title {:kixi.datastore.metadatastore/name "Foo Bar" :kixi.datastore.metadatastore/file-type "csv"} :small :tiny)]]))
 
 (defcard inline-group
   (sab/html

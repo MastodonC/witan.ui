@@ -106,6 +106,16 @@
               {:margin-left (px 4)
                :cursor :default}]]
 
+            [:.shared-inline-file-title
+             {:display :flex
+              :align-items :center}
+             [:h1 :h2 :h3 :h4 :h5
+              {:margin [[(em 0.0) (em 0.3)]]
+               :line-height (em 1.6)
+               :white-space :nowrap
+               :overflow :hidden
+               :text-overflow :ellipsis}]]
+
 ;;;;;;;;;;;;;;
 
             [:.button-container

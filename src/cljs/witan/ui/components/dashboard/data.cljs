@@ -22,6 +22,7 @@
   [file-metadata]
   {:data/id (:kixi.datastore.metadatastore/id file-metadata)
    :data/name (:kixi.datastore.metadatastore/name file-metadata)
+   :data/file-type (:kixi.datastore.metadatastore/file-type file-metadata)
    :data/owner-name (get-in file-metadata [:kixi.datastore.metadatastore/provenance :kixi/user :kixi.user/name])
    :data/created-at (get-in file-metadata [:kixi.datastore.metadatastore/provenance :kixi.datastore.metadatastore/created])})
 
@@ -40,7 +41,7 @@
                                                               :txt :string/view
                                                               :id (:data/id d)}
                                                              #(navigate-fn {:data/id %})))))
-            name-fn #(vector :div.data-name (icons/workspace (if (:data/local %) :error :dark)) (:data/name %))]
+            name-fn #(vector :div.data-name (icons/file-type (:data/file-type %) :small) (:data/name %))]
         [:div#data-dash.dashboard
          (shared-dash/header {:title :string/data-dash-title
                               :filter-txt :string/data-dash-filter
