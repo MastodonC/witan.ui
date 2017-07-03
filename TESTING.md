@@ -21,7 +21,7 @@ Additional tests should be written inside the `test/cljs/witan/ui/test` director
 ## Manual Acceptance Testing
 Until there is an automated way to run acceptance tests the only way to catch regressions is with a manual script/checklist:
 
-*Last updated 21/06/17*
+*Last updated 03/07/17*
 
 | Test  | Expected Result |
 | --------| ------ |
@@ -37,3 +37,4 @@ Until there is an automated way to run acceptance tests the only way to catch re
 | Is the user prevented from editing sharing details on a file for which they don't have permission? | The user is not presented with any options to adjust the sharing details and cannot use the search facility of the 'Sharing' view.|
 | Is the user prevented from downloading a file for which they don't have permission? | The user is not presented with the download button and cannot download the file.|
 | Does loading a file take < 1s? | When navigating from the dashboard to a file, the loading icon spins for no more than 1s. | Does saving metadata take < 3.5s? | When hitting 'Save' after editing metadata, the button should stay disabled for no more than 3.5s. |
+| Does quickly changing sharing permissions on a file work as intended? | This is an area we've seen regressions frequently. When quickly changing sharing permissions, the app should remain responsive and not panic. |
