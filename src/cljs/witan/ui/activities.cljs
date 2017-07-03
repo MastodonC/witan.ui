@@ -5,6 +5,16 @@
             [cljs.core.async :refer [chan put! close!]])
   (:require-macros [cljs-log.core :as log]))
 
+(def save-timeout (atom nil))
+
+(defn debounce-save!
+  []
+  (when @save-timeout
+    (js/clearTimeout @save-timeout))
+  (reset! save-timeout (js/setTimeout #(do
+                                         (data/save-data!)
+                                         (reset! save-timeout nil)) 1000)))
+
 ;; This system is designed to use FSMs to pattern match against 'activities'.
 ;; Activities are high-level user operations such as uploading a file, changing some metadata etc.
 ;; Currently, activities must be kicked off manually so that the system knows where to begin looking
@@ -87,7 +97,7 @@
   (if-let [command-id (:kixi.comms.command/id message)]
     (try
       (let [state (a/advance (activity-fsm activity) :pending message)
-            id (random-uuid)]
+            id (str (random-uuid))]
         (data/swap-app-state! :app/activities assoc-in [:activities/pending command-id] {:activity activity
                                                                                          :state state
                                                                                          :reporters reporters
@@ -109,7 +119,7 @@
                                                                        :time (t/jstime->str)})
     (data/publish-topic :activity/activity-finished {:log log-message :message final-message :activity activity :result result})
     (log/debug "Finished activity" activity id)
-    (js/setTimeout #(data/save-data!) 1000)))
+    (debounce-save!)))
 
 (defn process-event
   [{:keys [args]}]

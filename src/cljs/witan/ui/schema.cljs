@@ -51,8 +51,8 @@
 (def ActivityPendingSchema
   {:activity s/Keyword
    :state s/Any
-   :reporters {:failed s/Str
-               :completed s/Str}
+   :reporters {:failed s/Any
+               :completed s/Any}
    :id uuid?})
 
 ;; app state schema

@@ -182,7 +182,8 @@
    (swap-app-state! :app/user dissoc :user/group-search-filtered)
    (swap-app-state! :app/datastore assoc :ds/query-tries 0)
    (swap-app-state! :app/datastore assoc :ds/current nil)
-   (swap-app-state! :app/datastore dissoc :ds/error))
+   (swap-app-state! :app/datastore dissoc :ds/error)
+   (swap-app-state! :app/activities assoc :activities/pending {}))
   ([m]
    (-> m
        (update :app/create-data dissoc :cd/pending-data))))
