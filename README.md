@@ -8,17 +8,7 @@
 
 ## Overview
 
-This is the frontend application that powers Witan, the open city planning tool, using...
-
-[ClojureScript](https://github.com/clojure/clojurescript)
-[Venue](https://github.com/mastodonc/venue)
-[Om](https://github.com/omcljs/om)
-[Sablono](https://github.com/r0man/sablono)
-[Figwheel](https://github.com/bhauman/lein-figwheel)
-[Secretary](https://github.com/gf3/secretary)
-[Schema](https://github.com/Prismatic/schema)
-[Datascript](https://github.com/tonsky/datascript)
-[Garden](https://github.com/noprompt/garden)
+This is the frontend application that powers Witan, the open city planning tool.
 
 ## To Develop
 
