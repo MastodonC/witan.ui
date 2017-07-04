@@ -10,6 +10,7 @@
             [witan.ui.components.create-workspace :as create-ws]
             [witan.ui.components.create-rts :as create-rts]
             [witan.ui.components.create-data :as create-data]
+            [witan.ui.components.create-datapack :as create-datapack]
             [witan.ui.components.data :as data-view]
             [witan.ui.components.activities :as activities]
             [witan.ui.components.debug :as debug]
@@ -24,6 +25,7 @@
   {:app/workspace-dash   workspace-dash/view
    :app/data-dash        data-dash/view
    :app/data-create      create-data/view
+   :app/datapack-create  create-datapack/view
    :app/data             data-view/view
    :app/workspace        split/view
    :app/create-workspace create-ws/view

@@ -11,7 +11,7 @@
    :string/file-type                        "Dataset Type"
    :string/file-provenance-source           "Source"
    :string/sign-in-failure                  "There was a problem with your details. Please try again."
-   :string/upload-new-data                  "Upload new dataset"
+   :string/upload-new-data                  "Upload a new file"
    :string/upload-new-data-desc             "Upload to securely store, share or visualise your data"
    :string/forgotten-instruction            "Please enter your email address. If it matches one in our system we'll send you reset instructions."
    :string/confirm-email                    "Confirm email"
@@ -237,13 +237,15 @@
    :string/activity-desc                    "All your activity in this session"
    :string/no-activity                      "There has been no activity recorded in this session"
    :string/file-name-too-short              [:string/file-name " must be not be empty"]
+   :string/create-new-datapack              "Create a new datapack"
    ;;
    :string.activity.upload-file/failed          "You failed to upload the file '%s'."
    :string.activity.upload-file/completed       "You successfully uploaded the file '%s'."
    :string.activity.update-metadata/failed      "You failed to update the metadata for file '%s' (%s) - %s"
    :string.activity.update-metadata/completed   "You successfully updated the metadata for file '%s' (%s)"
    :string.activity.update-sharing/failed       "You failed to update the sharing details for file '%s'"
-   :string.activity.update-sharing/completed    "You successfully updated the sharing details for file '%s' (%s: %s)"})
+   :string.activity.update-sharing/completed    "You successfully updated the sharing details for file '%s' (%s: %s)"
+   })
 
 
 (defn resolve-string

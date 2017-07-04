@@ -18,6 +18,10 @@
   [selected-id _]
   (route/navigate! :app/data-create))
 
+(defmethod button-press :datapack
+  [selected-id _]
+  (route/navigate! :app/datapack-create))
+
 (defn file-metadata->dash-display
   [file-metadata]
   {:data/id (:kixi.datastore.metadatastore/id file-metadata)
@@ -31,7 +35,8 @@
   (let [selected-id (r/atom nil)]
     (fn []
       (let [raw-data (data/get-app-state :app/data-dash)
-            buttons [{:id :upload :icon icons/upload :txt :string/upload :class "data-upload"}]
+            buttons [{:id :datapack :icon icons/datapack :txt :string/create-new-datapack :class "data-upload"}
+                     {:id :upload :icon icons/upload :txt :string/upload-new-data :class "data-upload"}]
             modified-fn #(vector :div (time/iso-time-as-moment (:data/created-at %)))
             datasets (mapv file-metadata->dash-display (:items raw-data))
             selected-id' @selected-id
