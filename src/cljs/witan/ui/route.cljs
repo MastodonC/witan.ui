@@ -14,20 +14,21 @@
   (.. js/document -location -pathname))
 
 (def route-patterns
-  ["/" {"app" {""                             default-view
-               "/"                            default-view
-               "/data/"      {"dashboard"     :app/data-dash
-                              "create"        :app/data-create
-                              [:id ""]        :app/data}
-               "/workspace/" {"create"        :app/create-workspace
-                              "dashboard"     :app/workspace-dash
-                              [:id ""]        :app/workspace}
-               "/rts/"       {"create"        :app/rts-create
-                              "dashboard"     :app/request-to-share
-                              [:id ""]        :app/rts
-                              [:id "/submit"] :app/rts-submit}
-               "/activity"  {""               :app/activity}
-               "/debug"     {""               :app/debug}}
+  ["/" {"app" {""                               default-view
+               "/"                              default-view
+               "/data/"      {"dashboard"       :app/data-dash
+                              "create"          :app/data-create
+                              "create-datapack" :app/datapack-create
+                              [:id ""]          :app/data}
+               "/workspace/" {"create"          :app/create-workspace
+                              "dashboard"       :app/workspace-dash
+                              [:id ""]          :app/workspace}
+               "/rts/"       {"create"          :app/rts-create
+                              "dashboard"       :app/request-to-share
+                              [:id ""]          :app/rts
+                              [:id "/submit"]   :app/rts-submit}
+               "/activity"  {""                 :app/activity}
+               "/debug"     {""                 :app/debug}}
 
         "reset" {""  default-view
                  "/" default-view}

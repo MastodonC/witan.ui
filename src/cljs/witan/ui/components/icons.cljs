@@ -196,6 +196,10 @@
   [& args]
   (apply create-key "history" args))
 
+(defn datapack
+  [& args]
+  (apply create-key "folder" args))
+
 ;;
 
 (defn ext->file-type
@@ -350,7 +354,8 @@
                     ["warning"       warning]
                     ["file"          file]
                     ["retry"         retry]
-                    ["activity"      activity]]]
+                    ["activity"      activity]
+                    ["datapack"      datapack]]]
      [:div {:style {:background-color "#fff"}}
       (for [[title icon-fn] all-icons]
         [:div
