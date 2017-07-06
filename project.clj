@@ -36,7 +36,7 @@
                  [cljsjs/parinfer "2.0.0-0"]]
 
   :plugins [[lein-figwheel "0.5.4-3" :exclusions [org.clojure/tools.reader]]
-            [lein-cljsbuild "1.1.2" :exclusions [[org.clojure/clojure]]]
+            [lein-cljsbuild "1.1.2" :exclusions [org.clojure/clojure]]
             [lein-garden "0.2.6"]
             [lein-doo "0.1.7"]]
 

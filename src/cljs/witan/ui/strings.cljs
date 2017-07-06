@@ -4,10 +4,12 @@
    [cljs-log.core :as log]))
 
 (def strings
-  {:string/name                             "Name"
+  {:string/support-email                    "witan@mastodonc.com"
+   :string/name                             "Name"
    :string/type                             "Type"
    :string/full-name                        "Full Name"
    :string/file-name                        "Title"
+   :string/title                            "Title"
    :string/file-type                        "Dataset Type"
    :string/file-provenance-source           "Source"
    :string/sign-in-failure                  "There was a problem with your details. Please try again."
@@ -28,7 +30,7 @@
    :string/forecast-lastmodified            "Last Modified"
    :string/create-account-header            "Need an account?"
    :string/view                             "View"
-   :string/if-persists                      "If the problem persists, please contact us at witan@mastodonc.com"
+   :string/if-persists                      ["If the problem persists, please contact us at" :string/support-email]
    :string/api-failure                      ["Sorry, we're having a problem with the service. Please try again." :string/if-persists]
    :string/thanks                           "Thanks"
    :string/upload                           "Upload"
@@ -184,6 +186,8 @@
    :string/title-data-dashboard             "Your Datasets"
    :string/title-data-create                "Upload Dataset"
    :string/title-data-loading               "Loading..."
+   :string/calculating                      "Calculating..."
+   :string/waiting                          "Waiting..."
    :string/this-is-you                      "This is you!"
    :string/upload-finalizing                "Confirming the upload succeeded"
    :string/uploading                        "Uploading"
@@ -236,15 +240,31 @@
    :string/activity                         "Activity"
    :string/activity-desc                    "All your activity in this session"
    :string/no-activity                      "There has been no activity recorded in this session"
+   :string/datapack-name                    "Datapack title"
    :string/file-name-too-short              [:string/file-name " must be not be empty"]
+   :string/datapack-name-too-short          [:string/datapack-name " must be not be empty"]
    :string/create-new-datapack              "Create a new datapack"
+   :string/create-datapack-title-ph         "Give your datapack a descriptive and relevant name, e.g. 'Greenway Project'"
+   :string/datapack-sharing                 "Datapack sharing"
+   :string/files                            "Files"
+   :string/create-datapack-search-files     "Search for files by their titles..."
+   :string/create-datapack-no-files         "You have not yet added any files to the datapack. Use the search box to select the files you would like to add."
+   :string/sharing-summary-transparent      "OK!"
+   :string/sharing-summary-translucent      "Warnings"
+   :string/sharing-summary-trans-meta-read  ["The following participants are missing<br/><strong>" :string/file-sharing-meta-read "</strong> permissions:"]
+   :string/sharing-summary-trans-file-read  ["The following participants are missing<br/><strong>" :string/file-sharing-file-read "</strong> permissions:"]
+   :string/na                               "n/a"
+   :string/create-datapack-fail-invalid     ["There was a problem creating the datapack. Please contact support."]
+   :string/visible-to                       "Visible to"
    ;;
-   :string.activity.upload-file/failed          "You failed to upload the file '%s'."
-   :string.activity.upload-file/completed       "You successfully uploaded the file '%s'."
+   :string.activity.upload-file/failed          "You failed to upload the file '%s'"
+   :string.activity.upload-file/completed       "You successfully uploaded the file '%s'"
    :string.activity.update-metadata/failed      "You failed to update the metadata for file '%s' (%s) - %s"
    :string.activity.update-metadata/completed   "You successfully updated the metadata for file '%s' (%s)"
    :string.activity.update-sharing/failed       "You failed to update the sharing details for file '%s'"
    :string.activity.update-sharing/completed    "You successfully updated the sharing details for file '%s' (%s: %s)"
+   :string.activity.create-datapack/failed      "You failed to create the datapack '%s'"
+   :string.activity.create-datapack/completed   "You successfully created the datapack '%s'"
    })
 
 

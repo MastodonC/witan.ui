@@ -17,3 +17,9 @@ var pym = {
         }
     }
 }
+
+// Opentip
+var Opentip = function() {};
+Opentip.prototype = {"show": function () {},
+                     "hide": function () {},
+                     "setContent": function () {}}

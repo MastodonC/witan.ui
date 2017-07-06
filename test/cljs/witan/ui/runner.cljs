@@ -8,6 +8,7 @@
            [witan.ui.test.data-test]
            [witan.ui.test.activities-test]
            [witan.ui.test.controllers.datastore-test]
+           [witan.ui.test.components.create-datapack-test]
            ;;
            [witan.ui.route :as route]
            [accountant.core :as accountant]))
@@ -24,4 +25,5 @@
            'witan.ui.test.route-test
            'witan.ui.test.data-test
            'witan.ui.test.activities-test
-           'witan.ui.test.controllers.datastore-test)
+           'witan.ui.test.controllers.datastore-test
+           'witan.ui.test.components.create-datapack-test)

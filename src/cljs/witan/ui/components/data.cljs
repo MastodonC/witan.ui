@@ -3,7 +3,7 @@
             [sablono.core :as sab :include-macros true]
             [witan.ui.data :as data]
             [witan.ui.route :as route]
-            [witan.ui.components.shared :as shared]
+            [witan.ui.components.shared :as shared :refer [editable-field]]
             [witan.ui.components.icons :as icons]
             [witan.ui.strings :refer [get-string]]
             [witan.ui.controller :as controller]
@@ -92,21 +92,6 @@
                 [:br {:key (str "br-" %1)}])
        (range (count substrings))
        substrings))]))
-
-(defn editable-field
-  [on-edit-fn & render-fns]
-  (let [state (r/atom :idle)]
-    (fn [on-edit-fn & render-fns]
-      [:div.editable-field
-       {:on-mouse-over #(reset! state :hovered)
-        :on-mouse-leave #(reset! state :idle)}
-       (vec (cons :div.editable-field-content
-                  (conj
-                   (vec render-fns)
-                   (when (and on-edit-fn (= :hovered @state))
-                     [:span.clickable-text.edit-label
-                      {:on-click on-edit-fn}
-                      (get-string :string/edit)]))))])))
 
 (defn title
   [{:keys [kixi.datastore.metadatastore/name

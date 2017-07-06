@@ -106,7 +106,13 @@
                    :ds/file-properties FilePropertiesSchema
                    :ds/activities {s/Keyword s/Str}
                    :ds/locked-activities [s/Keyword]
+                   :dp/activities {s/Keyword s/Str}
+                   :dp/locked-activities [s/Keyword]
                    :ds/query-tries s/Num
+                   (s/optional-key :ds/files-search-filtered) [s/Any]
                    (s/optional-key :ds/error) s/Keyword}
+   :app/create-datapack {:cdp/pending? s/Bool
+                         (s/optional-key :cdp/pending-datapack) s/Any
+                         (s/optional-key :cdp/error) {s/Keyword s/Str}}
    :app/activities {:activities/log [ActivityLogSchema]
                     :activities/pending {uuid? ActivityPendingSchema}}})

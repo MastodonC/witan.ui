@@ -34,8 +34,6 @@
                [:#submit-button
                 {:margin-bottom (px 20)}]
                [:.pure-form
-                [:i
-                 {:font-size (px 20)}]
                 [:.button-container
                  {:margin-top (px 6)}
                  [:button {:margin (px 0)}]]]
@@ -102,10 +100,8 @@
              [:.data-name
               {:display :flex
                :align-items :center}
-              [:span
-               {:vertical-align :top
-                :line-height 2.1
-                :margin-left (px 10)}]]]
+              [:h4
+               {:margin [[(px 0) (px 0) (px 0) (px 10)]]}]]]
 
             [:#data-view
              {:width (percent 100)
@@ -198,37 +194,4 @@
 
              [:.file-edit-geography
               [:input
-               {:margin-top (em 0.3)}]]
-
-             [:.editable-field
-              {:padding [[(em 1) (px 0) (em 1) (em 1)]]
-               :margin-bottom (em 1)
-               ;;:width (percent 100)
-               :line-height (em 1.7)
-               :border-color colour/subtle-grey
-               :border-radius (px 2)
-               :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]}
-              [:&:hover
-               {}]
-              [:span.clickable-text.edit-label
-               {:font-size (px 12)
-                :height (em 0.75)
-                :line-height (em 0.75)
-                :position :absolute
-                :right (px 20)}]
-              [:.heading
-               {:margin-top (em 0)}]
-              [:.intro
-               {:line-height (em 1.5)
-                :display :block
-                :font-size (px 11)
-                :color 'dimgrey
-                :margin-bottom (em 1)}]
-
-              [:.editable-field-content
-               {:display :flex
-                :justify-content :space-between
-                :vertical-align :bottom
-                :align-items :flex-end}]]
-             [:.editable-field-editing
-              {}]]])
+               {:margin-top (em 0.3)}]]]])

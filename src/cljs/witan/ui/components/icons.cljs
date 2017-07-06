@@ -96,6 +96,10 @@
   [& args]
   (apply create-key "open_in_browser" args))
 
+(defn view
+  [& args]
+  (apply create-key "visibility" args))
+
 (defn error
   [& args]
   (apply create-key "error" args))
@@ -198,14 +202,13 @@
 
 (defn datapack
   [& args]
-  (apply create-key "folder" args))
+  (apply create-key "library_books" args))
 
 ;;
 
 (defn ext->file-type
   [ext]
-  (condp = ext
-    "csv"  "csv"
+  (case ext
     "ai"   "ai"
     "avi"  "avi"
     "css"  "css"
@@ -247,6 +250,17 @@
            :alt attr
            :title attr
            :class (str "icon--file-type " (when size (name size)))}]))
+
+(defn bundle-type
+  [type & [size]]
+  (case type
+    "datapack" (let [attr (str "zip-1 icon (designed by Madebyoliver from Flaticon)")]
+                 [:img {:src (str "/img/file-types/pack.svg")
+                        :alt attr
+                        :title attr
+                        :class (str "icon--file-type " (when size (name size)))}])
+    ;;
+    (help)))
 
 ;;
 
@@ -330,6 +344,7 @@
                     ["person"        person]
                     ["plus"          plus]
                     ["open"          open]
+                    ["view"          view]
                     ["error"         error]
                     ["clipboard"     clipboard]
                     ["close"         close]

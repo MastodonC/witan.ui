@@ -85,6 +85,7 @@
     :app/workspace-dash {:wd/workspaces nil}
     :app/data-dash {}
     :app/create-data {:cd/pending? false}
+    :app/create-datapack {:cdp/pending? false}
     :app/rts-dash {}
     :app/workspace-results []
     :app/panic-message nil
@@ -103,6 +104,10 @@
                                     :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
                                     :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)}
                     :ds/locked-activities [:kixi.datastore.metadatastore/meta-update
+                                           :kixi.datastore.metadatastore/meta-read]
+                    :dp/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
+                                    :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)}
+                    :dp/locked-activities [:kixi.datastore.metadatastore/meta-update
                                            :kixi.datastore.metadatastore/meta-read]}
     :app/activities {:activities/log []
                      :activities/pending {}}}
@@ -326,7 +331,7 @@
              :kixi.comms.query/body query}]
       (swap! query-responses assoc id cb)
       (send-ws! m))
-    (throw (js/Error. "Query needs to be a map"))))
+    (throw (js/Error. (str "Query needs to be a map:" (pr-str query))))))
 
 (defn command!
   [command-key version params]

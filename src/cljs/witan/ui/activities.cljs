@@ -52,7 +52,13 @@
                      [{:kixi.comms.event/key  :kixi.datastore.file-metadata/updated
                        :kixi.comms.event/payload {:kixi.datastore.communication-specs/file-metadata-update-type :kixi.datastore.communication-specs/file-metadata-sharing-updated}}
                       (a/$ :completed)]
-                     [{:kixi.comms.event/key  :kixi.datastore.metadatastore/sharing-change-rejected} (a/$ :failed)])]})
+                     [{:kixi.comms.event/key  :kixi.datastore.metadatastore/sharing-change-rejected} (a/$ :failed)])]
+   ;;
+   :create-datapack [{:kixi.comms.command/key  :kixi.datastore/create-datapack}
+                     (a/or
+                      [{:kixi.comms.event/key  :kixi.datastore.file-metadata/rejected} (a/$ :failed)]
+                      [{:kixi.comms.event/key  :kixi.datastore.file-metadata/updated
+                        :kixi.comms.event/payload {:kixi.datastore.communication-specs/file-metadata-update-type :kixi.datastore.communication-specs/file-metadata-created}} (a/$ :completed)])]})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

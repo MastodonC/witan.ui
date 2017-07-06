@@ -13,6 +13,7 @@
                :margin         (em 0.24)}]
              [:input
               {:padding-left (px 30)
+               :height       (px 34)
                :width        (percent 100)}]]
 
 ;;;;;;;;;;;;;;
@@ -92,7 +93,11 @@
                :vertical-align :super
                :margin-left (em 1)}
               [:form
-               {:width (em 32)}]]]
+               {:width (em 32)}]]
+             [:&.center-string
+              [:h1
+               {:width (percent 100)
+                :text-align :center}]]]
 
 ;;;;;;;;;;;;;;
 
@@ -125,8 +130,8 @@
              [:button
               {:margin-left (em 0.5)
                :box-shadow [[(px 2) (px 2) (px 4) colour/box-shadow]]}
-              [:i
-               {:margin [[(px -3) (px 5) (px 0) (px 0)]]}]]]
+              #_[:i
+                 {:margin [[(px -3) (px 5) (px 0) (px 0)]]}]]]
 
 ;;;;;;;;;;;;;;
 
@@ -205,7 +210,7 @@
 
 ;;;;;;;;;;;;;;;
 
-            [:.shared-schema-search-area :.shared-group-search-area
+            [:.shared-schema-search-area :.shared-group-search-area :.shared-search-area
              [:div.breakout-area
               {:display :flex
                :overflow :hidden
@@ -288,4 +293,54 @@
              {:color colour/clickable
               :cursor :pointer}
              [:&:hover
-              {:color colour/clickable-hovered}]]])
+              {:color colour/clickable-hovered}]]
+
+            [:.shared-collapsible-text
+             [:div
+              {:margin-top (px 3)
+               :margin-left (px 2)}
+              [:&.rotate270
+               {:margin-top (px -3)
+                :margin-left (px 3)}]]
+             [:span
+              {:margin-top (px 4)
+               :margin-left (px 1)}
+              [:&.ellipsis
+               {:margin-top (px 2)
+                :margin-left (px -2)}]]
+             [:i
+              {:cursor :pointer}]]
+
+            [:.editable-field
+             {:padding [[(em 1) (px 0) (em 1) (em 1)]]
+              :margin-bottom (em 1)
+              ;;:width (percent 100)
+              :line-height (em 1.7)
+              :border-color colour/subtle-grey
+              :border-radius (px 2)
+              :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]}
+             [:&:hover
+              {}]
+             [:span.clickable-text.edit-label
+              {:font-size (px 12)
+               :height (em 0.75)
+               :line-height (em 0.75)
+               :position :absolute
+               :right (px 20)}]
+             [:.heading
+              {:margin-top (em 0)}]
+             [:.intro
+              {:line-height (em 1.5)
+               :display :block
+               :font-size (px 11)
+               :color 'dimgrey
+               :margin-bottom (em 1)}]
+
+             [:.editable-field-content
+              {:display :flex
+               :justify-content :space-between
+               :vertical-align :bottom
+               :align-items :flex-end}]]
+
+            [:.editable-field-editing
+             {}]])

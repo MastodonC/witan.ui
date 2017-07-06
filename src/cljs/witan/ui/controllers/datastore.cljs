@@ -130,6 +130,8 @@
                         {:message :string/upload-finalizing
                          :progress 1})
   ;; now upload metadata
+  ;; TODO this whole thing needs sorting out
+  ;; as we don't do it this way anymore.
   (let [{:keys [pending-file
                 info-name
                 info-description
@@ -246,6 +248,13 @@
   (set-title! (get-string :string/title-data-create)))
 
 (defmethod on-route-change
+  :app/datapack-create
+  [_]
+  (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false)
+  (data/swap-app-state! :app/create-datapack dissoc :cdp/error)
+  (set-title! (get-string :string/create-new-datapack)))
+
+(defmethod on-route-change
   :app/data
   [{:keys [args]}]
   (data/swap-app-state! :app/datastore dissoc :ds/error)
@@ -305,6 +314,7 @@
 (defmethod on-event
   [:kixi.datastore.file-metadata/rejected "1.0.0"]
   [{:keys [args]}]
+  (log/warn "TODO Change to activity failure")
   (let [{:keys [kixi.comms.event/payload]} args
         {:keys [reason]} payload]
     (data/swap-app-state! :app/create-data assoc :cd/error (upload-error->string reason))
@@ -594,6 +604,76 @@
                           :ds/file-metadata-editing-command
                           utils/remove-nil-or-empty-vals)))
 
+(defmethod handle
+  :refresh-files
+  [event _]
+  (send-dashboard-query! (data/get-in-app-state :app/user :kixi.user/id)))
+
+(defmethod handle
+  :search-files
+  [event {:keys [search]}]
+  (let [mds (data/get-in-app-state :app/data-dash :items)]
+    (data/swap-app-state! :app/datastore assoc :ds/files-search-filtered
+                          (filter
+                           #(and
+                             (gstring/caseInsensitiveContains (:kixi.datastore.metadatastore/name %) search)
+                             (= "stored" (:kixi.datastore.metadatastore/type %))) mds))))
+
+(defmethod handle
+  :create-datapack
+  [event {:keys [datapack]}]
+  (data/swap-app-state! :app/create-datapack assoc :cdp/pending? true)
+  (data/swap-app-state! :app/create-datapack assoc :cdp/pending-datapack datapack)
+  (let [{:keys [title]} datapack]
+    (activities/start-activity!
+     :create-datapack
+     (data/command! :kixi.datastore/create-datapack "1.0.0"
+                    {:kixi.datastore.metadatastore/name title
+                     :kixi.datastore.metadatastore/id (str (random-uuid))
+                     :kixi.datastore.metadatastore/type "bundle"
+                     :kixi.datastore.metadatastore/bundle-type "datapack"
+                     :kixi.datastore.metadatastore/bundled-ids (set (map :kixi.datastore.metadatastore/id (:selected-files datapack)))
+                     :kixi.datastore.metadatastore/sharing (selected-groups->sharing-activities
+                                                            (:selected-groups datapack)
+                                                            (keys (data/get-in-app-state :app/datastore :dp/activities)))
+                     :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
+                                                               :kixi.user/id (data/get-in-app-state :app/user :kixi.user/id)}})
+     {:failed #(gstring/format (get-string :string.activity.create-datapack/failed) title)
+      :completed #(gstring/format (get-string :string.activity.create-datapack/completed) title)})))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmulti on-activity-finished
+  (fn [{:keys [args]}] [(:activity args) (:result args)]))
+
+(defmethod on-activity-finished
+  :default
+  [{:keys [args]}])
+
+(defmethod on-activity-finished
+  [:create-datapack :failed]
+  [{:keys [args]}]
+  (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false)
+  (data/swap-app-state!
+   :app/create-datapack assoc :cdp/error
+   {:general (case (get-in args [:message :kixi.comms.event/payload :reason])
+               :metadata-invalid (get-string :string/create-datapack-fail-invalid))}))
+
+(defmethod on-activity-finished
+  [:create-datapack :completed]
+  [{:keys [args]}]
+  (js/setTimeout
+   #(do
+      (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false)
+      (data/swap-app-state! :app/create-datapack dissoc :cdp/pending-datapack)
+      (route/navigate!
+       :app/data
+       {:id (get-in args [:message
+                          :kixi.comms.event/payload
+                          :kixi.datastore.metadatastore/file-metadata
+                          :kixi.datastore.metadatastore/id])}
+       {:new 1})) 500))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-user-logged-in
@@ -608,4 +688,5 @@
 (defonce subscriptions
   (do (data/subscribe-topic :data/route-changed  on-route-change)
       (data/subscribe-topic :data/user-logged-in on-user-logged-in)
-      (data/subscribe-topic :data/event-received on-event)))
+      (data/subscribe-topic :data/event-received on-event)
+      (data/subscribe-topic :activity/activity-finished on-activity-finished)))
