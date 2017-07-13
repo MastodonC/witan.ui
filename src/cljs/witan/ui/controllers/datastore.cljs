@@ -78,6 +78,7 @@
   [id]
   (when-not @dash-query-pending?
     (reset! dash-query-pending? true)
+    (data/swap-app-state! :app/data-dash dissoc :items)
     (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read]]
                                                       (:full query-fields)]}
                 on-query-response)))
@@ -189,13 +190,27 @@
 (defmulti on-query-response
   (fn [[k v]] k))
 
+(defn filter-files-by-type
+  [file-type-filter]
+  (let [p
+        (case file-type-filter
+          :files (comp (partial = "stored") :kixi.datastore.metadatastore/type)
+          :datapacks (comp (partial = "datapack") :kixi.datastore.metadatastore/bundle-type))]
+    (fn [items]
+      (filter p items))))
+
 (defmethod on-query-response
   :datastore/metadata-with-activities
-  [[_ data]]
+  [[_ {:keys [items paging]}]]
   (reset! dash-query-pending? false)
-  (data/swap-app-state! :app/data-dash assoc
-                        :items (get data :items)
-                        :paging (get data :paging)))
+  (let [filter-fn
+        (if-let [file-type-filter
+                 (data/get-in-app-state :app/data-dash :dd/file-type-filter)]
+          (filter-files-by-type file-type-filter)
+          identity)]
+    (data/swap-app-state! :app/data-dash assoc
+                          :items (filter-fn items)
+                          :paging paging)))
 
 
 (defmethod on-query-response
@@ -213,11 +228,11 @@
         (do
           (log/warn "File" id "is not accessible.")
           (data/swap-app-state! :app/datastore assoc :ds/error :string/file-inaccessible)
-          (data/swap-app-state! :app/datastore assoc :ds/query-tries 0))))
-    (do
-      (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)
-      (save-file-metadata! data)
-      (set-title! (:kixi.datastore.metadatastore/name data)))))
+          (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)))))
+  (do
+    (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)
+    (save-file-metadata! data)
+    (set-title! (:kixi.datastore.metadatastore/name data))))
 
 (defmethod on-query-response
   :error
@@ -236,7 +251,11 @@
 
 (defmethod on-route-change
   :app/data-dash
-  [_]
+  [{:keys [args]}]
+  (if-let [type-filter (keyword (get-in args [:route/query :type]))]
+    (do
+      (data/swap-app-state! :app/data-dash assoc :dd/file-type-filter type-filter))
+    (data/swap-app-state! :app/data-dash dissoc :dd/file-type-filter))
   (if-let [id (:kixi.user/id (data/get-app-state :app/user))]
     (send-dashboard-query! id))
   (set-title! (get-string :string/title-data-dashboard)))

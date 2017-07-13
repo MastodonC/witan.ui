@@ -16,6 +16,11 @@
                ^:prefix {:user-select :none}
                [:&:hover
                 {:color colour/side-text}]]]
+             [:.sub-side-element
+              [:.material-icons.md-m
+               {:font-size (px 16)}]
+              [:.side-element
+               {:margin [[(em 0.5) (em 0)]]}]]
              [:#side-upper
               {:width values/app-peripheral-width}]
              [:#side-lower

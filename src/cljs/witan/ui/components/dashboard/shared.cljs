@@ -8,9 +8,11 @@
                    [devcards.core :as dc :refer [defcard]]))
 
 (defn header
-  [{:keys [title buttons on-button-click]}]
+  [{:keys [title subtitle buttons on-button-click]}]
   [:div.shared-heading
    [:h1 (get-string title)]
+   (when subtitle
+     [:span (get-string subtitle)])
    [:div.dash-buttons
     (for [button buttons]
       (shared/button button on-button-click))]])

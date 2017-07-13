@@ -57,9 +57,7 @@
 
 ;; app state schema
 (def AppStateSchema
-  {:app/side {:side/upper [[s/Keyword]]
-              :side/lower [[s/Keyword]]}
-   :app/login {:login/pending? s/Bool
+  {:app/login {:login/pending? s/Bool
                :login/token (s/maybe {:auth-token s/Str
                                       :refresh-token s/Str})
                :login/message (s/maybe s/Str)
@@ -78,7 +76,8 @@
                     (s/optional-key :workspace/current-viz) {:result/location s/Str}
                     (s/optional-key :workspace/model-list) [{s/Keyword s/Any}]}
    :app/workspace-dash {:wd/workspaces (s/maybe [s/Any])}
-   :app/data-dash {s/Keyword s/Any}
+   :app/data-dash {(s/optional-key :dd/file-type-filter) s/Keyword
+                   s/Keyword s/Any}
    :app/create-data {:cd/pending? s/Bool
                      (s/optional-key :cd/message) s/Str
                      (s/optional-key :cd/error) s/Keyword

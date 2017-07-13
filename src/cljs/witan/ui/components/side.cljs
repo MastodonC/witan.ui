@@ -13,21 +13,32 @@
    [devcards.core :as dc :refer [defcard]]
    [cljs-log.core :as log]))
 
-(defn navigate!
-  [route current-route]
-  (when-not (= route current-route)
-    (route/navigate! route)))
+(def side-bar-config
+  {:side/upper [#_[:button :workspaces]
+                [:button :data
+                 [[:button :data-files]
+                  [:button :data-datapacks]]]
+                #_[:button :rts]]
+   :side/lower [[:button :activity]
+                [:button :help]
+                [:button :logout]]})
 
 (defn get-details
   [id]
   (get
-   {:workspaces {:fnc (partial navigate! :app/workspace-dash)
+   {:workspaces {:fnc (partial route/navigate! :app/workspace-dash)
                  :tooltip :string/tooltip-workspace
                  :icon icons/workspace}
-    :data       {:fnc (partial navigate! :app/data-dash)
+    :data       {:fnc (partial route/navigate! :app/data-dash)
                  :tooltip :string/tooltip-data
                  :icon icons/data}
-    :rts        {:fnc (partial navigate! :app/request-to-share)
+    :data-files {:fnc (partial route/navigate! :app/data-dash {} {:type "files"})
+                 :tooltip :string/tooltip-data--files
+                 :icon icons/file}
+    :data-datapacks {:fnc (partial route/navigate! :app/data-dash {} {:type "datapacks"})
+                     :tooltip :string/tooltip-data--datapacks
+                     :icon icons/datapack}
+    :rts        {:fnc (partial route/navigate! :app/request-to-share)
                  :tooltip :string/tooltip-request-to-share
                  :icon icons/request-to-share}
     :help       {:fnc #(controller/raise! :intercom/open-new)
@@ -36,56 +47,58 @@
     :logout     {:fnc #(controller/raise! :user/logout)
                  :tooltip :string/tooltip-logout
                  :icon icons/logout}
-    :activity   {:fnc (partial navigate! :app/activity)
+    :activity   {:fnc (partial route/navigate! :app/activity)
                  :tooltip :string/tooltip-activity
                  :icon icons/activity}
-    :debug      {:fnc (partial navigate! :app/debug)
+    :debug      {:fnc (partial route/navigate! :app/debug)
                  :tooltip :string/tooltip-debug
                  :icon icons/bug}}
    id))
 
 (defn add-side-elements!
-  [element-list current-route disabled?]
-  (for [[element-type element-key] element-list]
+  [element-list disabled?]
+  (for [[element-type element-key leaf-buttons] element-list]
     [:div.side-element
      {:key element-key}
      (condp = element-type
        :button
        (let [{:keys [route tooltip fnc icon]} (get-details element-key)]
-         [:div.side-link
-          {:on-click #(when fnc
-                        (fnc current-route))
-           :data-ot (get-string tooltip)
-           :data-ot-style "dark"
-           :data-ot-tip-joint "left"
-           :data-ot-fixed true
-           :data-ot-target true
-           :data-ot-delay 0.5
-           :data-ot-contain-in-viewport false
-           ;;
-           :style {:pointer-events (if disabled? "none" "auto")}}
-          (icon :medium)])
+         [:div
+          [:div.side-link
+           {:on-click #(when fnc
+                         (fnc))
+            :data-ot (get-string tooltip)
+            :data-ot-style "dark"
+            :data-ot-tip-joint "left"
+            :data-ot-fixed true
+            :data-ot-target true
+            :data-ot-delay 0.5
+            :data-ot-contain-in-viewport false
+            ;;
+            :style {:pointer-events (if disabled? "none" "auto")}}
+           (icon :medium)]
+          (when leaf-buttons
+            [:div.sub-side-element
+             (add-side-elements! leaf-buttons disabled?)])])
        :hr [:hr])]))
 
 (defn side-bar
-  [{:keys [side/upper side/lower]} path disabled?]
+  [{:keys [side/upper side/lower]} disabled?]
   [:div#side-container
    [:div#side-upper
-    (add-side-elements! upper path disabled?)]
+    (add-side-elements! upper disabled?)]
    [:div#side-lower
     (add-side-elements! (if (:debug? data/config)
                           (cons [:button :debug] lower)
-                          lower) path disabled?)]])
+                          lower) disabled?)]])
 
 (defn root-view
   []
   (r/create-class
    {:reagent-render
     (fn []
-      (let [panic-message (data/get-app-state :app/panic-message)
-            {:keys [route/path]} (data/get-app-state :app/route)
-            side (data/get-app-state :app/side)]
-        (side-bar side path panic-message)))}))
+      (let [panic-message (data/get-app-state :app/panic-message)]
+        (side-bar side-bar-config panic-message)))}))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;

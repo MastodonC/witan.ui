@@ -57,13 +57,7 @@
 ;; default app-state
 (defonce app-state
   (->>
-   {:app/side {:side/upper [#_[:button :workspaces]
-                            [:button :data]
-                            #_[:button :rts]]
-               :side/lower [[:button :activity]
-                            [:button :help]
-                            [:button :logout]]}
-    :app/login {:login/pending? false
+   {:app/login {:login/pending? false
                 :login/token nil
                 :login/message nil
                 :login/auth-expiry -1
@@ -377,7 +371,9 @@
       (doseq [result results]
         (if result
           (let [r (first result)]
-            (log/debug "Query response:" r)
+            (if ((comp :items second) r)
+              (log/debug "Query response:" ((comp count :items second) r) " item(s)")
+              (log/debug "Query response:" r))
             (cb r))
           (do
             (panic! (str "Error in query response: " result))

@@ -50,7 +50,9 @@
    :string/reset-password                   "Reset Password"
    :string/create-account-info              "If you have an invite code you can create your account below:"
    :string/tooltip-workspace                "Browse your workspaces"
-   :string/tooltip-data                     "Browse your datasets"
+   :string/tooltip-data                     "Browse"
+   :string/tooltip-data--files              "Browse your files"
+   :string/tooltip-data--datapacks          "Browse your datapacks"
    :string/tooltip-logout                   "Log out from your account"
    :string/tooltip-help                     "Get help"
    :string/tooltip-request-to-share         "Request that datasets be shared with you or a group you belong to"
@@ -249,13 +251,11 @@
    :string/files                            "Files"
    :string/create-datapack-search-files     "Search for files by their titles..."
    :string/create-datapack-no-files         "You have not yet added any files to the datapack. Use the search box to select the files you would like to add."
-   :string/sharing-summary-transparent      "OK!"
-   :string/sharing-summary-translucent      "Warnings"
-   :string/sharing-summary-trans-meta-read  ["The following participants are missing<br/><strong>" :string/file-sharing-meta-read "</strong> permissions:"]
-   :string/sharing-summary-trans-file-read  ["The following participants are missing<br/><strong>" :string/file-sharing-file-read "</strong> permissions:"]
    :string/na                               "n/a"
    :string/create-datapack-fail-invalid     ["There was a problem creating the datapack. Please contact support."]
    :string/visible-to                       "Visible to"
+   :string/dash-filter--files               "Showing only your files"
+   :string/dash-filter--datapacks           "Showing only your datapacks"
    ;;
    :string.activity.upload-file/failed          "You failed to upload the file '%s'"
    :string.activity.upload-file/completed       "You successfully uploaded the file '%s'"

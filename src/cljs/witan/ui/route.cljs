@@ -83,12 +83,16 @@
   ([route args]
    (navigate! route args {}))
   ([route args query]
-   (let [path (find-path route args)]
-     (if path
-       (do
-         (log/debug "Navigating to" route args "=>" path)
-         (accountant/navigate! path query))
-       (log/severe "No path was found for route" route args)))))
+   (let []
+     (let [path (find-path route args)
+           old-route (data/get-app-state :app/route)]
+       (if path
+         ;; block against reloading the same route
+         (when-not (and (= path (:route/address old-route))
+                        (= query (:route/query old-route)))
+           (log/debug "Navigating to" route args query "=>" path query)
+           (accountant/navigate! path query))
+         (log/severe "No path was found for route" route args))))))
 
 (defn swap-query-string!
   [fn]

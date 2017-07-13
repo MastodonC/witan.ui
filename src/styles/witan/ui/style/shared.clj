@@ -84,9 +84,10 @@
                :font-weight 700}]
              [:h2
               {:font-family fonts/base-fonts
-
                :font-weight 500
                :font-size (em 1.2)}]
+             [:span
+              {:margin [[(px 15) (px 10) (px 10) (px 10)]]}]
              [:.shared-search-input
               {:display :inline-flex
                :font-size (px 14)

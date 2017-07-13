@@ -27,6 +27,7 @@
   (let [selected-id (r/atom nil)]
     (fn []
       (let [raw-data (data/get-app-state :app/data-dash)
+            file-type-filter (:dd/file-type-filter raw-data)
             buttons [{:id :datapack :icon icons/datapack :txt :string/create-new-datapack :class "data-upload"}
                      {:id :upload :icon icons/upload :txt :string/upload-new-data :class "data-upload"}]
             modified-fn #(vector :div (time/iso-time-as-moment (get-in % [:kixi.datastore.metadatastore/provenance :kixi.datastore.metadatastore/created])))
@@ -46,6 +47,10 @@
                               :filter-txt :string/data-dash-filter
                               :filter-fn nil
                               :buttons buttons
+                              :subtitle (when file-type-filter
+                                          (case file-type-filter
+                                            :files :string/dash-filter--files
+                                            :datapacks :string/dash-filter--datapacks))
                               :on-button-click (partial button-press (str selected-id'))})
          [:div.content
           (shared/table {:headers [{:content-fn name-fn
@@ -55,7 +60,9 @@
                                     :title (get-string :string/file-uploader)
                                     :weight 0.2}
                                    {:content-fn modified-fn
-                                    :title (get-string :string/created-at)
+                                    :title (get-string (if (= file-type-filter :datapacks)
+                                                         :string/created-at
+                                                         :string/file-uploaded-at))
                                     :weight 0.2}
                                    {:content-fn actions-fn
                                     :title ""
