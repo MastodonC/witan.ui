@@ -54,11 +54,7 @@
   [datapack]
   (let [table-id "create-datapack-files-table"
         select-fn (fn [{:keys [kixi.datastore.metadatastore/id] :as x} & _]
-                    (swap! datapack update :selected-files conj x)
-                    #_(swap! datapack update :sharing-summary assoc id
-                             (update-sharing-summary (data/get-app-state :app/user)
-                                                     (keys (:selected-groups @datapack))
-                                                     x)))]
+                    (swap! datapack update :selected-files conj x))]
     [editable-field
      nil
      [:div.datapack-edit-file
@@ -137,12 +133,10 @@
       (fn [[group activities] activity target-state]
         (swap! datapack assoc-in [:selected-groups group :values activity] target-state)
         (when (every? false? (vals (get-in @datapack [:selected-groups group :values])))
-          (swap! datapack update :selected-groups dissoc group)
-          #_(reset-sharing-summaries! datapack)))
+          (swap! datapack update :selected-groups dissoc group)))
       :on-add
       (fn [g]
-        (swap! datapack assoc-in [:selected-groups g :values] {:kixi.datastore.metadatastore/meta-read true})
-        #_(reset-sharing-summaries! datapack))}
+        (swap! datapack assoc-in [:selected-groups g :values] {:kixi.datastore.metadatastore/meta-read true}))}
      {:exclusions (keys (:selected-groups @datapack))}]]])
 
 (defn create-button-disabled?

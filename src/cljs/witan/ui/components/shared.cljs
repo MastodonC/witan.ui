@@ -596,13 +596,6 @@
    :frame true
    :history false})
 
-;;{:ph :string/create-datapack-search-files
-;;:on-click #(swap! data assoc :selected-file %1)
-;;:on-init #(controller/raise! :data/refresh-metadata {})
-;;:on-search #(controller/raise! :user/search-groups {:search %})
-;;:get-results-fn #(:user/group-search-filtered (data/get-app-state :app/user))
-;;:selector-key :kixi.datastore.metadatastore/id}
-
 (defcard file-search-area
   (fn [data _]
     (sab/html
