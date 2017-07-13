@@ -18,6 +18,7 @@
             [witan.ui.style.components.results :as results]
             [witan.ui.style.components.rts :as rts]
             [witan.ui.style.components.data :as data]
+            [witan.ui.style.components.datapack :as datapack]
             [witan.ui.style.components.activities :as activities]
 
 
@@ -43,6 +44,7 @@
     results/style
     rts/style
     data/style
+    datapack/style
     activities/style
     ;;
     splitjs/style]

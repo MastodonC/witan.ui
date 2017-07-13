@@ -22,14 +22,6 @@
   [selected-id _]
   (route/navigate! :app/datapack-create))
 
-(defn file-metadata->dash-display
-  [file-metadata]
-  {:data/id (:kixi.datastore.metadatastore/id file-metadata)
-   :data/name (:kixi.datastore.metadatastore/name file-metadata)
-   :data/file-type (:kixi.datastore.metadatastore/file-type file-metadata)
-   :data/owner-name (get-in file-metadata [:kixi.datastore.metadatastore/provenance :kixi/user :kixi.user/name])
-   :data/created-at (get-in file-metadata [:kixi.datastore.metadatastore/provenance :kixi.datastore.metadatastore/created])})
-
 (defn view
   []
   (let [selected-id (r/atom nil)]
@@ -37,16 +29,18 @@
       (let [raw-data (data/get-app-state :app/data-dash)
             buttons [{:id :datapack :icon icons/datapack :txt :string/create-new-datapack :class "data-upload"}
                      {:id :upload :icon icons/upload :txt :string/upload-new-data :class "data-upload"}]
-            modified-fn #(vector :div (time/iso-time-as-moment (:data/created-at %)))
-            datasets (mapv file-metadata->dash-display (:items raw-data))
+            modified-fn #(vector :div (time/iso-time-as-moment (get-in % [:kixi.datastore.metadatastore/provenance :kixi.datastore.metadatastore/created])))
+            datasets (:items raw-data)
             selected-id' @selected-id
-            navigate-fn #(route/navigate! :app/data {:id (str (:data/id %))})
-            actions-fn (fn [d] (when (= (:data/id d) selected-id')
+            navigate-fn #(route/navigate! :app/data {:id (:kixi.datastore.metadatastore/id %)})
+            actions-fn (fn [d] (when (= (:kixi.datastore.metadatastore/id d) selected-id')
                                  (vector :div (shared/button {:icon icons/search
                                                               :txt :string/view
-                                                              :id (:data/id d)}
-                                                             #(navigate-fn {:data/id %})))))
-            name-fn #(vector :div.data-name (icons/file-type (:data/file-type %) :small) (:data/name %))]
+                                                              :id (:kixi.datastore.metadatastore/id d)}
+                                                             #(navigate-fn {:kixi.datastore.metadatastore/id %})))))
+            name-fn #(vector :div.data-name (case (:kixi.datastore.metadatastore/type %)
+                                              "stored" (icons/file-type (:kixi.datastore.metadatastore/file-type %) :small)
+                                              "bundle" (icons/bundle-type (:kixi.datastore.metadatastore/bundle-type %) :small)) [:h4 (:kixi.datastore.metadatastore/name %)])]
         [:div#data-dash.dashboard
          (shared-dash/header {:title :string/data-dash-title
                               :filter-txt :string/data-dash-filter
@@ -57,7 +51,7 @@
           (shared/table {:headers [{:content-fn name-fn
                                     :title (get-string :string/forecast-name)
                                     :weight 0.45}
-                                   {:content-fn :data/owner-name
+                                   {:content-fn (comp :kixi.user/name :kixi/user :kixi.datastore.metadatastore/provenance)
                                     :title (get-string :string/file-uploader)
                                     :weight 0.2}
                                    {:content-fn modified-fn
@@ -67,6 +61,6 @@
                                     :title ""
                                     :weight 0.15}]
                          :content datasets
-                         :selected?-fn #(= (:data/id %) selected-id')
-                         :on-select #(reset! selected-id (:data/id %))
+                         :selected?-fn #(= (:kixi.datastore.metadatastore/id %) selected-id')
+                         :on-select #(reset! selected-id (:kixi.datastore.metadatastore/id %))
                          :on-double-click navigate-fn})]]))))

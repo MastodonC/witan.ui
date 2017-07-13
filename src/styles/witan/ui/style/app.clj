@@ -40,6 +40,11 @@
               :align-items :flex-start
               :justify-content :space-between}]
 
+            [:.flex-start
+             {:display :flex
+              :align-items :flex-start
+              :justify-content :flex-start}]
+
             [:.flex-center
              {:display :flex
               :align-items :flex-start
@@ -50,6 +55,11 @@
               :align-items :center
               :justify-content :space-between}]
 
+            [:.flex-vcenter-start
+             {:display :flex
+              :align-items :center
+              :justify-content :flex-start}]
+
             [:.flex-3
              {:flex [[0.315 1 :auto]]
               :align-self :auto
@@ -59,6 +69,11 @@
              {:flex [[0.493 1 :auto]]
               :align-self :auto
               :width 0}]
+
+            [:.ellipsis
+             {:white-space :nowrap
+              :overflow :hidden}
+             ^:prefix {:text-overflow :ellipsis}]
 
              ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
             ;; Create Workspace
@@ -226,7 +241,7 @@
              [:i
               {:margin-right (px 6)}]
              [:div.hero-content
-              {:margin (px 5)}]
+              {:margin [[(px 5) (px 20) (px 5) (px 5)]]}]
              [:div.hero-close
               {:position :absolute
                :right (px 1)

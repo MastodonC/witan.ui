@@ -39,12 +39,12 @@
        [:function/name
         :function/id
         :function/version]}
-    (data/query `[{[:workspace/list-by-owner ~id]
-                   [:workspace/name
-                    :workspace/id
-                    :workspace/owner-name
-                    :workspace/modified]}]
-                on-receive)))
+    #_(data/query `[{[:workspace/list-by-owner ~id]
+                     [:workspace/name
+                      :workspace/id
+                      :workspace/owner-name
+                      :workspace/modified]}]
+                  on-receive)))
 
 (defn set-result-downloading!
   ([result dling?]
@@ -222,7 +222,7 @@
                           :workspace/owner-id
                           :workspace/description
                           :workspace/modified]]
-    (data/query `[{[:workspace/by-id ~workspace-id] ~workspace-fields}] on-receive)))
+    #_(data/query `[{[:workspace/by-id ~workspace-id] ~workspace-fields}] on-receive)))
 
 (defmethod on-route-change
   :app/workspace-dash
@@ -269,21 +269,21 @@
 (defmethod handle :fetch-models
   [_ _]
   (log/debug "Fetching models....")
-  (data/query [{:workspace/available-models [:metadata]}] on-receive))
+  #_(data/query [{:workspace/available-models [:metadata]}] on-receive))
 
 (defmethod handle :select-model
   [_ {:keys [name version]}]
   (log/debug "Fetching model" name version)
-  (data/query `[{[:workspace/model-by-name-and-version ~name ~version]
-                 [:workflow :catalog :metadata]}]
-              #(let [[_ {:keys [workflow catalog]}] %]
-                 (on-receive %)
-                 (data/swap-app-state!
-                  :app/workspace assoc-in [:workspace/current :workspace/workflow]
-                  workflow)
-                 (data/swap-app-state!
-                  :app/workspace assoc-in [:workspace/current :workspace/catalog]
-                  catalog))))
+  #_(data/query `[{[:workspace/model-by-name-and-version ~name ~version]
+                   [:workflow :catalog :metadata]}]
+                #(let [[_ {:keys [workflow catalog]}] %]
+                   (on-receive %)
+                   (data/swap-app-state!
+                    :app/workspace assoc-in [:workspace/current :workspace/workflow]
+                    workflow)
+                   (data/swap-app-state!
+                    :app/workspace assoc-in [:workspace/current :workspace/catalog]
+                    catalog))))
 
 (defmethod handle :run-current
   [_ _]

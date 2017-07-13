@@ -3,12 +3,15 @@
             [sablono.core :as sab :include-macros true]
             ;;
             [witan.ui.data :as data]
+            [witan.ui.utils :as utils]
+            [goog.string :as gstring]
             [witan.ui.controller :as controller]
             [witan.ui.strings :refer [get-string]]
             [witan.ui.components.icons :as icons])
   (:require-macros
    [devcards.core :as dc :refer [defcard]]
-   [cljs-log.core :as log]))
+   [cljs-log.core :as log]
+   [cljs.core.async.macros :refer [go]]))
 
 (defn search-filter
   [placeholder on-input & [{:keys [id disabled?]}]]
@@ -32,14 +35,23 @@
                    (.preventDefault e))}]]]])
 
 (defn table
-  [{:keys [headers content selected?-fn on-select on-double-click]}]
+  [{:keys [headers content selected?-fn on-select on-double-click on-scroll id]
+    :or {id (str (random-uuid))}}]
   [:div.shared-table
+   {:id id
+    :on-scroll (fn [e]
+                 (when on-scroll
+                   (let [el (.getElementById js/document id)
+                         d (/ (.-scrollTop el) (- (.-scrollHeight el) (.-offsetHeight el)))]
+                     (on-scroll d))))}
    [:table.pure-table.pure-table-horizontal.shared-table-headers
     [:thead
      [:tr
       (doall
        (for [{:keys [title weight]} headers]
-         (let [percent (str (* 100 weight) "%")]
+         (let [percent (if (string? weight)
+                         weight
+                         (str (* 100 weight) "%"))]
            [:th {:key title
                  :style {:width percent}} title])))]]]
    (if-not content
@@ -47,13 +59,15 @@
      [:table.pure-table.pure-table-horizontal.shared-table-rows
       [:tbody
        (doall
-        (for [row content]
+        (for [[i row] (map-indexed vector content)]
           [:tr
-           {:key (apply str row)
+           {:key (str id "--" i)
             :class (when (and selected?-fn (selected?-fn row)) "selected")}
            (doall
             (for [{:keys [content-fn title weight]} headers]
-              (let [percent (str (* 100 weight) "%")]
+              (let [percent (if (string? weight)
+                              weight
+                              (str (* 100 weight) "%"))]
                 [:td {:style {:width percent}
                       :key (apply str row title)
 
@@ -67,8 +81,11 @@
   ([title-string]
    (header-string title-string nil))
   ([title-string subtitle-string]
+   (header-string title-string nil nil))
+  ([title-string subtitle-string opts]
    [:div.shared-heading
-    {:key "heading"}
+    {:key "heading"
+     :class (when (contains? opts :center) "center-string")}
     [:h1 title-string]
     (when subtitle-string
       [:h2 subtitle-string])]))
@@ -77,7 +94,9 @@
   ([title]
    (header-string (get-string title) nil))
   ([title subtitle]
-   (header-string (get-string title) (get-string subtitle))))
+   (header-string (get-string title) (when subtitle (get-string subtitle))))
+  ([title subtitle opts]
+   (header-string (get-string title) (when subtitle (get-string subtitle)) opts)))
 
 (defn button
   [{:keys [icon txt class id prevent? disabled?]} on-button-click]
@@ -119,7 +138,8 @@
 
 (defn inline-file-title
   [{:keys [kixi.datastore.metadatastore/name
-           kixi.datastore.metadatastore/file-type]} size-text size-icon]
+           kixi.datastore.metadatastore/file-type
+           kixi.datastore.metadatastore/bundle-type]} size-text size-icon]
   (let [size-el (condp = size-text
                   :div     :div
                   :span    :span
@@ -129,7 +149,9 @@
                   :large   :h2
                   :x-large :h1)]
     [:div.shared-inline-file-title
-     (icons/file-type file-type size-icon)
+     (cond
+       file-type   (icons/file-type file-type size-icon)
+       bundle-type (icons/bundle-type bundle-type size-icon))
      [size-el name]]))
 
 (defn index
@@ -265,6 +287,62 @@
            {:on-click close-fn}
            (icons/close)]]]))))
 
+;; Experimenting with a new style of search area
+(defn file-search-area
+  [{:keys [on-init]} & _]
+  (let [show-breakout? (r/atom false)
+        selected-group (r/atom nil)
+        num-results (r/atom 10)
+        table-id (str (random-uuid))]
+    (when on-init
+      (on-init))
+    (fn [{:keys [ph on-click on-init get-results-fn selector-key on-search table-headers-fn]} & [opts]]
+      (let [{:keys [id disabled? exclusions]
+             :or {id (str "search-field-"ph)
+                  disabled? false
+                  exclusions nil}} opts
+            results (take @num-results (get-results-fn))
+            results (if exclusions
+                      (let [excluded-groups (map selector-key exclusions)]
+                        (remove (fn [x] (some #{(selector-key x)} excluded-groups)) results))
+                      results)
+            soft-reset-fn (fn []
+                            (when-let [el (.getElementById js/document table-id)]
+                              (set! (.-scrollTop el) 0))
+                            (reset! num-results 10)
+                            (reset! show-breakout? false))
+            close-fn (fn [& _]
+                       (aset (.getElementById js/document id) "value" nil)
+                       (reset! selected-group nil)
+                       (soft-reset-fn))
+            select-fn (fn [final? group]
+                        (when on-click
+                          (on-click group final?))
+                        (reset! selected-group group)
+                        (when final?
+                          (close-fn)))]
+        [:div.shared-search-area
+         (search-filter (get-string ph)
+                        #(if (clojure.string/blank? %)
+                           (soft-reset-fn)
+                           (do (reset! show-breakout? true)
+                               (on-search %)))
+                        {:id id
+                         :disabled? disabled?})
+         [:div.breakout-area
+          {:style {:height (if @show-breakout? "300px" "0px")}}
+          (table {:id table-id
+                  :headers (table-headers-fn)
+                  :content results
+                  :selected?-fn #(= (selector-key %) (selector-key @selected-group))
+                  :on-select (partial select-fn true)
+                  :on-double-click (partial select-fn true)
+                  :on-scroll #(if (> % 1.0)
+                                (swap! num-results + 10))})
+          [:div.close
+           {:on-click close-fn}
+           (icons/close)]]]))))
+
 (defn sharing-matrix
   [sharing-activites group->activities
    {:keys [on-change on-add all-disabled? show-search?]
@@ -335,6 +413,34 @@
        (icons/close)])
     [:span tag-string]]))
 
+(defn editable-field
+  [on-edit-fn & render-fns]
+  (let [state (r/atom :idle)]
+    (fn [on-edit-fn & render-fns]
+      [:div.editable-field
+       {:on-mouse-over #(reset! state :hovered)
+        :on-mouse-leave #(reset! state :idle)}
+       (vec (cons :div.editable-field-content
+                  (conj
+                   (vec render-fns)
+                   (when (and on-edit-fn (= :hovered @state))
+                     [:span.clickable-text.edit-label
+                      {:on-click on-edit-fn}
+                      (get-string :string/edit)]))))])))
+
+(defn collapsible-text
+  [long-text]
+  (let [expanded? (r/atom false)]
+    (fn [long-text]
+      [:div.shared-collapsible-text.flex-start
+       [:div
+        {:class (when-not @expanded? "rotate270")
+         :on-click #(swap! expanded? not)}
+        (icons/tree-arrow-down)]
+       [:span
+        {:class (when-not @expanded? "ellipsis")}
+        long-text]])))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -390,6 +496,13 @@
     [:div (inline-file-title {:kixi.datastore.metadatastore/name "Foo Bar" :kixi.datastore.metadatastore/file-type "csv"} :large :medium)]
     [:div (inline-file-title {:kixi.datastore.metadatastore/name "Foo Bar" :kixi.datastore.metadatastore/file-type "csv"} :medium :small)]
     [:div (inline-file-title {:kixi.datastore.metadatastore/name "Foo Bar" :kixi.datastore.metadatastore/file-type "csv"} :small :tiny)]]))
+
+(defcard inline-file-title-bundles
+  (sab/html
+   [:div
+    [:div (inline-file-title {:kixi.datastore.metadatastore/name "Foo Bar" :kixi.datastore.metadatastore/bundle-type "datapack"} :large :medium)]
+    [:div (inline-file-title {:kixi.datastore.metadatastore/name "Foo Bar" :kixi.datastore.metadatastore/bundle-type "datapack"} :medium :small)]
+    [:div (inline-file-title {:kixi.datastore.metadatastore/name "Foo Bar" :kixi.datastore.metadatastore/bundle-type "datapack"} :small :tiny)]]))
 
 (defcard inline-group
   (sab/html
@@ -483,6 +596,39 @@
    :frame true
    :history false})
 
+(defcard file-search-area
+  (fn [data _]
+    (sab/html
+     [:div
+      {:style {:width "100%"}}
+      (r/as-element
+       [file-search-area
+        {:ph :string/create-datapack-search-files
+         :on-click #(swap! data assoc :selected-file %1)
+         :on-init identity
+         :on-search #(swap! data assoc :search-results
+                            (keep (fn [s]
+                                    (when (gstring/caseInsensitiveContains (:kixi.datastore.metadatastore/name s) %)
+                                      s)) (:all-files @data)))
+         :get-results-fn #(:search-results @data)
+         :selector-key :kixi.datastore.metadatastore/id
+         :table-headers-fn (fn [selector-key select-fn]
+                             [{:content-fn #(button {:icon icons/tick
+                                                     :id (selector-key %)
+                                                     :prevent? true}
+                                                    (fn [_] (select-fn true %)))
+                               :title ""  :weight 0.12}
+                              {:content-fn #(inline-file-title % :small :small) :title (get-string :string/file-name) :weight 0.50}
+                              {:content-fn :kixi.datastore.metadatastore/created :title (get-string :string/file-uploaded-at) :weight 0.38}])}])]))
+  {:selected-file nil
+   :all-files (vec (map-indexed (fn [i s]
+                                  {:kixi.datastore.metadatastore/id (str i)
+                                   :kixi.datastore.metadatastore/name (str (:name s) " " i)}) (concat states states)))
+   :search-results []}
+  {:inspect-data false
+   :frame true
+   :history false})
+
 (defcard sharing-matrix
   (fn [data _]
     (sab/html
@@ -557,3 +703,25 @@
          "Closeable"
          (doall (for [t (take 5 (drop 10 state-names))]
                   (tag t identity identity)))]]))))
+
+(defcard editable-field
+  (fn [data _]
+    (sab/html
+     [:div
+      {:style {:width "100%"}}
+      (r/as-element
+       [editable-field
+        nil
+        [:div "Just a card, no editing."]])
+      (r/as-element
+       [editable-field
+        identity
+        [:div "Hover to edit."]])])))
+
+(defcard collapsible-text
+  (fn [data _]
+    (sab/html
+     [:div
+      {:style {:width "100%"}}
+      (r/as-element
+       [collapsible-text (clojure.string/join "," (map :name states))])])))
