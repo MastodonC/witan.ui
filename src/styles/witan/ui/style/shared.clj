@@ -129,9 +129,7 @@
               {:vertical-align :middle}]
              [:button
               {:margin-left (em 0.5)
-               :box-shadow [[(px 2) (px 2) (px 4) colour/box-shadow]]}
-              #_[:i
-                 {:margin [[(px -3) (px 5) (px 0) (px 0)]]}]]]
+               :box-shadow [[(px 2) (px 2) (px 4) colour/box-shadow]]}]]
 
 ;;;;;;;;;;;;;;
 
@@ -314,7 +312,6 @@
             [:.editable-field
              {:padding [[(em 1) (px 0) (em 1) (em 1)]]
               :margin-bottom (em 1)
-              ;;:width (percent 100)
               :line-height (em 1.7)
               :border-color colour/subtle-grey
               :border-radius (px 2)
