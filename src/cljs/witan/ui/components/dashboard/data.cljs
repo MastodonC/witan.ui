@@ -40,9 +40,7 @@
                                                              #(navigate-fn {:kixi.datastore.metadatastore/id %})))))
             name-fn #(vector :div.data-name (case (:kixi.datastore.metadatastore/type %)
                                               "stored" (icons/file-type (:kixi.datastore.metadatastore/file-type %) :small)
-                                              "bundle" (icons/bundle-type (:kixi.datastore.metadatastore/bundle-type %) :small)) [:h4 (:kixi.datastore.metadatastore/name %)])
-            ;;name-fn  (fn [f] (vector :div.data-name (shared/inline-file-title f :small :small)))
-            ]
+                                              "bundle" (icons/bundle-type (:kixi.datastore.metadatastore/bundle-type %) :small)) [:h4 (:kixi.datastore.metadatastore/name %)])]
         [:div#data-dash.dashboard
          (shared-dash/header {:title :string/data-dash-title
                               :filter-txt :string/data-dash-filter
