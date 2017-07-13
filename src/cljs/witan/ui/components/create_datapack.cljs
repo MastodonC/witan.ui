@@ -45,94 +45,84 @@
               :on-change #(swap! datapack assoc :title (.. % -target -value))}])]])
 
 (defn display-sharing-summary
-  [ddatapack ot]
-  (fn [{:keys [kixi.datastore.metadatastore/id kixi.datastore.metadatastore/sharing]}]
+  [ddatapack]
+  (fn [{:keys [kixi.datastore.metadatastore/sharing]}]
     (let [group-names (set (map :kixi.group/name (:kixi.datastore.metadatastore/meta-read sharing)))]
       [shared/collapsible-text (str/join ", "  group-names)])))
 
 (defn edit-files
   [datapack]
   (let [table-id "create-datapack-files-table"
-        ot (atom nil)]
-    (r/create-class
-     {:component-did-mount
-      (fn [_]
-        (reset! ot (js/Opentip. (str "#" table-id) "FOOBAR" #js {:showOn nil
-                                                                 :tipJoint "left"
-                                                                 :fixed true
-                                                                 :offset #js [30,-5]})))
-      :reagent-render
-      (fn [datapack]
-        (let [select-fn (fn [{:keys [kixi.datastore.metadatastore/id] :as x} & _]
-                          (swap! datapack update :selected-files conj x)
-                          #_(swap! datapack update :sharing-summary assoc id
-                                   (update-sharing-summary (data/get-app-state :app/user)
-                                                           (keys (:selected-groups @datapack))
-                                                           x)))]
-          [editable-field
-           nil
-           [:div.datapack-edit-file
-            [:h2.heading (get-string :string/files)]
-            [shared/file-search-area
-             {:ph :string/create-datapack-search-files
-              :on-click select-fn
-              :on-init #(controller/raise! :data/refresh-files {})
-              :on-search #(controller/raise! :data/search-files {:search %})
-              :get-results-fn #(data/get-in-app-state :app/datastore :ds/files-search-filtered)
-              :selector-key :kixi.datastore.metadatastore/id
-              :table-headers-fn (fn []
-                                  [{:content-fn #(shared/button {:icon icons/tick
-                                                                 :id (str (:kixi.datastore.metadatastore/id %) "-select")
-                                                                 :prevent? true}
-                                                                identity)
-                                    :title ""  :weight 0.10}
-                                   {:content-fn #(shared/inline-file-title % :small :small)
-                                    :title (get-string :string/file-name)
-                                    :weight 0.50}
-                                   {:content-fn (comp
-                                                 :kixi.user/name
-                                                 :kixi/user
-                                                 :kixi.datastore.metadatastore/provenance)
-                                    :title (get-string :string/file-uploader)
-                                    :weight 0.20}
-                                   {:content-fn (comp
-                                                 time/iso-time-as-moment
-                                                 :kixi.datastore.metadatastore/created
-                                                 :kixi.datastore.metadatastore/provenance)
-                                    :title (get-string :string/file-uploaded-at)
-                                    :weight 0.20}])}
-             {:exclusions (:selected-files @datapack)}]
-            (when (empty? (:selected-files @datapack))
-              [:i [:h4 (get-string :string/create-datapack-no-files)]])
-            [:div
-             {:style {:display (if (empty? (:selected-files @datapack)) "none" "inherit")}}
-             [shared/table
-              {:headers [{:content-fn
-                          #(vector
-                            :div.flex-start
-                            (shared/button {:icon icons/close
-                                            :id (str (:kixi.datastore.metadatastore/id %) "-select")
-                                            :prevent? true}
-                                           (fn [_]
-                                             (swap! datapack update :selected-files
-                                                    (fn [files]
-                                                      (remove #{%} files)))))
-                            (shared/button {:icon icons/search
-                                            :id (str (:kixi.datastore.metadatastore/id %) "-open")
-                                            :prevent? true}
-                                           (fn [_]
-                                             (.open
-                                              js/window
-                                              (str "/#" (route/find-path :app/data {:id (:kixi.datastore.metadatastore/id %)}))))))
-                          :title ""  :weight "90px"}
-                         {:content-fn #(shared/inline-file-title % :small :small)
-                          :title (get-string :string/file-name)
-                          :weight 0.43}
-                         {:content-fn (display-sharing-summary @datapack @ot)
-                          :title (get-string :string/visible-to)
-                          :weight 0.43}]
-               :content (reverse (:selected-files @datapack))
-               :id table-id}]]]]))})))
+        select-fn (fn [{:keys [kixi.datastore.metadatastore/id] :as x} & _]
+                    (swap! datapack update :selected-files conj x)
+                    #_(swap! datapack update :sharing-summary assoc id
+                             (update-sharing-summary (data/get-app-state :app/user)
+                                                     (keys (:selected-groups @datapack))
+                                                     x)))]
+    [editable-field
+     nil
+     [:div.datapack-edit-file
+      [:h2.heading (get-string :string/files)]
+      [shared/file-search-area
+       {:ph :string/create-datapack-search-files
+        :on-click select-fn
+        :on-init #(controller/raise! :data/refresh-files {})
+        :on-search #(controller/raise! :data/search-files {:search %})
+        :get-results-fn #(data/get-in-app-state :app/datastore :ds/files-search-filtered)
+        :selector-key :kixi.datastore.metadatastore/id
+        :table-headers-fn (fn []
+                            [{:content-fn #(shared/button {:icon icons/tick
+                                                           :id (str (:kixi.datastore.metadatastore/id %) "-select")
+                                                           :prevent? true}
+                                                          identity)
+                              :title ""  :weight 0.10}
+                             {:content-fn #(shared/inline-file-title % :small :small)
+                              :title (get-string :string/file-name)
+                              :weight 0.50}
+                             {:content-fn (comp
+                                           :kixi.user/name
+                                           :kixi/user
+                                           :kixi.datastore.metadatastore/provenance)
+                              :title (get-string :string/file-uploader)
+                              :weight 0.20}
+                             {:content-fn (comp
+                                           time/iso-time-as-moment
+                                           :kixi.datastore.metadatastore/created
+                                           :kixi.datastore.metadatastore/provenance)
+                              :title (get-string :string/file-uploaded-at)
+                              :weight 0.20}])}
+       {:exclusions (:selected-files @datapack)}]
+      (when (empty? (:selected-files @datapack))
+        [:i [:h4 (get-string :string/create-datapack-no-files)]])
+      [:div
+       {:style {:display (if (empty? (:selected-files @datapack)) "none" "inherit")}}
+       [shared/table
+        {:headers [{:content-fn
+                    #(vector
+                      :div.flex-start
+                      (shared/button {:icon icons/close
+                                      :id (str (:kixi.datastore.metadatastore/id %) "-select")
+                                      :prevent? true}
+                                     (fn [_]
+                                       (swap! datapack update :selected-files
+                                              (fn [files]
+                                                (remove #{%} files)))))
+                      (shared/button {:icon icons/search
+                                      :id (str (:kixi.datastore.metadatastore/id %) "-open")
+                                      :prevent? true}
+                                     (fn [_]
+                                       (.open
+                                        js/window
+                                        (str "/#" (route/find-path :app/data {:id (:kixi.datastore.metadatastore/id %)}))))))
+                    :title ""  :weight "90px"}
+                   {:content-fn #(shared/inline-file-title % :small :small)
+                    :title (get-string :string/file-name)
+                    :weight 0.43}
+                   {:content-fn (display-sharing-summary @datapack)
+                    :title (get-string :string/visible-to)
+                    :weight 0.43}]
+         :content (reverse (:selected-files @datapack))
+         :id table-id}]]]]))
 
 (defn edit-sharing
   [datapack activities->string]
@@ -174,7 +164,7 @@
          [:div.flex-center
           [:div.container.padded-content
            (edit-title datapack)
-           [edit-files datapack]
+           (edit-files datapack)
            (edit-sharing datapack activities->string)
            [:div.flex-vcenter-start
             (shared/button {:icon icons/datapack
