@@ -141,8 +141,7 @@
 
 (defn create-button-disabled?
   [ddatapack]
-  (or (clojure.string/blank? (:title ddatapack))
-      (empty? (:selected-files ddatapack))))
+  (clojure.string/blank? (:title ddatapack)))
 
 (defn view
   []
