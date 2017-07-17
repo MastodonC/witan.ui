@@ -58,3 +58,15 @@
          (dissoc a k)
          a)) m m)
     m))
+
+(defn user-has-permission?
+  [permission user file-metadata]
+  (let [ug (:kixi.user/groups user)
+        vg (set (map :kixi.group/id (get-in file-metadata [:kixi.datastore.metadatastore/sharing permission])))]
+    (some vg ug)))
+
+(def user-has-edit?
+  (partial user-has-permission? :kixi.datastore.metadatastore/meta-update))
+
+(def user-has-download?
+  (partial user-has-permission? :kixi.datastore.metadatastore/file-read))

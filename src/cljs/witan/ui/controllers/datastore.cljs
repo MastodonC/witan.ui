@@ -478,11 +478,10 @@
                                   (i/capitalize (:kixi.group/type group))
                                   (:kixi.group/name group))})))
 
-(defmethod handle
-  :sharing-add-group
-  [event {:keys [current group] :as data}]
-  (let [md (data/get-in-app-state :app/datastore :ds/file-metadata current)]
-    (data/swap-app-state! :app/datastore update-in [:ds/file-metadata current
+(defn add-group-to-file-sharing
+  [{:keys [id group] :as data}]
+  (let [md (get-local-file id)]
+    (data/swap-app-state! :app/datastore update-in [:ds/file-metadata id
                                                     :kixi.datastore.metadatastore/sharing
                                                     :kixi.datastore.metadatastore/meta-read]
                           (fn [groups]
@@ -491,7 +490,7 @@
     (activities/start-activity!
      :update-sharing
      (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
-                    {:kixi.datastore.metadatastore/id current
+                    {:kixi.datastore.metadatastore/id id
                      :kixi.datastore.metadatastore/activity :kixi.datastore.metadatastore/meta-read
                      :kixi.group/id (:kixi.group/id group)
                      :kixi.datastore.metadatastore/sharing-update :kixi.datastore.metadatastore/sharing-conj})
@@ -501,6 +500,11 @@
                                   (:kixi.datastore.metadatastore/name md)
                                   (i/capitalize (:kixi.group/type group))
                                   (:kixi.group/name group))})))
+
+(defmethod handle
+  :sharing-add-group
+  [event {:keys [current] :as data}]
+  (add-group-to-file-sharing (assoc data :id current)))
 
 (defn md-key->update-command-key
   [k]
@@ -675,12 +679,38 @@
   (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false)
   (data/swap-app-state!
    :app/create-datapack assoc :cdp/error
-   {:general (case (get-in args [:message :kixi.comms.event/payload :reason])
-               :metadata-invalid (get-string :string/create-datapack-fail-invalid))}))
+   {:gefeature/neral (case (get-in args [:message :kixi.comms.event/payload :reason])
+                       :metadata-invalid (get-string :string/create-datapack-fail-invalid))}))
 
 (defmethod on-activity-finished
   [:create-datapack :completed]
   [{:keys [args]}]
+  (let [user (data/get-in-app-state :app/user)
+        read-groups
+        (get-in args [:message
+                      :kixi.comms.event/payload
+                      :kixi.datastore.metadatastore/file-metadata
+                      :kixi.datastore.metadatastore/sharing
+                      :kixi.datastore.metadatastore/meta-read])
+        files
+        (get-in args [:message
+                      :kixi.comms.event/payload
+                      :kixi.datastore.metadatastore/file-metadata
+                      :kixi.datastore.metadatastore/bundled-ids])]
+    (log/debug "aaa READ GROUPS" read-groups)
+    (log/debug "aaa FILES" files)
+    (run!
+     (fn [file-id]
+       (log/debug "bbb doing file" file-id (get-local-file file-id))
+       (let [md (get-local-file file-id)]
+         (when (utils/user-has-edit? user md)
+           (run!
+            (fn [gid]
+              (log/debug "bbb doing group" gid)
+              (when-not (= gid (:kixi.user/self-group user))
+                (add-group-to-file-sharing {:id file-id
+                                            :group {:kixi.group/id gid}}))) read-groups))))
+     files))
   (js/setTimeout
    #(do
       (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false)

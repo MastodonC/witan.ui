@@ -118,11 +118,11 @@
 (defn download-file
   [id]
   #(set! (.. js/window -location -href)
-        (str
-         (if (:gateway/secure? data/config) "https://" "http://")
-         (or (:gateway/address data/config) "localhost:30015")
-         "/download?id="
-         id)))
+         (str
+          (if (:gateway/secure? data/config) "https://" "http://")
+          (or (:gateway/address data/config) "localhost:30015")
+          "/download?id="
+          id)))
 
 (defmulti metadata
   (fn [md _]
@@ -186,10 +186,10 @@
 (defn total-bundled-size
   [meta]
   (->> meta
-      :kixi.datastore.metadatastore/bundled-files
-      vals
-      (map :kixi.datastore.metadatastore/size-bytes)
-      (reduce +)))
+       :kixi.datastore.metadatastore/bundled-files
+       vals
+       (map :kixi.datastore.metadatastore/size-bytes)
+       (reduce +)))
 
 (defmethod metadata
   ["bundle" "datapack"]
@@ -243,7 +243,7 @@
                        (shared/button {:icon icons/download
                                        :id (str (:kixi.datastore.metadatastore/id %) "-download")
                                        :prevent? true
-                                       :disabled? (empty? (clojure.set/intersection 
+                                       :disabled? (empty? (clojure.set/intersection
                                                            (set (map :kixi.group/id (get-in % [:kixi.datastore.metadatastore/sharing
                                                                                                :kixi.datastore.metadatastore/file-read])))
                                                            (set (data/get-in-app-state :app/user :kixi.user/groups))))}
@@ -296,7 +296,7 @@
     (shared/button {:icon icons/download
                     :id :download
                     :txt :string/file-actions-download-file
-                    :prevent? true} 
+                    :prevent? true}
                    (download-file current))]])
 
 (defn sharing-detailed
@@ -672,18 +672,6 @@
     (route/swap-query-string! #(assoc % subview-query-param i))
     (reset! subview-tab k)))
 
-(defn user-has-permission?
-  [permission user file-metadata]
-  (let [ug (:kixi.user/groups user)
-        vg (set (map :kixi.group/id (get-in file-metadata [:kixi.datastore.metadatastore/sharing permission])))]
-    (some vg ug)))
-
-(def user-has-edit?
-  (partial user-has-permission? :kixi.datastore.metadatastore/meta-update))
-
-(def user-has-download?
-  (partial user-has-permission? :kixi.datastore.metadatastore/file-read))
-
 (defn md->tab-config
   [md has-edit?]
   (cond
@@ -706,7 +694,6 @@
 
 ;;
 
-
 (defn view
   []
   (reset! subview-tab (idx->tab (or (utils/query-param-int subview-query-param 0 2) 0)))
@@ -716,9 +703,9 @@
             (data/get-in-app-state :app/datastore)
             activities->string (:ds/activities ds)
             md (data/get-in-app-state :app/datastore :ds/file-metadata current)
-            has-edit? (user-has-edit? (data/get-in-app-state :app/user) md)
-            can-download? (user-has-download? (data/get-in-app-state :app/user) md)
             is-bundle? (= "bundle" (:kixi.datastore.metadatastore/type md))
+            has-edit? (utils/user-has-edit? (data/get-in-app-state :app/user) md)
+            can-download? (utils/user-has-download? (data/get-in-app-state :app/user) md)
             remove-new-fn (fn []
                             (route/swap-query-string! (fn [x] (dissoc x :new)))
                             (reset! new? false))
