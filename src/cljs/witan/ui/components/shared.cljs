@@ -53,7 +53,7 @@
                          weight
                          (str (* 100 weight) "%"))]
            [:th {:key title
-                 :style {:width percent}} title])))]]]
+                 :style {:width percent :display (if (string? weight) :inline-block :inheirit)}} title])))]]]
    (if-not content
      [:div#loading.text-center (icons/loading :large)]
      [:table.pure-table.pure-table-horizontal.shared-table-rows

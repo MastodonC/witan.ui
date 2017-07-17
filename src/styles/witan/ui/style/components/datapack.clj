@@ -29,8 +29,7 @@
      [:input
       {:margin-bottom (em 1)}]]
     [:.datapack-edit-sharing :.datapack-edit-title :.datapack-edit-file
-     {:width (percent 100)
-      :padding-right (em 1)}]
+     {:width (percent 100)}]
     [:.datapack-edit-title :.datapack-edit-file
      [:input
       {:width (percent 100)}]]

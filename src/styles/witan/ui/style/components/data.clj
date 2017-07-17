@@ -124,8 +124,7 @@
              [:.file-metadata-table
               {:width (percent 100)
                :display :flex
-               :justify-content :space-around
-               :padding-right (em 1)}
+               :justify-content :space-around}
               [:.row-title {:width (percent 15)}]
               [:.row-value {:width (percent 35)}]
               [:table
@@ -146,9 +145,14 @@
                {:margin [[(em 0.0) (em 0.2)]]
                 :line-height (em 1.6)}]]
 
-             [:.file-sharing-detailed
+             [:.datapack-files
               {:width (percent 100)
-               :margin-right (em 1)}]
+               :margin-bottom (em 1.5)}
+              [:table
+               {:width (percent 100)}]]
+
+             [:.file-sharing-detailed
+              {:width (percent 100)}]
 
              [:.file-actions
               {:width (percent 100)
@@ -166,8 +170,7 @@
                 {:margin-right (px 2)}]]]
 
              [:.file-edit-metadata
-              {:width (percent 100)
-               :padding-right (em 1)}
+              {:width (percent 100)}
               [:h3 :h4
                {:margin-bottom (em 0.3)
                 :margin-top 0}]

@@ -311,7 +311,7 @@
               {:cursor :pointer}]]
 
             [:.editable-field
-             {:padding [[(em 1) (px 0) (em 1) (em 1)]]
+             {:padding (em 1)
               :margin-bottom (em 1)
               :line-height (em 1.7)
               :border-color colour/subtle-grey
