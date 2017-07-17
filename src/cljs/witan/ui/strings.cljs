@@ -261,6 +261,7 @@
    :string/dash-filter--datapacks           "Showing only your datapacks"
    :string/datapack-view-num-files          "No. of files"
    :string/datapack-view-total-sized        "Total size"
+   :string/datapack-view-invisible-file-count "Due to your permissions, %d file(s) can not be displayed"
    ;;
    :string.activity.upload-file/failed          "You failed to upload the file '%s'"
    :string.activity.upload-file/completed       "You successfully uploaded the file '%s'"

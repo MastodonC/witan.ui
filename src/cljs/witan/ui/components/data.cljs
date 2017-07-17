@@ -229,40 +229,45 @@
 
 (defn files
   [{:keys [kixi.datastore.metadatastore/bundled-files]} on-edit-fn]
-  [editable-field
-   on-edit-fn
-   [:div.datapack-files
-    [:h3 (get-string :string/files)]
-    [shared/table
-     {:headers [{:content-fn
-                 #(vector
-                   :div.flex-start
-                   (shared/button {:icon icons/download
-                                   :id (str (:kixi.datastore.metadatastore/id %) "-download")
-                                   :prevent? true
-                                   :disabled? (empty? (clojure.set/intersection 
-                                                       (set (map :kixi.group/id (get-in % [:kixi.datastore.metadatastore/sharing
-                                                                                           :kixi.datastore.metadatastore/file-read])))
-                                                       (set (data/get-in-app-state :app/user :kixi.user/groups))))}
-                                  (download-file (:kixi.datastore.metadatastore/id %)))
-                   (shared/button {:icon icons/search
-                                   :id (str (:kixi.datastore.metadatastore/id %) "-open")
-                                   :prevent? true}
-                                  (fn [_]
-                                    (.open
-                                     js/window
-                                     (str "/#" (route/find-path :app/data {:id (:kixi.datastore.metadatastore/id %)}))))))
-                 :title "Actions"  :weight "105px"}
-                {:content-fn #(shared/inline-file-title % :small :small)
-                 :title (get-string :string/file-name)
-                 :weight 0.5}
-                {:content-fn #(js/filesize (:kixi.datastore.metadatastore/size-bytes %))
-                 :title (get-string :string/file-size)
-                 :weight 0.2}
-                {:content-fn #(or (:kixi.datastore.metadatastore/license %) (get-string :string/na))
-                 :title (get-string :string/license)
-                 :weight 0.2}]
-      :content (vals bundled-files)}]]])
+  (let [invisible-files (filter :error (vals bundled-files))
+        visible-files (remove :error (vals bundled-files))]
+    [editable-field
+     on-edit-fn
+     [:div.datapack-files
+      [:h3 (get-string :string/files)]
+      (when-not (empty? visible-files)
+        [shared/table
+         {:headers [{:content-fn
+                     #(vector
+                       :div.flex-start
+                       (shared/button {:icon icons/download
+                                       :id (str (:kixi.datastore.metadatastore/id %) "-download")
+                                       :prevent? true
+                                       :disabled? (empty? (clojure.set/intersection 
+                                                           (set (map :kixi.group/id (get-in % [:kixi.datastore.metadatastore/sharing
+                                                                                               :kixi.datastore.metadatastore/file-read])))
+                                                           (set (data/get-in-app-state :app/user :kixi.user/groups))))}
+                                      (download-file (:kixi.datastore.metadatastore/id %)))
+                       (shared/button {:icon icons/search
+                                       :id (str (:kixi.datastore.metadatastore/id %) "-open")
+                                       :prevent? true}
+                                      (fn [_]
+                                        (.open
+                                         js/window
+                                         (str "/#" (route/find-path :app/data {:id (:kixi.datastore.metadatastore/id %)}))))))
+                     :title "Actions"  :weight "105px"}
+                    {:content-fn #(shared/inline-file-title % :small :small)
+                     :title (get-string :string/file-name)
+                     :weight 0.5}
+                    {:content-fn #(js/filesize (:kixi.datastore.metadatastore/size-bytes %))
+                     :title (get-string :string/file-size)
+                     :weight 0.2}
+                    {:content-fn #(or (:kixi.datastore.metadatastore/license %) (get-string :string/na))
+                     :title (get-string :string/license)
+                     :weight 0.2}]
+          :content visible-files}])
+      (when-not (empty? invisible-files)
+        (gstring/format (get-string :string/datapack-view-invisible-file-count) (count invisible-files)))]]))
 
 (defn sharing
   [{:keys [kixi.datastore.metadatastore/sharing]} on-edit-fn]
