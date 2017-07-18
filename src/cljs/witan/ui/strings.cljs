@@ -268,7 +268,7 @@
    :string.activity.update-metadata/failed      "You failed to update the metadata for file '%s' (%s) - %s"
    :string.activity.update-metadata/completed   "You successfully updated the metadata for file '%s' (%s)"
    :string.activity.update-sharing/failed       "You failed to update the sharing details for file '%s'"
-   :string.activity.update-sharing/completed    "You successfully updated the sharing details for file '%s' (%s: %s)"
+   :string.activity.update-sharing/completed    "You successfully updated the sharing details for file '%s'"
    :string.activity.create-datapack/failed      "You failed to create the datapack '%s'"
    :string.activity.create-datapack/completed   "You successfully created the datapack '%s'"
    })
