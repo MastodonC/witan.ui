@@ -45,6 +45,7 @@
    :string/create                           "Create"
    :string/password                         "Password"
    :string/created-at                       "Created at"
+   :string/creator                          "Creator"
    :string/confirm-password                 "Confirm password"
    :string/browser-upload-error             "An error occurred whilst trying to upload the dataset. Please try again and if this problem persists, contact us."
    :string/reset-password                   "Reset Password"

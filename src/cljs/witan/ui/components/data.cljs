@@ -206,12 +206,12 @@
       [:table.pure-table.pure-table-bordered.pure-table-odd
        [:tbody
         (vec (concat [:tr]
-                     (row :string/file-uploader
+                     (row :string/creator
                           (fn [] [:span (:kixi.user/name prov-created-by)]))
                      (row :string/datapack-view-num-files
                           (fn [] [:span (count bundled-ids)]))))
         (vec (concat [:tr]
-                     (row :string/file-uploaded-at
+                     (row :string/created-at
                           (fn [] [:span (time/iso-time-as-moment prov-created-at)]))
                      (row :string/datapack-view-total-sized
                           (fn [] [:span (js/filesize (total-bundled-size meta))]))))]]]]))
@@ -301,8 +301,11 @@
                    (download-file current))]])
 
 (defn sharing-detailed
-  [{:keys [kixi.datastore.metadatastore/sharing kixi.datastore.metadatastore/id]} has-edit?]
-  (let [activities->string (data/get-in-app-state :app/datastore :ds/activities)
+  [{:keys [kixi.datastore.metadatastore/sharing
+           kixi.datastore.metadatastore/type
+           kixi.datastore.metadatastore/id]} has-edit?]
+  (let [activity-source (if (= "stored" type) :ds/activities :dp/activities)
+        activities->string (data/get-in-app-state :app/datastore activity-source)
         user-sg (data/get-in-app-state :app/user :kixi.user/self-group)
         sharing-groups (set (reduce concat [] (vals sharing)))]
     [editable-field
