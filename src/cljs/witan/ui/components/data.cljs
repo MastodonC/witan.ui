@@ -262,7 +262,10 @@
                     {:content-fn #(js/filesize (:kixi.datastore.metadatastore/size-bytes %))
                      :title (get-string :string/file-size)
                      :weight 0.2}
-                    {:content-fn #(or (:kixi.datastore.metadatastore/license %) (get-string :string/na))
+                    {:content-fn #(or (get-in
+                                       %
+                                       [:kixi.datastore.metadatastore.license/license
+                                        :kixi.datastore.metadatastore.license/type]) (get-string :string/na))
                      :title (get-string :string/license)
                      :weight 0.2}]
           :content visible-files}])
