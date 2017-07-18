@@ -479,11 +479,11 @@
                                   (:kixi.group/name group))})))
 
 (defn add-group-to-file-sharing
-  [{:keys [id group] :as data}]
+  [perm {:keys [id group] :as data}]
   (let [md (get-local-file id)]
     (data/swap-app-state! :app/datastore update-in [:ds/file-metadata id
                                                     :kixi.datastore.metadatastore/sharing
-                                                    :kixi.datastore.metadatastore/meta-read]
+                                                    perm]
                           (fn [groups]
                             (let [g-set (set groups)]
                               (conj g-set group))))
@@ -491,7 +491,7 @@
      :update-sharing
      (data/command! :kixi.datastore.metadatastore/sharing-change "1.0.0"
                     {:kixi.datastore.metadatastore/id id
-                     :kixi.datastore.metadatastore/activity :kixi.datastore.metadatastore/meta-read
+                     :kixi.datastore.metadatastore/activity perm
                      :kixi.group/id (:kixi.group/id group)
                      :kixi.datastore.metadatastore/sharing-update :kixi.datastore.metadatastore/sharing-conj})
      {:failed #(gstring/format (get-string :string.activity.update-sharing/failed)
@@ -502,7 +502,7 @@
 (defmethod handle
   :sharing-add-group
   [event {:keys [current] :as data}]
-  (add-group-to-file-sharing (assoc data :id current)))
+  (add-group-to-file-sharing :kixi.datastore.metadatastore/meta-read (assoc data :id current)))
 
 (defn md-key->update-command-key
   [k]
@@ -702,8 +702,12 @@
            (run!
             (fn [gid]
               (when-not (= gid (:kixi.user/self-group user))
-                (add-group-to-file-sharing {:id file-id
-                                            :group {:kixi.group/id gid}}))) read-groups))))
+                (run! #(add-group-to-file-sharing
+                        %
+                        {:id file-id
+                         :group {:kixi.group/id gid}})
+                      [:kixi.datastore.metadatastore/meta-read
+                       :kixi.datastore.metadatastore/file-read]))) read-groups))))
      files))
   (js/setTimeout
    #(do

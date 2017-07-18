@@ -685,7 +685,7 @@
     (= "datapack" (:kixi.datastore.metadatastore/bundle-type md))
     (if has-edit?
       {:overview (get-string :string/overview)
-       :files (get-string :string/files)
+       ;;:files (get-string :string/files)
        :sharing (get-string :string/sharing)
        :edit (get-string :string/edit)}
       {:overview (get-string :string/overview)
