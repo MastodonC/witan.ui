@@ -134,7 +134,7 @@
              [:.file-description
               {:font-family fonts/base-fonts}]
 
-             [:.file-tags
+             [:.file-tags :.datapack-files
               [:h3
                {:margin [[(em 0.0) (em 0.2)]]
                 :margin-bottom (em 0.2)

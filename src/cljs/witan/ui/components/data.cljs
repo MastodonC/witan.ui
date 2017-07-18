@@ -232,7 +232,8 @@
   (let [invisible-files (filter :error (vals bundled-files))
         visible-files (remove :error (vals bundled-files))]
     [editable-field
-     on-edit-fn
+     ;;on-edit-fn
+     nil
      [:div.datapack-files
       [:h3 (get-string :string/files)]
       (when-not (empty? visible-files)
@@ -248,13 +249,10 @@
                                                                                                :kixi.datastore.metadatastore/file-read])))
                                                            (set (data/get-in-app-state :app/user :kixi.user/groups))))}
                                       (download-file (:kixi.datastore.metadatastore/id %)))
-                       (shared/button {:icon icons/search
-                                       :id (str (:kixi.datastore.metadatastore/id %) "-open")
-                                       :prevent? true}
-                                      (fn [_]
-                                        (.open
-                                         js/window
-                                         (str "/#" (route/find-path :app/data {:id (:kixi.datastore.metadatastore/id %)}))))))
+                       [:a {:href (str "/#" (route/find-path :app/data {:id (:kixi.datastore.metadatastore/id %)}))}
+                        (shared/button {:icon icons/search
+                                        :id (str (:kixi.datastore.metadatastore/id %) "-open")}
+                                       (fn [_]))])
                      :title "Actions"  :weight "105px"}
                     {:content-fn #(shared/inline-file-title % :small :small)
                      :title (get-string :string/file-name)
@@ -646,13 +644,15 @@
         [:div.file-edit-metadata-content-container
          (edit-title-description local-md update-errors)
          (edit-tags local-md update-errors)
-         (edit-license local-md show-license-usage licenses update-errors)
-         [:div.file-edit-metadata-container.flex
-          {:style {:align-items :stretch}}
-          [:div.flex-2
-           [edit-source local-md update-errors]]
-          [:div.flex-2
-           [edit-temporal-coverage-and-geography local-md update-errors]]]
+         (when (= "stored" (:kixi.datastore.metadatastore/type md))
+           [:div
+            (edit-license local-md show-license-usage licenses update-errors)
+            [:div.file-edit-metadata-container.flex
+             {:style {:align-items :stretch}}
+             [:div.flex-2
+              [edit-source local-md update-errors]]
+             [:div.flex-2
+              [edit-temporal-coverage-and-geography local-md update-errors]]]])
          (edit-actions local-md flags update-errors)]))))
 
 (def tabs
