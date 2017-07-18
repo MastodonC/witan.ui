@@ -497,9 +497,7 @@
      {:failed #(gstring/format (get-string :string.activity.update-sharing/failed)
                                (:kixi.datastore.metadatastore/name md))
       :completed #(gstring/format (get-string :string.activity.update-sharing/completed)
-                                  (:kixi.datastore.metadatastore/name md)
-                                  (i/capitalize (:kixi.group/type group))
-                                  (:kixi.group/name group))})))
+                                  (:kixi.datastore.metadatastore/name md))})))
 
 (defmethod handle
   :sharing-add-group
@@ -697,16 +695,12 @@
                       :kixi.comms.event/payload
                       :kixi.datastore.metadatastore/file-metadata
                       :kixi.datastore.metadatastore/bundled-ids])]
-    (log/debug "aaa READ GROUPS" read-groups)
-    (log/debug "aaa FILES" files)
     (run!
      (fn [file-id]
-       (log/debug "bbb doing file" file-id (get-local-file file-id))
        (let [md (get-local-file file-id)]
          (when (utils/user-has-edit? user md)
            (run!
             (fn [gid]
-              (log/debug "bbb doing group" gid)
               (when-not (= gid (:kixi.user/self-group user))
                 (add-group-to-file-sharing {:id file-id
                                             :group {:kixi.group/id gid}}))) read-groups))))
