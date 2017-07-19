@@ -20,7 +20,7 @@
                   [:button :data-datapacks]]]
                 #_[:button :rts]]
    :side/lower [[:button :activity]
-                [:button :help]
+                [:button :about]
                 [:button :logout]]})
 
 (defn get-details
@@ -41,9 +41,9 @@
     :rts        {:fnc (partial route/navigate! :app/request-to-share)
                  :tooltip :string/tooltip-request-to-share
                  :icon icons/request-to-share}
-    :help       {:fnc #(controller/raise! :intercom/open-new)
-                 :tooltip :string/tooltip-help
-                 :icon icons/help}
+    :about      {:fnc (partial route/navigate! :app/about)
+                 :tooltip :string/tooltip-about
+                 :icon icons/info}
     :logout     {:fnc #(controller/raise! :user/logout)
                  :tooltip :string/tooltip-logout
                  :icon icons/logout}

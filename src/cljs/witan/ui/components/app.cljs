@@ -14,6 +14,7 @@
             [witan.ui.components.data :as data-view]
             [witan.ui.components.activities :as activities]
             [witan.ui.components.debug :as debug]
+            [witan.ui.components.about :as about]
             [witan.ui.components.panic :refer [panic-screen]]
             [witan.ui.utils :as utils]
             [witan.ui.data :as data]
@@ -33,7 +34,8 @@
    :app/rts-create       create-rts/view
    :app/rts              rts/view
    :app/activity         activities/view
-   :app/debug            debug/view})
+   :app/debug            debug/view
+   :app/about            about/view})
 
 (defn root-view
   []

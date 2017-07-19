@@ -68,6 +68,10 @@
   [& args]
   (apply create-key "live_help" args))
 
+(defn info
+  [& args]
+  (apply create-key "info" args))
+
 (defn logout
   [& args]
   (apply create-key "power_settings_new" args))
