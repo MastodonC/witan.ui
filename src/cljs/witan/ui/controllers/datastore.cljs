@@ -228,11 +228,11 @@
         (do
           (log/warn "File" id "is not accessible.")
           (data/swap-app-state! :app/datastore assoc :ds/error :string/file-inaccessible)
-          (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)))))
-  (do
-    (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)
-    (save-file-metadata! data)
-    (set-title! (:kixi.datastore.metadatastore/name data))))
+          (data/swap-app-state! :app/datastore assoc :ds/query-tries 0))))
+    (do
+      (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)
+      (save-file-metadata! data)
+      (set-title! (:kixi.datastore.metadatastore/name data)))))
 
 (defmethod on-query-response
   :error
