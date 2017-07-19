@@ -61,10 +61,11 @@
 
 (defn save-file-metadata!
   [{:keys [kixi.datastore.metadatastore/id] :as payload}]
-  (log/debug "Saving file metadata..." id)
-  (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload)
-  (when (= id (data/get-in-app-state :app/datastore :ds/file-metadata-editing :kixi.datastore.metadatastore/id))
-    (reset-file-edit-metadata! payload)))
+  (when id
+    (log/debug "Saving file metadata..." id)
+    (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload)
+    (when (= id (data/get-in-app-state :app/datastore :ds/file-metadata-editing :kixi.datastore.metadatastore/id))
+      (reset-file-edit-metadata! payload))))
 
 (defn selected-groups->sharing-activities
   [groups activities]
