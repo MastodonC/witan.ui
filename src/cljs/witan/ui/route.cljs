@@ -28,7 +28,8 @@
                               [:id ""]          :app/rts
                               [:id "/submit"]   :app/rts-submit}
                "/activity"  {""                 :app/activity}
-               "/debug"     {""                 :app/debug}}
+               "/debug"     {""                 :app/debug}
+               "/about"     {""                 :app/about}}
 
         "reset" {""  default-view
                  "/" default-view}

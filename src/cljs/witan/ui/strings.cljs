@@ -5,6 +5,8 @@
 
 (def strings
   {:string/support-email                    "witan@mastodonc.com"
+   :string/enquiries-email                  "theteam@mastodonc.com"
+   :string/contact-us                       "Contact Us"
    :string/name                             "Name"
    :string/type                             "Type"
    :string/full-name                        "Full Name"
@@ -17,7 +19,7 @@
    :string/upload-new-data-desc             "Upload to securely store, share or visualise your data"
    :string/forgotten-instruction            "Please enter your email address. If it matches one in our system we'll send you reset instructions."
    :string/confirm-email                    "Confirm email"
-   :string/witan                            "Witan"
+   :string/witan                            "Witan For Cities"
    :string/reset-submitted                  "Thanks. Your password reset request has been received."
    :string/back                             "Back"
    :string/please-wait                      "Please Wait..."
@@ -55,7 +57,7 @@
    :string/tooltip-data--files              "Browse your files"
    :string/tooltip-data--datapacks          "Browse your datapacks"
    :string/tooltip-logout                   "Log out from your account"
-   :string/tooltip-help                     "Get help"
+   :string/tooltip-about                    "About Witan"
    :string/tooltip-request-to-share         "Request that datasets be shared with you or a group you belong to"
    :string/tooltip-activity                 "View your recent activity"
    :string/tooltip-debug                    "Debug"
@@ -263,6 +265,12 @@
    :string/datapack-view-num-files          "No. of files"
    :string/datapack-view-total-sized        "Total size"
    :string/datapack-view-invisible-file-count "Due to your permissions, %d file(s) can not be displayed"
+   ;;
+   :string.about/contact-us-1                "If you need Witan support, please either use our live help system or email us at"
+   :string.about/contact-us-2                "For all other enquiries, please email us at"
+   :string.about/attributions                "Attributions"
+   :string.about/attributions-text-1         "The image on the login screen was taken by Binayak Dasgupta (https://www.flickr.com/photos/fico86/) and the applicable license is 'CC BY 2.0' (https://creativecommons.org/licenses/by/2.0/)."
+   :string.about/attributions-text-2         "The file icons were created by user 'Madebyoliver' (http://www.flaticon.com/authors/madebyoliver) and the applicable license is 'FlatIcon Free License (with attribution)' (https://profile.flaticon.com/license/free)."
    ;;
    :string.activity.upload-file/failed          "You failed to upload the file '%s'"
    :string.activity.upload-file/completed       "You successfully uploaded the file '%s'"
