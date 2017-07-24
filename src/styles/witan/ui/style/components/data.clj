@@ -145,11 +145,12 @@
                {:margin [[(em 0.0) (em 0.2)]]
                 :line-height (em 1.6)}]]
 
-             [:.datapack-files
-              {:width (percent 100)
-               :margin-bottom (em 1.5)}
+             [:.datapack-files :.datapack-edit-files
+              {:width (percent 100)}
               [:table
                {:width (percent 100)}]]
+             [:.datapack-files
+              {:margin-bottom (em 1.5)}]
 
              [:.file-sharing-detailed
               {:width (percent 100)}]

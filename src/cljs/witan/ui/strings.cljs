@@ -292,6 +292,8 @@
    :string.activity.create-datapack/completed   "You successfully created the datapack '%s'"
    :string.activity.delete-datapack/failed      "You failed to delete the datapack '%s'"
    :string.activity.delete-datapack/completed   "You successfully deleted the datapack '%s'"
+   :string.activity.remove-file-from-datapack/failed      "You failed to remove a file from '%s'"
+   :string.activity.remove-file-from-datapack/completed   "You successfully removed a file from '%s'"
    })
 
 

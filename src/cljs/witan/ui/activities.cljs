@@ -64,7 +64,12 @@
    :delete-datapack [{:kixi.command/type :kixi.datastore/delete-bundle}
                      (a/or
                       [{:kixi.event/type :kixi.datastore/bundle-delete-rejected} (a/$ :failed)]
-                      [{:kixi.event/type :kixi.datastore/bundle-deleted} (a/$ :completed)])]})
+                      [{:kixi.event/type :kixi.datastore/bundle-deleted} (a/$ :completed)])]
+
+   :remove-file-from-datapack [{:kixi.command/type :kixi.datastore/remove-files-from-bundle}
+                                (a/or
+                                 [{:kixi.event/type :kixi.datastore/files-remove-from-bundle-rejected} (a/$ :failed)]
+                                 [{:kixi.event/type :kixi.datastore/files-removed-from-bundle} (a/$ :completed)])]})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

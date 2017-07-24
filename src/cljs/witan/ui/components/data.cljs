@@ -235,8 +235,7 @@
   (let [invisible-files (filter :error (vals bundled-files))
         visible-files (remove :error (vals bundled-files))]
     [editable-field
-     ;;on-edit-fn
-     nil
+     on-edit-fn
      [:div.datapack-files
       [:h3 (get-string :string/files)]
       (if-not (empty? visible-files)
@@ -689,11 +688,60 @@
               [edit-temporal-coverage-and-geography local-md update-errors]]]])
          [edit-actions local-md flags update-errors]]))))
 
+(defn edit-files
+  [md]
+  (let []
+    (fn [{:keys [kixi.datastore.metadatastore/bundled-files]}]
+      (let [invisible-files (filter :error (vals bundled-files))
+            visible-files (remove :error (vals bundled-files))]
+        [editable-field
+         nil
+         [:div.datapack-edit-files
+          [:h3 (get-string :string/files)]
+          (when-not (empty? visible-files)
+            [shared/table
+             {:headers [{:content-fn
+                         #(vector
+                           :div.flex-start
+                           (shared/button {:icon icons/download
+                                           :id (str (:kixi.datastore.metadatastore/id %) "-download")
+                                           :prevent? true
+                                           :disabled? (empty? (clojure.set/intersection
+                                                               (set (map :kixi.group/id (get-in % [:kixi.datastore.metadatastore/sharing
+                                                                                                   :kixi.datastore.metadatastore/file-read])))
+                                                               (set (data/get-in-app-state :app/user :kixi.user/groups))))}
+                                          (download-file (:kixi.datastore.metadatastore/id %)))
+                           [:a {:href (str "/#" (route/find-path :app/data {:id (:kixi.datastore.metadatastore/id %)}))}
+                            (shared/button {:icon icons/search
+                                            :id (str (:kixi.datastore.metadatastore/id %) "-open")}
+                                           (fn [_]))]
+                           (shared/button {:icon icons/delete
+                                           :id (str (:kixi.datastore.metadatastore/id %) "-delete")}
+                                          (fn [_]
+                                            (controller/raise! :data/remove-file-from-datapack {:datapack md
+                                                                                                :remove-file-id (:kixi.datastore.metadatastore/id %)}))))
+                         :title "Actions"  :weight "105px"}
+                        {:content-fn #(shared/inline-file-title % :small :small)
+                         :title (get-string :string/file-name)
+                         :weight 0.5}
+                        {:content-fn #(js/filesize (:kixi.datastore.metadatastore/size-bytes %))
+                         :title (get-string :string/file-size)
+                         :weight 0.2}
+                        {:content-fn #(or (get-in
+                                           %
+                                           [:kixi.datastore.metadatastore.license/license
+                                            :kixi.datastore.metadatastore.license/type]) (get-string :string/na))
+                         :title (get-string :string/license)
+                         :weight 0.2}]
+              :content visible-files}])
+          (when-not (empty? invisible-files)
+            (gstring/format (get-string :string/datapack-view-invisible-file-count) (count invisible-files)))]]))))
+
 (def tabs
   [[0 :overview]
    [1 :sharing]
    [2 :edit]
-   [4 :files]])
+   [3 :files]])
 
 (defn idx->tab
   [i]
@@ -722,7 +770,7 @@
     (= "datapack" (:kixi.datastore.metadatastore/bundle-type md))
     (if has-edit?
       {:overview (get-string :string/overview)
-       ;;:files (get-string :string/files)
+       :files (get-string :string/files)
        :sharing (get-string :string/sharing)
        :edit (get-string :string/edit)}
       {:overview (get-string :string/overview)
@@ -733,7 +781,7 @@
 
 (defn view
   []
-  (reset! subview-tab (idx->tab (or (utils/query-param-int subview-query-param 0 2) 0)))
+  (reset! subview-tab (idx->tab (or (utils/query-param-int subview-query-param 0 3) 0)))
   (let [new? (r/atom (= 1 (or (utils/query-param-int new-query-param 0 1) 0)))]
     (fn []
       (let [{:keys [ds/current ds/download-pending? ds/error] :as ds}
@@ -788,6 +836,7 @@
                (case @subview-tab
                  :sharing (sharing-detailed md has-edit?)
                  :edit [edit-metadata current md]
+                 :files [edit-files md]
                  ;; :overview & default
                  [:div
                   (title md go-to-edit)

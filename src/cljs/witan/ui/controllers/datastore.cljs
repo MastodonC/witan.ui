@@ -283,7 +283,7 @@
     (send-single-file-item-query! id)
     (reset-properties! id)
     (select-current! id)
-    (set-title! :string/title-data-loading)))
+    (set-title! (get-string :string/title-data-loading))))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -675,6 +675,29 @@
       :completed #(gstring/format (get-string :string.activity.delete-datapack/completed) name)
       :context {:name name}})))
 
+(defmethod handle
+  :add-file-to-datapack
+  [event opts])
+
+(defmethod handle
+  :remove-file-from-datapack
+  [event {:keys [datapack remove-file-id]}]
+  (let [name (:kixi.datastore.metadatastore/name datapack)
+        datapack-id (:kixi.datastore.metadatastore/id datapack)]
+    (data/swap-app-state! :app/datastore update :ds/file-metadata update datapack-id 
+                          (fn [dp] 
+                            (-> dp
+                                (update :kixi.datastore.metadatastore/bundled-files #(dissoc % remove-file-id))
+                                (update :kixi.datastore.metadatastore/bundled-ids #(filter (partial = remove-file-id) %)))))
+    (activities/start-activity!
+     :remove-file-from-datapack
+     (data/new-command! :kixi.datastore/remove-files-from-bundle "1.0.0"
+                        {:kixi.datastore.metadatastore/id datapack-id
+                         :kixi.datastore.metadatastore/bundled-ids #{remove-file-id}})
+     {:failed #(gstring/format (get-string :string.activity.remove-file-from-datapack/failed) name)
+      :completed #(gstring/format (get-string :string.activity.remove-file-from-datapack/completed) name)
+      :context {:name name}})))
+ 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti on-activity-finished
