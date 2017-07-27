@@ -241,6 +241,7 @@
           (publish-topic :data/app-state-restored))
         (catch js/Object e
           (log/warn "Failed to restore app state from local storage:" (str e))
+          (log/warn (b64/decodeString data))
           (delete-data!))))
     (log/debug "(No existing token was found.)")))
 
@@ -338,10 +339,23 @@
     (send-ws! m)
     (publish-topic :data/command-sent m)
     m))
+
+(defn new-command!
+  [command-key version params]
+  (let [id (str (random-uuid))
+        m (merge {:kixi.message/type :command
+                  :kixi.command/type command-key
+                  :kixi.command/version version
+                  :kixi.command/id id}
+                 params)]
+    (send-ws! m)
+    (publish-topic :data/command-sent m)
+    m))
 ;;
 
 (defmulti handle-server-message
-  (fn [{:keys [kixi.comms.message/type]}] type))
+  (fn [m] (or (:kixi.comms.message/type m)
+              (:kixi.message/type m))))
 
 (defmethod handle-server-message
   :default
@@ -395,6 +409,11 @@
 
 (defmethod handle-server-message
   "event"
+  [event]
+  (publish-topic :data/event-received event))
+
+(defmethod handle-server-message
+  :event
   [event]
   (publish-topic :data/event-received event))
 

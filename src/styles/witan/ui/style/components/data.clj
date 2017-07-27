@@ -154,13 +154,21 @@
              [:.file-sharing-detailed
               {:width (percent 100)}]
 
-             [:.file-actions
+             [:.data-actions
               {:width (percent 100)
                :display :flex
-               :justify-contents :flex-start
+               :justify-content :flex-start
                :align-items :center}
               [:span
-               {:margin-left (px 5)}]]
+               {:margin [[(px 0)(px 5)]]}]]
+
+             [:.data-edit-actions
+              {:width (percent 100)
+               :display :flex
+               :justify-content :space-between
+               :align-items :center}
+              [:span
+               {:margin [[(px 0)(px 5)]]}]]
 
              [:.file-edit-metadata-container]
 

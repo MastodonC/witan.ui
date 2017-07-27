@@ -27,10 +27,7 @@
              [:th
               {:color colour/table-header-text
                :font-weight :normal
-               :cursor :default}
-              [:&:first-child
-               {:border-bottom 0
-                :display :inline-block}]]
+               :cursor :default}]
              [:tbody
               [:tr
                {:transition (transition :background-color "0.15s"
@@ -143,6 +140,9 @@
              {:color colour/success}]
             [:.btn-success
              {:background-color colour/success
+              :color 'white}]
+            [:.btn-error
+             {:background-color colour/error
               :color 'white}]
 ;;;;;;;;;;;;;;
 

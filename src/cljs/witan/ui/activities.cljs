@@ -58,13 +58,26 @@
                      (a/or
                       [{:kixi.comms.event/key  :kixi.datastore.file-metadata/rejected} (a/$ :failed)]
                       [{:kixi.comms.event/key  :kixi.datastore.file-metadata/updated
-                        :kixi.comms.event/payload {:kixi.datastore.communication-specs/file-metadata-update-type :kixi.datastore.communication-specs/file-metadata-created}} (a/$ :completed)])]})
+                        :kixi.comms.event/payload {:kixi.datastore.communication-specs/file-metadata-update-type :kixi.datastore.communication-specs/file-metadata-created}} (a/$ :completed)])]
+   ;; NEW style
+   ;;
+   :delete-datapack [{:kixi.command/type :kixi.datastore/delete-bundle}
+                     (a/or
+                      [{:kixi.event/type :kixi.datastore/bundle-delete-rejected} (a/$ :failed)]
+                      [{:kixi.event/type :kixi.datastore/bundle-deleted} (a/$ :completed)])]})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn extract-command-event-signal
   [m]
   (cond
+    ;; new commands
+    (contains? m :kixi.command/type)
+    (select-keys m [:kixi.command/type])
+    ;; new events
+    (contains? m :kixi.event/type)
+    (select-keys m [:kixi.event/type])
+
     ;; commands
     (contains? m :kixi.comms.command/key)
     (select-keys m [:kixi.comms.command/key])
@@ -98,32 +111,39 @@
   (get compiled-activities a))
 
 (defn start-activity!
-  [activity message reporters]
-  (assert (every? fn? (vals reporters)))
-  (if-let [command-id (:kixi.comms.command/id message)]
-    (try
-      (let [state (a/advance (activity-fsm activity) :pending message)
-            id (str (random-uuid))]
-        (data/swap-app-state! :app/activities assoc-in [:activities/pending command-id] {:activity activity
-                                                                                         :state state
-                                                                                         :reporters reporters
-                                                                                         :id id})
-        (data/publish-topic :activity/activity-started {:message message :activity activity})
-        (log/debug "Started activity" activity id))
-      (catch js/Error e
-        (log/severe "Failed to start activity" activity "- message did not match fsm")))
-    (log/severe "Failed to start activity" activity "- message did not contain a command ID")))
+  [activity message {:keys [context] :as opts}]
+  (let [reporters (select-keys opts [:failed :completed])]
+    (assert (every? fn? (vals reporters)))
+    (if-let [command-id (or (:kixi.comms.command/id message)
+                            (:kixi.command/id message))]
+      (try
+        (let [state (a/advance (activity-fsm activity) :pending message)
+              id (str (random-uuid))]
+          (data/swap-app-state! :app/activities assoc-in [:activities/pending command-id] {:activity activity
+                                                                                           :state state
+                                                                                           :reporters reporters
+                                                                                           :context context
+                                                                                           :id id})
+          (data/publish-topic :activity/activity-started {:message message :activity activity})
+          (log/debug "Started activity" activity id))
+        (catch js/Error e
+          (log/severe "Failed to start activity" activity "- message did not match fsm")))
+      (log/severe "Failed to start activity" activity "- message did not contain a command ID"))))
 
 (defn- finish-activity!
   [final-message result command-id]
-  (let [{:keys [activity reporters id]} (data/get-in-app-state :app/activities :activities/pending command-id)
+  (let [{:keys [activity reporters id context]} (data/get-in-app-state :app/activities :activities/pending command-id)
         reporter (get reporters result)
         log-message (when reporter (reporter final-message))]
     (data/swap-app-state! :app/activities update :activities/pending dissoc command-id)
     (data/swap-app-state! :app/activities update :activities/log conj {:status result
                                                                        :message log-message
                                                                        :time (t/jstime->str)})
-    (data/publish-topic :activity/activity-finished {:log log-message :message final-message :activity activity :result result})
+    (data/publish-topic :activity/activity-finished {:log log-message
+                                                     :message final-message
+                                                     :activity activity
+                                                     :result result
+                                                     :context context})
     (log/debug "Finished activity" activity id)
     (debounce-save!)))
 
@@ -132,7 +152,8 @@
   (let [activities (data/get-in-app-state :app/activities :activities/pending)]
     (loop [activities' activities]
       (let [[command-id {:keys [activity state]}] (first activities')]
-        (if (= command-id (:kixi.comms.command/id args))
+        (if (= command-id (or (:kixi.comms.command/id args)
+                              (:kixi.command/id args)))
           (try
             (let [{:keys [value] :as new-state} (a/advance (activity-fsm activity) state args)]
               (if (= :pending value)
@@ -150,7 +171,8 @@
     (loop [activities' activities]
       (try
         (let [[command-id {:keys [activity state]}] (first activities')
-              new-command-id (:kixi.comms.command/id args)
+              new-command-id (or (:kixi.comms.command/id args)
+                                 (:kixi.command/id args))
               {:keys [value] :as new-state} (a/advance (activity-fsm activity) state args)]
           (if (= :pending value)
             (let [existing (data/get-in-app-state :app/activities :activities/pending command-id)]

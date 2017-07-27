@@ -53,7 +53,8 @@
    :state s/Any
    :reporters {:failed s/Any
                :completed s/Any}
-   :id uuid?})
+   :id uuid?
+   :context s/Any})
 
 ;; app state schema
 (def AppStateSchema

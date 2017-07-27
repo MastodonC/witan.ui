@@ -61,7 +61,7 @@
 
 (defn user-has-permission?
   [permission user file-metadata]
-  (let [ug (:kixi.user/groups user)
+  (let [ug (set (conj (:kixi.user/groups user) (:kixi.user/self-group user)))
         vg (set (map :kixi.group/id (get-in file-metadata [:kixi.datastore.metadatastore/sharing permission])))]
     (some vg ug)))
 

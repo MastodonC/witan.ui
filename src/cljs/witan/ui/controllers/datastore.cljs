@@ -346,9 +346,8 @@
   (let [{:keys [kixi.comms.event/payload]} args
         {:keys [kixi.datastore.metadatastore/id]} payload]
     (log/warn "An adjustment to the sharing properties of" id "was rejected. Restoring...")
-    (.error js/toastr (str "An adjustment to the sharing properties of '"
-                           (:kixi.datastore.metadatastore/name (get-local-file id))
-                           "' was rejected."))
+    (.error js/toastr (gstring/format (get-string :stringf/reject-sharing-adjustments)
+                                      (:kixi.datastore.metadatastore/name (get-local-file id))))
     (send-single-file-item-query! id)))
 
 (defmulti on-metadata-updated
@@ -358,7 +357,7 @@
   :kixi.datastore.communication-specs/file-metadata-update
   [{:keys [kixi.datastore.metadatastore/id]}]
   (utils/remove-file-flag! id :metadata-saving)
-  (.info js/toastr "Metadata was saved successfully!"))
+  (.info js/toastr (get-string :stringf/metadata-saved)))
 
 (defmethod on-metadata-updated
   :kixi.datastore.communication-specs/file-metadata-created
@@ -415,9 +414,8 @@
         id (get-in original [:kixi.datastore.metadatastore/payload :kixi.comms.command/payload :kixi.datastore.metadatastore/id])]
     (log/warn "An adjustment to the metadata of" id "was rejected:" reason original)
     (utils/remove-file-flag! id :metadata-saving)
-    (.error js/toastr (str "An adjustment to the metadata of '"
-                           (:kixi.datastore.metadatastore/name (get-local-file id))
-                           "' was rejected."))
+    (.error js/toastr (gstring/format (get-string :stringf/reject-metadata-adjustments)
+                                      (:kixi.datastore.metadatastore/name (get-local-file id))))
     (let [errors (collect-metadata-update-errors payload)]
       (data/swap-app-state! :app/datastore assoc-in [:ds/file-properties id :update-errors] errors))))
 
@@ -663,6 +661,19 @@
      {:failed #(gstring/format (get-string :string.activity.create-datapack/failed) title)
       :completed #(gstring/format (get-string :string.activity.create-datapack/completed) title)})))
 
+(defmethod handle
+  :delete-datapack
+  [event {:keys [id]}]
+  (let [{:keys [kixi.datastore.metadatastore/name]} (get-local-file id)]
+    (data/swap-app-state! :app/datastore update :ds/file-metadata dissoc id)
+    (activities/start-activity!
+     :delete-datapack
+     (data/new-command! :kixi.datastore/delete-bundle "1.0.0"
+                        {:kixi.datastore.metadatastore/id id})
+     {:failed #(gstring/format (get-string :string.activity.delete-datapack/failed) name)
+      :completed #(gstring/format (get-string :string.activity.delete-datapack/completed) name)
+      :context {:name name}})))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti on-activity-finished
@@ -721,6 +732,17 @@
                           :kixi.datastore.metadatastore/file-metadata
                           :kixi.datastore.metadatastore/id])}
        {:new 1})) 500))
+
+(defmethod on-activity-finished
+  [:delete-datapack :completed]
+  [{:keys [args]}]
+  (route/navigate! :app/data-dash)
+  (.info js/toastr (gstring/format (get-string :stringf/datapack-deleted) (get-in args [:context :name]))))
+
+(defmethod on-activity-finished
+  [:delete-datapack :failed]
+  [{:keys [args]}]
+  (log/warn "Failed to delete datapack:" args))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

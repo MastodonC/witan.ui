@@ -32,8 +32,8 @@
    :string/forecast-lastmodified            "Last Modified"
    :string/create-account-header            "Need an account?"
    :string/view                             "View"
-   :string/if-persists                      ["If the problem persists, please contact us at" :string/support-email]
-   :string/api-failure                      ["Sorry, we're having a problem with the service. Please try again." :string/if-persists]
+   :string/if-persists                      ["If the problem persists, please contact us at ":string/support-email]
+   :string/api-failure                      ["Sorry, we're having a problem with the service. Please try again. If the problem persists, please contact us at " :string/support-email]
    :string/thanks                           "Thanks"
    :string/upload                           "Upload"
    :string/create-account                   "Create Account"
@@ -258,6 +258,11 @@
    :string/create-datapack-search-files     "Search for files by their titles..."
    :string/create-datapack-no-files         "You have not yet added any files to the datapack. Use the search box to select the files you would like to add."
    :string/na                               "n/a"
+   :string/cancel                           "Cancel"
+   :string/ok                               "OK"
+   :string/delete                           "Delete"
+   :string/confirm-delete-pre               "Are you sure you want to delete this"
+   :string/confirm-delete-datapack          [:string/confirm-delete-pre "datapack? The files it contains will not be deleted."]
    :string/create-datapack-fail-invalid     ["There was a problem creating the datapack. Please contact support."]
    :string/visible-to                       "Visible to"
    :string/dash-filter--files               "Showing only your files"
@@ -265,6 +270,11 @@
    :string/datapack-view-num-files          "No. of files"
    :string/datapack-view-total-sized        "Total size"
    :string/datapack-view-invisible-file-count "Due to your permissions, %d file(s) can not be displayed"
+   :string/no-files-in-datapack             "There are currently no files in this datapack."
+   :stringf/datapack-deleted                "Datapack '%s' was deleted!"
+   :stringf/reject-sharing-adjustments      "An adjustment to the sharing properties of '%s' was rejected."
+   :stringf/reject-metadata-adjustments     "An adjustment to the metadata of '%s' was rejected."
+   :stringf/metadata-saved                  "Metadata was saved successfully!"
    ;;
    :string.about/contact-us-1                "If you need Witan support, please either use our live help system or email us at"
    :string.about/contact-us-2                "For all other enquiries, please email us at"
@@ -280,6 +290,8 @@
    :string.activity.update-sharing/completed    "You successfully updated the sharing details for file '%s'"
    :string.activity.create-datapack/failed      "You failed to create the datapack '%s'"
    :string.activity.create-datapack/completed   "You successfully created the datapack '%s'"
+   :string.activity.delete-datapack/failed      "You failed to delete the datapack '%s'"
+   :string.activity.delete-datapack/completed   "You successfully deleted the datapack '%s'"
    })
 
 

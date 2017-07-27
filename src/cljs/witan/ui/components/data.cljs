@@ -48,8 +48,11 @@
 (def other-geography
   "Other (please specify)")
 
-
 (defonce subview-tab (r/atom :overview))
+
+(defn bundle?
+  [md]
+  (= "bundle" (:kixi.datastore.metadatastore/type md)))
 
 (defn reverse-group->activity-map
   [all-activities sharing]
@@ -236,7 +239,7 @@
      nil
      [:div.datapack-files
       [:h3 (get-string :string/files)]
-      (when-not (empty? visible-files)
+      (if-not (empty? visible-files)
         [shared/table
          {:headers [{:content-fn
                      #(vector
@@ -266,7 +269,8 @@
                                         :kixi.datastore.metadatastore.license/type]) (get-string :string/na))
                      :title (get-string :string/license)
                      :weight 0.2}]
-          :content visible-files}])
+          :content visible-files}]
+        [:i (get-string :string/no-files-in-datapack)])
       (when-not (empty? invisible-files)
         (gstring/format (get-string :string/datapack-view-invisible-file-count) (count invisible-files)))]]))
 
@@ -293,7 +297,7 @@
   [current]
   [editable-field
    nil
-   [:div.file-actions
+   [:div.data-actions
     (shared/button {:icon icons/download
                     :id :download
                     :txt :string/file-actions-download-file
@@ -303,8 +307,8 @@
 (defn sharing-detailed
   [{:keys [kixi.datastore.metadatastore/sharing
            kixi.datastore.metadatastore/type
-           kixi.datastore.metadatastore/id]} has-edit?]
-  (let [activity-source (if (= "stored" type) :ds/activities :dp/activities)
+           kixi.datastore.metadatastore/id] :as md} has-edit?]
+  (let [activity-source (if (bundle? md) :dp/activities :ds/activities)
         activities->string (data/get-in-app-state :app/datastore activity-source)
         user-sg (data/get-in-app-state :app/user :kixi.user/self-group)
         sharing-groups (set (reduce concat [] (vals sharing)))]
@@ -620,21 +624,48 @@
 
 (defn edit-actions
   [md flags update-errors]
-  (let [saving? (contains? flags :metadata-saving)]
-    [editable-field
-     nil
-     [:div.file-actions
-      (shared/button {:icon icons/tick
-                      :id :save
-                      :txt :string/save
-                      :class "btn-success"
-                      :prevent? true
-                      :disabled? saving?}
-                     #(controller/raise! :data/metadata-change md))
-      (cond saving?
-            [:span.success (get-string :string/saving "...")]
-            (not-empty update-errors)
-            [:span.error (get-string :string/md-not-saved-due-to-errors)])]]))
+  (let [confirming? (r/atom false)]
+    (fn [md flags update-errors]
+      (let [saving? (contains? flags :metadata-saving)]
+        [editable-field
+         nil
+         [:div.data-edit-actions
+          [:div.flex-vcenter
+           (shared/button {:icon icons/tick
+                           :id :save
+                           :txt :string/save
+                           :class "btn-success"
+                           :prevent? true
+                           :disabled? saving?}
+                          #(controller/raise! :data/metadata-change md))
+           (cond saving?
+                 [:span.success (get-string :string/saving "...")]
+                 (not-empty update-errors)
+                 [:span.error (get-string :string/md-not-saved-due-to-errors)])]
+          (when (bundle? md)
+            (if @confirming?
+              [:div.flex-vcenter
+               [:span.error (get-string :string/confirm-delete-datapack)]
+               (shared/button {:id :delete-no
+                               :txt :string/cancel
+                               :class "btn-error"
+                               :prevent? true
+                               :disabled? saving?}
+                              #(reset! confirming? false))
+               (shared/button {:id :delete-yes
+                               :txt :string/ok
+                               :prevent? true
+                               :disabled? saving?}
+                              (fn [_]
+                                (reset! confirming? false)
+                                (controller/raise! :data/delete-datapack {:id (:kixi.datastore.metadatastore/id md)})))]
+              (shared/button {:icon icons/delete
+                              :id :delete
+                              :txt :string/delete
+                              :class "btn-error"
+                              :prevent? true
+                              :disabled? saving?}
+                             #(reset! confirming? true))))]]))))
 
 (defn edit-metadata
   [current md]
@@ -647,7 +678,7 @@
         [:div.file-edit-metadata-content-container
          (edit-title-description local-md update-errors)
          (edit-tags local-md update-errors)
-         (when (= "stored" (:kixi.datastore.metadatastore/type md))
+         (when-not (bundle? md)
            [:div
             (edit-license local-md show-license-usage licenses update-errors)
             [:div.file-edit-metadata-container.flex
@@ -656,7 +687,7 @@
               [edit-source local-md update-errors]]
              [:div.flex-2
               [edit-temporal-coverage-and-geography local-md update-errors]]]])
-         (edit-actions local-md flags update-errors)]))))
+         [edit-actions local-md flags update-errors]]))))
 
 (def tabs
   [[0 :overview]
@@ -709,7 +740,6 @@
             (data/get-in-app-state :app/datastore)
             activities->string (:ds/activities ds)
             md (data/get-in-app-state :app/datastore :ds/file-metadata current)
-            is-bundle? (= "bundle" (:kixi.datastore.metadatastore/type md))
             has-edit? (utils/user-has-edit? (data/get-in-app-state :app/user) md)
             can-download? (utils/user-has-download? (data/get-in-app-state :app/user) md)
             remove-new-fn (fn []
@@ -765,7 +795,7 @@
                   (metadata md go-to-edit)
                   (sharing md go-to-sharing)
                   (tags md go-to-edit)
-                  (when is-bundle? (files md go-to-files))
+                  (when (bundle? md) (files md go-to-files))
                   (when can-download? (actions current))])]]]))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
