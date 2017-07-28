@@ -666,6 +666,7 @@
   [event {:keys [id]}]
   (let [{:keys [kixi.datastore.metadatastore/name]} (get-local-file id)]
     (data/swap-app-state! :app/datastore update :ds/file-metadata dissoc id)
+    (data/swap-app-state! :app/data-dash update :items remove #(= id (:kixi.datastore.metadatastore/id %)))
     (activities/start-activity!
      :delete-datapack
      (data/new-command! :kixi.datastore/delete-bundle "1.0.0"
