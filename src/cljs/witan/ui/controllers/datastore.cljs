@@ -254,11 +254,11 @@
   :app/data-dash
   [{:keys [args]}]
   (if-let [type-filter (keyword (get-in args [:route/query :type]))]
-    (do
-      (data/swap-app-state! :app/data-dash assoc :dd/file-type-filter type-filter))
+    (data/swap-app-state! :app/data-dash assoc :dd/file-type-filter type-filter)
     (data/swap-app-state! :app/data-dash dissoc :dd/file-type-filter))
-  (if-let [id (:kixi.user/id (data/get-app-state :app/user))]
-    (send-dashboard-query! id))
+  (when-let [id (:kixi.user/id (data/get-app-state :app/user))]
+    (when (empty? (data/get-in-app-state :app/data-dash :items))
+      (send-dashboard-query! id)))
   (set-title! (get-string :string/title-data-dashboard)))
 
 (defmethod on-route-change
@@ -666,7 +666,8 @@
   [event {:keys [id]}]
   (let [{:keys [kixi.datastore.metadatastore/name]} (get-local-file id)]
     (data/swap-app-state! :app/datastore update :ds/file-metadata dissoc id)
-    (data/swap-app-state! :app/data-dash update :items remove #(= id (:kixi.datastore.metadatastore/id %)))
+    (data/swap-app-state! :app/data-dash update :items (fn [items]
+                                                         (vec (remove #(= id (:kixi.datastore.metadatastore/id %)) items))))
     (activities/start-activity!
      :delete-datapack
      (data/new-command! :kixi.datastore/delete-bundle "1.0.0"
@@ -745,6 +746,12 @@
                       [:kixi.datastore.metadatastore/meta-read
                        :kixi.datastore.metadatastore/file-read]))) read-groups))))
      files))
+
+  (let [new-datapack-meta (assoc-in (get-in args [:message :kixi.comms.event/payload :kixi.datastore.metadatastore/file-metadata])
+                                    [:kixi.datastore.metadatastore/provenance :kixi/user] (data/get-in-app-state :app/user))]
+    (data/swap-app-state! :app/data-dash update :items #(cons new-datapack-meta %))
+    (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % (:kixi.datastore.metadatastore/id new-datapack-meta) new-datapack-meta)))
+
   (js/setTimeout
    #(do
       (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false)
@@ -766,7 +773,8 @@
 (defmethod on-activity-finished
   [:delete-datapack :failed]
   [{:keys [args]}]
-  (log/warn "Failed to delete datapack:" args))
+  (log/warn "Failed to delete datapack:" args)
+  (.info js/toastr (gstring/format (get-string :string.activity.delete-datapack/failed ) (get-in args [:context :name]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
