@@ -256,6 +256,7 @@
    :string/datapack-sharing                 "Datapack sharing"
    :string/files                            "Files"
    :string/create-datapack-search-files     "Search for files by their titles..."
+   :string/edit-datapack-search-files       "Search for files to add to the datapack..."
    :string/create-datapack-no-files         "You have not yet added any files to the datapack. Use the search box to select the files you would like to add."
    :string/na                               "n/a"
    :string/cancel                           "Cancel"
@@ -292,8 +293,10 @@
    :string.activity.create-datapack/completed   "You successfully created the datapack '%s'"
    :string.activity.delete-datapack/failed      "You failed to delete the datapack '%s'"
    :string.activity.delete-datapack/completed   "You successfully deleted the datapack '%s'"
-   :string.activity.remove-file-from-datapack/failed      "You failed to remove a file from '%s'"
-   :string.activity.remove-file-from-datapack/completed   "You successfully removed a file from '%s'"
+   :string.activity.remove-file-from-datapack/failed      "You failed to remove file '%s' from datapack '%s'"
+   :string.activity.remove-file-from-datapack/completed   "You successfully removed file '%s' from datapack '%s'"
+   :string.activity.add-file-to-datapack/failed      "You failed to add file '%s' to datapack '%s'"
+   :string.activity.add-file-to-datapack/completed   "You successfully added file '%s' to datapack '%s'"
    })
 
 

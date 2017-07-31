@@ -698,7 +698,37 @@
          nil
          [:div.datapack-edit-files
           [:h3 (get-string :string/files)]
-          (when-not (empty? visible-files)
+          [shared/file-search-area
+           {:ph :string/edit-datapack-search-files
+            :on-click #(controller/raise! :data/add-file-to-datapack {:datapack md
+                                                                      :add-file %})
+            :on-init #(controller/raise! :data/refresh-files {})
+            :on-search #(controller/raise! :data/search-files {:search %})
+            :get-results-fn #(data/get-in-app-state :app/datastore :ds/files-search-filtered)
+            :selector-key :kixi.datastore.metadatastore/id
+            :table-headers-fn (fn []
+                                [{:content-fn #(shared/button {:icon icons/tick
+                                                               :id (str (:kixi.datastore.metadatastore/id %) "-select")
+                                                               :prevent? true}
+                                                              identity)
+                                  :title ""  :weight 0.10}
+                                 {:content-fn #(shared/inline-file-title % :small :small)
+                                  :title (get-string :string/file-name)
+                                  :weight 0.50}
+                                 {:content-fn (comp
+                                               :kixi.user/name
+                                               :kixi/user
+                                               :kixi.datastore.metadatastore/provenance)
+                                  :title (get-string :string/file-uploader)
+                                  :weight 0.20}
+                                 {:content-fn (comp
+                                               time/iso-time-as-moment
+                                               :kixi.datastore.metadatastore/created
+                                               :kixi.datastore.metadatastore/provenance)
+                                  :title (get-string :string/file-uploaded-at)
+                                  :weight 0.20}])}
+           {:exclusions visible-files}]
+          (if-not (empty? visible-files)
             [shared/table
              {:headers [{:content-fn
                          #(vector
@@ -719,7 +749,7 @@
                                            :id (str (:kixi.datastore.metadatastore/id %) "-delete")}
                                           (fn [_]
                                             (controller/raise! :data/remove-file-from-datapack {:datapack md
-                                                                                                :remove-file-id (:kixi.datastore.metadatastore/id %)}))))
+                                                                                                :remove-file %}))))
                          :title "Actions"  :weight "105px"}
                         {:content-fn #(shared/inline-file-title % :small :small)
                          :title (get-string :string/file-name)
@@ -733,7 +763,8 @@
                                             :kixi.datastore.metadatastore.license/type]) (get-string :string/na))
                          :title (get-string :string/license)
                          :weight 0.2}]
-              :content visible-files}])
+              :content visible-files}]
+            [:i (get-string :string/no-files-in-datapack)])
           (when-not (empty? invisible-files)
             (gstring/format (get-string :string/datapack-view-invisible-file-count) (count invisible-files)))]]))))
 

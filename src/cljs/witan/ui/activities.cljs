@@ -65,11 +65,14 @@
                      (a/or
                       [{:kixi.event/type :kixi.datastore/bundle-delete-rejected} (a/$ :failed)]
                       [{:kixi.event/type :kixi.datastore/bundle-deleted} (a/$ :completed)])]
-
    :remove-file-from-datapack [{:kixi.command/type :kixi.datastore/remove-files-from-bundle}
-                                (a/or
-                                 [{:kixi.event/type :kixi.datastore/files-remove-from-bundle-rejected} (a/$ :failed)]
-                                 [{:kixi.event/type :kixi.datastore/files-removed-from-bundle} (a/$ :completed)])]})
+                               (a/or
+                                [{:kixi.event/type :kixi.datastore/files-remove-from-bundle-rejected} (a/$ :failed)]
+                                [{:kixi.event/type :kixi.datastore/files-removed-from-bundle} (a/$ :completed)])]
+   :add-file-to-datapack [{:kixi.command/type :kixi.datastore/add-files-to-bundle}
+                          (a/or
+                           [{:kixi.event/type :kixi.datastore/files-add-to-bundle-rejected} (a/$ :failed)]
+                           [{:kixi.event/type :kixi.datastore/files-added-to-bundle} (a/$ :completed)])]})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

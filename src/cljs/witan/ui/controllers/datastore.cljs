@@ -672,15 +672,33 @@
 
 (defmethod handle
   :add-file-to-datapack
-  [event opts])
+  [event {:keys [datapack add-file]}]
+  (let [dp-name (:kixi.datastore.metadatastore/name datapack)
+        file-name (:kixi.datastore.metadatastore/name add-file)
+        datapack-id (:kixi.datastore.metadatastore/id datapack)
+        add-file-id (:kixi.datastore.metadatastore/id add-file)]
+    (data/swap-app-state! :app/datastore update :ds/file-metadata update datapack-id
+                          (fn [dp]
+                            (-> dp
+                                (update :kixi.datastore.metadatastore/bundled-files #(assoc % add-file-id add-file))
+                                (update :kixi.datastore.metadatastore/bundled-ids #(conj % add-file-id)))))
+    (activities/start-activity!
+     :add-file-to-datapack
+     (data/new-command! :kixi.datastore/add-files-to-bundle "1.0.0"
+                        {:kixi.datastore.metadatastore/id datapack-id
+                         :kixi.datastore.metadatastore/bundled-ids #{add-file-id}})
+     {:failed #(gstring/format (get-string :string.activity.add-file-to-datapack/failed) file-name dp-name)
+      :completed #(gstring/format (get-string :string.activity.add-file-to-datapack/completed) file-name dp-name)})))
 
 (defmethod handle
   :remove-file-from-datapack
-  [event {:keys [datapack remove-file-id]}]
-  (let [name (:kixi.datastore.metadatastore/name datapack)
-        datapack-id (:kixi.datastore.metadatastore/id datapack)]
-    (data/swap-app-state! :app/datastore update :ds/file-metadata update datapack-id 
-                          (fn [dp] 
+  [event {:keys [datapack remove-file]}]
+  (let [dp-name (:kixi.datastore.metadatastore/name datapack)
+        file-name (:kixi.datastore.metadatastore/name remove-file)
+        datapack-id (:kixi.datastore.metadatastore/id datapack)
+        remove-file-id (:kixi.datastore.metadatastore/id remove-file)]
+    (data/swap-app-state! :app/datastore update :ds/file-metadata update datapack-id
+                          (fn [dp]
                             (-> dp
                                 (update :kixi.datastore.metadatastore/bundled-files #(dissoc % remove-file-id))
                                 (update :kixi.datastore.metadatastore/bundled-ids #(filter (partial = remove-file-id) %)))))
@@ -689,10 +707,9 @@
      (data/new-command! :kixi.datastore/remove-files-from-bundle "1.0.0"
                         {:kixi.datastore.metadatastore/id datapack-id
                          :kixi.datastore.metadatastore/bundled-ids #{remove-file-id}})
-     {:failed #(gstring/format (get-string :string.activity.remove-file-from-datapack/failed) name)
-      :completed #(gstring/format (get-string :string.activity.remove-file-from-datapack/completed) name)
-      :context {:name name}})))
- 
+     {:failed #(gstring/format (get-string :string.activity.remove-file-from-datapack/failed) file-name dp-name)
+      :completed #(gstring/format (get-string :string.activity.remove-file-from-datapack/completed) file-name dp-name)})))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti on-activity-finished
