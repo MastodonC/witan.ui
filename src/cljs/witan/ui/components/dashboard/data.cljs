@@ -22,6 +22,13 @@
   [selected-id _]
   (route/navigate! :app/datapack-create))
 
+(defn filter-fn
+  [file-type-filter]
+  (case file-type-filter
+    :files (comp (partial = "stored") :kixi.datastore.metadatastore/type)
+    :datapacks (comp (partial = "datapack") :kixi.datastore.metadatastore/bundle-type)
+    (constantly true)))
+
 (defn view
   []
   (let [selected-id (r/atom nil)]
@@ -31,7 +38,7 @@
             buttons [{:id :datapack :icon icons/datapack :txt :string/create-new-datapack :class "data-upload"}
                      {:id :upload :icon icons/upload :txt :string/upload-new-data :class "data-upload"}]
             modified-fn #(vector :div (time/iso-time-as-moment (get-in % [:kixi.datastore.metadatastore/provenance :kixi.datastore.metadatastore/created])))
-            datasets (:items raw-data)
+            datasets (filter (filter-fn file-type-filter) (:items raw-data))
             selected-id' @selected-id
             navigate-fn #(route/navigate! :app/data {:id (:kixi.datastore.metadatastore/id %)})
             actions-fn (fn [d] (when (= (:kixi.datastore.metadatastore/id d) selected-id')

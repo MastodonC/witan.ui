@@ -35,6 +35,13 @@
            [:id :name]}
           :kixi.data-acquisition.request-for-data/message]})
 
+(defn add-new-metadata-to-app-state!
+  [md]
+  (let [new-datapack-meta (assoc-in md
+                                    [:kixi.datastore.metadatastore/provenance :kixi/user] (data/get-in-app-state :app/user))]
+    (data/swap-app-state! :app/data-dash update :items #(cons new-datapack-meta %))
+    (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % (:kixi.datastore.metadatastore/id new-datapack-meta) new-datapack-meta))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (declare on-query-response)
@@ -191,27 +198,13 @@
 (defmulti on-query-response
   (fn [[k v]] k))
 
-(defn filter-files-by-type
-  [file-type-filter]
-  (let [p
-        (case file-type-filter
-          :files (comp (partial = "stored") :kixi.datastore.metadatastore/type)
-          :datapacks (comp (partial = "datapack") :kixi.datastore.metadatastore/bundle-type))]
-    (fn [items]
-      (filter p items))))
-
 (defmethod on-query-response
   :datastore/metadata-with-activities
   [[_ {:keys [items paging]}]]
   (reset! dash-query-pending? false)
-  (let [filter-fn
-        (if-let [file-type-filter
-                 (data/get-in-app-state :app/data-dash :dd/file-type-filter)]
-          (filter-files-by-type file-type-filter)
-          identity)]
-    (data/swap-app-state! :app/data-dash assoc
-                          :items (filter-fn items)
-                          :paging paging)))
+  (data/swap-app-state! :app/data-dash assoc
+                        :items items
+                        :paging paging))
 
 
 (defmethod on-query-response
@@ -361,7 +354,8 @@
 
 (defmethod on-metadata-updated
   :kixi.datastore.communication-specs/file-metadata-created
-  [args])
+  [args]
+  (add-new-metadata-to-app-state! (get-in args [:kixi.datastore.metadatastore/file-metadata])))
 
 (defmethod on-metadata-updated
   :kixi.datastore.communication-specs/file-metadata-sharing-updated
@@ -747,10 +741,7 @@
                        :kixi.datastore.metadatastore/file-read]))) read-groups))))
      files))
 
-  (let [new-datapack-meta (assoc-in (get-in args [:message :kixi.comms.event/payload :kixi.datastore.metadatastore/file-metadata])
-                                    [:kixi.datastore.metadatastore/provenance :kixi/user] (data/get-in-app-state :app/user))]
-    (data/swap-app-state! :app/data-dash update :items #(cons new-datapack-meta %))
-    (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % (:kixi.datastore.metadatastore/id new-datapack-meta) new-datapack-meta)))
+  (add-new-metadata-to-app-state! (get-in args [:message :kixi.comms.event/payload :kixi.datastore.metadatastore/file-metadata]))
 
   (js/setTimeout
    #(do
