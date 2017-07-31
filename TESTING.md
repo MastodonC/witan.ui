@@ -39,5 +39,7 @@ Until there is an automated way to run acceptance tests the only way to catch re
 | - If the user includes a file for which a recipient has no permissions, but the user has 'update' permission, does the recipient gain 'read' and 'download' permissions? | When sharing a datapack with another user, that user will gain 'read' and 'download' permissions for any file that the author use has 'update' permission for. |
 | - If the user includes a file for which a recipient has no permissions and the user also has no permissions, does the recipient get a message telling them they are unable to view a file in the datapack? | If a datapack shared with a user contains files that they cannot see, they will be informed that this is the case. |
 | Can the user create an empty datapack? | The user can create an empty datapack. |
+| Can the user delete a datapack? | The user can delete a datapack (for which they have permission). |
+| Can the user remove files from a datapack? | The user can removes files from a datapack (for which they have permission). |
 | Does loading a file take < 1s? | When navigating from the dashboard to a file, the loading icon spins for no more than 1s. | Does saving metadata take < 3.5s? | When hitting 'Save' after editing metadata, the button should stay disabled for no more than 3.5s. |
 | Does quickly changing sharing permissions on a file work as intended? | This is an area we've seen regressions frequently. When quickly changing sharing permissions, the app should remain responsive and not panic. |
