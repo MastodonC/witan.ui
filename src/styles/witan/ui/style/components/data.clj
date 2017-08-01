@@ -206,4 +206,9 @@
 
              [:.file-edit-geography
               [:input
-               {:margin-top (em 0.3)}]]]])
+               {:margin-top (em 0.3)}]]]
+
+            [:.header-bg-file
+             {:background-color colour/lol-color-2-4}]
+            [:.header-bg-bundle
+             {:background-color colour/lol-color-2-1}]])

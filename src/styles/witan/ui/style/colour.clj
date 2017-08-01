@@ -42,6 +42,12 @@
 (def lol-color-6 "#F3A86C")
 (def lol-color-7 "#429491")
 
+;; complements of lol-color-2
+(def lol-color-2-1 "#cd6eaa")
+(def lol-color-2-2 "#cd806e")
+(def lol-color-2-3 "#6ecdb4")
+(def lol-color-2-4 "#6e87cd")
+
 (def subtle-grey "#dfe3e9")
 (def subtle-grey2 (color/darken subtle-grey 10))
 (def subtle-grey3 (color/darken subtle-grey 20))

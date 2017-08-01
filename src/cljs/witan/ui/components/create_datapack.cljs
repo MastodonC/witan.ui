@@ -71,7 +71,7 @@
                                                            :id (str (:kixi.datastore.metadatastore/id %) "-select")
                                                            :prevent? true}
                                                           identity)
-                              :title ""  :weight 0.10}
+                              :title ""  :weight "50px"}
                              {:content-fn #(shared/inline-file-title % :small :small)
                               :title (get-string :string/file-name)
                               :weight 0.50}

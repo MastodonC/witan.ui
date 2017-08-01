@@ -49,11 +49,11 @@
      [:tr
       (doall
        (for [{:keys [title weight]} headers]
-         (let [percent (if (string? weight)
-                         weight
-                         (str (* 100 weight) "%"))]
+         (let [style (if (string? weight)
+                       {:min-width weight}
+                       {:width (str (* 100 weight) "%")})]
            [:th {:key title
-                 :style {:width percent #_:display #_(if (string? weight) :inline-block :table-cell)}} title])))]]]
+                 :style style} title])))]]]
    (if-not content
      [:div#loading.text-center (icons/loading :large)]
      [:table.pure-table.pure-table-horizontal.shared-table-rows
@@ -85,7 +85,10 @@
   ([title-string subtitle-string opts]
    [:div.shared-heading
     {:key "heading"
-     :class (when (contains? opts :center) "center-string")}
+     :class (str
+             (:class opts)
+             " "
+             (when (contains? opts :center) "center-string"))}
     [:h1 title-string]
     (when subtitle-string
       [:h2 subtitle-string])]))

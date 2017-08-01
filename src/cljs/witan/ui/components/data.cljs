@@ -10,6 +10,7 @@
             [witan.ui.utils :as utils]
             [witan.ui.time :as time]
             [goog.string :as gstring]
+            [clojure.string :as str]
             [inflections.core :as i]
             [cljsjs.pikaday.with-moment])
   (:require-macros [cljs-log.core :as log]
@@ -47,8 +48,6 @@
 
 (def other-geography
   "Other (please specify)")
-
-(defonce subview-tab (r/atom :overview))
 
 (defn bundle?
   [md]
@@ -255,7 +254,7 @@
                         (shared/button {:icon icons/search
                                         :id (str (:kixi.datastore.metadatastore/id %) "-open")}
                                        (fn [_]))])
-                     :title "Actions"  :weight "105px"}
+                     :title ""  :weight "100px"}
                     {:content-fn #(shared/inline-file-title % :small :small)
                      :title (get-string :string/file-name)
                      :weight 0.5}
@@ -688,6 +687,12 @@
               [edit-temporal-coverage-and-geography local-md update-errors]]]])
          [edit-actions local-md flags update-errors]]))))
 
+(defn display-sharing-summary
+  [ddatapack]
+  (fn [{:keys [kixi.datastore.metadatastore/sharing]}]
+    (let [group-names (set (map :kixi.group/name (:kixi.datastore.metadatastore/meta-read sharing)))]
+      [shared/collapsible-text (str/join ", "  group-names)])))
+
 (defn edit-files
   [md]
   (let []
@@ -750,18 +755,21 @@
                                           (fn [_]
                                             (controller/raise! :data/remove-file-from-datapack {:datapack md
                                                                                                 :remove-file %}))))
-                         :title "Actions"  :weight "105px"}
+                         :title ""  :weight "150px"}
                         {:content-fn #(shared/inline-file-title % :small :small)
                          :title (get-string :string/file-name)
-                         :weight 0.5}
+                         :weight 0.4}
                         {:content-fn #(js/filesize (:kixi.datastore.metadatastore/size-bytes %))
                          :title (get-string :string/file-size)
-                         :weight 0.2}
+                         :weight 0.15}
                         {:content-fn #(or (get-in
                                            %
                                            [:kixi.datastore.metadatastore.license/license
                                             :kixi.datastore.metadatastore.license/type]) (get-string :string/na))
                          :title (get-string :string/license)
+                         :weight 0.15}
+                        {:content-fn (display-sharing-summary md)
+                         :title (get-string :string/visible-to)
                          :weight 0.2}]
               :content visible-files}]
             [:i (get-string :string/no-files-in-datapack)])
@@ -786,7 +794,7 @@
   [k]
   (let [i (tab->idx k)]
     (route/swap-query-string! #(assoc % subview-query-param i))
-    (reset! subview-tab k)))
+    (controller/raise! :data/switch-data-view-subview-idx {:idx i})))
 
 (defn md->tab-config
   [md has-edit?]
@@ -812,10 +820,11 @@
 
 (defn view
   []
-  (reset! subview-tab (idx->tab (or (utils/query-param-int subview-query-param 0 3) 0)))
   (let [new? (r/atom (= 1 (or (utils/query-param-int new-query-param 0 1) 0)))]
     (fn []
-      (let [{:keys [ds/current ds/download-pending? ds/error] :as ds}
+      (let [subview-tab (idx->tab
+                         (data/get-in-app-state :app/datastore :ds/data-view-subview-idx))
+            {:keys [ds/current ds/download-pending? ds/error] :as ds}
             (data/get-in-app-state :app/datastore)
             activities->string (:ds/activities ds)
             md (data/get-in-app-state :app/datastore :ds/file-metadata current)
@@ -842,9 +851,13 @@
             [:div.loading
              (icons/loading :large)]
             [:div#data-view
-             (shared/header-string (:kixi.datastore.metadatastore/name md))
+             (shared/header-string (:kixi.datastore.metadatastore/name md)
+                                   ""
+                                   {:class (if (bundle? md)
+                                             "header-bg-bundle"
+                                             "header-bg-file")})
              (shared/tabs {:tabs (md->tab-config md has-edit?)
-                           :selected-tab @subview-tab
+                           :selected-tab subview-tab
                            :on-click switch-primary-view!})
              [:div.flex-center
               [:div.container.padded-content
@@ -864,7 +877,7 @@
                      (case (:kixi.datastore.metadatastore/type md)
                        "stored" (get-string :string/click-here-to-edit-file-metadata)
                        "bundle" (get-string :string/click-here-to-edit-bundle-metadata))]]]])
-               (case @subview-tab
+               (case subview-tab
                  :sharing (sharing-detailed md has-edit?)
                  :edit [edit-metadata current md]
                  :files [edit-files md]

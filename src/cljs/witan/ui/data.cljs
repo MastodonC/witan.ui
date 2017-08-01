@@ -94,6 +94,7 @@
                     :ds/file-metadata-editing-command nil
                     :ds/file-properties {}
                     :ds/query-tries 0
+                    :ds/data-view-subview-idx 0
                     :ds/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
                                     :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
                                     :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)}

@@ -267,11 +267,15 @@
   (data/swap-app-state! :app/create-datapack dissoc :cdp/error)
   (set-title! (get-string :string/create-new-datapack)))
 
+(def subview-query-param :d)
+
 (defmethod on-route-change
   :app/data
   [{:keys [args]}]
   (data/swap-app-state! :app/datastore dissoc :ds/error)
   (data/swap-app-state! :app/datastore assoc :ds/pending? true)
+  (data/swap-app-state! :app/datastore assoc :ds/data-view-subview-idx
+                        (utils/query-param-int subview-query-param 0 3))
   (let [id (get-in args [:route/params :id])]
     (send-single-file-item-query! id)
     (reset-properties! id)
@@ -709,6 +713,11 @@
                          :kixi.datastore.metadatastore/bundled-ids #{remove-file-id}})
      {:failed #(gstring/format (get-string :string.activity.remove-file-from-datapack/failed) file-name dp-name)
       :completed #(gstring/format (get-string :string.activity.remove-file-from-datapack/completed) file-name dp-name)})))
+
+(defmethod handle
+  :switch-data-view-subview-idx
+  [event {:keys [idx]}]
+  (data/swap-app-state! :app/datastore assoc :ds/data-view-subview-idx idx))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
