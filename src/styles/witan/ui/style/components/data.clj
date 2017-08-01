@@ -147,10 +147,10 @@
 
              [:.datapack-files :.datapack-edit-files
               {:width (percent 100)}
-              [:table
-               {:width (percent 100)}]]
-             [:.datapack-files
-              {:margin-bottom (em 1.5)}]
+              [:table:last-child
+               {:width (percent 100)
+                :margin-bottom (em 1.5)
+                :table-layout :fixed}]]
 
              [:.file-sharing-detailed
               {:width (percent 100)}]

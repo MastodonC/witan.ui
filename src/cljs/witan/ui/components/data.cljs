@@ -270,7 +270,7 @@
           :content visible-files}]
         [:i (get-string :string/no-files-in-datapack)])
       (when-not (empty? invisible-files)
-        (gstring/format (get-string :string/datapack-view-invisible-file-count) (count invisible-files)))]]))
+        [:div.invisible-files (gstring/format (get-string :string/datapack-view-invisible-file-count) (count invisible-files))])]]))
 
 (defn sharing
   [{:keys [kixi.datastore.metadatastore/sharing]} on-edit-fn]
@@ -702,7 +702,7 @@
         [editable-field
          nil
          [:div.datapack-edit-files
-          [:h3 (get-string :string/files)]
+          [:h2.heading (get-string :string/files)]
           [shared/file-search-area
            {:ph :string/edit-datapack-search-files
             :on-click #(controller/raise! :data/add-file-to-datapack {:datapack md
@@ -774,7 +774,7 @@
               :content visible-files}]
             [:i (get-string :string/no-files-in-datapack)])
           (when-not (empty? invisible-files)
-            (gstring/format (get-string :string/datapack-view-invisible-file-count) (count invisible-files)))]]))))
+            [:div.invisible-files (gstring/format (get-string :string/datapack-view-invisible-file-count) (count invisible-files))])]]))))
 
 (def tabs
   [[0 :overview]

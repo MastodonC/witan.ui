@@ -35,7 +35,7 @@
                    (.preventDefault e))}]]]])
 
 (defn table
-  [{:keys [headers content selected?-fn on-select on-double-click on-scroll id]
+  [{:keys [headers content selected?-fn on-select on-double-click on-scroll id class]
     :or {id (str (random-uuid))}}]
   [:div.shared-table
    {:id id
