@@ -136,8 +136,8 @@
   [email pass]
   (let [args {:username email :password pass}]
     (data/swap-app-state! :app/login assoc :login/pending? true)
-    (POST (str (if (:gateway/secure? data/config) "https://" "http://")
-               (:gateway/address data/config) "/login")
+    (POST (str (if (:gateway/secure? @data/config) "https://" "http://")
+               (:gateway/address @data/config) "/login")
           {:id :login
            :params (s/validate Login args)
            :result-cb (route-api-response :login)})))
@@ -173,8 +173,8 @@
 
 (defmethod handle :reset-password
   [event username]
-  (POST (str (if (:gateway/secure? data/config) "https://" "http://")
-             (:gateway/address data/config) "/reset")
+  (POST (str (if (:gateway/secure? @data/config) "https://" "http://")
+             (:gateway/address @data/config) "/reset")
         {:id :reset
          :params {:username username}
          :result-cb (route-api-response :reset)}))
@@ -187,8 +187,8 @@
       (data/swap-app-state! :app/login assoc :login/message nil)
       (data/swap-app-state! :app/login assoc :login/pending? true)
       (data/swap-app-state! :app/login assoc :login/reset-complete? false)
-      (POST (str (if (:gateway/secure? data/config) "https://" "http://")
-                 (:gateway/address data/config) "/complete-reset")
+      (POST (str (if (:gateway/secure? @data/config) "https://" "http://")
+                 (:gateway/address @data/config) "/complete-reset")
             {:id :reset-complete
              :params {:username username
                       :password (first passwords)
@@ -221,8 +221,8 @@
                 (assoc :username (first usernames)
                        :password (first passwords)))]
       (data/swap-app-state! :app/login assoc :login/pending? true)
-      (POST (str (if (:gateway/secure? data/config) "https://" "http://")
-                 (:gateway/address data/config) "/signup")
+      (POST (str (if (:gateway/secure? @data/config) "https://" "http://")
+                 (:gateway/address @data/config) "/signup")
             {:id event
              :params (s/validate SignUp p)
              :result-cb (route-api-response event p)}))))

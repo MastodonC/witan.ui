@@ -22,3 +22,36 @@
 (deftest remove-nil-or-empty-vals-test
   (is (= {:baz 1} (utils/remove-nil-or-empty-vals {:foo [] :bar nil :baz 1})))
   (is (= {:baz 1 :foo ""} (utils/remove-nil-or-empty-vals {:foo "" :bar nil :baz 1}))))
+
+(deftest user-has-permission-test
+  (let [user {:kixi.user/groups #{1 2 3}
+               :kixi.user/self-group 4}
+        file {:kixi.datastore.metadatastore/sharing
+              {:kixi.datastore.metadatastore/meta-update #{{:kixi.group/id 3}}}}]
+    (is (utils/user-has-edit? user file)))
+  (let [user {:kixi.user/groups #{1 2 3}
+               :kixi.user/self-group 4}
+        file {:kixi.datastore.metadatastore/sharing
+              {:kixi.datastore.metadatastore/meta-update #{{:kixi.group/id 4}}}}]
+    (is (utils/user-has-edit? user file)))
+  (let [user {:kixi.user/groups #{1 2 3}
+               :kixi.user/self-group 4}
+        file {:kixi.datastore.metadatastore/sharing
+              {:kixi.datastore.metadatastore/meta-update #{{:kixi.group/id 5}}}}]
+    (is (not (utils/user-has-edit? user file))))
+  ;;;
+  (let [user {:kixi.user/groups #{1 2 3}
+              :kixi.user/self-group 4}
+        file {:kixi.datastore.metadatastore/sharing
+              {:kixi.datastore.metadatastore/file-read #{{:kixi.group/id 3}}}}]
+    (is (utils/user-has-download? user file)))
+  (let [user {:kixi.user/groups #{1 2 3}
+              :kixi.user/self-group 4}
+        file {:kixi.datastore.metadatastore/sharing
+              {:kixi.datastore.metadatastore/file-read #{{:kixi.group/id 4}}}}]
+    (is (utils/user-has-download? user file)))
+  (let [user {:kixi.user/groups #{1 2 3}
+              :kixi.user/self-group 4}
+        file {:kixi.datastore.metadatastore/sharing
+              {:kixi.datastore.metadatastore/file-read #{{:kixi.group/id 5}}}}]
+    (is (not (utils/user-has-download? user file)))))
