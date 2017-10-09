@@ -7,13 +7,15 @@
 (defn set-title!
   [& msg]
   (let [logged-in? (data/get-in-app-state :app/user :kixi.user/id)
+        prefix (or (get @data/config :branding/title)
+                   "Witan")
         title (if logged-in?
                 (do
                   (reset! buffered-title nil)
-                  (str "Witan - " (clojure.string/join " " msg)))
+                  (str prefix " - " (clojure.string/join " " msg)))
                 (do
                   (reset! buffered-title msg)
-                  "Witan"))]
+                  prefix))]
     (set! (.. js/window -document -title) title)
     (log/debug "Title set to:" title)))
 
