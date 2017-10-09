@@ -61,7 +61,7 @@
       :color 'white}]]
 
    [:.branding-strap
-    {:z-index 60
+    {:z-index 59
      :position :fixed
      :bottom (px 0)
      :padding (percent 5)}]
@@ -97,7 +97,7 @@
      :top      (px 0)
      :left     (px 0)
      :width    (percent 100)
-     :z-index    56}]
+     :z-index    70}]
 
    [:#relative-container
     {:position :relative

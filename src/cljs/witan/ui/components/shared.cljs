@@ -424,12 +424,11 @@
        {:on-mouse-over #(reset! state :hovered)
         :on-mouse-leave #(reset! state :idle)}
        (vec (cons :div.editable-field-content
-                  (conj
-                   (vec render-fns)
-                   (when (and on-edit-fn (= :hovered @state))
-                     [:span.clickable-text.edit-label
-                      {:on-click on-edit-fn}
-                      (get-string :string/edit)]))))])))
+                  (vec render-fns)))
+       (when (and on-edit-fn (= :hovered @state))
+         [:span.clickable-text.edit-label
+          {:on-click on-edit-fn}
+          (get-string :string/edit)])])))
 
 (defn collapsible-text
   [long-text]

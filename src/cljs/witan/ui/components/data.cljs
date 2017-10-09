@@ -116,6 +116,21 @@
       (get-string (if on-edit-fn
                     :string/edit-to-add-description
                     :string/no-description))])])
+(defn logo
+  [{:keys [kixi.datastore.metadatastore/logo]
+    :or {kixi.datastore.metadatastore/logo "img/witan-logo-placeholder.png"}
+    :as md} on-edit-fn]
+  [editable-field
+   on-edit-fn
+   [:div.file-logo.flex-vcenter-center
+    [:img {:src logo}]]])
+
+(defn header-container [md on-edit-fn]
+  [:div.flex.data-header-container
+   [:div.flex-2-3.flex-columns
+    [title md on-edit-fn]
+    [description md on-edit-fn]]
+   [:div.flex-1-3 [logo md on-edit-fn]]])
 
 (defn download-file
   [id]
@@ -129,6 +144,9 @@
 (defmulti metadata
   (fn [md _]
     ((juxt :kixi.datastore.metadatastore/type :kixi.datastore.metadatastore/bundle-type) md)))
+
+(defmethod metadata :default
+  [_ _])
 
 (defmethod metadata
   ["stored" nil]
@@ -354,7 +372,8 @@
 (defn edit-title-description
   [md update-errors]
   (let [{:keys [kixi.datastore.metadatastore/name
-                kixi.datastore.metadatastore/description]} md]
+                kixi.datastore.metadatastore/description
+                kixi.datastore.metadatastore/logo]} md]
     [editable-field
      nil
      [:div.file-edit-metadata
@@ -371,7 +390,13 @@
        [:textarea {:id  "description"
                    :value description
                    :placeholder nil
-                   :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/description] (.. % -target -value)])}])]]))
+                   :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/description] (.. % -target -value)])}]
+       [:h3 (get-string :string/meta-image-url)]
+       [:input {:id "meta-image-url"
+                :type "text"
+                :value logo
+                :placeholder (get-string :string/meta-image-url-placeholder)
+                :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/logo] (.. % -target -value)])}])]]))
 
 (defn edit-license
   [md showing-atom licenses update-errors]
@@ -883,8 +908,9 @@
                  :files [edit-files md]
                  ;; :overview & default
                  [:div
-                  (title md go-to-edit)
-                  (description md go-to-edit)
+                  (header-container md go-to-edit)
+                  #_(title md go-to-edit)
+                  #_(description md go-to-edit)
                   (metadata md go-to-edit)
                   (sharing md go-to-sharing)
                   (tags md go-to-edit)
@@ -920,6 +946,7 @@
    :kixi.datastore.metadatastore/author "Some Author"
    :kixi.datastore.metadatastore/maintainer "Some Maintainer"
    :kixi.datastore.metadatastore/source "GLA Demography"
+   :kixi.datastore.metadatastore/logo "https://tfl.gov.uk/cdn/static/cms/images/boroughs-map-static.gif"
    :kixi.datastore.metadatastore.license/license {:kixi.datastore.metadatastore.license/type "Public Domain"
                                                   :kixi.datastore.metadatastore.license/usage "Some usage for this license"}
    :kixi.datastore.metadatastore.geography/geography {:kixi.datastore.metadatastore.geography/type "smallest"
@@ -942,10 +969,11 @@
 (defcard title-display
   (fn [data _]
     (sab/html
-     [:div
+     [:div#data-view
       {:style {:width "100%"}}
       (r/as-element [title @data identity])]))
-  (select-keys example-file [:kixi.datastore.metadatastore/name])
+  (select-keys example-file [:kixi.datastore.metadatastore/name
+                             :kixi.datastore.metadatastore/file-type])
   {:inspect-data true
    :frame true
    :history false})
@@ -953,10 +981,45 @@
 (defcard description-display
   (fn [data _]
     (sab/html
-     [:div
+     [:div#data-view
       {:style {:width "100%"}}
       (r/as-element [description @data identity])]))
   (select-keys example-file [:kixi.datastore.metadatastore/description])
+  {:inspect-data true
+   :frame true
+   :history false})
+
+(defcard header-container
+  (fn [data _]
+    (sab/html
+     [:div#data-view
+      {:style {:width "100%"}}
+      (r/as-element [header-container @data identity])]
+     ))
+  example-file
+  {:inspect-data false
+   :frame true
+   :history false})
+
+(defcard header-container-long
+  (fn [data _]
+    (sab/html
+     [:div#data-view
+      {:style {:width "100%"}}
+      (r/as-element [header-container @data identity])]
+     ))
+  (assoc example-file :kixi.datastore.metadatastore/description (repeat 100 "foobar "))
+  {:inspect-data false
+   :frame true
+   :history false})
+
+(defcard logo
+  (fn [data _]
+    (sab/html
+     [:div#data-view
+      {:style {:width "100%"}}
+      (r/as-element [logo @data identity])]))
+  (select-keys example-file [:kixi.datastore.metadatastore/logo])
   {:inspect-data true
    :frame true
    :history false})
