@@ -29,13 +29,17 @@
    [:.gla-branded-login-bg
     {:bottom     (px 0)
      :right      (px 0)
-     :background "#5b9bd3 url ('../img/branding/gla-login-graphic.png') no-repeat center right"
-     :background-size [[(px gla-login-graphic-wh) (px gla-login-graphic-wh)]]}]
+     :background "#5b9bd3 url ('../img/branding/gla-login-graphic.png') no-repeat"
+     :background-size (percent 50)
+     :background-position [[(percent 100) (percent 50)]]}]
 
    [:.gla-branded-login-content
     [:.trans-bg
      {:background 'steelblue
       :border-radius (px 5)}]
+    [:.login-title
+     [:h2
+      {:font-size (em 3)}]]
     [:.witan-login
      [:h3
       {:color 'silver}]]]
