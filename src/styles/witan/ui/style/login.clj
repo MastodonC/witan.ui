@@ -42,8 +42,9 @@
       {:font-size (em 3)}]]
     [:.witan-login
      [:h3
-      {:color 'silver}]]]
-
+      {:color 'silver}]
+     [:.forgotten-link
+      {:color 'white}]]]
    ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
    [:#bg-attribution
@@ -122,7 +123,7 @@
      {:color         colour/error
       :display       :block
       :margin-bottom (em 1)}]
-    [:#forgotten-link
+    [:.forgotten-link
      {:font-size      (px 10)
       :vertical-align :text-top
       :text-align     :right

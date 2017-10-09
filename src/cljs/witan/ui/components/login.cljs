@@ -240,11 +240,12 @@
               :disabled pending?
               :type "submit"
               :class "pure-button pure-button-primary"} (get-string :string/sign-in)]
-    [:a {:id "forgotten-link"
-         :disabled pending?
-         :on-click (fn [e]
-                     (set-phase-fn :reset)
-                     (.preventDefault e))} (str "(" (get-string :string/forgotten-question) ")")]]
+    [:a.forgotten-link
+     {:id "forgotten-link"
+      :disabled pending?
+      :on-click (fn [e]
+                  (set-phase-fn :reset)
+                  (.preventDefault e))} (str "(" (get-string :string/forgotten-question) ")")]]
    [:h3 (get-string :string/create-account-header)]
    [:p
     [:span.text-white (get-string :string/create-account-info)]]
