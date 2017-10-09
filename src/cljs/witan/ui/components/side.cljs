@@ -88,7 +88,7 @@
    [:div#side-upper
     (add-side-elements! upper disabled?)]
    [:div#side-lower
-    (add-side-elements! (if (:debug? data/config)
+    (add-side-elements! (if (:debug? @data/config)
                           (cons [:button :debug] lower)
                           lower) disabled?)]])
 

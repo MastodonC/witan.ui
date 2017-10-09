@@ -11,15 +11,16 @@
             [cognitect.transit :as tr]
             [cljs-time.coerce :as tc]
             [cljs-time.core :as t]
-            [witan.ui.time :as time])
+            [witan.ui.time :as time]
+            [ajax.core :as ajax])
   (:require-macros [cljs-log.core :as log]
                    [cljs.core.async.macros :refer [go go-loop]]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
-(def config {:gateway/secure? (or (boolean (cljs-env :witan-api-secure)) false)
-             :gateway/address (or (cljs-env :witan-api-url) "localhost:30015")
-             :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")
-             :debug? ^boolean goog.DEBUG})
+(def config (r/atom {:gateway/secure? (or (boolean (cljs-env :witan-api-secure)) false)
+                     :gateway/address (or (cljs-env :witan-api-url) "localhost:30015")
+                     :viz/address     (or (cljs-env :witan-viz-url) "localhost:3448")
+                     :debug? ^boolean goog.DEBUG}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -246,6 +247,21 @@
           (delete-data!))))
     (log/debug "(No existing token was found.)")))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Config
+
+(defn- load-config-file!
+  [prefix]
+  (let [filename (str prefix ".conf")]
+    (ajax/GET (str "/" filename)
+              {:format :edn
+               :handler #(swap! config merge (reader/read-string %))})))
+
+(defn load-config!
+  []
+  (when-let [subdomain   (last (re-find #"(http\://)?((.+)\.)?witanforcities\.com" (.. js/window -location -host)))]
+    (log/debug "Loading subdomain config:" subdomain)
+    (load-config-file! subdomain)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Websocket
@@ -433,8 +449,8 @@
   (log/debug "Connecting to gateway...")
   (go-loop []
     (reset! ws-conn nil)
-    (let [{:keys [ws-channel error]} (<! (ws-ch (str (if (get config :gateway/secure?) "wss://" "ws://")
-                                                     (get config :gateway/address)
+    (let [{:keys [ws-channel error]} (<! (ws-ch (str (if (get @config :gateway/secure?) "wss://" "ws://")
+                                                     (get @config :gateway/address)
                                                      "/ws")
                                                 {:format :str}))]
       (if-not error

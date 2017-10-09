@@ -22,6 +22,7 @@
                    "DATE: " (or (cljs-env :build-dt)    "?"))))
 
       ;; data
+      (data/load-config!)
       (data/load-data!)
 
       ;; routing

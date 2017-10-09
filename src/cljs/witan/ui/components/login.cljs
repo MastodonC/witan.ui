@@ -24,6 +24,24 @@
    :passwords [(.-value (.querySelector js/document ".sign-up-form #password"))
                (.-value (.querySelector js/document ".sign-up-form #confirm-password"))]})
 
+(defn populate-branding-strap [branding-config]
+  [:div (for [item branding-config]
+          (cond (contains? item :branding/strap-img)
+                [:img.branding-strap-item
+                 {:key (:branding/strap-img item)
+                  :src (str "../img/branding/" (:branding/strap-img item))}]
+                (contains? item :branding/strap-text)
+                [:span.branding-strap-item
+                 {:key (:branding/strap-text item)}
+                 (:branding/strap-text item)]))])
+
+(defn photo-credit [{:keys [link name licence-link licence-name] :as credit-map}]
+  (when (not-empty credit-map)
+    [:span#bg-attribution.trans-bg
+     "Photo by "
+     [:a {:href link :target "_blank" :key "photo-attr1"} name] " - "
+     [:a {:href licence-link :target "_blank" :key "photo-attr2"} licence-name]]))
+
 (defmulti login-state-view
   (fn [phase data] phase))
 
@@ -253,17 +271,22 @@
         (fn []
           (let [{:keys [login/message login/pending?]} (data/get-app-state :app/login)]
             [:div
-             [:div#login-bg {:key "login-bg"}
-              [:span#bg-attribution.trans-bg
-               "Photo by "
-               [:a {:href "https://www.flickr.com/photos/fico86/" :target "_blank" :key "photo-attr1"}
-                "Binayak Dasgupta"] " - "
-               [:a {:href "https://creativecommons.org/licenses/by/2.0/" :target "_blank" :key "photo-attr2"} "CC BY 2.0"]]]
-             [:div#content-container {:key "login-content"}
+             [:div {:key "login-bg"
+                    :class (str "login-bg " (get @data/config :branding/login-bg-class))}
+              (if (get @data/config :branding/photo-credit)
+                (photo-credit (get @data/config :branding/photo-credit))
+                (photo-credit {:link "https://www.flickr.com/photos/fico86/"
+                               :name "Binayak Dasgupta"
+                               :licence-name "CC BY 2.0"
+                               :licence-link "https://creativecommons.org/licenses/by/2.0/"}))]
+             [:div#content-container
+              {:key "login-content"
+               :class (get @data/config :branding/login-content-class)}
               [:div#relative-container
                [:div.login-title.trans-bg {:key "login-title"}
-                [:h1 {:key "login-title-main"} (get-string :string/witan) ]
-                [:h2 {:key "login-title-sub"} (get-string :string/witan-tagline)]]
-               [:div#witan-login.trans-bg {:key "login-state"}
+                [:h1 {:key "login-title-main"} (or (get @data/config :branding/title) (get-string :string/witan)) ]
+                [:h2 {:key "login-title-sub"} (or (get @data/config :branding/subtitle) (get-string :string/witan-tagline))]]
+               [:div.witan-login.trans-bg {:key "login-state"}
                 (login-state-view @phase {:message message :set-phase-fn phase-fn :pending? pending?
-                                          :params (:route/query route)})]]]]))}))))
+                                          :params (:route/query route)})]]]
+             [:div.branding-strap (populate-branding-strap (get @data/config :branding/login-strap))]]))}))))

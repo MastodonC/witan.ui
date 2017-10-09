@@ -121,8 +121,8 @@
   [id]
   #(set! (.. js/window -location -href)
          (str
-          (if (:gateway/secure? data/config) "https://" "http://")
-          (or (:gateway/address data/config) "localhost:30015")
+          (if (:gateway/secure? @data/config) "https://" "http://")
+          (or (:gateway/address @data/config) "localhost:30015")
           "/download?id="
           id)))
 

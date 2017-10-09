@@ -40,10 +40,10 @@
     (result-cb status response)))
 
 (defn- request
-  [method-fn {:keys [id params result-cb auth]}]
+  [method-fn {:keys [id params result-cb auth suppress-error?]}]
   (method-fn {:params params
               :handler (partial handle-response :success id result-cb)
-              :error-handler (partial handle-response :failure id result-cb)
+              :error-handler (when-not suppress-error? (partial handle-response :failure id result-cb))
               :format :transit
               :response-format :transit
               :keywords? true
