@@ -381,7 +381,12 @@
   [field val]
   (get {:kixi.datastore.metadatastore.license/license (get-string :string/field-invalid-error (get-string :string/license))
         :kixi.datastore.metadatastore.time/temporal-coverage (get-string :string/field-invalid-error (get-string :string/temporal-coverage))
-        :kixi.datastore.metadatastore/name (get-string :string/field-invalid-error (get-string :string/file-name) (str "(" val ")"))}
+        :kixi.datastore.metadatastore/name (get-string :string/field-invalid-error (get-string :string/file-name) (str "(" val ")"))
+        :kixi.datastore.metadatastore/logo (get-string :string/field-invalid-error
+                                                       (get-string :string/meta-image-url)
+                                                       (str "(" val " - ")
+                                                       (get-string :string/invalid-url)
+                                                       ")")}
        field (get-string :string/unknown-error)))
 
 (defn remove-update-from-key
@@ -399,7 +404,7 @@
   [{:keys [reason explanation]}]
   (case reason
     :unauthorised {:unauthorised :string/unauthorised-error}
-    :invalid (let [{:keys [clojure.spec/problems]} explanation]
+    :invalid (let [{:keys [clojure.spec.alpha/problems]} explanation]
                (into {} (map (fn [{:keys [path val]}]
                                (when-let [fp (remove-update-from-key (second path))]
                                  (hash-map fp (metadata-invalid-field->error-string fp val)))) problems)))))
