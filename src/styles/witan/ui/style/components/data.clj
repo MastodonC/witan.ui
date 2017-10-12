@@ -1,5 +1,6 @@
 (ns witan.ui.style.components.data
   (:require [garden.units :refer [px em percent]]
+            [garden.selectors :as s]
             [witan.ui.style.colour :as colour]
             [witan.ui.style.values :as values]
             [witan.ui.style.fonts :as fonts]
@@ -134,6 +135,15 @@
              [:.file-description
               {:font-family fonts/base-fonts}]
 
+             [:.file-logo
+              {:width (percent 100)
+               :height (px 256)
+               :padding-bottom (px 10)}
+              [:img
+               {:max-width (percent 100)
+                :max-height (percent 100)
+                :margin [[0 :auto]]}]]
+
              [:.file-tags :.datapack-files
               [:h3
                {:margin [[(em 0.0) (em 0.2)]]
@@ -162,6 +172,14 @@
                :align-items :center}
               [:span
                {:margin [[(px 0)(px 5)]]}]]
+
+             [:.data-header-container
+              {:align-items :stretch}]
+
+             [(s/> :.data-header-container ":first-child" :div)
+              {:flex [[1 1 :auto]]}]
+             [(s/> :.data-header-container ":first-child" ":first-child")
+              {:flex 0}]
 
              [:.data-edit-actions
               {:width (percent 100)

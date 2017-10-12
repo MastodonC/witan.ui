@@ -60,8 +60,23 @@
               :align-items :center
               :justify-content :flex-start}]
 
+            [:.flex-vcenter-center
+             {:display :flex
+              :align-items :center
+              :justify-content :center}]
+
             [:.flex-3
              {:flex [[0.315 1 :auto]]
+              :align-self :auto
+              :width 0}]
+
+            [:.flex-1-3
+             {:flex [[0.362 1 :auto]]
+              :align-self :auto
+              :width 0}]
+
+            [:.flex-2-3
+             {:flex [[0.62 1 :auto]]
               :align-self :auto
               :width 0}]
 
@@ -69,6 +84,10 @@
              {:flex [[0.493 1 :auto]]
               :align-self :auto
               :width 0}]
+
+            [:.flex-columns
+             {:display :flex
+              :flex-direction :column}]
 
             [:.ellipsis
              {:white-space :nowrap

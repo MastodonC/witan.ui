@@ -114,7 +114,9 @@
 
             [:.shared-inline-file-title
              {:display :flex
-              :align-items :center}
+              :align-items :center
+              :text-overflow :ellipsis
+              :width (percent 100)}
              [:h1 :h2 :h3 :h4 :h5
               {:margin [[(em 0.0) (em 0.3)]]
                :line-height (em 1.6)
@@ -319,7 +321,8 @@
               :line-height (em 1.7)
               :border-color colour/subtle-grey
               :border-radius (px 2)
-              :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]}
+              :box-shadow [[(px 0) (px 1) (px 4) "rgba(0,0,0,.14)"]]
+              :position :relative}
              [:&:hover
               {}]
              [:span.clickable-text.edit-label
@@ -327,7 +330,8 @@
                :height (em 0.75)
                :line-height (em 0.75)
                :position :absolute
-               :right (px 20)}]
+               :right (px 8)
+               :bottom (px 8)}]
              [:.heading
               {:margin-top (em 0)}]
              [:.intro
