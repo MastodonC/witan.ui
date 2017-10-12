@@ -909,8 +909,6 @@
                  ;; :overview & default
                  [:div
                   (header-container md go-to-edit)
-                  #_(title md go-to-edit)
-                  #_(description md go-to-edit)
                   (metadata md go-to-edit)
                   (sharing md go-to-sharing)
                   (tags md go-to-edit)
