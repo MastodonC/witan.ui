@@ -378,7 +378,9 @@
      nil
      [:div.file-edit-metadata
       [:h2.heading (get-string :string/file-sharing-meta-update)]
-      (list-any-errors update-errors [:kixi.datastore.metadatastore/name :kixi.datastore.metadatastore/description])
+      (list-any-errors update-errors [:kixi.datastore.metadatastore/name
+                                      :kixi.datastore.metadatastore/description
+                                      :kixi.datastore.metadatastore/logo])
       (input-wrapper
        [:h3 (get-string :string/file-name)]
        [:input {:id  "title"
