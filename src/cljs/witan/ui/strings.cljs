@@ -277,7 +277,7 @@
    :stringf/reject-metadata-adjustments     "An adjustment to the metadata of '%s' was rejected."
    :stringf/metadata-saved                  "Metadata was saved successfully!"
    :string/meta-image-url                   "Logo"
-   :string/meta-image-url-placeholder       "Provide a logo image as a URL e.g. http://mydomain.com/mylogo.png"
+   :string/meta-image-url-placeholder       "Provide a logo image as a URL e.g. https://mydomain.com/mylogo.png"
    :string/invalid-url                      "Invalid URL"
    ;;
    :string.about/contact-us-1                "If you need Witan support, please either use our live help system or email us at"
