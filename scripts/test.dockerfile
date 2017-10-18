@@ -1,4 +1,4 @@
-FROM debian:jessie
+FROM re6exp/debian-jessie-oracle-jdk-8:latest
 
 # Install runtime dependencies
 RUN apt-get update \
@@ -10,14 +10,6 @@ RUN apt-get update \
         curl \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
-
-# Install Java
-RUN add-apt-repository -y "deb http://ppa.launchpad.net/webupd8team/java/ubuntu xenial main" \
-&& apt-get update \
-&& echo oracle-java8-installer shared/accepted-oracle-license-v1-1 select true | /usr/bin/debconf-set-selections \
-&& apt-get install -y \
-oracle-java8-installer \
-oracle-java8-set-default
 
 # Install official PhantomJS release
 RUN mkdir /tmp/phantomjs \
