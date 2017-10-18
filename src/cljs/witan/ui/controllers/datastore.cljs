@@ -42,10 +42,9 @@
                            [:kixi.datastore.metadatastore/provenance :kixi/user] (data/get-user))
         existing (some #(when (= (:kixi.datastore.metadatastore/id %) new-id) %)
                        (data/get-in-app-state :app/data-dash :items))]
-    (when existing
-      (data/swap-app-state! :app/data-dash update :items #(remove #{existing} %)))
-    (data/swap-app-state! :app/data-dash update :items #(cons new-meta %))
-    (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % new-id new-meta))))
+    (when-not existing
+      (data/swap-app-state! :app/data-dash update :items #(cons new-meta %))
+      (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % new-id new-meta)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -209,7 +208,9 @@
   (reset! dash-query-pending? false)
   (data/swap-app-state! :app/data-dash assoc
                         :items items
-                        :paging paging))
+                        :paging paging)
+  (doseq [{:keys [kixi.datastore.metadatastore/id] :as payload} items]
+    (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload)))
 
 
 (defmethod on-query-response
