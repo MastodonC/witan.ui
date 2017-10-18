@@ -855,8 +855,8 @@
             (data/get-in-app-state :app/datastore)
             activities->string (:ds/activities ds)
             md (data/get-in-app-state :app/datastore :ds/file-metadata current)
-            has-edit? (utils/user-has-edit? (data/get-in-app-state :app/user) md)
-            can-download? (utils/user-has-download? (data/get-in-app-state :app/user) md)
+            has-edit? (utils/user-has-edit? (data/get-user) md)
+            can-download? (utils/user-has-download? (data/get-user) md)
             remove-new-fn (fn []
                             (route/swap-query-string! (fn [x] (dissoc x :new)))
                             (reset! new? false))

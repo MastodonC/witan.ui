@@ -21,7 +21,7 @@
 
 (defn empty-form-data
   [activities locked-activities]
-  (let [user (data/get-in-app-state :app/user)]
+  (let [user (data/get-user)]
     {:title ""
      :selected-files []
      :sharing-summary {}

@@ -37,10 +37,14 @@
 
 (defn add-new-metadata-to-app-state!
   [md]
-  (let [new-datapack-meta (assoc-in md
-                                    [:kixi.datastore.metadatastore/provenance :kixi/user] (data/get-in-app-state :app/user))]
-    (data/swap-app-state! :app/data-dash update :items #(cons new-datapack-meta %))
-    (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % (:kixi.datastore.metadatastore/id new-datapack-meta) new-datapack-meta))))
+  (let [new-meta (assoc-in md
+                           [:kixi.datastore.metadatastore/provenance :kixi/user] (data/get-user))
+        existing (some #(when (= (:kixi.datastore.metadatastore/id %) (:kixi.datastore.metadatastore/id md)) %)
+                       (data/get-in-app-state :app/data-dash :items))]
+    (when existing
+      (data/swap-app-state! :app/data-dash update :items #(remove #{existing} %)))
+    (data/swap-app-state! :app/data-dash update :items #(cons new-meta %))
+    (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % (:kixi.datastore.metadatastore/id new-meta) new-meta))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -745,7 +749,7 @@
 (defmethod on-activity-finished
   [:create-datapack :completed]
   [{:keys [args]}]
-  (let [user (data/get-in-app-state :app/user)
+  (let [user (data/get-user)
         read-groups
         (get-in args [:message
                       :kixi.comms.event/payload
