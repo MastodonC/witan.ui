@@ -37,10 +37,14 @@
 
 (defn add-new-metadata-to-app-state!
   [md]
-  (let [new-datapack-meta (assoc-in md
-                                    [:kixi.datastore.metadatastore/provenance :kixi/user] (data/get-in-app-state :app/user))]
-    (data/swap-app-state! :app/data-dash update :items #(cons new-datapack-meta %))
-    (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % (:kixi.datastore.metadatastore/id new-datapack-meta) new-datapack-meta))))
+  (let [new-id (:kixi.datastore.metadatastore/id md)
+        new-meta (assoc-in md
+                           [:kixi.datastore.metadatastore/provenance :kixi/user] (data/get-user))
+        existing (some #(when (= (:kixi.datastore.metadatastore/id %) new-id) %)
+                       (data/get-in-app-state :app/data-dash :items))]
+    (when-not existing
+      (data/swap-app-state! :app/data-dash update :items #(cons new-meta %))
+      (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % new-id new-meta)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -204,7 +208,9 @@
   (reset! dash-query-pending? false)
   (data/swap-app-state! :app/data-dash assoc
                         :items items
-                        :paging paging))
+                        :paging paging)
+  (doseq [{:keys [kixi.datastore.metadatastore/id] :as payload} items]
+    (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload)))
 
 
 (defmethod on-query-response
@@ -745,7 +751,7 @@
 (defmethod on-activity-finished
   [:create-datapack :completed]
   [{:keys [args]}]
-  (let [user (data/get-in-app-state :app/user)
+  (let [user (data/get-user)
         read-groups
         (get-in args [:message
                       :kixi.comms.event/payload

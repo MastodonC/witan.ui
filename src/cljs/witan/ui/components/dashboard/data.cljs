@@ -38,7 +38,7 @@
             buttons [{:id :datapack :icon icons/datapack :txt :string/create-new-datapack :class "data-upload"}
                      {:id :upload :icon icons/upload :txt :string/upload-new-data :class "data-upload"}]
             modified-fn #(vector :div (time/iso-time-as-moment (get-in % [:kixi.datastore.metadatastore/provenance :kixi.datastore.metadatastore/created])))
-            datasets (filter (filter-fn file-type-filter) (:items raw-data))
+            datasets (when (:items raw-data) (filter (filter-fn file-type-filter) (:items raw-data)))
             selected-id' @selected-id
             navigate-fn #(route/navigate! :app/data {:id (:kixi.datastore.metadatastore/id %)})
             actions-fn (fn [d] (when (= (:kixi.datastore.metadatastore/id d) selected-id')

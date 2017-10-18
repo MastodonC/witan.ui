@@ -55,6 +55,13 @@
   [m]
   (reduce-kv (fn [a k v] (assoc a k (deref v))) {} m))
 
+(def user-map
+  {:kixi.user/name nil
+   :kixi.user/username nil
+   :kixi.user/id nil
+   :kixi.user/groups [nil]
+   :kixi.user/self-group nil})
+
 ;; default app-state
 (defonce app-state
   (->>
@@ -64,11 +71,7 @@
                 :login/auth-expiry -1
                 :login/refresh-expiry -1
                 :login/reset-complete? false}
-    :app/user {:kixi.user/name nil
-               :kixi.user/username nil
-               :kixi.user/id nil
-               :kixi.user/groups [nil]
-               :kixi.user/self-group nil}
+    :app/user user-map
     :app/route {:route/path nil
                 :route/params nil
                 :route/query nil
@@ -125,6 +128,12 @@
 (defn reset-app-state!
   [k value]
   (update app-state k #(reset! % value)))
+
+(defn get-user
+  []
+  (select-keys
+   (get-app-state :app/user)
+   (keys user-map)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Panic
