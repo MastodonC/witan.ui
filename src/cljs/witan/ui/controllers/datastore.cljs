@@ -37,14 +37,15 @@
 
 (defn add-new-metadata-to-app-state!
   [md]
-  (let [new-meta (assoc-in md
+  (let [new-id (:kixi.datastore.metadatastore/id md)
+        new-meta (assoc-in md
                            [:kixi.datastore.metadatastore/provenance :kixi/user] (data/get-user))
-        existing (some #(when (= (:kixi.datastore.metadatastore/id %) (:kixi.datastore.metadatastore/id md)) %)
+        existing (some #(when (= (:kixi.datastore.metadatastore/id %) new-id) %)
                        (data/get-in-app-state :app/data-dash :items))]
     (when existing
       (data/swap-app-state! :app/data-dash update :items #(remove #{existing} %)))
     (data/swap-app-state! :app/data-dash update :items #(cons new-meta %))
-    (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % (:kixi.datastore.metadatastore/id new-meta) new-meta))))
+    (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % new-id new-meta))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
