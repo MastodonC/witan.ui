@@ -12,11 +12,15 @@
             [witan.ui.strings :refer [get-string]]
             [witan.ui.title :refer [set-title!]]
             [goog.string :as gstring]
-            [cljsjs.toastr])
+            [cljsjs.toastr]
+            [cljs.core.async :refer [put! chan <! >! timeout close!]])
   (:require-macros [cljs-log.core :as log]
-                   [witan.ui.env :as env :refer [cljs-env]]))
+                   [witan.ui.env :as env :refer [cljs-env]]
+                   [cljs.core.async.macros :refer [go go-loop]]))
 
 (def dash-query-pending? (atom false))
+;;(def default-max-file-size 50000000) ;; 50MB
+(def default-max-file-size 10000) ;; 10KB
 
 (def query-fields
   {:header [{:activities [:kixi.datastore.metadatastore/meta-read :kixi.datastore.metadatastore/file-read]}]
@@ -288,39 +292,57 @@
     (select-current! id)
     (set-title! (get-string :string/title-data-loading))))
 
+(defn split-file
+  [file size-per-part num-parts]
+  (let [file-size (.-size file)
+        num-chunks (/ file-size size-per-part)
+        num-major-chunks (.floor js/Math num-chunks)
+        chunk-ranges (reduce (fn [a x]
+                               (let [start (inc (or (:end (last a)) -1))
+                                     end (+ start size-per-part)]
+                                 (conj a {:start start :end end}))) [] (range num-major-chunks))
+        chunk-ranges (conj chunk-ranges {:start (inc (:end (last chunk-ranges)))
+                                         :end file-size})]
+    (map (fn [{:keys [start end]}]
+           (.slice file start end)) chunk-ranges)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Events
 
 (defmulti on-event
-  (fn [{:keys [args]}] [(:kixi.comms.event/key args) (:kixi.comms.event/version args)]))
+  (fn [{:keys [args]}] [(or (:kixi.comms.event/key args)
+                            (:kixi.event/type args))
+                        (or (:kixi.comms.event/version args)
+                            (:kixi.event/version args))]))
 
 (defmethod on-event
   :default [x])
 
 (defmethod on-event
-  [:kixi.datastore.filestore/upload-link-created "1.0.0"]
+  [:kixi.datastore.filestore/multi-part-upload-links-created "1.0.0"]
   [{:keys [args]}]
-  (let [{:keys [kixi.comms.event/payload]} args
-        {:keys [kixi.datastore.filestore/upload-link
-                kixi.datastore.filestore/id]} payload
-        {:keys [pending-file]} (data/get-in-app-state :app/create-data :cd/pending-data)]
-    (log/debug "Uploading to" upload-link)
-    (if (clojure.string/starts-with? upload-link "file")
-      (do
-                                        ;for testing locally, so you can manually copy the metadata-one-valid.csv file
-        (log/debug "Sleeping, copy file!")
-        (time/sleep 20000)
-        (api-response {:event :upload :status :success :id id} 14))
-      (ajax/PUT* upload-link
-                 {:body pending-file
-                  :progress-handler #(let [upload-frac (/ (.-loaded %) (.-total %))]
-                                       (data/swap-app-state! :app/create-data assoc
-                                                             :cd/pending-message
-                                                             {:message :string/uploading
-                                                              :progress upload-frac}))
-                  :handler (partial api-response {:event :upload :status :success :id id})
-                  :error-handler (partial api-response {:event :upload :status :failure})}))))
+  (let [{:keys [kixi.datastore.filestore.upload/part-urls
+                kixi.datastore.filestore/id]} args
+        {:keys [pending-file]} (data/get-in-app-state :app/create-data :cd/pending-data)
+        file-parts (split-file
+                    pending-file
+                    (or (:upload/max-file-size @data/config) default-max-file-size)
+                    (count part-urls))
+        files-and-urls (map vector file-parts part-urls)]
+    (log/debug "Uploading...")
+    (go-loop [remaining-files files-and-urls
+              etags []]
+      (when-let [next-file (first remaining-files)]
+        (let [[file link] next-file]
+          (ajax/PUT* link
+                     {:body file
+                      :progress-handler #(let [upload-frac (/ (.-loaded %) (.-total %))]
+                                           (data/swap-app-state! :app/create-data assoc
+                                                                 :cd/pending-message
+                                                                 {:message :string/uploading
+                                                                  :progress upload-frac}))
+                      :handler (partial api-response {:event :upload :status :success :id id})
+                      :error-handler (partial api-response {:event :upload :status :failure})}))))))
 
 (defmethod on-event
   [:kixi.datastore.file/created "1.0.0"]
@@ -448,16 +470,22 @@
 
 (defmethod handle
   :upload
-  [event data]
+  [event fdata]
   (data/swap-app-state! :app/create-data assoc :cd/pending? true)
-  (data/swap-app-state! :app/create-data assoc :cd/pending-data data)
+  (data/swap-app-state! :app/create-data assoc :cd/pending-data fdata)
   (data/swap-app-state! :app/create-data assoc :cd/pending-message {:message :string/preparing-upload
                                                                     :progress 0})
-  (activities/start-activity!
-   :upload-file
-   (data/command! :kixi.datastore.filestore/create-upload-link "1.0.0" nil)
-   {:failed #(gstring/format (get-string :string.activity.upload-file/failed) (:info-name data))
-    :completed #(gstring/format (get-string :string.activity.upload-file/completed) (:info-name data))}))
+  (let [max-file-size (or (:upload/max-file-size @data/config) default-max-file-size)
+        file-size (.-size (:pending-file fdata))
+        parts (.ceil js/Math (/ file-size max-file-size))]
+    (activities/start-activity!
+     :upload-file
+     (data/new-command!
+      :kixi.datastore.filestore/create-multi-part-upload-link
+      "1.0.0"
+      {:kixi.datastore.filestore.upload/part-count parts})
+     {:failed #(gstring/format (get-string :string.activity.upload-file/failed) (:info-name fdata))
+      :completed #(gstring/format (get-string :string.activity.upload-file/completed) (:info-name fdata))})))
 
 (defmethod handle
   :sharing-change

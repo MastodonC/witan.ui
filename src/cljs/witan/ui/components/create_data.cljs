@@ -129,13 +129,13 @@
                                            :type "file"
                                            :on-change
                                            (fn [e]
-                                             (let [file (first (array-seq (.. e -target -files)))
-                                                   file-name (.-name file)
-                                                   ext (last (clojure.string/split file-name #"\."))]
-                                               (if (valid-extension? ext)
-                                                 (swap! form-data assoc :pending-file file)
-                                                 (.alert js/window
-                                                         (str file-name " is not a valid file type.")))))}]
+                                             (when-let [file (first (array-seq (.. e -target -files)))]
+                                               (let [ file-name (.-name file)
+                                                     ext (last (clojure.string/split file-name #"\."))]
+                                                 (if (valid-extension? ext)
+                                                   (swap! form-data assoc :pending-file file)
+                                                   (.alert js/window
+                                                           (str file-name " is not a valid file type."))))))}]
                 (shared/button {:id :select-upload
                                 :icon icons/upload
                                 :txt :string/choose-file}
