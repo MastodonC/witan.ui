@@ -210,7 +210,7 @@
                         :items items
                         :paging paging)
   (doseq [{:keys [kixi.datastore.metadatastore/id] :as payload} items]
-    (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload)))
+    (data/swap-app-state! :app/datastore update-in [:ds/file-metadata id] #(merge % payload))))
 
 
 (defmethod on-query-response
