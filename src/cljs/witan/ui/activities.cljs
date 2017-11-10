@@ -35,6 +35,7 @@
 (def available-activities
   {:upload-file [{:kixi.command/type :kixi.datastore.filestore/create-multi-part-upload-link}
                  {:kixi.event/type   :kixi.datastore.filestore/multi-part-upload-links-created}
+                 {:kixi.command/type :kixi.datastore.filestore/complete-multi-part-upload-link}
                  {:kixi.comms.command/key  :kixi.datastore.filestore/create-file-metadata}
                  (a/or
                   [{:kixi.comms.event/key  :kixi.datastore.file/created} (a/$ :completed)]

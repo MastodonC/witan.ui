@@ -20,7 +20,7 @@
 
 (def dash-query-pending? (atom false))
 ;;(def default-max-file-size 50000000) ;; 50MB
-(def default-max-file-size 10000) ;; 10KB
+(def default-max-file-size 500000) ;; 500KB
 
 (def query-fields
   {:header [{:activities [:kixi.datastore.metadatastore/meta-read :kixi.datastore.metadatastore/file-read]}]
@@ -138,13 +138,21 @@
    {}
    (partition 2 keys-vals)))
 
-(defmethod api-response
-  [:upload :success]
-  [{:keys [id file-size]} response]
+(defn complete-multi-part-upload!
+  [etags upload-id file-id]
+  (data/new-command!
+   :kixi.datastore.filestore/complete-multi-part-upload
+   "1.0.0"
+   {:kixi.datastore.filestore.upload/part-ids etags
+    :kixi.datastore.filestore.upload/id upload-id
+    :kixi.datastore.filestore/id file-id}))
+
+(defn create-file-after-upload!
+  [id file-size]
   (log/info "Upload succeeded:" id)
   (data/swap-app-state! :app/create-data assoc
                         :cd/pending-message
-                        {:message :string/upload-finalizing
+                        {:message :string/upload-creating-md
                          :progress 1})
   ;; now upload metadata
   ;; TODO this whole thing needs sorting out
@@ -192,13 +200,6 @@
                                                                                         :kixi.datastore.metadatastore.geography/level info-geo-smallest)}))
         payload (if selected-schema (assoc payload :kixi.datastore.schemastore/id selected-schema) payload)]
     (data/command! :kixi.datastore.filestore/create-file-metadata "1.0.0" payload)))
-
-(defmethod api-response
-  [:upload :failure]
-  [_ response]
-  (log/severe "Upload failed:" response)
-  (data/swap-app-state! :app/create-data assoc :cd/pending? false)
-  (data/swap-app-state! :app/create-data assoc :cd/message :api-failure))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query Response
@@ -293,7 +294,7 @@
     (set-title! (get-string :string/title-data-loading))))
 
 (defn split-file
-  [file size-per-part num-parts]
+  [file size-per-part]
   (let [file-size (.-size file)
         num-chunks (/ file-size size-per-part)
         num-major-chunks (.floor js/Math num-chunks)
@@ -318,31 +319,58 @@
 (defmethod on-event
   :default [x])
 
+(defn clean-etag
+  [etag]
+  (clojure.string/replace etag "\"" ""))
+
 (defmethod on-event
   [:kixi.datastore.filestore/multi-part-upload-links-created "1.0.0"]
   [{:keys [args]}]
   (let [{:keys [kixi.datastore.filestore.upload/part-urls
                 kixi.datastore.filestore/id]} args
+        upload-id (:kixi.datastore.filestore.upload/id args)
         {:keys [pending-file]} (data/get-in-app-state :app/create-data :cd/pending-data)
+        total-file-size (.-size pending-file)
         file-parts (split-file
                     pending-file
-                    (or (:upload/max-file-size @data/config) default-max-file-size)
-                    (count part-urls))
-        files-and-urls (map vector file-parts part-urls)]
-    (log/debug "Uploading...")
-    (go-loop [remaining-files files-and-urls
-              etags []]
-      (when-let [next-file (first remaining-files)]
-        (let [[file link] next-file]
-          (ajax/PUT* link
-                     {:body file
-                      :progress-handler #(let [upload-frac (/ (.-loaded %) (.-total %))]
-                                           (data/swap-app-state! :app/create-data assoc
-                                                                 :cd/pending-message
-                                                                 {:message :string/uploading
-                                                                  :progress upload-frac}))
-                      :handler (partial api-response {:event :upload :status :success :id id})
-                      :error-handler (partial api-response {:event :upload :status :failure})}))))))
+                    (or (:upload/max-file-size @data/config) default-max-file-size))
+        chunks-and-urls (map vector file-parts part-urls)
+        result-chan (chan)]
+    (log/info "Uploading...")
+    (go-loop [remaining-chunks chunks-and-urls
+              etags []
+              total-loaded 0]
+      (if-let [next-chunk (first remaining-chunks)]
+        (let [[chunk link] next-chunk
+              chunk-size (.-size chunk)]
+          (ajax/s3-upload link
+                          {:body chunk
+                           :progress-handler #(let [upload-frac (/ (+ total-loaded (.-loaded %)) total-file-size)]
+                                                (data/swap-app-state! :app/create-data assoc
+                                                                      :cd/pending-message
+                                                                      {:message :string/uploading
+                                                                       :progress upload-frac}))
+                           :handler (fn [[ok resp]]
+                                      (if ok
+                                        (do
+                                          (put! result-chan (get resp "etag")))
+                                        (do
+                                          (log/severe "Upload failed:" resp)
+                                          (data/swap-app-state! :app/create-data assoc :cd/pending? false)
+                                          (data/swap-app-state! :app/create-data assoc :cd/message :api-failure)
+                                          (put! result-chan false))))})
+          (let [result (<! result-chan)]
+            (when result
+              (recur (next remaining-chunks)
+                     (conj etags (clean-etag result))
+                     (+ total-loaded chunk-size)))))
+        (do
+          (log/info "Finished uploading" etags)
+          (data/swap-app-state! :app/create-data assoc
+                                :cd/pending-message
+                                {:message :string/upload-finalizing
+                                 :progress 1})
+          (complete-multi-part-upload! etags upload-id id))))))
 
 (defmethod on-event
   [:kixi.datastore.file/created "1.0.0"]

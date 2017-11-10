@@ -197,6 +197,7 @@
    :string/upload-finalizing                "Confirming the upload succeeded"
    :string/uploading                        "Uploading"
    :string/preparing-upload                 "Preparing to upload"
+   :string/upload-creating-md               "Creating the file metadata"
    :string/sign-up-error-usernames-match    "Email addresses do not match"
    :string/sign-up-error-passwords-match    "Passwords do not match"
    :string/sign-up-failure                  ["There was an issue signing up. Please check your invite code and email address, and try again." :string/if-persists]
