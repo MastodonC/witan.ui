@@ -19,7 +19,7 @@
                  [bidi "2.0.0"]
                  [venantius/accountant "0.1.7"]
                  [environ "1.0.2"]
-                 [cljs-ajax "0.5.3"]
+                 [cljs-ajax "0.7.2"]
                  [inflections "0.12.2"]
                  [prismatic/schema "1.1.2"]
                  [com.cognitect/transit-cljs "0.8.239"]

@@ -33,14 +33,7 @@
 ;;   Note: Adjust `extract-command-event-signal` to further select messages
 
 (def available-activities
-  {:upload-file [{:kixi.comms.command/key  :kixi.datastore.filestore/create-upload-link}
-                 {:kixi.comms.event/key    :kixi.datastore.filestore/upload-link-created}
-                 {:kixi.comms.command/key  :kixi.datastore.filestore/create-file-metadata}
-                 (a/or
-                  [{:kixi.comms.event/key  :kixi.datastore.file/created} (a/$ :completed)]
-                  [{:kixi.comms.event/key  :kixi.datastore.file-metadata/rejected} (a/$ :failed)])]
-   ;;
-   :update-metadata [{:kixi.comms.command/key  :kixi.datastore.metadatastore/update}
+  {:update-metadata [{:kixi.comms.command/key  :kixi.datastore.metadatastore/update}
                      (a/or
                       [{:kixi.comms.event/key  :kixi.datastore.file-metadata/updated
                         :kixi.comms.event/payload {:kixi.datastore.communication-specs/file-metadata-update-type :kixi.datastore.communication-specs/file-metadata-update}}
@@ -72,7 +65,19 @@
    :add-file-to-datapack [{:kixi.command/type :kixi.datastore/add-files-to-bundle}
                           (a/or
                            [{:kixi.event/type :kixi.datastore/files-add-to-bundle-rejected} (a/$ :failed)]
-                           [{:kixi.event/type :kixi.datastore/files-added-to-bundle} (a/$ :completed)])]})
+                           [{:kixi.event/type :kixi.datastore/files-added-to-bundle} (a/$ :completed)])]
+   :upload-file [{:kixi.command/type :kixi.datastore.filestore/initiate-file-upload}
+                 (a/or
+                  {:kixi.event/type :kixi.datastore.filestore/file-upload-initiated}
+                  [{:kixi.event/type :kixi.datastore.filestore/file-upload-failed} (a/$ :failed)])
+                 {:kixi.command/type :kixi.datastore.filestore/complete-file-upload}
+                 (a/or
+                  {:kixi.event/type :kixi.datastore.filestore/file-upload-completed}
+                  [{:kixi.event/type :kixi.datastore.filestore/file-upload-rejected} (a/$ :failed)])
+                 {:kixi.comms.command/key  :kixi.datastore.filestore/create-file-metadata}
+                 (a/or
+                  [{:kixi.comms.event/key  :kixi.datastore.file/created} (a/$ :completed)]
+                  [{:kixi.comms.event/key  :kixi.datastore.file-metadata/rejected} (a/$ :failed)])]})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -144,7 +149,8 @@
         reporter (get reporters result)
         log-message (when reporter (reporter final-message))]
     (data/swap-app-state! :app/activities update :activities/pending dissoc command-id)
-    (data/swap-app-state! :app/activities update :activities/log conj {:status result
+    (data/swap-app-state! :app/activities update :activities/log conj {:activity activity
+                                                                       :status result
                                                                        :message log-message
                                                                        :time (t/jstime->str)})
     (data/publish-topic :activity/activity-finished {:log log-message

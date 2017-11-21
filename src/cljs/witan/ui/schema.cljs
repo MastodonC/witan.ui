@@ -46,7 +46,8 @@
 (def ActivityLogSchema
   {:status (s/enum :completed :failed)
    :message s/Str
-   :time s/Any})
+   :time s/Any
+   :activity s/Keyword})
 
 (def ActivityPendingSchema
   {:activity s/Keyword
