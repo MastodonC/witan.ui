@@ -132,23 +132,26 @@
       (try
         (let [state (a/advance (activity-fsm activity) :pending message)
               id (str (random-uuid))]
-          (data/swap-app-state! :app/activities assoc-in [:activities/pending command-id] {:activity activity
-                                                                                           :state state
-                                                                                           :reporters reporters
-                                                                                           :context context
-                                                                                           :id id})
+          (data/swap-app-state! :app/activities assoc-in [:activities/pending id] {:activity activity
+                                                                                   :id id
+                                                                                   :state state
+                                                                                   :reporters reporters
+                                                                                   :context context
+                                                                                   :command-id command-id})
           (data/publish-topic :activity/activity-started {:message message :activity activity})
-          (log/debug "Started activity" activity id))
+          (log/debug "Started activity" activity id)
+          id)
         (catch js/Error e
           (log/severe "Failed to start activity" activity "- message did not match fsm")))
       (log/severe "Failed to start activity" activity "- message did not contain a command ID"))))
 
 (defn- finish-activity!
-  [final-message result command-id]
-  (let [{:keys [activity reporters id context]} (data/get-in-app-state :app/activities :activities/pending command-id)
+  [final-message result id]
+  (let [{:keys [activity reporters context]}
+        (data/get-in-app-state :app/activities :activities/pending id)
         reporter (get reporters result)
         log-message (when reporter (reporter final-message))]
-    (data/swap-app-state! :app/activities update :activities/pending dissoc command-id)
+    (data/swap-app-state! :app/activities update :activities/pending dissoc id)
     (data/swap-app-state! :app/activities update :activities/log conj {:activity activity
                                                                        :status result
                                                                        :message log-message
@@ -161,20 +164,29 @@
     (log/debug "Finished activity" activity id)
     (debounce-save!)))
 
+(defn abandon-activity!
+  [activity-name id]
+  (let [{:keys [activity] :as app-state}
+        (data/get-in-app-state :app/activities :activities/pending id)]
+    (when (and app-state (= activity-name activity))
+      (finish-activity! nil :failed id))))
+
 (defn process-event
   [{:keys [args]}]
   (let [activities (data/get-in-app-state :app/activities :activities/pending)]
     (loop [activities' activities]
-      (let [[command-id {:keys [activity state]}] (first activities')]
+      (let [[id {:keys [command-id activity state]}] (first activities')]
         (if (= command-id (or (:kixi.comms.command/id args)
                               (:kixi.command/id args)))
           (try
             (let [{:keys [value] :as new-state} (a/advance (activity-fsm activity) state args)]
               (if (= :pending value)
                 (do
-                  (data/swap-app-state! :app/activities assoc-in [:activities/pending command-id :state] new-state)
-                  (data/publish-topic :activity/activity-progressed {:message args :activity activity}))
-                (finish-activity! args value command-id)))
+                  (data/swap-app-state! :app/activities assoc-in [:activities/pending id :state] new-state)
+                  (let [updated-activity (data/get-in-app-state :app/activities :activities/pending id)]
+                    (data/publish-topic :activity/activity-progressed {:message args
+                                                                       :activity updated-activity})))
+                (finish-activity! args value id)))
             (catch js/Error e))
           (when (next activities')
             (recur (next activities'))))))))
@@ -184,17 +196,19 @@
   (let [activities (data/get-in-app-state :app/activities :activities/pending)]
     (loop [activities' activities]
       (try
-        (let [[command-id {:keys [activity state]}] (first activities')
+        (let [[id {:keys [command-id activity state]}] (first activities')
               new-command-id (or (:kixi.comms.command/id args)
                                  (:kixi.command/id args))
               {:keys [value] :as new-state} (a/advance (activity-fsm activity) state args)]
           (if (= :pending value)
-            (let [existing (data/get-in-app-state :app/activities :activities/pending command-id)]
-              (data/swap-app-state! :app/activities assoc-in [:activities/pending new-command-id]
-                                    (assoc existing :state new-state))
-              (data/swap-app-state! :app/activities update :activities/pending dissoc command-id)
-              (data/publish-topic :activity/activity-progressed {:message args :activity activity}))
-            (finish-activity! args value command-id)))
+            (do
+              (data/swap-app-state! :app/activities update-in [:activities/pending id]
+                                    (fn [x]
+                                      (assoc x :state new-state :command-id new-command-id)))
+              (let [updated-activity (data/get-in-app-state :app/activities :activities/pending id)]
+                (data/publish-topic :activity/activity-progressed {:message args
+                                                                   :activity updated-activity})))
+            (finish-activity! args value id)))
         (catch js/Error e
           (when (next activities')
             (recur (next activities'))))))))

@@ -80,7 +80,6 @@
     (fn [this]
       (let [{:keys [cd/pending?
                     cd/pending-message
-                    cd/message
                     cd/error]} (data/get-app-state :app/create-data)
             disabled? pending?]
         [:div#create-data
@@ -89,15 +88,15 @@
           [:div.content.pure-g
            {:key "content"}
            [:div.pure-u-lg-2-3.pure-u-sm-1.pure-u-1
-            (shared/info-panel :string/data-upload-intro)
+            (when-not error
+              (shared/info-panel :string/data-upload-intro))
 
             (cond
               error
               [:div.upload-error
                [:h2 (get-string :string/error)]
-               (icons/error :large :dark)
-               [:div.error
-                (get-string error)]
+               (icons/error :large :error)
+               [:h3.error (get-string error)]
                [:div
                 (shared/button {:id :retry-upload
                                 :icon icons/retry

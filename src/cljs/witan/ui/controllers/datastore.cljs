@@ -381,7 +381,6 @@
 (defmethod handle
   :reset-errors
   [_ _]
-  (data/swap-app-state! :app/create-data dissoc :cd/message)
   (data/swap-app-state! :app/create-data dissoc :cd/error)
   (data/swap-app-state! :app/create-data assoc :cd/pending? false))
 
@@ -746,12 +745,12 @@
     :kixi.datastore.filestore/id file-id}))
 
 (defmulti advance-file-upload
-  (fn [msg] (or (:kixi.event/type msg)
-                (:kixi.comms.event/key msg))))
+  (fn [msg _] (or (:kixi.event/type msg)
+                  (:kixi.comms.event/key msg))))
 
 (defmethod advance-file-upload
   :kixi.datastore.filestore/file-upload-initiated
-  [{:keys [kixi.datastore.filestore.upload/part-urls kixi.datastore.filestore/id]}]
+  [{:keys [kixi.datastore.filestore.upload/part-urls kixi.datastore.filestore/id]} activity]
   (if (clojure.string/starts-with? ((comp :kixi.datastore.filestore.upload/url first) part-urls) "file")
     (log/severe "We don't support file:// protocol anymore")
     (let [{:keys [pending-file]} (data/get-in-app-state :app/create-data :cd/pending-data)
@@ -796,8 +795,8 @@
                 (do
                   (log/severe "Upload failed!")
                   (data/swap-app-state! :app/create-data assoc :cd/pending? false)
-                  (data/swap-app-state! :app/create-data assoc :cd/message :upload-failure)
-                  (put! result-chan false)))))
+                  (data/swap-app-state! :app/create-data assoc :cd/error :string/browser-upload-error)
+                  (activities/abandon-activity! :upload-file (:id activity))))))
           (do
             (log/info "Finished uploading" etags)
             (data/swap-app-state! :app/create-data assoc
@@ -808,23 +807,24 @@
 
 (defmethod advance-file-upload
   :kixi.datastore.filestore/file-upload-completed
-  [{:keys [kixi.datastore.filestore/id] :as m}]
+  [{:keys [kixi.datastore.filestore/id] :as m} activity]
   (let [{:keys [pending-file]} (data/get-in-app-state :app/create-data :cd/pending-data)]
     (create-file-after-upload! id (.-size pending-file))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defmulti on-activity-progressed
-  (fn [{:keys [args]}] (:activity args)))
+  (fn [{:keys [args]}]  (get-in args [:activity :activity])))
 
 (defmethod on-activity-progressed
   :default [_])
 
 (defmethod on-activity-progressed
   :upload-file
-  [{{:keys [message]} :args}]
-  (when (= :event (:kixi.message/type message))
-    (advance-file-upload message)))
+  [{:keys [args]}]
+  (let [{:keys [message activity]} args]
+    (when (= :event (:kixi.message/type message))
+      (advance-file-upload message activity))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
