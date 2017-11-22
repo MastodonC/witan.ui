@@ -760,11 +760,12 @@
           result-chan (chan)]
       (go-loop [remaining-chunks urls-with-chunks
                 etags []
-                total-loaded 0]
+                total-loaded 0
+                retries 10]
         (if-let [next-chunk (first remaining-chunks)]
           (let [{:keys [chunk
                         kixi.datastore.filestore.upload/url
-                        kixi.datastore.filestore.upload/length-bytes] :as foo} next-chunk]
+                        kixi.datastore.filestore.upload/length-bytes]} next-chunk]
             (ajax/s3-upload url
                             {:body chunk
                              :progress-handler #(let [upload-frac (/ (+ total-loaded (.-loaded %)) total-file-size)]
@@ -774,18 +775,29 @@
                                                                          :progress upload-frac}))
                              :handler (fn [[ok resp]]
                                         (if ok
-                                          (do
-                                            (put! result-chan (get resp "etag")))
-                                          (do
-                                            (log/severe "Upload failed:" resp)
-                                            (data/swap-app-state! :app/create-data assoc :cd/pending? false)
-                                            (data/swap-app-state! :app/create-data assoc :cd/message :api-failure)
-                                            (put! result-chan false))))})
+                                          (put! result-chan (get resp "etag"))
+                                          (put! result-chan (if (pos? retries) :retry false))))})
             (let [result (<! result-chan)]
-              (when result
+              (cond
+                ;;
+                (= :retry result)
+                (do
+                  (log/warn "Last chunk upload failed. Retrying...")
+                  (time/sleep 1000)
+                  (recur remaining-chunks etags total-loaded (dec retries)))
+                ;;
+                result
                 (recur (next remaining-chunks)
                        (conj etags (clean-etag result))
-                       (+ total-loaded length-bytes)))))
+                       (+ total-loaded length-bytes)
+                       retries)
+                ;;
+                (false? result)
+                (do
+                  (log/severe "Upload failed!")
+                  (data/swap-app-state! :app/create-data assoc :cd/pending? false)
+                  (data/swap-app-state! :app/create-data assoc :cd/message :upload-failure)
+                  (put! result-chan false)))))
           (do
             (log/info "Finished uploading" etags)
             (data/swap-app-state! :app/create-data assoc
@@ -886,6 +898,16 @@
   [{:keys [args]}]
   (log/warn "Failed to delete datapack:" args)
   (.info js/toastr (gstring/format (get-string :string.activity.delete-datapack/failed ) (get-in args [:context :name]))))
+
+(defmethod on-activity-finished
+  [:upload-file :completed]
+  [{{:keys [log]} :args}]
+  (.info js/toastr log))
+
+(defmethod on-activity-finished
+  [:upload-file :failed]
+  [{{:keys [log]} :args}]
+  (.info js/toastr log))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
