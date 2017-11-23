@@ -198,6 +198,16 @@
    (-> m
        (update :app/create-data dissoc :cd/pending-data))))
 
+;; We encountered the issue: Failed to execute 'btoa' on 'Window': The string to be encoded contains characters outside of the Latin1 range.
+;; Applying the fix described here solved the problem: https://www.codeday.top/2017/06/28/28252.html
+(defn encode-string
+  [s]
+  (b64/encodeString (.encodeURIComponent js/window s)))
+
+(defn decode-string
+  [s]
+  (.decodeURIComponent js/window (b64/decodeString s)))
+
 (defn save-data!
   []
   (log/debug "Saving app state to local storage")
@@ -209,14 +219,14 @@
      (-> unencoded
          custom-resets!
          pr-str
-         b64/encodeString))))
+         encode-string))))
 
 (defn deconstruct-token
   [tkn]
   (let [r (-> tkn
               (clojure.string/split #"\.")
               (second)
-              (b64/decodeString)
+              (decode-string)
               (transit-decode))]
     (reduce-kv (fn [a k v] (assoc a (keyword k) v)) {} r)))
 
@@ -244,7 +254,7 @@
     (when @wants-to-load?
       (reset! wants-to-load? false)
       (try
-        (let [unencoded (->> data b64/decodeString reader/read-string)]
+        (let [unencoded (->> data decode-string reader/read-string)]
           (s/validate ws/AppStateSchema unencoded)
           (run! (fn [[k v]] (reset-app-state! k v)) unencoded)
           (custom-resets!)
@@ -252,7 +262,7 @@
           (publish-topic :data/app-state-restored))
         (catch js/Object e
           (log/warn "Failed to restore app state from local storage:" (str e))
-          (log/warn (b64/decodeString data))
+          (log/warn (decode-string data))
           (delete-data!))))
     (log/debug "(No existing token was found.)")))
 
