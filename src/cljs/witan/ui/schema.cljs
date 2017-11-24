@@ -55,6 +55,7 @@
    :reporters {:failed s/Any
                :completed s/Any}
    :command-id uuid?
+   :id uuid?
    :context s/Any})
 
 ;; app state schema
