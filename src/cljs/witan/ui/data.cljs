@@ -141,6 +141,8 @@
 (defn panic!
   [msg]
   (log/severe "App has panicked:" msg)
+  ;; FIXME HERE
+  (publish-topic :data/panic-event-triggered msg)
   (reset-app-state! :app/panic-message msg))
 
 (.addEventListener js/window "error"
