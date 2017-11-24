@@ -136,20 +136,6 @@
    (keys user-map)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Panic
-
-(defn panic!
-  [msg]
-  (log/severe "App has panicked:" msg)
-  ;; FIXME HERE
-  (publish-topic :data/panic-event-triggered msg)
-  (reset-app-state! :app/panic-message msg))
-
-(.addEventListener js/window "error"
-                   (fn [e]
-                     (panic! (.. e -error -message))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; PubSub
 
 (def publisher (chan))
@@ -176,6 +162,19 @@
   (let [subscriber (chan)
         _ (sub publication topic subscriber)]
     (go (cb (<! subscriber)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Panic
+
+(defn panic!
+  [msg]
+  (log/severe "App has panicked:" msg)
+  (publish-topic :data/panic {:message msg})
+  (reset-app-state! :app/panic-message msg))
+
+(.addEventListener js/window "error"
+                   (fn [e]
+                     (panic! (.. e -error -message))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Cookies

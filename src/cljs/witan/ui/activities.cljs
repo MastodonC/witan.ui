@@ -169,13 +169,7 @@
   (let [{:keys [activity] :as app-state}
         (data/get-in-app-state :app/activities :activities/pending id)]
     (when (and app-state (= activity-name activity))
-      ;; FIXME - Change message to something useful from a reporter.
-      (do
-        (data/publish-topic :activity/panic {:message "something"
-                                             :activity activity
-                                             :activity-name activity-name
-                                             :id id})
-        (finish-activity! nil :failed id)))))
+      (finish-activity! nil :failed id))))
 
 (defn process-event
   [{:keys [args]}]

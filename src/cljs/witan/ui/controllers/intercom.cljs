@@ -21,7 +21,14 @@
                          :widget {:activator "#IntercomDefaultWidget"}}))
     (.setInterval js/window do-update (* 1000 60 4))))
 
-(defn parse-payload [payload message]
+(defn event-to-intercom [event-label payload]
+  (.Intercom js/window
+             "trackEvent"
+             event-label
+             (clj->js payload)))
+
+(defn create-activity-payload
+  [payload message]
   (-> payload
       (dissoc :message)
       (assoc :message-type (or (:kixi.comms.message/type message)
@@ -39,21 +46,18 @@
                                "n/a"))))
 
 
-(defn publish-to-intercom [event-label name activity payload message]
-  (.Intercom js/window
-             event-label
-             (name activity)
-             (clj->js (parse-payload payload message))))
+
 
 (defn on-panic-event
   [{:keys [args]}]
-  (let [{:keys [activity message] :as payload} args]
-    (publish-to-intercom "panicEvent" name activity payload message)))
+  (event-to-intercom "panic" args))
 
 (defn on-activity-finished
   [{:keys [args]}]
   (let [{:keys [activity message] :as payload} args]
-    (publish-to-intercom "trackEvent" name activity payload message)))
+    (event-to-intercom
+     (name activity)
+     (create-activity-payload payload message))))
 
 (defmulti handle
   (fn [event args] event))
@@ -67,4 +71,4 @@
   (when (cljs-env :intercom)
     (data/subscribe-topic :data/user-logged-in on-user-logged-in)
     (data/subscribe-topic :activity/activity-finished on-activity-finished)
-    (data/subscribe-topic :data/panic-event-triggered on-panic-event)))
+    (data/subscribe-topic :data/panic on-panic-event)))
