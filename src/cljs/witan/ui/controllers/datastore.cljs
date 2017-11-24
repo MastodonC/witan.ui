@@ -12,8 +12,10 @@
             [witan.ui.strings :refer [get-string]]
             [witan.ui.title :refer [set-title!]]
             [goog.string :as gstring]
+            [cljs.core.async :refer [chan <! >! timeout pub sub unsub unsub-all put! close!]]
             [cljsjs.toastr])
   (:require-macros [cljs-log.core :as log]
+                   [cljs.core.async.macros :refer [go go-loop]]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
 (def dash-query-pending? (atom false))
@@ -134,68 +136,6 @@
    {}
    (partition 2 keys-vals)))
 
-(defmethod api-response
-  [:upload :success]
-  [{:keys [id file-size]} response]
-  (log/info "Upload succeeded:" id)
-  (data/swap-app-state! :app/create-data assoc
-                        :cd/pending-message
-                        {:message :string/upload-finalizing
-                         :progress 1})
-  ;; now upload metadata
-  ;; TODO this whole thing needs sorting out
-  ;; as we don't do it this way anymore.
-  (let [{:keys [pending-file
-                info-name
-                info-description
-                info-author
-                info-maintainer
-                info-source
-                info-geo-smallest
-                info-license-type
-                info-license-usage
-                info-temporal-cov-from
-                info-temporal-cov-to
-                info-tags
-                selected-schema
-                selected-groups]} (data/get-in-app-state :app/create-data :cd/pending-data)
-        user-groups [(data/get-in-app-state :app/user :kixi.user/self-group)]
-        user-id (data/get-in-app-state :app/user :kixi.user/id)
-        ext (last (clojure.string/split (.-name pending-file) #"\."))
-        tag-coll (when (not-empty info-tags) (clojure.string/split info-tags #","))
-        payload (merge (filled-map :kixi.datastore.metadatastore/name info-name
-                                   :kixi.datastore.metadatastore/description info-description
-                                   :kixi.datastore.metadatastore/id id
-                                   :kixi.datastore.metadatastore/type "stored"
-                                   :kixi.datastore.metadatastore/file-type ext
-                                   :kixi.datastore.metadatastore/sharing (selected-groups->sharing-activities
-                                                                          selected-groups
-                                                                          (keys (data/get-in-app-state :app/datastore :ds/activities)))
-                                   :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
-                                                                             :kixi.user/id user-id}
-                                   :kixi.datastore.metadatastore/size-bytes (.-size pending-file)
-                                   :kixi.datastore.metadatastore/header true
-                                   :kixi.datastore.metadatastore/author info-author
-                                   :kixi.datastore.metadatastore/maintainer info-maintainer
-                                   :kixi.datastore.metadatastore/source info-source
-                                   :kixi.datastore.metadatastore/tags tag-coll
-                                   :kixi.datastore.metadatastore.license/license (filled-map :kixi.datastore.metadatastore.license/type info-license-type
-                                                                                             :kixi.datastore.metadatastore.license/usage info-license-usage)
-                                   :kixi.datastore.metadatastore.time/temporal-coverage (filled-map :kixi.datastore.metadatastore.time/from info-temporal-cov-from
-                                                                                                    :kixi.datastore.metadatastore.time/to info-temporal-cov-to))
-                       (when (not-empty info-geo-smallest)
-                         {:kixi.datastore.metadatastore.geography/geography (filled-map :kixi.datastore.metadatastore.geography/type "smallest"
-                                                                                        :kixi.datastore.metadatastore.geography/level info-geo-smallest)}))
-        payload (if selected-schema (assoc payload :kixi.datastore.schemastore/id selected-schema) payload)]
-    (data/command! :kixi.datastore.filestore/create-file-metadata "1.0.0" payload)))
-
-(defmethod api-response
-  [:upload :failure]
-  [_ response]
-  (log/severe "Upload failed:" response)
-  (data/swap-app-state! :app/create-data assoc :cd/pending? false)
-  (data/swap-app-state! :app/create-data assoc :cd/message :api-failure))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Query Response
 
@@ -299,28 +239,27 @@
   :default [x])
 
 (defmethod on-event
-  [:kixi.datastore.filestore/upload-link-created "1.0.0"]
+  [:kixi.datastore.filestore/file-upload-initiated "1.0.0"]
   [{:keys [args]}]
-  (let [{:keys [kixi.comms.event/payload]} args
-        {:keys [kixi.datastore.filestore/upload-link
-                kixi.datastore.filestore/id]} payload
-        {:keys [pending-file]} (data/get-in-app-state :app/create-data :cd/pending-data)]
-    (log/debug "Uploading to" upload-link)
-    (if (clojure.string/starts-with? upload-link "file")
-      (do
+  (let [{:keys [kixi.datastore.filestore.upload/part-urls
+                kixi.datastore.filestore/id]} args
+        ]
+    (log/debug "Uploading to" part-urls)
+    #_(if (clojure.string/starts-with? upload-link "file")
+        (do
                                         ;for testing locally, so you can manually copy the metadata-one-valid.csv file
-        (log/debug "Sleeping, copy file!")
-        (time/sleep 20000)
-        (api-response {:event :upload :status :success :id id} 14))
-      (ajax/PUT* upload-link
-                 {:body pending-file
-                  :progress-handler #(let [upload-frac (/ (.-loaded %) (.-total %))]
-                                       (data/swap-app-state! :app/create-data assoc
-                                                             :cd/pending-message
-                                                             {:message :string/uploading
-                                                              :progress upload-frac}))
-                  :handler (partial api-response {:event :upload :status :success :id id})
-                  :error-handler (partial api-response {:event :upload :status :failure})}))))
+          (log/debug "Sleeping, copy file!")
+          (time/sleep 20000)
+          (api-response {:event :upload :status :success :id id} 14))
+        (ajax/PUT* upload-link
+                   {:body pending-file
+                    :progress-handler #(let [upload-frac (/ (.-loaded %) (.-total %))]
+                                         (data/swap-app-state! :app/create-data assoc
+                                                               :cd/pending-message
+                                                               {:message :string/uploading
+                                                                :progress upload-frac}))
+                    :handler (partial api-response {:event :upload :status :success :id id})
+                    :error-handler (partial api-response {:event :upload :status :failure})}))))
 
 (defmethod on-event
   [:kixi.datastore.file/created "1.0.0"]
@@ -442,22 +381,23 @@
 (defmethod handle
   :reset-errors
   [_ _]
-  (data/swap-app-state! :app/create-data dissoc :cd/message)
   (data/swap-app-state! :app/create-data dissoc :cd/error)
   (data/swap-app-state! :app/create-data assoc :cd/pending? false))
 
 (defmethod handle
   :upload
   [event data]
-  (data/swap-app-state! :app/create-data assoc :cd/pending? true)
-  (data/swap-app-state! :app/create-data assoc :cd/pending-data data)
-  (data/swap-app-state! :app/create-data assoc :cd/pending-message {:message :string/preparing-upload
-                                                                    :progress 0})
-  (activities/start-activity!
-   :upload-file
-   (data/command! :kixi.datastore.filestore/create-upload-link "1.0.0" nil)
-   {:failed #(gstring/format (get-string :string.activity.upload-file/failed) (:info-name data))
-    :completed #(gstring/format (get-string :string.activity.upload-file/completed) (:info-name data))}))
+  (let [size-bytes (.-size (:pending-file data))]
+    (data/swap-app-state! :app/create-data assoc :cd/pending? true)
+    (data/swap-app-state! :app/create-data assoc :cd/pending-data data)
+    (data/swap-app-state! :app/create-data assoc :cd/pending-message {:message :string/preparing-upload
+                                                                      :progress 0})
+    (activities/start-activity!
+     :upload-file
+     (data/new-command! :kixi.datastore.filestore/initiate-file-upload "1.0.0"
+                        {:kixi.datastore.filestore.upload/size-bytes size-bytes})
+     {:failed #(gstring/format (get-string :string.activity.upload-file/failed) (:info-name data))
+      :completed #(gstring/format (get-string :string.activity.upload-file/completed) (:info-name data))})))
 
 (defmethod handle
   :sharing-change
@@ -732,12 +672,167 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defn clean-etag
+  [etag]
+  (clojure.string/replace etag "\"" ""))
+
+(defn split-file
+  [part-urls file]
+  (map-indexed (fn [i {:keys [kixi.datastore.filestore.upload/start-byte
+                              kixi.datastore.filestore.upload/length-bytes] :as m}]
+                 (assoc m :chunk (.slice file start-byte (+ start-byte length-bytes)))) part-urls))
+
+(defn create-file-after-upload!
+  [id file-size]
+  (log/info "Upload succeeded:" id "Creating metadata...")
+  (data/swap-app-state! :app/create-data assoc
+                        :cd/pending-message
+                        {:message :string/upload-creating-md
+                         :progress 1})
+  ;; now upload metadata
+  ;; TODO this whole thing needs sorting out
+  ;; as we don't do it this way anymore.
+  (let [{:keys [pending-file
+                info-name
+                info-description
+                info-author
+                info-maintainer
+                info-source
+                info-geo-smallest
+                info-license-type
+                info-license-usage
+                info-temporal-cov-from
+                info-temporal-cov-to
+                info-tags
+                selected-schema
+                selected-groups]} (data/get-in-app-state :app/create-data :cd/pending-data)
+        user-groups [(data/get-in-app-state :app/user :kixi.user/self-group)]
+        user-id (data/get-in-app-state :app/user :kixi.user/id)
+        ext (last (clojure.string/split (.-name pending-file) #"\."))
+        tag-coll (when (not-empty info-tags) (clojure.string/split info-tags #","))
+        payload (merge (filled-map :kixi.datastore.metadatastore/name info-name
+                                   :kixi.datastore.metadatastore/description info-description
+                                   :kixi.datastore.metadatastore/id id
+                                   :kixi.datastore.metadatastore/type "stored"
+                                   :kixi.datastore.metadatastore/file-type ext
+                                   :kixi.datastore.metadatastore/sharing (selected-groups->sharing-activities
+                                                                          selected-groups
+                                                                          (keys (data/get-in-app-state :app/datastore :ds/activities)))
+                                   :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
+                                                                             :kixi.user/id user-id}
+                                   :kixi.datastore.metadatastore/size-bytes (.-size pending-file)
+                                   :kixi.datastore.metadatastore/header true
+                                   :kixi.datastore.metadatastore/author info-author
+                                   :kixi.datastore.metadatastore/maintainer info-maintainer
+                                   :kixi.datastore.metadatastore/source info-source
+                                   :kixi.datastore.metadatastore/tags tag-coll
+                                   :kixi.datastore.metadatastore.license/license (filled-map :kixi.datastore.metadatastore.license/type info-license-type
+                                                                                             :kixi.datastore.metadatastore.license/usage info-license-usage)
+                                   :kixi.datastore.metadatastore.time/temporal-coverage (filled-map :kixi.datastore.metadatastore.time/from info-temporal-cov-from
+                                                                                                    :kixi.datastore.metadatastore.time/to info-temporal-cov-to))
+                       (when (not-empty info-geo-smallest)
+                         {:kixi.datastore.metadatastore.geography/geography (filled-map :kixi.datastore.metadatastore.geography/type "smallest"
+                                                                                        :kixi.datastore.metadatastore.geography/level info-geo-smallest)}))
+        payload (if selected-schema (assoc payload :kixi.datastore.schemastore/id selected-schema) payload)]
+    (data/command! :kixi.datastore.filestore/create-file-metadata "1.0.0" payload)))
+
+(defn complete-multi-part-upload!
+  [etags file-id]
+  (data/new-command!
+   :kixi.datastore.filestore/complete-file-upload
+   "1.0.0"
+   {:kixi.datastore.filestore.upload/part-ids etags
+    :kixi.datastore.filestore/id file-id}))
+
+(defmulti advance-file-upload
+  (fn [msg _] (or (:kixi.event/type msg)
+                  (:kixi.comms.event/key msg))))
+
+(defmethod advance-file-upload
+  :kixi.datastore.filestore/file-upload-initiated
+  [{:keys [kixi.datastore.filestore.upload/part-urls kixi.datastore.filestore/id]} activity]
+  (if (clojure.string/starts-with? ((comp :kixi.datastore.filestore.upload/url first) part-urls) "file")
+    (log/severe "We don't support file:// protocol anymore")
+    (let [{:keys [pending-file]} (data/get-in-app-state :app/create-data :cd/pending-data)
+          total-file-size (.-size pending-file)
+          urls-with-chunks (split-file part-urls pending-file)
+          result-chan (chan)]
+      (go-loop [remaining-chunks urls-with-chunks
+                etags []
+                total-loaded 0
+                retries 10]
+        (if-let [next-chunk (first remaining-chunks)]
+          (let [{:keys [chunk
+                        kixi.datastore.filestore.upload/url
+                        kixi.datastore.filestore.upload/length-bytes]} next-chunk]
+            (ajax/s3-upload url
+                            {:body chunk
+                             :progress-handler #(let [upload-frac (/ (+ total-loaded (.-loaded %)) total-file-size)]
+                                                  (data/swap-app-state! :app/create-data assoc
+                                                                        :cd/pending-message
+                                                                        {:message :string/uploading
+                                                                         :progress upload-frac}))
+                             :handler (fn [[ok resp]]
+                                        (if ok
+                                          (put! result-chan (get resp "etag"))
+                                          (put! result-chan (if (pos? retries) :retry false))))})
+            (let [result (<! result-chan)]
+              (cond
+                ;;
+                (= :retry result)
+                (do
+                  (log/warn "Last chunk upload failed. Retrying...")
+                  (time/sleep 1000)
+                  (recur remaining-chunks etags total-loaded (dec retries)))
+                ;;
+                result
+                (recur (next remaining-chunks)
+                       (conj etags (clean-etag result))
+                       (+ total-loaded length-bytes)
+                       retries)
+                ;;
+                (false? result)
+                (do
+                  (log/severe "Upload failed!")
+                  (data/swap-app-state! :app/create-data assoc :cd/pending? false)
+                  (data/swap-app-state! :app/create-data assoc :cd/error :string/browser-upload-error)
+                  (activities/abandon-activity! :upload-file (:id activity))))))
+          (do
+            (log/info "Finished uploading" etags)
+            (data/swap-app-state! :app/create-data assoc
+                                  :cd/pending-message
+                                  {:message :string/upload-finalizing
+                                   :progress 1})
+            (complete-multi-part-upload! etags id)))))))
+
+(defmethod advance-file-upload
+  :kixi.datastore.filestore/file-upload-completed
+  [{:keys [kixi.datastore.filestore/id] :as m} activity]
+  (let [{:keys [pending-file]} (data/get-in-app-state :app/create-data :cd/pending-data)]
+    (create-file-after-upload! id (.-size pending-file))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defmulti on-activity-progressed
+  (fn [{:keys [args]}]  (get-in args [:activity :activity])))
+
+(defmethod on-activity-progressed
+  :default [_])
+
+(defmethod on-activity-progressed
+  :upload-file
+  [{:keys [args]}]
+  (let [{:keys [message activity]} args]
+    (when (= :event (:kixi.message/type message))
+      (advance-file-upload message activity))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (defmulti on-activity-finished
   (fn [{:keys [args]}] [(:activity args) (:result args)]))
 
 (defmethod on-activity-finished
-  :default
-  [{:keys [args]}])
+  :default [_])
 
 (defmethod on-activity-finished
   [:create-datapack :failed]
@@ -804,6 +899,16 @@
   (log/warn "Failed to delete datapack:" args)
   (.info js/toastr (gstring/format (get-string :string.activity.delete-datapack/failed ) (get-in args [:context :name]))))
 
+(defmethod on-activity-finished
+  [:upload-file :completed]
+  [{{:keys [log]} :args}]
+  (.info js/toastr log))
+
+(defmethod on-activity-finished
+  [:upload-file :failed]
+  [{{:keys [log]} :args}]
+  (.info js/toastr log))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn on-user-logged-in
@@ -819,4 +924,5 @@
   (do (data/subscribe-topic :data/route-changed  on-route-change)
       (data/subscribe-topic :data/user-logged-in on-user-logged-in)
       (data/subscribe-topic :data/event-received on-event)
-      (data/subscribe-topic :activity/activity-finished on-activity-finished)))
+      (data/subscribe-topic :activity/activity-finished on-activity-finished)
+      (data/subscribe-topic :activity/activity-progressed on-activity-progressed)))

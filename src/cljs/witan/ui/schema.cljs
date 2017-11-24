@@ -46,14 +46,15 @@
 (def ActivityLogSchema
   {:status (s/enum :completed :failed)
    :message s/Str
-   :time s/Any})
+   :time s/Any
+   :activity s/Keyword})
 
 (def ActivityPendingSchema
   {:activity s/Keyword
    :state s/Any
    :reporters {:failed s/Any
                :completed s/Any}
-   :id uuid?
+   :command-id uuid?
    :context s/Any})
 
 ;; app state schema
@@ -80,7 +81,6 @@
    :app/data-dash {(s/optional-key :dd/file-type-filter) s/Keyword
                    s/Keyword s/Any}
    :app/create-data {:cd/pending? s/Bool
-                     (s/optional-key :cd/message) s/Str
                      (s/optional-key :cd/error) s/Keyword
                      (s/optional-key :cd/pending-data) s/Any
                      (s/optional-key :cd/pending-message) {:message s/Keyword

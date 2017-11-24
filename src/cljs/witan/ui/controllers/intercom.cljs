@@ -29,9 +29,19 @@
                (name activity)
                (clj->js (-> payload
                             (dissoc :message)
-                            (assoc :message-type (:kixi.comms.message/type message))
-                            (assoc :message-key  (str (or (:kixi.comms.event/key message) (:kixi.comms.command/key message))))
-                            (assoc :message-id   (or (:kixi.comms.event/id message) (:kixi.comms.command/id message))))))))
+                            (assoc :message-type (or (:kixi.comms.message/type message)
+                                                     (:kixi.message/type message)
+                                                     "Unknown"))
+                            (assoc :message-key  (str (or (:kixi.comms.event/key message)
+                                                          (:kixi.event/type message)
+                                                          (:kixi.comms.command/key message)
+                                                          (:kixi.command/type message)
+                                                          "n/a")))
+                            (assoc :message-id   (or (:kixi.comms.event/id message)
+                                                     (:kixi.event/id message)
+                                                     (:kixi.comms.command/id message)
+                                                     (:kixi.command/id message)
+                                                     "n/a")))))))
 
 (defmulti handle
   (fn [event args] event))
