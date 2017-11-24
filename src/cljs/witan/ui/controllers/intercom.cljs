@@ -21,27 +21,43 @@
                          :widget {:activator "#IntercomDefaultWidget"}}))
     (.setInterval js/window do-update (* 1000 60 4))))
 
+(defn event-to-intercom [event-label payload]
+  (.Intercom js/window
+             "trackEvent"
+             event-label
+             (clj->js payload)))
+
+(defn create-activity-payload
+  [payload message]
+  (-> payload
+      (dissoc :message)
+      (assoc :message-type (or (:kixi.comms.message/type message)
+                               (:kixi.message/type message)
+                               "Unknown"))
+      (assoc :message-key  (str (or (:kixi.comms.event/key message)
+                                    (:kixi.event/type message)
+                                    (:kixi.comms.command/key message)
+                                    (:kixi.command/type message)
+                                    "n/a")))
+      (assoc :message-id   (or (:kixi.comms.event/id message)
+                               (:kixi.event/id message)
+                               (:kixi.comms.command/id message)
+                               (:kixi.command/id message)
+                               "n/a"))))
+
+
+
+
+(defn on-panic-event
+  [{:keys [args]}]
+  (event-to-intercom "panic" args))
+
 (defn on-activity-finished
   [{:keys [args]}]
   (let [{:keys [activity message] :as payload} args]
-    (.Intercom js/window
-               "trackEvent"
-               (name activity)
-               (clj->js (-> payload
-                            (dissoc :message)
-                            (assoc :message-type (or (:kixi.comms.message/type message)
-                                                     (:kixi.message/type message)
-                                                     "Unknown"))
-                            (assoc :message-key  (str (or (:kixi.comms.event/key message)
-                                                          (:kixi.event/type message)
-                                                          (:kixi.comms.command/key message)
-                                                          (:kixi.command/type message)
-                                                          "n/a")))
-                            (assoc :message-id   (or (:kixi.comms.event/id message)
-                                                     (:kixi.event/id message)
-                                                     (:kixi.comms.command/id message)
-                                                     (:kixi.command/id message)
-                                                     "n/a")))))))
+    (event-to-intercom
+     (name activity)
+     (create-activity-payload payload message))))
 
 (defmulti handle
   (fn [event args] event))
@@ -54,4 +70,5 @@
 (defonce subscriptions
   (when (cljs-env :intercom)
     (data/subscribe-topic :data/user-logged-in on-user-logged-in)
-    (data/subscribe-topic :activity/activity-finished on-activity-finished)))
+    (data/subscribe-topic :activity/activity-finished on-activity-finished)
+    (data/subscribe-topic :data/panic on-panic-event)))
