@@ -235,7 +235,7 @@
    :string/to                               "To"
    :string/save                             "Save"
    :string/saving                           "Saving"
-   :string/edit-to-add-description          "Add a description by clicking here"
+   :string/edit-to-add-description          "Add a description by clicking "
    :string/new-upload-file-information-hero      "Congratulations, your file was uploaded successfully. Please consider adding additional information about this file such as a description, license and tags."
    :string/new-upload-bundle-information-hero      "Congratulations, your datapack was created successfully. Please consider adding additional information about this datapack such as a description and tags."
    :string/click-here-to-edit-file-metadata      "Click here to add metadata to your file."
@@ -262,10 +262,15 @@
    :string/na                               "n/a"
    :string/cancel                           "Cancel"
    :string/ok                               "OK"
+   :string/delete-metadata-ok "I understand. Please delete this."
+   :string/delete-metadata-cancel "I've changed my mind. Do not delete this."
    :string/delete                           "Delete"
    :string/confirm-delete-pre               "Are you sure you want to delete this"
-   :string/confirm-delete-datapack          [:string/confirm-delete-pre "datapack? The files it contains will not be deleted."]
+   :string/confirm-delete-datapack-title    [:string/confirm-delete-pre "datapack?"]
+   :string/confirm-delete-datapack          "Please confirm that you wish to delete this datapack. Files contained in the datapack will not be deleted."
    :string/create-datapack-fail-invalid     ["There was a problem creating the datapack. Please contact support."]
+   :string/confirm-delete-file-title        [:string/confirm-delete-pre "file?"]
+   :string/confirm-delete-file              ["Please confirm that you wish to delete this file. Note that the file will not be visible on the dashboard but may still exist in our database. Deleted files are permanently erased after 120 days. If you want your file to be erased sooner then please contact " :string/support-email]
    :string/visible-to                       "Visible to"
    :string/dash-filter--files               "Showing only your files"
    :string/dash-filter--datapacks           "Showing only your datapacks"
@@ -274,6 +279,7 @@
    :string/datapack-view-invisible-file-count "Due to your permissions, %d file(s) can not be displayed"
    :string/no-files-in-datapack             "There are currently no files in this datapack."
    :stringf/datapack-deleted                "Datapack '%s' was deleted!"
+   :stringf/file-deleted                 "File '%s' was deleted!"
    :stringf/reject-sharing-adjustments      "An adjustment to the sharing properties of '%s' was rejected."
    :stringf/reject-metadata-adjustments     "An adjustment to the metadata of '%s' was rejected."
    :stringf/metadata-saved                  "Metadata was saved successfully!"
@@ -297,6 +303,8 @@
    :string.activity.create-datapack/completed   "You successfully created the datapack '%s'"
    :string.activity.delete-datapack/failed      "You failed to delete the datapack '%s'"
    :string.activity.delete-datapack/completed   "You successfully deleted the datapack '%s'"
+   :string.activity.delete-file/failed       "You failed to delete the file '%s'"
+   :string.activity.delete-file/completed "You successfully deleted the file '%s'"
    :string.activity.remove-file-from-datapack/failed      "You failed to remove file '%s' from datapack '%s'"
    :string.activity.remove-file-from-datapack/completed   "You successfully removed file '%s' from datapack '%s'"
    :string.activity.add-file-to-datapack/failed      "You failed to add file '%s' to datapack '%s'"

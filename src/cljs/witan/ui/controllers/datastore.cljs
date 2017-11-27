@@ -239,29 +239,6 @@
   :default [x])
 
 (defmethod on-event
-  [:kixi.datastore.filestore/file-upload-initiated "1.0.0"]
-  [{:keys [args]}]
-  (let [{:keys [kixi.datastore.filestore.upload/part-urls
-                kixi.datastore.filestore/id]} args
-        ]
-    (log/debug "Uploading to" part-urls)
-    #_(if (clojure.string/starts-with? upload-link "file")
-        (do
-                                        ;for testing locally, so you can manually copy the metadata-one-valid.csv file
-          (log/debug "Sleeping, copy file!")
-          (time/sleep 20000)
-          (api-response {:event :upload :status :success :id id} 14))
-        (ajax/PUT* upload-link
-                   {:body pending-file
-                    :progress-handler #(let [upload-frac (/ (.-loaded %) (.-total %))]
-                                         (data/swap-app-state! :app/create-data assoc
-                                                               :cd/pending-message
-                                                               {:message :string/uploading
-                                                                :progress upload-frac}))
-                    :handler (partial api-response {:event :upload :status :success :id id})
-                    :error-handler (partial api-response {:event :upload :status :failure})}))))
-
-(defmethod on-event
   [:kixi.datastore.file/created "1.0.0"]
   [{:keys [args]}]
   (let [{:keys [kixi.comms.event/payload]} args
@@ -398,6 +375,16 @@
                         {:kixi.datastore.filestore.upload/size-bytes size-bytes})
      {:failed #(gstring/format (get-string :string.activity.upload-file/failed) (:info-name data))
       :completed #(gstring/format (get-string :string.activity.upload-file/completed) (:info-name data))})))
+
+(defmethod handle
+  :confirm-delete-metadata
+  [event _]
+  (data/swap-app-state! :app/datastore assoc :ds/confirming-delete? true))
+
+(defmethod handle
+  :reset-confirm-delete-metadata
+  [event _]
+  (data/swap-app-state! :app/datastore assoc :ds/confirming-delete? false))
 
 (defmethod handle
   :sharing-change
@@ -610,20 +597,42 @@
      {:failed #(gstring/format (get-string :string.activity.create-datapack/failed) title)
       :completed #(gstring/format (get-string :string.activity.create-datapack/completed) title)})))
 
+(defn remove-deleted-file!
+  [id]
+  (data/swap-app-state! :app/datastore update :ds/file-metadata dissoc id)
+  (data/swap-app-state! :app/data-dash update :items (fn [items]
+                                                       (vec (remove #(= id (:kixi.datastore.metadatastore/id %)) items)))))
+
+(defmethod handle
+  :delete-file
+  [event {:keys [id]}]
+  (let [{:keys [kixi.datastore.metadatastore/name]} (get-local-file id)]
+    ;; do the tombstone
+    (activities/start-activity!
+     :delete-file
+     (data/new-command! :kixi.datastore/delete-file "1.0.0"
+                        {:kixi.datastore.metadatastore/id id})
+     {:failed #(gstring/format (get-string :string.activity.delete-file/failed) name)
+      :completed #(gstring/format (get-string :string.activity.delete-file/completed) name)
+      :context {:name name}})
+    (data/swap-app-state! :app/datastore assoc :ds/confirming-delete? false)
+    (remove-deleted-file! id)
+    (route/navigate! :app/data-dash)))
+
 (defmethod handle
   :delete-datapack
   [event {:keys [id]}]
   (let [{:keys [kixi.datastore.metadatastore/name]} (get-local-file id)]
-    (data/swap-app-state! :app/datastore update :ds/file-metadata dissoc id)
-    (data/swap-app-state! :app/data-dash update :items (fn [items]
-                                                         (vec (remove #(= id (:kixi.datastore.metadatastore/id %)) items))))
     (activities/start-activity!
      :delete-datapack
      (data/new-command! :kixi.datastore/delete-bundle "1.0.0"
                         {:kixi.datastore.metadatastore/id id})
      {:failed #(gstring/format (get-string :string.activity.delete-datapack/failed) name)
       :completed #(gstring/format (get-string :string.activity.delete-datapack/completed) name)
-      :context {:name name}})))
+      :context {:name name}})
+    (data/swap-app-state! :app/datastore assoc :ds/confirming-delete? false)
+    (remove-deleted-file! id)
+    (route/navigate! :app/data-dash)))
 
 (defmethod handle
   :add-file-to-datapack
@@ -891,7 +900,6 @@
 (defmethod on-activity-finished
   [:delete-datapack :completed]
   [{:keys [args]}]
-  (route/navigate! :app/data-dash)
   (.info js/toastr (gstring/format (get-string :stringf/datapack-deleted) (get-in args [:context :name]))))
 
 (defmethod on-activity-finished
@@ -909,6 +917,18 @@
   [:upload-file :failed]
   [{{:keys [log]} :args}]
   (.info js/toastr log))
+
+(defmethod on-activity-finished
+  [:delete-file :failed]
+  [{:keys [args]}]
+  (log/warn "Failed to delete file:" args)
+  (.info js/toastr (gstring/format (get-string :string.activity.delete-file) (get-in args [:context :name]))))
+
+(defmethod on-activity-finished
+  [:delete-file :completed]
+  [{:keys [args]}]
+
+  (.info js/toastr (gstring/format (get-string :stringf/file-deleted) (get-in args [:context :name]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
