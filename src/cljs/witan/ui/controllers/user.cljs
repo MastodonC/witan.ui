@@ -35,7 +35,7 @@
 (defn login-success!
   [{:keys [token-pair] :as response}]
   (data/swap-app-state! :app/login assoc :login/message nil)
-  (if response
+  (when response
     ;; if response, we assume everything is shiny and new
     (let [auth-info    (data/deconstruct-token (:auth-token token-pair))
           refresh-info (data/deconstruct-token (:refresh-token token-pair))]
@@ -43,25 +43,37 @@
       (data/swap-app-state! :app/user assoc  :kixi.user/name (:name auth-info))
       (data/swap-app-state! :app/user assoc  :kixi.user/username (:username auth-info))
       (data/swap-app-state! :app/user assoc  :kixi.user/groups (:user-groups auth-info))
-      (data/swap-app-state! :app/user assoc  :kixi.user/self-group (:self-group auth-info))
-      (data/save-token-pair! token-pair)
-      (data/save-data!))
-    ;; if NO response, check we have everything
-    ;; NB. don't bother checking that tokens are valid because they'll be checked
-    ;; by data as soon as any commands or queries are issued
-    (let [user  (data/get-app-state :app/user)
-          login (data/get-app-state :app/login)]
-      ;; - checking presence of data
-      (when-not (and (:kixi.user/id user)
-                     (:kixi.user/name user)
-                     (:login/token login)
-                     (:login/auth-expiry login)
-                     (:login/refresh-expiry login))
-        (data/delete-data!)
-        (data/panic! (str "login-success! was called erroneously - data was deleted" login))
-        (throw (js/Error. "login-success! was called erroneously")))))
+      (data/swap-app-state! :app/user assoc  :kixi.user/self-group (:self-group auth-info)))
+    (data/save-token-pair! token-pair)
+    (data/save-data!))
   (kill-login-screen!)
-  (data/connect! {:on-connect #(data/publish-topic :data/user-logged-in (data/get-app-state :app/user))}))
+  (let [user-valid? (fn [user]
+                      (and (:kixi.user/id user)
+                           (:kixi.user/name user)
+                           (:kixi.user/username user)
+                           (:kixi.user/self-group user)
+                           (not-empty (:kixi.user/groups user))))
+        login-valid? (fn [login]
+                       (and (:login/token login)
+                            (:login/auth-expiry login)
+                            (:login/refresh-expiry login)))
+        user  (data/get-app-state :app/user)
+        login (data/get-app-state :app/login)]
+    ;; - checking presence of data
+    (cond
+      (not (user-valid? user))
+      (do
+        (data/delete-data!)
+        (data/panic! (str "Login failed! There was a problem with the user: " user)))
+
+      (and login (not (login-valid? login)))
+      (do
+        (data/delete-data!)
+        (data/panic! (str "Login failed! There was a problem with the login token: " login)))
+
+      :else
+      (do
+        (data/connect! {:on-connect #(data/publish-topic :data/user-logged-in (data/get-app-state :app/user))})))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
