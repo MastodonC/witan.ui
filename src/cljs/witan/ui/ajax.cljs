@@ -17,13 +17,13 @@
 
 (defn- request
   [method-fn {:keys [id params result-cb auth suppress-error?]}]
-  (method-fn {:params params
-              :handler (partial handle-response :success id result-cb)
-              :error-handler (when-not suppress-error? (partial handle-response :failure id result-cb))
-              :format :transit
+  (method-fn {:params          params
+              :handler         (partial handle-response :success id result-cb)
+              :error-handler   (when-not suppress-error? (partial handle-response :failure id result-cb))
+              :format          :transit
               :response-format :transit
-              :keywords? true
-              :headers auth}))
+              :keywords?       true
+              :headers         auth}))
 
 (defn GET
   [method {:keys [params] :as args}]
@@ -41,14 +41,16 @@
 
 (defn get-headers
   [response]
-  (ajax.protocols/-get-all-headers response))
+  (as-> (ajax.protocols/-get-all-headers response) h
+    (reduce-kv (fn [a k v] (assoc a (clojure.string/lower-case k) v)) {} h)
+    (update h "vary" #(when % (clojure.string/lower-case %)))))
 
 (defn s3-upload [uri {:keys [params] :as args}]
   (log/debug "PUT" uri params)
   (ajax/ajax-request
    (merge
-    {:uri uri
-     :method :put
-     :format (ajax/text-request-format)
+    {:uri             uri
+     :method          :put
+     :format          (ajax/text-request-format)
      :response-format {:read get-headers :description "headers"}}
     args)))

@@ -773,9 +773,10 @@
                                                                         {:message :string/uploading
                                                                          :progress upload-frac}))
                              :handler (fn [[ok resp]]
-                                        (if ok
-                                          (put! result-chan (get resp "etag"))
-                                          (put! result-chan (if (pos? retries) :retry false))))})
+                                        (let [etag (get resp "etag")]
+                                          (if (and ok etag)
+                                            (put! result-chan etag)
+                                            (put! result-chan (if (pos? retries) :retry false)))))})
             (let [result (<! result-chan)]
               (cond
                 ;;
