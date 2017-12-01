@@ -41,5 +41,6 @@ Until there is an automated way to run acceptance tests the only way to catch re
 | Can the user create an empty datapack? | The user can create an empty datapack. |
 | Can the user delete a datapack? | The user can delete a datapack (for which they have permission). |
 | Can the user remove files from a datapack? | The user can removes files from a datapack (for which they have permission). |
+| Can the user delete a file? | The user can delete files (for which they have permission). They are prompted to confirm with an appropriate message. |
 | Does loading a file take < 1s? | When navigating from the dashboard to a file, the loading icon spins for no more than 1s. | Does saving metadata take < 3.5s? | When hitting 'Save' after editing metadata, the button should stay disabled for no more than 3.5s. |
 | Does quickly changing sharing permissions on a file work as intended? | This is an area we've seen regressions frequently. When quickly changing sharing permissions, the app should remain responsive and not panic. |
