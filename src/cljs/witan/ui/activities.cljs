@@ -77,7 +77,11 @@
                  {:kixi.comms.command/key  :kixi.datastore.filestore/create-file-metadata}
                  (a/or
                   [{:kixi.comms.event/key  :kixi.datastore.file/created} (a/$ :completed)]
-                  [{:kixi.comms.event/key  :kixi.datastore.file-metadata/rejected} (a/$ :failed)])]})
+                  [{:kixi.comms.event/key  :kixi.datastore.file-metadata/rejected} (a/$ :failed)])]
+   :delete-file [{:kixi.command/type :kixi.datastore/delete-file}
+                 (a/or
+                  [{:kixi.event/type :kixi.datastore/file-deleted} (a/$ :completed)]
+                  [{:kixi.event/type :kixi.datastore/file-delete-rejected} (a/$ :failed)])]})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

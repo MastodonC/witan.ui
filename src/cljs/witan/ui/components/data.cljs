@@ -353,6 +353,36 @@
           :show-search? has-edit?}
          {:exclusions sharing-groups}]]]]]))
 
+(defn confirm-delete
+  [md]
+  [editable-field
+   nil
+   [:div.metadata-confirmation
+    [:h2  (case (:kixi.datastore.metadatastore/type md)
+            "stored" (get-string :string/confirm-delete-file-title)
+            "bundle" (get-string :string/confirm-delete-datapack-title))]
+    [:div.metadata-confirmation-text
+     (case (:kixi.datastore.metadatastore/type md)
+       "stored" (get-string :string/confirm-delete-file)
+       "bundle" (get-string :string/confirm-delete-datapack))]
+    [:div.flex-start
+     (shared/button {:id :delete-yes
+                     :txt :string/delete-metadata-ok
+                     :class "btn-danger"
+                     :prevent? true}
+                    #(controller/raise!
+                      (case (:kixi.datastore.metadatastore/type md)
+                        "stored" :data/delete-file
+                        "bundle" :data/delete-datapack)
+                      {:id (:kixi.datastore.metadatastore/id md)}))
+     (shared/button {:id :delete-no
+                     :txt :string/delete-metadata-cancel
+                     :prevent? true}
+                    #(controller/raise! :data/reset-confirm-delete-metadata {}))]
+
+
+    ]])
+
 (defn input-wrapper
   [& inputs]
   [:form.pure-form
@@ -649,48 +679,35 @@
 
 (defn edit-actions
   [md flags update-errors]
-  (let [confirming? (r/atom false)]
-    (fn [md flags update-errors]
-      (let [saving? (contains? flags :metadata-saving)]
-        [editable-field
-         nil
-         [:div.data-edit-actions
-          [:div.flex-vcenter
-           (shared/button {:icon icons/tick
-                           :id :save
-                           :txt :string/save
-                           :class "btn-success"
-                           :prevent? true
-                           :disabled? saving?}
-                          #(controller/raise! :data/metadata-change md))
-           (cond saving?
-                 [:span.success (get-string :string/saving "...")]
-                 (not-empty update-errors)
-                 [:span.error (get-string :string/md-not-saved-due-to-errors)])]
-          (when (bundle? md)
-            (if @confirming?
-              [:div.flex-vcenter
-               [:span.error (get-string :string/confirm-delete-datapack)]
-               (shared/button {:id :delete-no
-                               :txt :string/cancel
-                               :class "btn-error"
-                               :prevent? true
-                               :disabled? saving?}
-                              #(reset! confirming? false))
-               (shared/button {:id :delete-yes
-                               :txt :string/ok
-                               :prevent? true
-                               :disabled? saving?}
-                              (fn [_]
-                                (reset! confirming? false)
-                                (controller/raise! :data/delete-datapack {:id (:kixi.datastore.metadatastore/id md)})))]
-              (shared/button {:icon icons/delete
-                              :id :delete
-                              :txt :string/delete
-                              :class "btn-error"
-                              :prevent? true
-                              :disabled? saving?}
-                             #(reset! confirming? true))))]]))))
+  (fn [md flags update-errors]
+    (let [saving? (contains? flags :metadata-saving)
+          tombstone? (contains? flags :metadata-tombstone)]
+      [editable-field
+       nil
+       [:div.data-edit-actions
+        [:div.flex-vcenter
+         (shared/button {:icon icons/tick
+                         :id :save
+                         :txt :string/save
+                         :class "btn-success"
+                         :prevent? true
+                         :disabled? saving?}
+                        #(controller/raise! :data/metadata-change md))
+
+         (cond saving?
+               [:span.success (get-string :string/saving "...")]
+               (not-empty update-errors)
+               [:span.error (get-string :string/md-not-saved-due-to-errors)])]
+        [:div.flex-vcenter
+
+         (shared/button {:icon icons/delete
+                         :id :delete
+                         :txt :string/delete
+                         :class "btn-danger"
+                         :prevent? true
+                         :disabled? saving?}
+                        (fn [_]
+                          (controller/raise! :data/confirm-delete-metadata {})))]]])))
 
 (defn edit-metadata
   [current md]
@@ -855,6 +872,7 @@
             (data/get-in-app-state :app/datastore)
             activities->string (:ds/activities ds)
             md (data/get-in-app-state :app/datastore :ds/file-metadata current)
+            confirming-delete? (data/get-in-app-state :app/datastore :ds/confirming-delete?)
             has-edit? (utils/user-has-edit? (data/get-user) md)
             can-download? (utils/user-has-download? (data/get-user) md)
             remove-new-fn (fn []
@@ -869,24 +887,32 @@
             go-to-sharing (when has-edit? (fn []
                                             (remove-new-fn)
                                             (switch-primary-view! :sharing)))]
-        (if error
+        (cond
+          error
           [:div.text-center.padded-content
            [:div
             (icons/error :dark :large)]
            [:div [:h3 (get-string error)]]]
-          (if-not md
-            [:div.loading
-             (icons/loading :large)]
-            [:div#data-view
-             (shared/header-string (:kixi.datastore.metadatastore/name md)
-                                   ""
-                                   {:class (if (bundle? md)
-                                             "header-bg-bundle"
-                                             "header-bg-file")})
+
+          (not md)
+          [:div.loading
+           (icons/loading :large)]
+
+          :else
+          [:div#data-view
+           (shared/header-string (:kixi.datastore.metadatastore/name md)
+                                 ""
+                                 {:class (if (bundle? md)
+                                           "header-bg-bundle"
+                                           "header-bg-file")})
+           (when-not confirming-delete?
              (shared/tabs {:tabs (md->tab-config md has-edit?)
                            :selected-tab subview-tab
-                           :on-click switch-primary-view!})
-             [:div.flex-center
+                           :on-click switch-primary-view!}))
+           [:div.flex-center
+            (if confirming-delete?
+              [:div.container.padded-content
+               (confirm-delete md)]
               [:div.container.padded-content
                (when @new?
                  [:div.hero-notification
@@ -915,7 +941,7 @@
                   (sharing md go-to-sharing)
                   (tags md go-to-edit)
                   (when (bundle? md) (files md go-to-files))
-                  (when can-download? (actions current))])]]]))))))
+                  (when can-download? (actions current))])])]])))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

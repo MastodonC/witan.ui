@@ -224,7 +224,15 @@
 
              [:.file-edit-geography
               [:input
-               {:margin-top (em 0.3)}]]]
+               {:margin-top (em 0.3)}]]
+
+             [:.metadata-confirmation
+              [:.metadata-confirmation-text
+               {:line-height (em 1.2)
+                :font-size (px 16)
+                :padding [[(px 0) (px 10) (px 20) (px 10)]]}]]]
+
+            ;;
 
             [:.header-bg-file
              {:background-color colour/lol-color-2-4}]

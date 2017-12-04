@@ -143,6 +143,9 @@
             [:.btn-success
              {:background-color colour/success
               :color 'white}]
+            [:.btn-danger
+             {:background-color colour/danger
+              :color 'white}]
             [:.btn-error
              {:background-color colour/error
               :color 'white}]

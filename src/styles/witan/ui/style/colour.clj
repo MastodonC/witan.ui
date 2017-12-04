@@ -55,6 +55,7 @@
 (def error   color-complement-0)
 (def warning color-secondary-2-0)
 (def success color-primary-0)
+(def danger color-complement-0)
 (def normal  color-secondary-1-0)
 (def deep    color-secondary-1-3)
 (def error-light color-complement-0)

@@ -101,6 +101,7 @@
    :app/datastore {(s/optional-key :schema/search-results) [SchemaSchema]
                    :ds/current (s/maybe uuid?)
                    :ds/pending? s/Bool
+                   :ds/confirming-delete? s/Bool
                    :ds/file-metadata {uuid? s/Any}
                    :ds/file-metadata-editing s/Any ;; TODO: metadata schema
                    :ds/file-metadata-editing-command s/Any ;; TODO: metadata schema + updates

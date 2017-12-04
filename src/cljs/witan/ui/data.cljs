@@ -93,6 +93,7 @@
                            :rts/pending? false}
     :app/datastore {:ds/current nil
                     :ds/pending? false
+                    :ds/confirming-delete? false
                     :ds/file-metadata {}
                     :ds/file-metadata-editing nil
                     :ds/file-metadata-editing-command nil
