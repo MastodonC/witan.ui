@@ -220,6 +220,7 @@
   [{:keys [args]}]
   (data/swap-app-state! :app/datastore dissoc :ds/error)
   (data/swap-app-state! :app/datastore assoc :ds/pending? true)
+  (data/swap-app-state! :app/datastore assoc :ds/confirming-delete? false)
   (data/swap-app-state! :app/datastore assoc :ds/data-view-subview-idx
                         (utils/query-param-int subview-query-param 0 3))
   (let [id (get-in args [:route/params :id])]
