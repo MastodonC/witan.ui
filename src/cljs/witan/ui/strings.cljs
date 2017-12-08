@@ -41,6 +41,8 @@
    :string/sign-up-token                    "Invite code"
    :string/forecast-owner                   "Owner"
    :string/progress                         "Progress"
+   :string/previous                         "Previous"
+   :string/next                             "Next"
    :string/forgotten-question               "forgotten your password?"
    :string/witan-tagline                    "Make more sense of your city"
    :string/sign-in                          "Sign In"

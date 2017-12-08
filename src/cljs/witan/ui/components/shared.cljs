@@ -727,3 +727,23 @@
       {:style {:width "100%"}}
       (r/as-element
        [collapsible-text (clojure.string/join "," (map :name states))])])))
+
+(defcard pagination-panel
+  (fn [data _]
+    (let [page-blocks (range 1 11)
+          show 50]
+      (sab/html
+       [:div.flex-start
+        {:style {:width "100%"}}
+        (button {:id "page-previous"
+                 :prevent? false
+                 :txt (get-string :string/previous)}
+                nil)
+        (map (fn [page]
+               (button {:id (str "page-" page)
+                        :txt page}
+                       nil)) page-blocks)
+        (button {:id "page-next"
+                 :prevent? false
+                 :txt (get-string :string/next)}
+                nil)]))))
