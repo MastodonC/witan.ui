@@ -32,7 +32,8 @@
 
 (defn view
   []
-  (let [selected-id (r/atom nil)]
+  (let [selected-id (r/atom nil)
+        local-current-page (r/atom 1)]
     (fn []
       (let [raw-data (data/get-app-state :app/data-dash)
             file-type-filter (:dd/file-type-filter raw-data)
@@ -79,10 +80,13 @@
                          :selected?-fn #(= (:kixi.datastore.metadatastore/id %) selected-id')
                          :on-select #(reset! selected-id (:kixi.datastore.metadatastore/id %))
                          :on-double-click navigate-fn})
-          [:div.flex-center.dash-pagination
-           (shared/pagination {:page-blocks
-                               (range 1 (/ (get-in raw-data [:paging :total])
-                                           (data/get-in-app-state :app/datastore :ds/page-size)))
-                               :current-page 1}
-                              (fn [id]
-                                (controller/raise! :data/set-current-page {:page (js/parseInt (subs id 5))})))]]]))))
+          (when datasets
+            [:div.flex-center.dash-pagination
+             [shared/pagination {:page-blocks
+                                 (range 1 (inc (.ceil js/Math (/ (get-in raw-data [:paging :total])
+                                                                 (data/get-in-app-state :app/datastore :ds/page-size)))))
+                                 :current-page local-current-page}
+              (fn [id]
+                (let [new-page (js/parseInt (subs id 5))]
+                  (reset! local-current-page new-page)
+                  (controller/raise! :data/set-current-page {:page new-page})))]])]]))))

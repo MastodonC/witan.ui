@@ -89,14 +89,19 @@
                                 (:kixi.group/id group))) groups))) activities)))
 
 (defn send-dashboard-query!
-  [id]
-  (when-not @dash-query-pending?
-    (reset! dash-query-pending? true)
-    (data/swap-app-state! :app/data-dash dissoc :items)
-    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read ]
-                                                       {:count 20}]
-                                                      (:full query-fields)]}
-                on-query-response)))
+  ([]
+   (send-dashboard-query! 0))
+  ([index]
+   (send-dashboard-query! index (data/get-in-app-state :app/datastore :ds/page-size)))
+  ([index item-count]
+   (when-not @dash-query-pending?
+     (reset! dash-query-pending? true)
+     (data/swap-app-state! :app/data-dash dissoc :items)
+     (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read]
+                                                        {:count item-count
+                                                         :index index}]
+                                                       (:full query-fields)]}
+                 on-query-response))))
 
 (defn send-single-file-item-query!
   [id]
@@ -196,9 +201,8 @@
   (if-let [type-filter (keyword (get-in args [:route/query :type]))]
     (data/swap-app-state! :app/data-dash assoc :dd/file-type-filter type-filter)
     (data/swap-app-state! :app/data-dash dissoc :dd/file-type-filter))
-  (when-let [id (:kixi.user/id (data/get-app-state :app/user))]
-    (when (empty? (data/get-in-app-state :app/data-dash :items))
-      (send-dashboard-query! id)))
+  (when (empty? (data/get-in-app-state :app/data-dash :items))
+    (send-dashboard-query!))
   (set-title! (get-string :string/title-data-dashboard)))
 
 (defmethod on-route-change
@@ -565,7 +569,7 @@
 (defmethod handle
   :refresh-files
   [event _]
-  (send-dashboard-query! (data/get-in-app-state :app/user :kixi.user/id)))
+  (send-dashboard-query!))
 
 (defmethod handle
   :search-files
@@ -608,8 +612,7 @@
 (defmethod handle
   :set-current-page
   [event {:keys [page]}]
-  (log/debug (str ">>>> Current page: " page))
-  )
+  (send-dashboard-query! (* (data/get-in-app-state :app/datastore :ds/page-size) (dec page))))
 
 (defmethod handle
   :delete-file
@@ -942,10 +945,9 @@
 
 (defn on-user-logged-in
   [{:keys [args]}]
-  (let [{:keys [kixi.user/id]} args
-        {:keys [route/path]} (data/get-app-state :app/route)]
+  (let [{:keys [route/path]} (data/get-app-state :app/route)]
     (when (= path :app/data-dash)
-      (send-dashboard-query! id))))
+      (send-dashboard-query!))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

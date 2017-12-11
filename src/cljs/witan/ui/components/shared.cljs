@@ -729,28 +729,35 @@
        [collapsible-text (clojure.string/join "," (map :name states))])])))
 
 (defn pagination
-  [{:keys [page-blocks current-page]} on-click]
-  [:div.flex-start
-   (button {:id (str "page-" (dec current-page))
-            :prevent? false
-            :disabled? (<= current-page 1)
-            :txt (get-string :string/previous)}
-           on-click)
+  [_ _]
+  (fn
+    [{:keys [page-blocks current-page]} on-click]
+    (let [current-page (if (satisfies? IDeref current-page)
+                         @current-page
+                         current-page)]
+      [:div.flex-start
+       (button {:id (str "page-" (dec current-page))
+                :class "btn-pagination"
+                :prevent? false
+                :disabled? (<= current-page 1)
+                :txt (get-string :string/previous)}
+               on-click)
 
-   (map (fn [page]
-          (button {:id (str "page-" page)
-                   :txt page
-                   :class (if (= page current-page)
-                            "btn-pagination btn-success"
-                            "btn-pagination")}
+       (map (fn [page]
+              (button {:id (str "page-" page)
+                       :txt page
+                       :class (if (= page current-page)
+                                "btn-pagination btn-success"
+                                "btn-pagination")}
 
-                  on-click)) page-blocks)
+                      on-click)) page-blocks)
 
-   (button {:id (str "page-" (inc current-page))
-            :prevent? false
-            :disabled? (>= current-page (count page-blocks))
-            :txt (get-string :string/next)}
-           on-click)])
+       (button {:id (str "page-" (inc current-page))
+                :class "btn-pagination"
+                :prevent? false
+                :disabled? (>= current-page (count page-blocks))
+                :txt (get-string :string/next)}
+               on-click)])))
 
 (defcard pagination-panel
   (fn [data _]
@@ -758,9 +765,9 @@
       (sab/html
        [:div
         {:style {:width "100%"}}
-        (pagination @data (fn [id]
+        [pagination @data (fn [id]
                             (swap! data assoc :current-page (js/parseInt (subs id 5)))
-                            ))])))
+                            )]])))
   {:page-blocks (range 1 11)
    :current-page 1}
   {:inspect-data true

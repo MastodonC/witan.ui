@@ -354,4 +354,5 @@
              {}]
 
             [:.btn-pagination
+             {:padding (px 2)}
              [:span {:margin-right (px 5)}]]])
