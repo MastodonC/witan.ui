@@ -742,7 +742,6 @@
                 :disabled? (<= current-page 1)
                 :txt (get-string :string/previous)}
                on-click)
-
        (for [page page-blocks]
          (button {:id (str "page-" page)
                   :txt page
