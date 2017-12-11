@@ -93,7 +93,8 @@
   (when-not @dash-query-pending?
     (reset! dash-query-pending? true)
     (data/swap-app-state! :app/data-dash dissoc :items)
-    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read]]
+    (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read ]
+                                                       {:count 20}]
                                                       (:full query-fields)]}
                 on-query-response)))
 

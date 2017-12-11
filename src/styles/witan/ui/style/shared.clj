@@ -351,4 +351,7 @@
                :align-items :flex-end}]]
 
             [:.editable-field-editing
-             {}]])
+             {}]
+
+            [:.btn-pagination
+             [:span {:margin-right (px 5)}]]])
