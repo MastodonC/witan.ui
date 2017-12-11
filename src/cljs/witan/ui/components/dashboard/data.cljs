@@ -7,7 +7,8 @@
             [witan.ui.time :as time]
             [witan.ui.route   :as route]
             [witan.ui.strings :refer [get-string]]
-            [witan.ui.data :as data])
+            [witan.ui.data :as data]
+            [witan.ui.controller :as controller])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
@@ -77,4 +78,11 @@
                          :content datasets
                          :selected?-fn #(= (:kixi.datastore.metadatastore/id %) selected-id')
                          :on-select #(reset! selected-id (:kixi.datastore.metadatastore/id %))
-                         :on-double-click navigate-fn})]]))))
+                         :on-double-click navigate-fn})
+          [:div.flex-center.dash-pagination
+           (shared/pagination {:page-blocks
+                               (range 1 (/ (get-in raw-data [:paging :total])
+                                           (data/get-in-app-state :app/datastore :ds/page-size)))
+                               :current-page 1}
+                              (fn [id]
+                                (controller/raise! :data/set-current-page {:page (js/parseInt (subs id 5))})))]]]))))

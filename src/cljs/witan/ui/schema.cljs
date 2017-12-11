@@ -107,6 +107,7 @@
                    :ds/file-metadata-editing-command s/Any ;; TODO: metadata schema + updates
                    :ds/file-properties FilePropertiesSchema
                    :ds/activities {s/Keyword s/Str}
+                   :ds/page-size s/Num
                    :ds/locked-activities [s/Keyword]
                    :dp/activities {s/Keyword s/Str}
                    :dp/locked-activities [s/Keyword]

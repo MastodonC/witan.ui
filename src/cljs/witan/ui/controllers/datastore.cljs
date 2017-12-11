@@ -606,6 +606,12 @@
                                                        (vec (remove #(= id (:kixi.datastore.metadatastore/id %)) items)))))
 
 (defmethod handle
+  :set-current-page
+  [event {:keys [page]}]
+  (log/debug (str ">>>> Current page: " page))
+  )
+
+(defmethod handle
   :delete-file
   [event {:keys [id]}]
   (let [{:keys [kixi.datastore.metadatastore/name]} (get-local-file id)]
