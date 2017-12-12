@@ -743,14 +743,13 @@
                 :txt (get-string :string/previous)}
                on-click)
 
-       (map (fn [page]
-              (button {:id (str "page-" page)
-                       :txt page
-                       :class (if (= page current-page)
-                                "btn-pagination btn-success"
-                                "btn-pagination")}
-
-                      on-click)) page-blocks)
+       (for [page page-blocks]
+         (button {:id (str "page-" page)
+                  :txt page
+                  :class (if (= page current-page)
+                           "btn-pagination btn-success"
+                           "btn-pagination")}
+                 on-click))
 
        (button {:id (str "page-" (inc current-page))
                 :class "btn-pagination"
