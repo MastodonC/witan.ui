@@ -33,7 +33,11 @@
                {:background-color colour/button-create
                 :color colour/body-bg}]
               [:.workspace-view
-               {:background-color colour/button-view}]]]
+               {:background-color colour/button-view}]]
+
+             [:.dash-pagination
+              {:margin-top (px 10)
+               :margin-bottom (px 10)}]]
 
             ;;;;;;;;;;;;;;;;;;;;;
             [:#rts-no-requests

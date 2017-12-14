@@ -727,3 +727,48 @@
       {:style {:width "100%"}}
       (r/as-element
        [collapsible-text (clojure.string/join "," (map :name states))])])))
+
+(defn pagination
+  [_ _]
+  (fn
+    [{:keys [page-blocks current-page]} on-click]
+    (let [current-page (if (satisfies? IDeref current-page)
+                         @current-page
+                         current-page)]
+      [:div.flex-start
+       (button {:id (str "page-" (dec current-page))
+                :class "btn-pagination"
+                :prevent? false
+                :disabled? (<= current-page 1)
+                :txt (get-string :string/previous)}
+               on-click)
+
+       (for [page page-blocks]
+         (button {:id (str "page-" page)
+                  :txt page
+                  :class (if (= page current-page)
+                           "btn-pagination btn-success"
+                           "btn-pagination")}
+                 on-click))
+
+       (button {:id (str "page-" (inc current-page))
+                :class "btn-pagination"
+                :prevent? false
+                :disabled? (>= current-page (count page-blocks))
+                :txt (get-string :string/next)}
+               on-click)])))
+
+(defcard pagination-panel
+  (fn [data _]
+    (let [page-blocks (range 1 11)]
+      (sab/html
+       [:div
+        {:style {:width "100%"}}
+        [pagination @data (fn [id]
+                            (swap! data assoc :current-page (js/parseInt (subs id 5)))
+                            )]])))
+  {:page-blocks (range 1 11)
+   :current-page 1}
+  {:inspect-data true
+   :frame true
+   :history false})

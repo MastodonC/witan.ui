@@ -98,6 +98,7 @@
                     :ds/file-metadata-editing nil
                     :ds/file-metadata-editing-command nil
                     :ds/file-properties {}
+                    :ds/page-size 20
                     :ds/query-tries 0
                     :ds/data-view-subview-idx 0
                     :ds/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
