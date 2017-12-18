@@ -205,6 +205,8 @@
                {:width (percent 100)
                 :resize :vertical
                 :margin-bottom (em 1)}]
+              [:textarea
+               {:height (px 150)}]
               [:select
                {:height (px 32)}]
               [:#license-usage

@@ -84,17 +84,6 @@
                                           :app/datastore :ds/locked-activities))}))]
               (assoc a group new-activities))) {} sharing))
 
-(defn format-description
-  [description-str]
-  (let [substrings (clojure.string/split description-str #"\n")]
-    [:div
-     (doall
-      (mapcat
-       #(vector [:span {:key (str "string-" %1)} %2]
-                [:br {:key (str "br-" %1)}])
-       (range (count substrings))
-       substrings))]))
-
 (defn title
   [{:keys [kixi.datastore.metadatastore/name
            kixi.datastore.metadatastore/file-type] :as md} on-edit-fn]
@@ -102,12 +91,18 @@
    on-edit-fn
    (shared/inline-file-title md :x-large :medium)])
 
+(defn markdown-text
+  [text]
+  [:div.file-description
+   {:dangerouslySetInnerHTML
+    {:__html (js/marked text)}}])
+
 (defn description
   [{:keys [kixi.datastore.metadatastore/description]} on-edit-fn]
   [editable-field
    on-edit-fn
    (if (not (clojure.string/blank? description))
-     [:span.file-description description]
+     (markdown-text description)
      [:i
       {:class (if on-edit-fn
                 "file-description clickable-text"
@@ -400,35 +395,48 @@
         [:span.error error]])]))
 
 (defn edit-title-description
-  [md update-errors]
-  (let [{:keys [kixi.datastore.metadatastore/name
-                kixi.datastore.metadatastore/description
-                kixi.datastore.metadatastore/logo]} md]
-    [editable-field
-     nil
-     [:div.file-edit-metadata
-      [:h2.heading (get-string :string/file-sharing-meta-update)]
-      (list-any-errors update-errors [:kixi.datastore.metadatastore/name
-                                      :kixi.datastore.metadatastore/description
-                                      :kixi.datastore.metadatastore/logo])
-      (input-wrapper
-       [:h3 (get-string :string/file-name)]
-       [:input {:id  "title"
-                :type "text"
-                :value name
-                :placeholder nil
-                :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/name] (.. % -target -value)])}]
-       [:h3 (get-string :string/file-description)]
-       [:textarea {:id  "description"
-                   :value description
-                   :placeholder nil
-                   :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/description] (.. % -target -value)])}]
-       [:h3 (get-string :string/meta-image-url)]
-       [:input {:id "meta-image-url"
-                :type "text"
-                :value logo
-                :placeholder (get-string :string/meta-image-url-placeholder)
-                :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/logo] (.. % -target -value)])}])]]))
+  [_ _]
+  (let [editing (r/atom nil)]
+    (fn [md update-errors]
+      (let [{:keys [kixi.datastore.metadatastore/name
+                    kixi.datastore.metadatastore/description
+                    kixi.datastore.metadatastore/logo]} md]
+        [editable-field
+         nil
+         [:div.file-edit-metadata
+          [:h2.heading (get-string :string/file-sharing-meta-update)]
+          (list-any-errors update-errors [:kixi.datastore.metadatastore/name
+                                          :kixi.datastore.metadatastore/description
+                                          :kixi.datastore.metadatastore/logo])
+          (input-wrapper
+           [:h3 (get-string :string/file-name)]
+           [:input {:id  "title"
+                    :type "text"
+                    :value name
+                    :placeholder nil
+                    :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/name] (.. % -target -value)])}]
+           [:div.flex
+            [:h3 (get-string :string/file-description)]
+            [:small (get-string :string/supports " ") [:a {:href "http://commonmark.org/help/"
+                                                           :target "_blank"} "Markdown"]]]
+           [:textarea {:id  "description"
+                       :value description
+                       :placeholder nil
+                       :on-change #(do
+                                     (reset! editing (.. % -target -value))
+                                     (controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/description] (.. % -target -value)]))}]
+           (when @editing
+             [:div
+              [:i {} (get-string :string/preview) ":"]
+              [:div.file-description
+               (markdown-text @editing)]
+              [:hr]])
+           [:h3 (get-string :string/meta-image-url)]
+           [:input {:id "meta-image-url"
+                    :type "text"
+                    :value logo
+                    :placeholder (get-string :string/meta-image-url-placeholder)
+                    :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/logo] (.. % -target -value)])}])]]))))
 
 (defn edit-license
   [md showing-atom licenses update-errors]
@@ -718,7 +726,7 @@
       (let [{:keys [flags update-errors]} (data/get-in-app-state :app/datastore :ds/file-properties current)
             local-md (data/get-in-app-state :app/datastore :ds/file-metadata-editing)]
         [:div.file-edit-metadata-content-container
-         (edit-title-description local-md update-errors)
+         [edit-title-description local-md update-errors]
          (edit-tags local-md update-errors)
          (when-not (bundle? md)
            [:div
