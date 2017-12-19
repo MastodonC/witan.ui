@@ -90,12 +90,16 @@
                            :on-double-click navigate-fn})
             (when datasets
               [:div.flex-center.dash-pagination
-               [shared/pagination {:page-blocks
-                                   (range 1 (inc (.ceil js/Math (/ (get-in raw-data [:paging :total])
-                                                                   (data/get-in-app-state :app/datastore :ds/page-size)))))
-                                   :current-page local-current-page}
-                (fn [id]
-                  (let [new-page (js/parseInt (subs id 5))]
-                    (reset! local-current-page new-page)
-                    (route/swap-query-string! #(assoc % dash-page-query-param new-page))
-                    (controller/raise! :data/set-current-page {:page new-page})))]])]]))})))
+               (if file-type-filter
+                 [:span.clickable-text
+                  {:on-click #(route/navigate! :app/data-dash {})}
+                  (get-string :string/dash-reanable-paging)]
+                 [shared/pagination {:page-blocks
+                                     (range 1 (inc (.ceil js/Math (/ (get-in raw-data [:paging :total])
+                                                                     (data/get-in-app-state :app/datastore :ds/page-size)))))
+                                     :current-page local-current-page}
+                  (fn [id]
+                    (let [new-page (js/parseInt (subs id 5))]
+                      (reset! local-current-page new-page)
+                      (route/swap-query-string! #(assoc % dash-page-query-param new-page))
+                      (controller/raise! :data/set-current-page {:page new-page})))])])]]))})))

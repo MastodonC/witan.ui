@@ -290,6 +290,7 @@
    :string/meta-image-url-placeholder       "Provide a logo image as a URL e.g. https://mydomain.com/mylogo.png"
    :string/invalid-url                      "Invalid URL"
    :string/supports                         "Supports"
+   :string/dash-reanable-paging             "To enable paging, please return to the unfiltered dashboard"
    ;;
    :string.about/contact-us-1                "If you need Witan support, please either use our live help system or email us at"
    :string.about/contact-us-2                "For all other enquiries, please email us at"
