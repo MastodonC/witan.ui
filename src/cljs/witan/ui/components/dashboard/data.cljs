@@ -34,16 +34,17 @@
 
 (defn view
   []
-  (let [selected-id (r/atom nil)
-        local-current-page (r/atom (or (utils/query-param-int dash-page-query-param 1 999) 1))]
+  (let [selected-id (r/atom nil)]
     (r/create-class
      {:component-did-mount
       (fn [this]
-        (when-not (= 1 @local-current-page)
-          (controller/raise! :data/set-current-page {:page @local-current-page})))
+        (controller/raise!
+         :data/set-current-page
+         {:page (or (utils/query-param-int dash-page-query-param 1 999) 1)}))
       :reagent-render
       (fn []
         (let [raw-data (data/get-app-state :app/data-dash)
+              current-page (data/get-in-app-state :app/data-dash :dd/current-page)
               file-type-filter (:dd/file-type-filter raw-data)
               buttons [{:id :datapack :icon icons/datapack :txt :string/create-new-datapack :class "data-upload"}
                        {:id :upload :icon icons/upload :txt :string/upload-new-data :class "data-upload"}]
@@ -97,9 +98,8 @@
                  [shared/pagination {:page-blocks
                                      (range 1 (inc (.ceil js/Math (/ (get-in raw-data [:paging :total])
                                                                      (data/get-in-app-state :app/datastore :ds/page-size)))))
-                                     :current-page local-current-page}
+                                     :current-page current-page}
                   (fn [id]
                     (let [new-page (js/parseInt (subs id 5))]
-                      (reset! local-current-page new-page)
                       (route/swap-query-string! #(assoc % dash-page-query-param new-page))
                       (controller/raise! :data/set-current-page {:page new-page})))])])]]))})))

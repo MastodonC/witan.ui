@@ -80,6 +80,7 @@
                     (s/optional-key :workspace/model-list) [{s/Keyword s/Any}]}
    :app/workspace-dash {:wd/workspaces (s/maybe [s/Any])}
    :app/data-dash {(s/optional-key :dd/file-type-filter) s/Keyword
+                   :dd/current-page s/Num
                    s/Keyword s/Any}
    :app/create-data {:cd/pending? s/Bool
                      (s/optional-key :cd/error) s/Keyword

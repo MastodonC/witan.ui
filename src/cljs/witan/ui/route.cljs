@@ -65,10 +65,11 @@
              m {:route/path handler
                 :route/params route-params
                 :route/address path
-                :route/query (query-string->map)}]
+                :route/query (query-string->map)}
+             prev (data/get-app-state :app/route)]
          (log/debug "Dispatching to route:" path "=>" handler)
          (data/reset-app-state! :app/route m)
-         (data/publish-topic :data/route-changed m)
+         (data/publish-topic :data/route-changed (assoc m :route/previous prev))
          (put! app-route-chan handler))
        (log/severe "Couldn't match a route to this path:" path)))))
 

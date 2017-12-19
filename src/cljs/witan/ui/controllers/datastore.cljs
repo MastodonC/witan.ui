@@ -89,19 +89,18 @@
                                 (:kixi.group/id group))) groups))) activities)))
 
 (defn send-dashboard-query!
-  ([]
-   (send-dashboard-query! 0))
-  ([index]
-   (send-dashboard-query! index (data/get-in-app-state :app/datastore :ds/page-size)))
-  ([index item-count]
-   (when-not @dash-query-pending?
-     (reset! dash-query-pending? true)
-     (data/swap-app-state! :app/data-dash dissoc :items)
-     (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read]
-                                                        {:count item-count
-                                                         :index index}]
-                                                       (:full query-fields)]}
-                 on-query-response))))
+  []
+  (when-not @dash-query-pending?
+    (let [item-count (data/get-in-app-state :app/datastore :ds/page-size)
+          index (* item-count
+                   (dec (data/get-in-app-state :app/data-dash :dd/current-page)))]
+      (reset! dash-query-pending? true)
+      (data/swap-app-state! :app/data-dash dissoc :items)
+      (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read]
+                                                         {:count item-count
+                                                          :index index}]
+                                                        (:full query-fields)]}
+                  on-query-response))))
 
 (defn send-single-file-item-query!
   [id]
@@ -198,11 +197,14 @@
 (defmethod on-route-change
   :app/data-dash
   [{:keys [args]}]
-  (if-let [type-filter (keyword (get-in args [:route/query :type]))]
-    (data/swap-app-state! :app/data-dash assoc :dd/file-type-filter type-filter)
-    (data/swap-app-state! :app/data-dash dissoc :dd/file-type-filter))
-  (when (empty? (data/get-in-app-state :app/data-dash :items))
-    (send-dashboard-query!))
+  (let [type-filter (keyword (get-in args [:route/query :type]))]
+    (if type-filter
+      (data/swap-app-state! :app/data-dash assoc :dd/file-type-filter type-filter)
+      (data/swap-app-state! :app/data-dash dissoc :dd/file-type-filter))
+    (when (or type-filter
+              (= :app/data-dash (get-in args [:route/previous :route/path])))
+      (data/swap-app-state! :app/data-dash assoc :dd/current-page 1)))
+  (send-dashboard-query!)
   (set-title! (get-string :string/title-data-dashboard)))
 
 (defmethod on-route-change
@@ -612,7 +614,8 @@
 (defmethod handle
   :set-current-page
   [event {:keys [page]}]
-  (send-dashboard-query! (* (data/get-in-app-state :app/datastore :ds/page-size) (dec page))))
+  (data/swap-app-state! :app/data-dash assoc :dd/current-page page)
+  (send-dashboard-query!))
 
 (defmethod handle
   :delete-file
