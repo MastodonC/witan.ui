@@ -23,3 +23,6 @@ var Opentip = function() {};
 Opentip.prototype = {"show": function () {},
                      "hide": function () {},
                      "setContent": function () {}}
+
+// marked
+var marked = function() {};
