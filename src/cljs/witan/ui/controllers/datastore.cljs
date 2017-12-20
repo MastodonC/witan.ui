@@ -18,6 +18,8 @@
                    [cljs.core.async.macros :refer [go go-loop]]
                    [witan.ui.env :as env :refer [cljs-env]]))
 
+(def dash-page-query-param :page)
+
 (def dash-query-pending? (atom false))
 
 (def query-fields
@@ -201,9 +203,8 @@
     (if type-filter
       (data/swap-app-state! :app/data-dash assoc :dd/file-type-filter type-filter)
       (data/swap-app-state! :app/data-dash dissoc :dd/file-type-filter))
-    (when (or type-filter
-              (= :app/data-dash (get-in args [:route/previous :route/path])))
-      (data/swap-app-state! :app/data-dash assoc :dd/current-page 1)))
+    (data/swap-app-state! :app/data-dash assoc :dd/current-page
+                          (or (get-in args [:route/query dash-page-query-param]) 1)))
   (send-dashboard-query!)
   (set-title! (get-string :string/title-data-dashboard)))
 
@@ -610,12 +611,6 @@
   (data/swap-app-state! :app/datastore update :ds/file-metadata dissoc id)
   (data/swap-app-state! :app/data-dash update :items (fn [items]
                                                        (vec (remove #(= id (:kixi.datastore.metadatastore/id %)) items)))))
-
-(defmethod handle
-  :set-current-page
-  [event {:keys [page]}]
-  (data/swap-app-state! :app/data-dash assoc :dd/current-page page)
-  (send-dashboard-query!))
 
 (defmethod handle
   :delete-file
