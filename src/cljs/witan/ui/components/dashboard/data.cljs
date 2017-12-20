@@ -8,11 +8,11 @@
             [witan.ui.route   :as route]
             [witan.ui.strings :refer [get-string]]
             [witan.ui.data :as data]
-            [witan.ui.controller :as controller])
+            [witan.ui.controller :as controller]
+            ;;
+            [witan.ui.controllers.datastore :refer [dash-page-query-param]])
   (:require-macros [cljs-log.core :as log]
                    [witan.ui.env :as env :refer [cljs-env]]))
-
-(def dash-page-query-param :p)
 
 (defmulti button-press
   (fn [_ event] event))
@@ -37,14 +37,11 @@
   (let [selected-id (r/atom nil)]
     (r/create-class
      {:component-did-mount
-      (fn [this]
-        (controller/raise!
-         :data/set-current-page
-         {:page (or (utils/query-param-int dash-page-query-param 1 999) 1)}))
+      (fn [this])
       :reagent-render
       (fn []
         (let [raw-data (data/get-app-state :app/data-dash)
-              current-page (data/get-in-app-state :app/data-dash :dd/current-page)
+              current-page (utils/query-param-int dash-page-query-param 1 999)
               file-type-filter (:dd/file-type-filter raw-data)
               buttons [{:id :datapack :icon icons/datapack :txt :string/create-new-datapack :class "data-upload"}
                        {:id :upload :icon icons/upload :txt :string/upload-new-data :class "data-upload"}]
@@ -101,5 +98,4 @@
                                      :current-page current-page}
                   (fn [id]
                     (let [new-page (js/parseInt (subs id 5))]
-                      (route/swap-query-string! #(assoc % dash-page-query-param new-page))
-                      (controller/raise! :data/set-current-page {:page new-page})))])])]]))})))
+                      (route/navigate! :app/data-dash {} {dash-page-query-param new-page})))])])]]))})))
