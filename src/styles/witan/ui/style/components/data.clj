@@ -141,8 +141,7 @@
                :padding-bottom (px 10)}
               [:img
                {:max-width (percent 100)
-                :max-height (percent 100)
-                :margin [[0 :auto]]}]]
+                :max-height (percent 100)}]]
 
              [:.file-tags :.datapack-files
               [:h3
@@ -179,7 +178,7 @@
              [(s/> :.data-header-container ":first-child" :div)
               {:flex [[1 1 :auto]]}]
              [(s/> :.data-header-container ":first-child" ":first-child")
-              {:flex 0}]
+              {:flex 0.3}]
 
              [:.data-edit-actions
               {:width (percent 100)
