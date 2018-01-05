@@ -41,9 +41,12 @@
 
 (defn get-headers
   [response]
-  (as-> (ajax.protocols/-get-all-headers response) h
-    (reduce-kv (fn [a k v] (assoc a (clojure.string/lower-case k) v)) {} h)
-    (update h "vary" #(when % (clojure.string/lower-case %)))))
+  (let [clean (fn [k] (-> k
+                          (clojure.string/lower-case)
+                          (clojure.string/replace #"\n" "")))]
+    (as-> (ajax.protocols/-get-all-headers response) h
+      (reduce-kv (fn [a k v] (assoc a (clean k) v)) {} h)
+      (update h "vary" #(when % (clojure.string/lower-case %))))))
 
 (defn s3-upload [uri {:keys [params] :as args}]
   (log/debug "PUT" uri params)
