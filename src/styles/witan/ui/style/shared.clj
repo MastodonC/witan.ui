@@ -197,7 +197,9 @@
                :flex-direction :column
                :vertical-align :middle}]
              [:i
-              {:padding-right (em 0.5)}]]
+              {:padding-right (em 0.5)}]
+             [:.message
+              {:overflow :hidden}]]
 
 
 ;;;;;;;;;;;;;;
