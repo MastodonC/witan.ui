@@ -72,8 +72,8 @@
 
 (defn view
   [this]
-  (let [activities->string (data/get-in-app-state :app/datastore :ds/activities)
-        locked-activities (data/get-in-app-state :app/datastore :ds/locked-activities)
+  (let [activities->string data/datastore-file-activities
+        locked-activities data/datastore-file-default-activity-permissions
         form-data (r/atom (empty-form-data
                            activities->string
                            locked-activities))]

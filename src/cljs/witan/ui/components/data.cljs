@@ -75,13 +75,12 @@
      all-groups)))
 
 (defn lock-activities
-  [sharing user-sg]
+  [sharing user-sg perms]
   (reduce (fn [a [group activities]]
             (let [new-activities
                   (merge activities
                          (when (= (:kixi.group/id group) user-sg)
-                           {:locked (set (data/get-in-app-state
-                                          :app/datastore :ds/locked-activities))}))]
+                           {:locked (set perms)}))]
               (assoc a group new-activities))) {} sharing))
 
 (defn title
@@ -319,8 +318,12 @@
   [{:keys [kixi.datastore.metadatastore/sharing
            kixi.datastore.metadatastore/type
            kixi.datastore.metadatastore/id] :as md} has-edit?]
-  (let [activity-source (if (bundle? md) :dp/activities :ds/activities)
-        activities->string (data/get-in-app-state :app/datastore activity-source)
+  (let [activities->string (if (bundle? md)
+                             data/datastore-bundle-activities
+                             data/datastore-file-activities)
+        locked-activities (if (bundle? md)
+                            data/datastore-bundle-default-activity-permissions
+                            data/datastore-file-default-activity-permissions)
         user-sg (data/get-in-app-state :app/user :kixi.user/self-group)
         sharing-groups (set (reduce concat [] (vals sharing)))]
     [editable-field
@@ -332,7 +335,7 @@
         [shared/sharing-matrix activities->string
          (-> (keys activities->string)
              (reverse-group->activity-map sharing)
-             (lock-activities user-sg))
+             (lock-activities user-sg locked-activities))
          {:on-change
           (fn [[group activities] activity target-state]
             (controller/raise! :data/sharing-change
@@ -934,7 +937,7 @@
                          (data/get-in-app-state :app/datastore :ds/data-view-subview-idx))
             {:keys [ds/current ds/download-pending? ds/error] :as ds}
             (data/get-in-app-state :app/datastore)
-            activities->string (:ds/activities ds)
+            activities->string data/datastore-file-activities
             md (data/get-in-app-state :app/datastore :ds/file-metadata current)
             confirming-delete? (data/get-in-app-state :app/datastore :ds/confirming-delete?)
             has-edit? (utils/user-has-edit? (data/get-user) md)
