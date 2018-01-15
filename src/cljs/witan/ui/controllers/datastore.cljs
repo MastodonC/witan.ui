@@ -600,7 +600,7 @@
                      :kixi.datastore.metadatastore/bundled-ids (set (map :kixi.datastore.metadatastore/id (:selected-files datapack)))
                      :kixi.datastore.metadatastore/sharing (selected-groups->sharing-activities
                                                             (:selected-groups datapack)
-                                                            (keys (data/get-in-app-state :app/datastore :dp/activities)))
+                                                            (keys data/datastore-bundle-activities))
                      :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
                                                                :kixi.user/id (data/get-in-app-state :app/user :kixi.user/id)}})
      {:failed #(gstring/format (get-string :string.activity.create-datapack/failed) title)
@@ -742,7 +742,7 @@
                                    :kixi.datastore.metadatastore/file-type ext
                                    :kixi.datastore.metadatastore/sharing (selected-groups->sharing-activities
                                                                           selected-groups
-                                                                          (keys (data/get-in-app-state :app/datastore :ds/activities)))
+                                                                          (keys data/datastore-file-activities))
                                    :kixi.datastore.metadatastore/provenance {:kixi.datastore.metadatastore/source "upload"
                                                                              :kixi.user/id user-id}
                                    :kixi.datastore.metadatastore/size-bytes (.-size pending-file)

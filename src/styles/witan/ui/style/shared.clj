@@ -199,7 +199,8 @@
              [:i
               {:padding-right (em 0.5)}]
              [:.message
-              {:overflow :hidden}]]
+              {:overflow :hidden
+               :line-height (em 1.4)}]]
 
 
 ;;;;;;;;;;;;;;

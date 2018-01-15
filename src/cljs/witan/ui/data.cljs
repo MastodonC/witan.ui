@@ -62,6 +62,26 @@
    :kixi.user/groups [nil]
    :kixi.user/self-group nil})
 
+;; statics
+(def datastore-file-activities
+  {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
+   :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
+   :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)})
+
+(def datastore-file-default-activity-permissions
+  [:kixi.datastore.metadatastore/meta-update
+   :kixi.datastore.metadatastore/meta-read])
+
+(def datastore-bundle-activities
+  {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
+   :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
+   :kixi.datastore.metadatastore/bundle-add (get-string :string/datapack-sharing-bundle-add)})
+
+(def datastore-bundle-default-activity-permissions
+  [:kixi.datastore.metadatastore/meta-update
+   :kixi.datastore.metadatastore/meta-read
+   :kixi.datastore.metadatastore/bundle-add])
+
 ;; default app-state
 (defonce app-state
   (->>
@@ -100,18 +120,7 @@
                     :ds/file-properties {}
                     :ds/page-size 20
                     :ds/query-tries 0
-                    :ds/data-view-subview-idx 0
-                    :ds/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
-                                    :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
-                                    :kixi.datastore.metadatastore/file-read (get-string :string/file-sharing-file-read)}
-                    :ds/locked-activities [:kixi.datastore.metadatastore/meta-update
-                                           :kixi.datastore.metadatastore/meta-read]
-                    :dp/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
-                                    :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
-                                    :kixi.datastore.metadatastore/bundle-add (get-string :string/datapack-sharing-bundle-add)}
-                    :dp/locked-activities [:kixi.datastore.metadatastore/meta-update
-                                           :kixi.datastore.metadatastore/meta-read
-                                           :kixi.datastore.metadatastore/bundle-add]}
+                    :ds/data-view-subview-idx 0}
     :app/activities {:activities/log []
                      :activities/pending {}}}
    (s/validate ws/AppStateSchema)

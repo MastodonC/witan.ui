@@ -145,8 +145,8 @@
 
 (defn view
   []
-  (let [activities->string (data/get-in-app-state :app/datastore :dp/activities)
-        locked-activities (data/get-in-app-state :app/datastore :dp/locked-activities)
+  (let [activities->string data/datastore-bundle-activities
+        locked-activities data/datastore-bundle-default-activity-permissions
         datapack (r/atom (empty-form-data
                           activities->string
                           locked-activities))]
