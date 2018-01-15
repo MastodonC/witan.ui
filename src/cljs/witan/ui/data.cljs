@@ -107,9 +107,11 @@
                     :ds/locked-activities [:kixi.datastore.metadatastore/meta-update
                                            :kixi.datastore.metadatastore/meta-read]
                     :dp/activities {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
-                                    :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)}
+                                    :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
+                                    :kixi.datastore.metadatastore/bundle-add (get-string :string/datapack-sharing-bundle-add)}
                     :dp/locked-activities [:kixi.datastore.metadatastore/meta-update
-                                           :kixi.datastore.metadatastore/meta-read]}
+                                           :kixi.datastore.metadatastore/meta-read
+                                           :kixi.datastore.metadatastore/bundle-add]}
     :app/activities {:activities/log []
                      :activities/pending {}}}
    (s/validate ws/AppStateSchema)

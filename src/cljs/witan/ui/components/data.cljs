@@ -415,7 +415,7 @@
                     :value name
                     :placeholder nil
                     :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore/name] (.. % -target -value)])}]
-           [:div.flex
+           [:div.flex-vcenter
             [:h3 (get-string :string/file-description)]
             [:small (get-string :string/supports " ") [:a {:href "http://commonmark.org/help/"
                                                            :target "_blank"} "Markdown"]]]
@@ -828,19 +828,74 @@
           (when-not (empty? invisible-files)
             [:div.invisible-files (gstring/format (get-string :string/datapack-view-invisible-file-count) (count invisible-files))])]]))))
 
+(defn basic-collect
+  [md]
+  (let [groups (r/atom #{})
+        message (r/atom nil)
+        sending? (r/atom false)]
+    (fn [md]
+      [editable-field
+       nil
+       [:div.datapack-basic-collect
+        [:h2.heading (get-string :string/collect)]
+        (shared/info-panel :string/collect-info)
+        [:hr]
+        [:div
+         [shared/group-search-area
+          :string/create-rts-user-ph
+          #(swap! groups conj %1) {:disabled? @sending?}]
+         (when (not-empty @groups)
+           (input-wrapper
+            [shared/table
+             {:headers [{:content-fn
+                         #(vector
+                           :div.flex-start
+                           (shared/button {:icon icons/delete
+                                           :disabled? @sending?
+                                           :id (str (:kixi.group/id %) "-remove")}
+                                          (fn [_]
+                                            (swap! groups disj %))))
+                         :title ""  :weight 0.1}
+                        {:content-fn shared/inline-group
+                         :title (get-string :string/name)
+                         :title-align :left
+                         :weight 0.9}]
+              :content @groups}]
+            [:div.flex-vcenter
+             [:h3 (get-string :string/message)]
+             [:small (get-string :string/supports " ") [:a {:href "http://commonmark.org/help/"
+                                                            :target "_blank"} "Markdown"]]]
+            [:textarea {:id  "description"
+                        :value @message
+                        :placeholder (get-string :string/collect-message-ph)
+                        :disabled (when @sending? :disabled)
+                        :on-change #(reset! message (.. % -target -value))}]
+            [:div.flex-vcenter-start
+             (shared/button {:id :send-cas-request
+                             :_id :send-cas-request
+                             :txt :string/collect-send-request
+                             :prevent? true
+                             :disabled? (or @sending? (clojure.string/blank? @message))}
+                            (fn [_]
+                              (reset! sending? true)
+                              (controller/raise! :data/send-basic-collect-request {:groups @groups
+                                                                                   :message :message})))
+             (when @sending? [:span (get-string :string/sending "...")])]))]]])))
+
 (def tabs
   [[0 :overview]
    [1 :sharing]
    [2 :edit]
-   [3 :files]])
+   [3 :files]
+   [4 :collect]])
 
 (defn idx->tab
   [i]
-  (get (into {} tabs) i))
+  (get (into {} tabs) i :overview))
 
 (defn tab->idx
   [i]
-  (get (zipmap (map second tabs) (map first tabs)) i))
+  (get (zipmap (map second tabs) (map first tabs)) i 0))
 
 (defn switch-primary-view!
   [k]
@@ -862,6 +917,7 @@
     (if has-edit?
       {:overview (get-string :string/overview)
        :files (get-string :string/files)
+       :collect (get-string :string/collect)
        :sharing (get-string :string/sharing)
        :edit (get-string :string/edit)}
       {:overview (get-string :string/overview)
@@ -942,6 +998,7 @@
                  :sharing (sharing-detailed md has-edit?)
                  :edit [edit-metadata current md]
                  :files [edit-files md]
+                 :collect [basic-collect md]
                  ;; :overview & default
                  [:div
                   (header-container md go-to-edit)

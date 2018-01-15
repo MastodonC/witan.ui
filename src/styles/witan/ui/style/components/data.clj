@@ -154,7 +154,7 @@
                {:margin [[(em 0.0) (em 0.2)]]
                 :line-height (em 1.6)}]]
 
-             [:.datapack-files :.datapack-edit-files
+             [:.datapack-files :.datapack-edit-files :.datapack-basic-collect
               {:width (percent 100)}
               [:table:last-child
                {:width (percent 100)
@@ -195,7 +195,7 @@
                [:i
                 {:margin-right (px 2)}]]]
 
-             [:.file-edit-metadata
+             [:.file-edit-metadata :.datapack-basic-collect
               {:width (percent 100)}
               [:h3 :h4
                {:margin-bottom (em 0.3)
@@ -223,6 +223,12 @@
                 {:display :inline
                  :width (px 30)}]]]
 
+             [:.datapack-basic-collect
+              [:button#send-cas-request
+               {:background-color colour/button-create
+                :color colour/body-bg
+                :margin-right (px 5)}]]
+
              [:.file-edit-geography
               [:input
                {:margin-top (em 0.3)}]]
@@ -231,8 +237,7 @@
               [:.metadata-confirmation-text
                {:line-height (em 1.2)
                 :font-size (px 16)
-                :padding [[(px 0) (px 10) (px 20) (px 10)]]}]]]
-
+                :padding [[(px 0) (px 10) (px 20) (px 10)]]}]]             ]
             ;;
 
             [:.header-bg-file

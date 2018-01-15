@@ -55,6 +55,11 @@
               :align-items :center
               :justify-content :space-between}]
 
+            [:.flex-vend
+             {:display :flex
+              :align-items :flex-end
+              :justify-content :space-between}]
+
             [:.flex-vcenter-start
              {:display :flex
               :align-items :center

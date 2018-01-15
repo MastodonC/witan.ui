@@ -48,10 +48,12 @@
     [:thead
      [:tr
       (doall
-       (for [{:keys [title weight]} headers]
-         (let [style (if (string? weight)
-                       {:min-width weight}
-                       {:width (str (* 100 weight) "%")})]
+       (for [{:keys [title weight title-align]} headers]
+         (let [style (merge (if (string? weight)
+                              {:min-width weight}
+                              {:width (str (* 100 weight) "%")})
+                            (when title-align
+                              {:text-align title-align}))]
            [:th {:key title
                  :style style} title])))]]]
    (if-not content
@@ -102,11 +104,12 @@
    (header-string (get-string title) (when subtitle (get-string subtitle)) opts)))
 
 (defn button
-  [{:keys [icon txt class id prevent? disabled?]} on-button-click]
+  [{:keys [icon txt class id prevent? disabled? _id]} on-button-click]
   [:div.button-container
    {:key id}
    [:button.pure-button
     {:class class
+     :id _id
      :key (str "button-" (name id))
      :disabled disabled?
      :on-click #(do
@@ -278,14 +281,14 @@
           {:style {:height (if @show-breakout? "300px" "0px")}}
           (table {:headers [{:content-fn #(button {:icon icons/tick
                                                    :id (:kixi.group/id %)
-                                                   :prevent? true}
-                                                  (fn [_] (select-fn true %)))
+                                                   :prevent? true} identity)
                              :title ""  :weight 0.12}
-                            {:content-fn inline-group  :title "Name"          :weight 0.88}]
+                            {:content-fn inline-group
+                             :title (get-string :string/name)
+                             :weight 0.88}]
                   :content results
                   :selected?-fn #(= (:kixi.group/id %) (:kixi.group/id @selected-group))
-                  :on-select (partial select-fn true)
-                  :on-double-click (partial select-fn true)})
+                  :on-select (partial select-fn true)})
           [:div.close
            {:on-click close-fn}
            (icons/close)]]]))))
