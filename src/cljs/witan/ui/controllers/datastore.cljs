@@ -204,7 +204,7 @@
       (data/swap-app-state! :app/data-dash assoc :dd/file-type-filter type-filter)
       (data/swap-app-state! :app/data-dash dissoc :dd/file-type-filter))
     (data/swap-app-state! :app/data-dash assoc :dd/current-page
-                          (or (get-in args [:route/query dash-page-query-param]) 1)))
+                          (or (js/parseInt (get-in args [:route/query dash-page-query-param])) 1)))
   (send-dashboard-query!)
   (set-title! (get-string :string/title-data-dashboard)))
 
