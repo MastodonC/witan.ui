@@ -264,9 +264,13 @@
   [{:keys [args]}]
   (log/warn "TODO Change to activity failure")
   (let [{:keys [kixi.comms.event/payload]} args
-        {:keys [reason]} payload]
-    (data/swap-app-state! :app/create-data assoc :cd/error (upload-error->string reason))
-    (data/swap-app-state! :app/create-data assoc :cd/pending? false)))
+        {:keys [reason]} payload
+        metadata (:kixi.datastore.metadatastore/file-metadata payload)]
+    (case (:kixi.datastore.metadatastore/type metadata)
+      "stored" (do (data/swap-app-state! :app/create-data assoc :cd/error (upload-error->string reason))
+                   (data/swap-app-state! :app/create-data assoc :cd/pending? false))
+
+      :do-nothing)))
 
 (defmethod on-event
   [:kixi.datastore.metadatastore/sharing-change-rejected "1.0.0"]
@@ -368,7 +372,9 @@
   :reset-errors
   [_ _]
   (data/swap-app-state! :app/create-data dissoc :cd/error)
-  (data/swap-app-state! :app/create-data assoc :cd/pending? false))
+  (data/swap-app-state! :app/create-data assoc :cd/pending? false)
+  (data/swap-app-state! :app/create-datapack dissoc :cdp/error)
+  (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false))
 
 (defmethod handle
   :upload
@@ -863,11 +869,17 @@
 (defmethod on-activity-finished
   [:create-datapack :failed]
   [{:keys [args]}]
+  (log/warn "Datapack create failure: " (get-in args [:message :kixi.comms.event/payload]))
   (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false)
-  (data/swap-app-state!
-   :app/create-datapack assoc :cdp/error
-   {:gefeature/neral (case (get-in args [:message :kixi.comms.event/payload :reason])
-                       :metadata-invalid (get-string :string/create-datapack-fail-invalid))}))
+  (data/swap-app-state! :app/create-datapack assoc :cdp/error
+                        (case (get-in args [:message :kixi.comms.event/payload :reason])
+                          :metadata-invalid :string/create-datapack-fail-invalid))
+  (comment
+    "Add"
+    (data/swap-app-state!
+     :app/create-datapack assoc :cdp/error
+     {:gefeature/neral (case (get-in args [:message :kixi.comms.event/payload :reason])
+                         :metadata-invalid (get-string :string/create-datapack-fail-invalid))})))
 
 (defmethod on-activity-finished
   [:create-datapack :completed]

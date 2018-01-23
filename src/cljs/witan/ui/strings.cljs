@@ -264,6 +264,7 @@
    :string/create-datapack-search-files     "Search for files by their titles..."
    :string/edit-datapack-search-files       "Search for files to add to the datapack..."
    :string/create-datapack-no-files         "You have not yet added any files to the datapack. Use the search box to select the files you would like to add."
+   :string/datapack-create-unknown-error    "Unexpected exception has occured, please contact support."
    :string/na                               "n/a"
    :string/cancel                           "Cancel"
    :string/ok                               "OK"
