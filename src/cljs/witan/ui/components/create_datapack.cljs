@@ -152,20 +152,39 @@
                           locked-activities))]
     (fn []
       (let [{:keys [cdp/pending? cdp/error] :as cdp} (data/get-in-app-state :app/create-datapack)]
-        [:div#create-datapack-view
-         (shared/header :string/create-new-datapack nil #{:center})
-         [:div.flex-center
-          [:div.container.padded-content
-           (edit-title datapack)
-           (edit-files datapack)
-           (edit-sharing datapack activities->string)
-           [:div.flex-vcenter-start
-            (shared/button {:icon icons/datapack
-                            :id :creats
-                            :txt :string/create
-                            :class "btn-success"
-                            :prevent? true
-                            :disabled? (or pending? (create-button-disabled? @datapack))}
-                           #(controller/raise! :data/create-datapack {:datapack @datapack}))
-            (when (:general error)
-              [:div.error (:general error)])]]]]))))
+        (cond
+          error
+          [:div.flex-center
+           [:div.upload-error
+            [:h2 (get-string :string/error)]
+            (icons/error :large :error)
+            [:h3.error (get-string error)]
+            [:div
+             (shared/button {:id :retry-upload
+                             :icon icons/retry
+                             :txt :string/try-again}
+                            #(do
+                               ;; TODO it'd be nice to maintain the form data but right now the search boxes and radios don't work, so we kill it all.
+                               (reset! datapack (empty-form-data
+                                                 activities->string
+                                                 locked-activities))
+                               (controller/raise! :data/reset-errors)))]]]
+
+          :else
+          [:div#create-datapack-view
+           (shared/header :string/create-new-datapack nil #{:center})
+           [:div.flex-center
+            [:div.container.padded-content
+             (edit-title datapack)
+             (edit-files datapack)
+             (edit-sharing datapack activities->string)
+             [:div.flex-vcenter-start
+              (shared/button {:icon icons/datapack
+                              :id :creats
+                              :txt :string/create
+                              :class "btn-success"
+                              :prevent? true
+                              :disabled? (or pending? (create-button-disabled? @datapack))}
+                             #(controller/raise! :data/create-datapack {:datapack @datapack}))
+              (when (:general error)
+                [:div.error (:general error)])]]]])))))

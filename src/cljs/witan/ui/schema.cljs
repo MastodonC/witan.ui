@@ -114,6 +114,6 @@
                    (s/optional-key :ds/error) s/Keyword}
    :app/create-datapack {:cdp/pending? s/Bool
                          (s/optional-key :cdp/pending-datapack) s/Any
-                         (s/optional-key :cdp/error) {s/Keyword s/Str}}
+                         (s/optional-key :cdp/error) s/Keyword}
    :app/activities {:activities/log [ActivityLogSchema]
                     :activities/pending {uuid? ActivityPendingSchema}}})
