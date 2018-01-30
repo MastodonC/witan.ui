@@ -120,7 +120,7 @@
                     :ds/file-metadata-editing nil
                     :ds/file-metadata-editing-command nil
                     :ds/file-properties {}
-                    :ds/page-size 20
+                    :ds/page-size 100
                     :ds/query-tries 0
                     :ds/data-view-subview-idx 0}
     :app/activities {:activities/log []
