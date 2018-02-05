@@ -75,13 +75,13 @@
 (def datastore-bundle-activities
   {:kixi.datastore.metadatastore/meta-read (get-string :string/file-sharing-meta-read)
    :kixi.datastore.metadatastore/meta-update (get-string :string/file-sharing-meta-update)
-   :kixi.datastore.metadatastore/bundle-add (get-string :string/datapack-sharing-bundle-add)
+   ;; :kixi.datastore.metadatastore/bundle-add (get-string :string/datapack-sharing-bundle-add)
    })
 
 (def datastore-bundle-default-activity-permissions
   [:kixi.datastore.metadatastore/meta-update
    :kixi.datastore.metadatastore/meta-read
-   :kixi.datastore.metadatastore/bundle-add
+   ;; :kixi.datastore.metadatastore/bundle-add
    ])
 
 ;; default app-state
