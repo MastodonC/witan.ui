@@ -124,7 +124,10 @@
                     :ds/query-tries 0
                     :ds/data-view-subview-idx 0}
     :app/activities {:activities/log []
-                     :activities/pending {}}}
+                     :activities/pending {}}
+    :app/collect {:collect/pending? false
+                  :collect/failure-message nil
+                  :collect/success-message nil}}
    (s/validate ws/AppStateSchema)
    (atomize-map)))
 

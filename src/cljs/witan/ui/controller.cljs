@@ -4,6 +4,7 @@
             [witan.ui.controllers.rts :as rts]
             [witan.ui.controllers.datastore :as datastore]
             [witan.ui.controllers.intercom :as intercom]
+            [witan.ui.controllers.collect :as collect]
             [cljs.core.async :refer [<! chan put!]])
   (:require-macros [cljs.core.async.macros :as am :refer [go-loop]]
                    [cljs-log.core :as log]))
@@ -15,7 +16,8 @@
           "workspace" workspace/handle
           "rts"       rts/handle
           "data"      datastore/handle
-          "intercom"  intercom/handle}
+          "intercom"  intercom/handle
+          "collect"   collect/handle}
          nsp)))
 
 (defonce event-chan (chan))

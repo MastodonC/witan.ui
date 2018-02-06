@@ -81,7 +81,11 @@
    :delete-file [{:kixi.command/type :kixi.datastore/delete-file}
                  (a/or
                   [{:kixi.event/type :kixi.datastore/file-deleted} (a/$ :completed)]
-                  [{:kixi.event/type :kixi.datastore/file-delete-rejected} (a/$ :failed)])]})
+                  [{:kixi.event/type :kixi.datastore/file-delete-rejected} (a/$ :failed)])]
+   :send-collect-request [{:kixi.command/type :kixi.collect/request-collection}
+                          (a/or
+                           [{:kixi.event/type :kixi.collect/collection-requested} (a/$ :completed)]
+                           [{:kixi.event/type :kixi.collect/collection-request-rejected} (a/$ :failed)])]})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

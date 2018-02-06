@@ -694,13 +694,6 @@
   [event {:keys [idx]}]
   (data/swap-app-state! :app/datastore assoc :ds/data-view-subview-idx idx))
 
-(defmethod handle
-  :send-basic-collect-request
-  [event {:keys [groups message]}]
-  #_(activities/start-activity!
-     :send-collect-request
-     (data/new-command!)))
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn clean-etag

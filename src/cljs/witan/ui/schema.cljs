@@ -115,5 +115,8 @@
    :app/create-datapack {:cdp/pending? s/Bool
                          (s/optional-key :cdp/pending-datapack) s/Any
                          (s/optional-key :cdp/error) s/Keyword}
+   :app/collect {:collect/pending? s/Bool
+                 :collect/failure-message (s/maybe s/Str)
+                 :collect/success-message (s/maybe s/Str)}
    :app/activities {:activities/log [ActivityLogSchema]
                     :activities/pending {uuid? ActivityPendingSchema}}})

@@ -834,56 +834,65 @@
 (defn basic-collect
   [md]
   (let [groups (r/atom #{})
-        message (r/atom nil)
-        sending? (r/atom false)]
+        message (r/atom nil)]
+    (controller/raise! :collect/reset-messages nil)
     (fn [md]
-      [editable-field
-       nil
-       [:div.datapack-basic-collect
-        [:h2.heading (get-string :string/collect)]
-        (shared/info-panel :string/collect-info)
-        [:hr]
-        [:div
-         [shared/group-search-area
-          :string/create-rts-user-ph
-          #(swap! groups conj %1) {:disabled? @sending?}]
-         (when (not-empty @groups)
-           (input-wrapper
-            [shared/table
-             {:headers [{:content-fn
-                         #(vector
-                           :div.flex-start
-                           (shared/button {:icon icons/delete
-                                           :disabled? @sending?
-                                           :id (str (:kixi.group/id %) "-remove")}
-                                          (fn [_]
-                                            (swap! groups disj %))))
-                         :title ""  :weight 0.1}
-                        {:content-fn shared/inline-group
-                         :title (get-string :string/name)
-                         :title-align :left
-                         :weight 0.9}]
-              :content @groups}]
-            [:div.flex-vcenter
-             [:h3 (get-string :string/message)]
-             [:small (get-string :string/supports " ") [:a {:href "http://commonmark.org/help/"
-                                                            :target "_blank"} "Markdown"]]]
-            [:textarea {:id  "description"
-                        :value @message
-                        :placeholder (get-string :string/collect-message-ph)
-                        :disabled (when @sending? :disabled)
-                        :on-change #(reset! message (.. % -target -value))}]
-            [:div.flex-vcenter-start
-             (shared/button {:id :send-cas-request
-                             :_id :send-cas-request
-                             :txt :string/collect-send-request
-                             :prevent? true
-                             :disabled? (or @sending? (clojure.string/blank? @message))}
-                            (fn [_]
-                              (reset! sending? true)
-                              (controller/raise! :data/send-basic-collect-request {:groups @groups
-                                                                                   :message :message})))
-             (when @sending? [:span (get-string :string/sending "...")])]))]]])))
+      (let [{:keys [collect/pending?
+                    collect/failure-message
+                    collect/success-message] :as collect} (data/get-app-state :app/collect)]
+        [editable-field
+         nil
+         [:div.datapack-basic-collect
+          [:h2.heading (get-string :string/collect)]
+          (shared/info-panel :string/collect-info)
+          [:hr]
+          [:div
+           [shared/group-search-area
+            :string/create-rts-user-ph
+            #(swap! groups conj %1) {:disabled? pending?}]
+           (when (not-empty @groups)
+             (input-wrapper
+              [shared/table
+               {:headers [{:content-fn
+                           #(vector
+                             :div.flex-start
+                             (shared/button {:icon icons/delete
+                                             :disabled? pending?
+                                             :id (str (:kixi.group/id %) "-remove")}
+                                            (fn [_]
+                                              (swap! groups disj %))))
+                           :title ""  :weight 0.1}
+                          {:content-fn shared/inline-group
+                           :title (get-string :string/name)
+                           :title-align :left
+                           :weight 0.9}]
+                :content @groups}]
+              [:div.flex-vcenter
+               [:h3 (get-string :string/message)]
+               #_[:small (get-string :string/supports " ") [:a {:href "http://commonmark.org/help/"
+                                                                :target "_blank"} "Markdown"]]]
+              [:textarea {:id  "description"
+                          :value @message
+                          :placeholder (get-string :string/collect-message-ph)
+                          :disabled (when pending? :disabled)
+                          :on-change #(reset! message (.. % -target -value))}]
+              [:div
+               [:div.flex-vcenter-start
+                (shared/button {:id :send-cas-request
+                                :_id :send-cas-request
+                                :txt :string/collect-send-request
+                                :prevent? true
+                                :disabled? (or pending? (clojure.string/blank? @message))}
+                               (fn [_]
+                                 (controller/raise!
+                                  :collect/send-collect-request
+                                  {:groups @groups
+                                   :message @message
+                                   :metadata md})))
+                (cond
+                  success-message [:span.success success-message]
+                  pending? [:span (get-string :string/sending "...")])]
+               (when failure-message [:div.error failure-message])]))]]]))))
 
 (def tabs
   [[0 :overview]
