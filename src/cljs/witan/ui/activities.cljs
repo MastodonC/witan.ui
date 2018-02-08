@@ -66,6 +66,10 @@
                           (a/or
                            [{:kixi.event/type :kixi.datastore/files-add-to-bundle-rejected} (a/$ :failed)]
                            [{:kixi.event/type :kixi.datastore/files-added-to-bundle} (a/$ :completed)])]
+   :add-collect-files-to-datapack [{:kixi.command/type :kixi.datastore/add-files-to-bundle}
+                                   (a/or
+                                    [{:kixi.event/type :kixi.datastore/files-add-to-bundle-rejected} (a/$ :failed)]
+                                    [{:kixi.event/type :kixi.datastore/files-added-to-bundle} (a/$ :completed)])]
    :upload-file [{:kixi.command/type :kixi.datastore.filestore/initiate-file-upload}
                  (a/or
                   {:kixi.event/type :kixi.datastore.filestore/file-upload-initiated}

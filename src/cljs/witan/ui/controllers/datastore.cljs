@@ -683,6 +683,24 @@
   [event {:keys [idx]}]
   (data/swap-app-state! :app/datastore assoc :ds/data-view-subview-idx idx))
 
+
+(defmethod handle
+  :send-basic-collect-request
+  [event {:keys [groups message]}]
+  #_(activities/start-activity!
+     :send-collect-request
+     (data/new-command!)))
+
+(defmethod handle
+  :add-collect-files-to-datapack
+  [event {:keys [datapack-id added-files]}]
+  (activities/start-activity!
+   :add-collect-files-to-datapack
+   (data/new-command! :kixi.datastore/add-files-to-bundle "1.0.0"
+                      {:kixi.datastore.metadatastore/id datapack-id
+                       :kixi.datastore.metadatastore/bundled-ids (set (map :kixi.datastore.metadatastore/id added-files))})
+   {:failed #(get-string :string.activity.add-files-to-datapack/failed)
+    :completed #(get-string :string.activity.add-files-to-datapack/completed)}))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn clean-etag
@@ -939,6 +957,16 @@
   [{:keys [args]}]
 
   (.info js/toastr (gstring/format (get-string :stringf/file-deleted) (get-in args [:context :name]))))
+
+(defmethod on-activity-finished
+  [:add-collect-files-to-datapack :completed]
+  [{:keys [args]}]
+  (.info js/toastr (:log args)))
+
+(defmethod on-activity-finished
+  [:add-collect-files-to-datapack :failed]
+  [{:keys [args]}]
+  (.info js/toastr (:log args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

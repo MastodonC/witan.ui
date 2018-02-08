@@ -188,6 +188,7 @@
    :string/file-sharing-meta-update         "Edit Metadata"
    :string/file-sharing-file-read           "Download Dataset"
    :string/datapack-sharing-bundle-add      "Add Files"
+   :string/datapack-bundle-add              "Share Files to a Datapack"
    :string/file-actions-download-file       "Download this dataset"
    :string/sharing-matrix-group-name        "Group Name"
    :string/sharing-matrix-group-search-ph   "Search for users and/or groups..."
@@ -300,13 +301,14 @@
    :string/collect-send-request             "Send Collect request"
    :string/collection-failed                "Failed to send Collect request: "
    :stringf/collection-succeeded             "Collect request sent to %s recipient(s)!"
+   :string/share-files-to-datapack          "Add Files to Datapack"
+   :string/datapack-collect-intro-text      "You have been invited to add files to a datapack. Use the search bar to find the files and click on the title to add that file to the datapack. When you have selected all the files you want to add click on 'Add Files' to complete the request."
    ;;
    :string.about/contact-us-1                "If you need Witan support, please either use our live help system or email us at"
    :string.about/contact-us-2                "For all other enquiries, please email us at"
    :string.about/attributions                "Attributions"
    :string.about/attributions-text-1         "The image on the login screen was taken by Binayak Dasgupta (https://www.flickr.com/photos/fico86/) and the applicable license is 'CC BY 2.0' (https://creativecommons.org/licenses/by/2.0/)."
    :string.about/attributions-text-2         "The file icons were created by user 'Madebyoliver' (http://www.flaticon.com/authors/madebyoliver) and the applicable license is 'FlatIcon Free License (with attribution)' (https://profile.flaticon.com/license/free)."
-   ;;
    :string.activity.upload-file/failed                  "You failed to upload the file '%s'"
    :string.activity.upload-file/completed               "You successfully uploaded the file '%s'"
    :string.activity.update-metadata/failed              "You failed to update the metadata for file '%s' (%s) - %s"
@@ -325,6 +327,8 @@
    :string.activity.add-file-to-datapack/completed      "You successfully added file '%s' to datapack '%s'"
    :string.activity.send-collect-request/failed         "You failed to send a collection request for datapack '%s'"
    :string.activity.send-collect-request/completed      "You successfully sent a collection request to %s recipient(s), for datapack '%s'"
+   :string.activity.add-files-to-datapack/failed "You failed to add files to the datapack."
+   :string.activity.add-files-to-datapack/completed "You successfully added files to the datapack."
    })
 
 
