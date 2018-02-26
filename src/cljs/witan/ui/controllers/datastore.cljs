@@ -50,6 +50,16 @@
       (data/swap-app-state! :app/data-dash update :items #(cons new-meta %))
       (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % new-id new-meta)))))
 
+;; Bundle add to datapack via collect and share: message and pending components.
+(defn reset-bundle-add-messages
+  []
+  (data/swap-app-state! :app/bundle-add assoc :ba/failure-message nil)
+  (data/swap-app-state! :app/bundle-add assoc :ba/success-message nil))
+
+(defn reset-bundle-add-pending
+  [b]
+  (data/swap-app-state! :app/bundle-add assoc :ba/pending? b))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (declare on-query-response)
@@ -360,6 +370,11 @@
 
 (defmulti handle
   (fn [event args] event))
+
+(defmethod handle
+  :reset-bundle-add-messages
+  [_ _]
+  (reset-bundle-add-messages))
 
 (defmethod handle
   :search-schema
@@ -685,15 +700,10 @@
 
 
 (defmethod handle
-  :send-basic-collect-request
-  [event {:keys [groups message]}]
-  #_(activities/start-activity!
-     :send-collect-request
-     (data/new-command!)))
-
-(defmethod handle
   :add-collect-files-to-datapack
   [event {:keys [datapack-id added-files]}]
+  (reset-bundle-add-pending true)
+  (reset-bundle-add-messages)
   (activities/start-activity!
    :add-collect-files-to-datapack
    (data/new-command! :kixi.datastore/add-files-to-bundle "1.0.0"
@@ -961,11 +971,17 @@
 (defmethod on-activity-finished
   [:add-collect-files-to-datapack :completed]
   [{:keys [args]}]
+  (reset-bundle-add-pending false)
+  (data/swap-app-state! :app/bundle-add assoc :ba/success-message
+                        (get-string :string.activity.add-files-to-datapack/completed))
   (.info js/toastr (:log args)))
 
 (defmethod on-activity-finished
   [:add-collect-files-to-datapack :failed]
   [{:keys [args]}]
+  (reset-bundle-add-pending false)
+  (data/swap-app-state! :app/bundle-add assoc :ba/failed-message
+                        (get-string :string.activity.add-files-to-datapack/failed))
   (.info js/toastr (:log args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

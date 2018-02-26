@@ -37,4 +37,8 @@
      [:i
       {:margin-right (em 0.3)}]]
     [:div.error
-     {:margin-left (em 1)}]]])
+     {:margin-left (em 1)}]
+    [:button#collect-bundle-add
+     {:margin-right (px 5)}]
+    [:button#collect-bundle-add-return
+     {:margin-top (px 10)}]]])

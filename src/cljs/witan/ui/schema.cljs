@@ -136,5 +136,8 @@
    :app/collect {:collect/pending? s/Bool
                  :collect/failure-message (s/maybe s/Str)
                  :collect/success-message (s/maybe s/Str)}
+   :app/bundle-add {:ba/pending? s/Bool
+                    :ba/failure-message (s/maybe s/Str)
+                    :ba/success-message (s/maybe s/Str)}
    :app/activities {:activities/log [ActivityLogSchema]
                     :activities/pending {uuid? ActivityPendingSchema}}})

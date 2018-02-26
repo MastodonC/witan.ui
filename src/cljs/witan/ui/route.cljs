@@ -19,8 +19,8 @@
                "/data/"      {"dashboard"       :app/data-dash
                               "create"          :app/data-create
                               "create-datapack" :app/datapack-create
-                              ["datapack-add/" :id] :app/datapack-bundle-add
                               [:id ""]          :app/data}
+               "/datapack-add" {""              :app/datapack-bundle-add}
                "/workspace/" {"create"          :app/create-workspace
                               "dashboard"       :app/workspace-dash
                               [:id ""]          :app/workspace}

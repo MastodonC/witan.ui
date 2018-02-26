@@ -47,7 +47,7 @@
   [id flag]
   (contains? (data/get-in-app-state :app/datastore [:ds/file-properties id :flags]) flag))
 
-(defn remove-nil-or-empty-vals
+(defn remove-nil-or-empty-valss
   [m]
   (if (map? m)
     (reduce
