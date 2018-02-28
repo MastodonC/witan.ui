@@ -56,7 +56,8 @@
                                                                #(navigate-fn {:kixi.datastore.metadatastore/id %})))))
               name-fn #(vector :div.data-name (case (:kixi.datastore.metadatastore/type %)
                                                 "stored" (icons/file-type (:kixi.datastore.metadatastore/file-type %) :small)
-                                                "bundle" (icons/bundle-type (:kixi.datastore.metadatastore/bundle-type %) :small)) [:h4 (:kixi.datastore.metadatastore/name %)])]
+                                                "bundle" (icons/bundle-type (:kixi.datastore.metadatastore/bundle-type %) :small)
+                                                :small) [:h4 (:kixi.datastore.metadatastore/name %)])]
           [:div#data-dash.dashboard
            (shared-dash/header {:title :string/data-dash-title
                                 :filter-txt :string/data-dash-filter
@@ -66,7 +67,12 @@
                                             (case file-type-filter
                                               :files :string/dash-filter--files
                                               :datapacks :string/dash-filter--datapacks))
-                                :on-button-click (partial button-press (str selected-id'))})
+                                :on-button-click (partial button-press (str selected-id'))
+                                #_:on-search #_(fn [search-obj]
+                                                 (let [search-term (.. search-obj -target -value)]
+                                                   (log/debug "Search: " search-term)
+                                                   (controller/raise! :search/dashboard
+                                                                      {:search-term search-term})))})
            [:div.content
             (shared/table {:headers [{:content-fn name-fn
                                       :title (get-string :string/forecast-name)

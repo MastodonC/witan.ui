@@ -762,9 +762,12 @@
            {:ph :string/edit-datapack-search-files
             :on-click #(controller/raise! :data/add-file-to-datapack {:datapack md
                                                                       :add-file %})
-            :on-init #(controller/raise! :data/refresh-files {})
-            :on-search #(controller/raise! :data/search-files {:search %})
-            :get-results-fn #(data/get-in-app-state :app/datastore :ds/files-search-filtered)
+            :on-init #(controller/raise! :search/clear-datapack-files {})
+            :on-search #(controller/raise! :search/datapack-files {:search-term %})
+            :on-scroll #(controller/raise! :search/datapack-files-expand {})
+            :get-results-fn #(->> (data/get-in-app-state :app/search :ks/datapack-files :ks/current-search)
+                                  (data/get-in-app-state :app/search :ks/datapack-files :ks/search->result)
+                                  :items)
             :selector-key :kixi.datastore.metadatastore/id
             :table-headers-fn (fn []
                                 [{:content-fn #(shared/button {:icon icons/tick

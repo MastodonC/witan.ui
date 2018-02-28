@@ -58,6 +58,10 @@
    :id uuid?
    :context s/Any})
 
+(def ListDisplayItem
+  ;; TODO: partial metadata schema
+  s/Any)
+
 ;; app state schema
 (def AppStateSchema
   {:app/login {:login/pending? s/Bool
@@ -82,6 +86,21 @@
    :app/data-dash {(s/optional-key :dd/file-type-filter) s/Keyword
                    :dd/current-page s/Num
                    s/Keyword s/Any}
+
+   :app/search {:ks/dashboard {:ks/current-search s/Str
+                               :ks/search->result {s/Str {:search-term s/Str
+                                                          :items [ListDisplayItem]
+                                                          :paging {:total s/Num
+                                                                   :count s/Num
+                                                                   :index s/Num}}}}
+                :ks/datapack-files {:ks/current-search s/Str
+                                    :ks/search->result {s/Str {:search-term s/Str
+                                                               :items [ListDisplayItem]
+                                                               :paging {:total s/Num
+                                                                        :count s/Num
+                                                                        :index s/Num}}}}
+                :ks/datapack-files-expand-in-progress s/Bool}
+
    :app/create-data {:cd/pending? s/Bool
                      (s/optional-key :cd/error) s/Keyword
                      (s/optional-key :cd/pending-data) s/Any
@@ -110,7 +129,6 @@
                    :ds/page-size s/Num
                    :ds/query-tries s/Num
                    :ds/data-view-subview-idx s/Num
-                   (s/optional-key :ds/files-search-filtered) [s/Any]
                    (s/optional-key :ds/error) s/Keyword}
    :app/create-datapack {:cdp/pending? s/Bool
                          (s/optional-key :cdp/pending-datapack) s/Any

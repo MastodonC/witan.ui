@@ -16,7 +16,7 @@
             [cljsjs.toastr])
   (:require-macros [cljs-log.core :as log]
                    [cljs.core.async.macros :refer [go go-loop]]
-                   [witan.ui.env :as env :refer [cljs-env]]))
+                   [witan.ui.env :as env :refer [cljs-env]])  )
 
 (def dash-page-query-param :page)
 
@@ -158,7 +158,6 @@
                         :paging paging)
   (doseq [{:keys [kixi.datastore.metadatastore/id] :as payload} items]
     (data/swap-app-state! :app/datastore update-in [:ds/file-metadata id] #(merge % payload))))
-
 
 (defmethod on-query-response
   :datastore/metadata-by-id
@@ -579,16 +578,6 @@
   :refresh-files
   [event _]
   (send-dashboard-query!))
-
-(defmethod handle
-  :search-files
-  [event {:keys [search]}]
-  (let [mds (data/get-in-app-state :app/data-dash :items)]
-    (data/swap-app-state! :app/datastore assoc :ds/files-search-filtered
-                          (filter
-                           #(and
-                             (gstring/caseInsensitiveContains (:kixi.datastore.metadatastore/name %) search)
-                             (= "stored" (:kixi.datastore.metadatastore/type %))) mds))))
 
 (defmethod handle
   :create-datapack

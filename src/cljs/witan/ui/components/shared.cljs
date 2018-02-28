@@ -298,16 +298,15 @@
   [{:keys [on-init]} & _]
   (let [show-breakout? (r/atom false)
         selected-group (r/atom nil)
-        num-results (r/atom 10)
         table-id (str (random-uuid))]
     (when on-init
       (on-init))
-    (fn [{:keys [ph on-click on-init get-results-fn selector-key on-search table-headers-fn]} & [opts]]
+    (fn [{:keys [ph on-click on-init get-results-fn selector-key on-search table-headers-fn on-scroll]} & [opts]]
       (let [{:keys [id disabled? exclusions]
              :or {id (str "search-field-"ph)
                   disabled? false
                   exclusions nil}} opts
-            results (take @num-results (get-results-fn))
+            results (get-results-fn)
             results (if exclusions
                       (let [excluded-groups (map selector-key exclusions)]
                         (remove (fn [x] (some #{(selector-key x)} excluded-groups)) results))
@@ -315,7 +314,6 @@
             soft-reset-fn (fn []
                             (when-let [el (.getElementById js/document table-id)]
                               (set! (.-scrollTop el) 0))
-                            (reset! num-results 10)
                             (reset! show-breakout? false))
             close-fn (fn [& _]
                        (aset (.getElementById js/document id) "value" nil)
@@ -344,7 +342,7 @@
                   :on-select (partial select-fn true)
                   :on-double-click (partial select-fn true)
                   :on-scroll #(if (> % 1.0)
-                                (swap! num-results + 10))})
+                                (on-scroll %))})
           [:div.close
            {:on-click close-fn}
            (icons/close)]]]))))

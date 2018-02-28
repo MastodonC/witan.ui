@@ -113,6 +113,11 @@
     :app/request-to-share {:rts/requests {}
                            :rts/current nil
                            :rts/pending? false}
+    :app/search {:ks/dashboard {:ks/current-search ""
+                                :ks/search->result {}}
+                 :ks/datapack-files {:ks/current-search ""
+                                     :ks/search->result {}}
+                 :ks/datapack-files-expand-in-progress false}
     :app/datastore {:ds/current nil
                     :ds/pending? false
                     :ds/confirming-delete? false
@@ -142,6 +147,18 @@
 (defn swap-app-state!
   [k & symbs]
   (update app-state k #(apply swap! % symbs)))
+
+(defn swap-app-state-in!
+  [ks & symbs]
+  (update app-state
+          (first ks)
+          #(swap! %
+                  (fn [a]
+                    (update-in a (rest ks)
+                               (fn [v]
+                                 (apply (first symbs)
+                                        v
+                                        (rest symbs))))))))
 
 (defn reset-app-state!
   [k value]
