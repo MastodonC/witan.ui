@@ -980,7 +980,7 @@
   [:add-collect-files-to-datapack :failed]
   [{:keys [args]}]
   (reset-bundle-add-pending false)
-  (data/swap-app-state! :app/bundle-add assoc :ba/failed-message
+  (data/swap-app-state! :app/bundle-add assoc :ba/failure-message
                         (get-string :string.activity.add-files-to-datapack/failed))
   (.info js/toastr (:log args)))
 
