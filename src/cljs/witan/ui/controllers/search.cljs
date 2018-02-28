@@ -72,7 +72,8 @@
   [event {:keys [search-term]}]
   (data/swap-app-state! :app/search
                         assoc
-                        :ks/datapack-files {})
+                        :ks/datapack-files {:ks/current-search nil
+                                            :ks/search->result {}})
   (set-expand-lock false))
 
 (defmulti on-query-response

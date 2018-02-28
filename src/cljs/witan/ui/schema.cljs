@@ -88,17 +88,17 @@
                    s/Keyword s/Any}
 
    :app/search {:ks/dashboard {:ks/current-search s/Str
-                               :ks/search->result {s/Str {:search-term s/Str
-                                                          :items [ListDisplayItem]
-                                                          :paging {:total s/Num
-                                                                   :count s/Num
-                                                                   :index s/Num}}}}
+                               :ks/search->result {(s/optional-key s/Str) {:search-term s/Str
+                                                                           :items [ListDisplayItem]
+                                                                           :paging {:total s/Num
+                                                                                    :count s/Num
+                                                                                    :index s/Num}}}}
                 :ks/datapack-files {:ks/current-search s/Str
-                                    :ks/search->result {s/Str {:search-term s/Str
-                                                               :items [ListDisplayItem]
-                                                               :paging {:total s/Num
-                                                                        :count s/Num
-                                                                        :index s/Num}}}}
+                                    :ks/search->result {(s/optional-key s/Str) {:search-term s/Str
+                                                                                :items [ListDisplayItem]
+                                                                                :paging {:total s/Num
+                                                                                         :count s/Num
+                                                                                         :index s/Num}}}}
                 :ks/datapack-files-expand-in-progress s/Bool}
 
    :app/create-data {:cd/pending? s/Bool
