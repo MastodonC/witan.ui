@@ -54,7 +54,8 @@
   [datapack]
   (let [table-id "create-datapack-files-table"
         select-fn (fn [{:keys [kixi.datastore.metadatastore/id] :as x} & _]
-                    (swap! datapack update :selected-files conj x))]
+                    (swap! datapack update :selected-files conj x))
+        present-files (into #{} (map :kixi.datastore.metadatastore/id (:selected-files @datapack)))]
     [editable-field
      nil
      [:div.datapack-edit-file
@@ -72,7 +73,8 @@
         :table-headers-fn (fn []
                             [{:content-fn #(shared/button {:icon icons/tick
                                                            :id (str (:kixi.datastore.metadatastore/id %) "-select")
-                                                           :prevent? true}
+                                                           :prevent? true
+                                                           :disabled? (present-files (:kixi.datastore.metadatastore/id %))}
                                                           identity)
                               :title ""  :weight "50px"}
                              {:content-fn #(shared/inline-file-title % :small :small)
@@ -89,8 +91,7 @@
                                            :kixi.datastore.metadatastore/created
                                            :kixi.datastore.metadatastore/provenance)
                               :title (get-string :string/file-uploaded-at)
-                              :weight 0.20}])}
-       {:exclusions (:selected-files @datapack)}]
+                              :weight 0.20}])}]
       (when (empty? (:selected-files @datapack))
         [:i [:h4 (get-string :string/create-datapack-no-files)]])
       [:div

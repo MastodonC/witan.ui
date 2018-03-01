@@ -753,7 +753,8 @@
   (let []
     (fn [{:keys [kixi.datastore.metadatastore/bundled-files]}]
       (let [invisible-files (filter :error (vals bundled-files))
-            visible-files (remove :error (vals bundled-files))]
+            visible-files (remove :error (vals bundled-files))
+            present-files (into #{} (map :kixi.datastore.metadatastore/id (vals bundled-files)))]
         [editable-field
          nil
          [:div.datapack-edit-files
@@ -772,7 +773,8 @@
             :table-headers-fn (fn []
                                 [{:content-fn #(shared/button {:icon icons/tick
                                                                :id (str (:kixi.datastore.metadatastore/id %) "-select")
-                                                               :prevent? true}
+                                                               :prevent? true
+                                                               :disabled? (present-files (:kixi.datastore.metadatastore/id %))}
                                                               identity)
                                   :title ""  :weight 0.10}
                                  {:content-fn #(shared/inline-file-title % :small :small)
@@ -789,8 +791,7 @@
                                                :kixi.datastore.metadatastore/created
                                                :kixi.datastore.metadatastore/provenance)
                                   :title (get-string :string/file-uploaded-at)
-                                  :weight 0.20}])}
-           {:exclusions visible-files}]
+                                  :weight 0.20}])}]
           (if-not (empty? visible-files)
             [shared/table
              {:headers [{:content-fn
