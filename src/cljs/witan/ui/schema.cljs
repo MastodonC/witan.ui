@@ -93,7 +93,7 @@
                                                           :paging {:total s/Num
                                                                    :count s/Num
                                                                    :index s/Num}}}}
-                :ks/datapack-files {:ks/current-search s/Str
+                :ks/datapack-files {:ks/current-search (s/maybe s/Str)
                                     :ks/search->result {s/Str {:search-term s/Str
                                                                :items [ListDisplayItem]
                                                                :paging {:total s/Num
