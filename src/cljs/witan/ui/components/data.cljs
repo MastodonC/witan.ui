@@ -903,7 +903,7 @@
    [1 :sharing]
    [2 :edit]
    [3 :files]
-   [4 :collect]
+   ;;[4 :collect]
    ])
 
 (defn idx->tab
