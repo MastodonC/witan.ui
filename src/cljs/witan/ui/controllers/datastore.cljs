@@ -50,6 +50,16 @@
       (data/swap-app-state! :app/data-dash update :items #(cons new-meta %))
       (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % new-id new-meta)))))
 
+;; Bundle add to datapack via collect and share: message and pending components.
+(defn reset-bundle-add-messages
+  []
+  (data/swap-app-state! :app/bundle-add assoc :ba/failure-message nil)
+  (data/swap-app-state! :app/bundle-add assoc :ba/success-message nil))
+
+(defn reset-bundle-add-pending
+  [b]
+  (data/swap-app-state! :app/bundle-add assoc :ba/pending? b))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (declare on-query-response)
@@ -360,6 +370,11 @@
 
 (defmulti handle
   (fn [event args] event))
+
+(defmethod handle
+  :reset-bundle-add-messages
+  [_ _]
+  (reset-bundle-add-messages))
 
 (defmethod handle
   :search-schema
@@ -683,6 +698,19 @@
   [event {:keys [idx]}]
   (data/swap-app-state! :app/datastore assoc :ds/data-view-subview-idx idx))
 
+
+(defmethod handle
+  :add-collect-files-to-datapack
+  [event {:keys [datapack-id added-files]}]
+  (reset-bundle-add-pending true)
+  (reset-bundle-add-messages)
+  (activities/start-activity!
+   :add-collect-files-to-datapack
+   (data/new-command! :kixi.datastore/add-files-to-bundle "1.0.0"
+                      {:kixi.datastore.metadatastore/id datapack-id
+                       :kixi.datastore.metadatastore/bundled-ids (set (map :kixi.datastore.metadatastore/id added-files))})
+   {:failed #(get-string :string.activity.add-files-to-datapack/failed)
+    :completed #(get-string :string.activity.add-files-to-datapack/completed)}))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defn clean-etag
@@ -939,6 +967,22 @@
   [{:keys [args]}]
 
   (.info js/toastr (gstring/format (get-string :stringf/file-deleted) (get-in args [:context :name]))))
+
+(defmethod on-activity-finished
+  [:add-collect-files-to-datapack :completed]
+  [{:keys [args]}]
+  (reset-bundle-add-pending false)
+  (data/swap-app-state! :app/bundle-add assoc :ba/success-message
+                        (get-string :string.activity.add-files-to-datapack/completed))
+  (.info js/toastr (:log args)))
+
+(defmethod on-activity-finished
+  [:add-collect-files-to-datapack :failed]
+  [{:keys [args]}]
+  (reset-bundle-add-pending false)
+  (data/swap-app-state! :app/bundle-add assoc :ba/failure-message
+                        (get-string :string.activity.add-files-to-datapack/failed))
+  (.info js/toastr (:log args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

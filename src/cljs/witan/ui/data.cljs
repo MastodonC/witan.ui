@@ -132,7 +132,10 @@
                      :activities/pending {}}
     :app/collect {:collect/pending? false
                   :collect/failure-message nil
-                  :collect/success-message nil}}
+                  :collect/success-message nil}
+    :app/bundle-add {:ba/pending? false
+                     :ba/failure-message nil
+                     :ba/success-message nil}}
    (s/validate ws/AppStateSchema)
    (atomize-map)))
 

@@ -50,7 +50,8 @@
       (doall
        (for [{:keys [title weight title-align]} headers]
          (let [style (merge (if (string? weight)
-                              {:min-width weight}
+                              {:min-width weight
+                               :width weight}
                               {:width (str (* 100 weight) "%")})
                             (when title-align
                               {:text-align title-align}))]
