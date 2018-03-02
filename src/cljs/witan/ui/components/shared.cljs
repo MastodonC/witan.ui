@@ -342,7 +342,7 @@
                   :selected?-fn #(= (selector-key %) (selector-key @selected-group))
                   :on-select (partial select-fn true)
                   :on-double-click (partial select-fn true)
-                  :on-scroll #(if (> % 1.0)
+                  :on-scroll #(if (>= % 0.75)
                                 (on-scroll %))})
           [:div.close
            {:on-click close-fn}
