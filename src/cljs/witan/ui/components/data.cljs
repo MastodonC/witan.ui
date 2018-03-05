@@ -934,7 +934,7 @@
     (if has-edit?
       {:overview (get-string :string/overview)
        :files (get-string :string/files)
-       :collect (get-string :string/collect)
+       ;;:collect (get-string :string/collect)
        :sharing (get-string :string/sharing)
        :edit (get-string :string/edit)}
       {:overview (get-string :string/overview)
