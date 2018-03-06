@@ -145,3 +145,6 @@
 ;; tags
 (def tag-bg lol-color-3)
 (def tag-border (color/darken lol-color-3 20))
+
+;; html bg
+(def html-bg "#735985")
