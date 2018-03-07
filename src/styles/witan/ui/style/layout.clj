@@ -9,6 +9,18 @@
            :height (percent 100)
            :overflow :hidden}]
 
+   [:#logo {:background-color colour/html-bg
+            :background-image (util/url "../img/witan-logo.png")
+            :background-size (px 48);
+            :background-repeat 'no-repeat
+            :background-position [[(px 7) (px 5)]]
+            :width (px 64)
+            :height (px 48)
+            :position :fixed
+            :top 0
+            :left 0
+            :z-index 100}]
+
    [:#login {:position :absolute
              :top 0
              :left 0
@@ -21,7 +33,7 @@
             :position :fixed
             :width values/app-peripheral-width
             :bottom 0
-            :top 0
+            :top (px 48)
             :left 0
             :overflow :hidden
             :z-index 20
