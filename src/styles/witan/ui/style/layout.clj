@@ -27,7 +27,7 @@
              :bottom 0
              :right 0
              :background-color 'white
-             :z-index 50}]
+             :z-index 200}]
 
    [:#side {:background-color colour/side-bg
             :position :fixed
