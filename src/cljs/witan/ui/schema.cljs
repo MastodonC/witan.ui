@@ -62,6 +62,16 @@
   ;; TODO: partial metadata schema
   s/Any)
 
+(def Search
+  {(s/optional-key :query) {s/Keyword s/Any}
+   (s/optional-key :size) s/Num
+   (s/optional-key :from) s/Num
+   (s/optional-key :fields) [(s/conditional coll? [s/Keyword]
+                                            :else s/Keyword)]
+   (s/optional-key :sort-by) [(s/conditional map? {s/Keyword (s/conditional map? {s/Keyword s/Keyword}
+                                                                            :else s/Keyword)}
+                                             :else s/Keyword)]})
+
 ;; app state schema
 (def AppStateSchema
   {:app/login {:login/pending? s/Bool
@@ -83,18 +93,14 @@
                     (s/optional-key :workspace/current-viz) {:result/location s/Str}
                     (s/optional-key :workspace/model-list) [{s/Keyword s/Any}]}
    :app/workspace-dash {:wd/workspaces (s/maybe [s/Any])}
-   :app/data-dash {(s/optional-key :dd/file-type-filter) s/Keyword
-                   :dd/current-page s/Num
-                   s/Keyword s/Any}
-
-   :app/search {:ks/dashboard {:ks/current-search s/Str
-                               :ks/search->result {s/Str {:search-term s/Str
-                                                          :items [ListDisplayItem]
-                                                          :paging {:total s/Num
-                                                                   :count s/Num
-                                                                   :index s/Num}}}}
-                :ks/datapack-files {:ks/current-search (s/maybe s/Str)
-                                    :ks/search->result {s/Str {:search-term s/Str
+   :app/search {:ks/dashboard {(s/optional-key :ks/current-search) Search
+                               :ks/search->result {Search {:search Search
+                                                           :items [ListDisplayItem]
+                                                           :paging {:total s/Num
+                                                                    :count s/Num
+                                                                    :index s/Num}}}}
+                :ks/datapack-files {:ks/current-search Search
+                                    :ks/search->result {s/Str {:search Search
                                                                :items [ListDisplayItem]
                                                                :paging {:total s/Num
                                                                         :count s/Num
@@ -118,18 +124,16 @@
    :app/request-to-share {:rts/requests {uuid? RTSSchema}
                           :rts/current (s/maybe uuid?)
                           :rts/pending? s/Bool}
-   :app/datastore {(s/optional-key :schema/search-results) [SchemaSchema]
-                   :ds/current (s/maybe uuid?)
+   :app/datastore {:ds/current (s/maybe uuid?)
                    :ds/pending? s/Bool
                    :ds/confirming-delete? s/Bool
                    :ds/file-metadata {uuid? s/Any}
                    :ds/file-metadata-editing s/Any ;; TODO: metadata schema
                    :ds/file-metadata-editing-command s/Any ;; TODO: metadata schema + updates
                    :ds/file-properties FilePropertiesSchema
-                   :ds/page-size s/Num
-                   :ds/query-tries s/Num
                    :ds/data-view-subview-idx s/Num
-                   (s/optional-key :ds/error) s/Keyword}
+                   (s/optional-key :ds/error) s/Keyword
+                   (s/optional-key :ds/query-tries) s/Num}
    :app/create-datapack {:cdp/pending? s/Bool
                          (s/optional-key :cdp/pending-datapack) s/Any
                          (s/optional-key :cdp/error) s/Keyword}

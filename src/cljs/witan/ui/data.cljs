@@ -84,6 +84,25 @@
    :kixi.datastore.metadatastore/bundle-add
    ])
 
+(def file-list-fields
+  [:kixi.datastore.metadatastore/name
+   :kixi.datastore.metadatastore/id
+   [:kixi.datastore.metadatastore/provenance
+    :kixi.datastore.metadatastore/created]
+   [:kixi.datastore.metadatastore/provenance
+    :kixi.user/id]
+   :kixi.datastore.metadatastore/type
+   :kixi.datastore.metadatastore/bundle-type
+   :kixi.datastore.metadatastore/file-type
+   :kixi.datastore.metadatastore/license
+   :kixi.datastore.metadatastore/size-bytes
+   :kixi.datastore.metadatastore/sharing])
+
+(def search-file-list-default
+  {:query {:kixi.datastore.metadatastore.query/type {:equals "stored"}}
+   :size 10
+   :fields file-list-fields})
+
 ;; default app-state
 (defonce app-state
   (->>
@@ -103,7 +122,6 @@
                     :workspace/running? false
                     :workspace/pending? true}
     :app/workspace-dash {:wd/workspaces nil}
-    :app/data-dash {:dd/current-page 1}
     :app/create-data {:cd/pending? false}
     :app/create-datapack {:cdp/pending? false}
     :app/rts-dash {}
@@ -113,9 +131,8 @@
     :app/request-to-share {:rts/requests {}
                            :rts/current nil
                            :rts/pending? false}
-    :app/search {:ks/dashboard {:ks/current-search ""
-                                :ks/search->result {}}
-                 :ks/datapack-files {:ks/current-search ""
+    :app/search {:ks/dashboard {:ks/search->result {}}
+                 :ks/datapack-files {:ks/current-search search-file-list-default
                                      :ks/search->result {}}
                  :ks/datapack-files-expand-in-progress false}
     :app/datastore {:ds/current nil
@@ -125,8 +142,6 @@
                     :ds/file-metadata-editing nil
                     :ds/file-metadata-editing-command nil
                     :ds/file-properties {}
-                    :ds/page-size 100
-                    :ds/query-tries 0
                     :ds/data-view-subview-idx 0}
     :app/activities {:activities/log []
                      :activities/pending {}}

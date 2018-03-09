@@ -104,3 +104,23 @@
         uri (str "/#" address "?" ms)]
     (.replaceState js/history nil nil uri)
     (data/swap-app-state! :app/route assoc-in [:route/query] m)))
+
+(defn assoc-query-param-drop-page!
+  [k v]
+  (swap-query-string! (fn [q]
+                        (-> q
+                            (assoc k v)
+                            (dissoc :page)))))
+
+(defn dissoc-query-params
+  [& ks]
+  (swap-query-string! (fn [q]
+                        (apply dissoc q ks))))
+
+(defn get-query-map
+  []
+  (:route/query (data/get-app-state :app/route)))
+
+(defn get-query-param
+  [k]
+  (k (get-query-map)))

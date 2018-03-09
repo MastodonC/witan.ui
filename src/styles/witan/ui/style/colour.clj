@@ -36,6 +36,7 @@
 (def lol-color-1 "#F16B6F")
 (def lol-color-2 "#C5C6B6")
 (def lol-color-3 "#AACD6E")
+(def lol-color-3a (color/lighten lol-color-3 12))
 (def lol-color-4 "#3C3530")
 ;;
 (def lol-color-5 "#5CC557")
@@ -147,4 +148,4 @@
 (def tag-border (color/darken lol-color-3 20))
 
 ;; html bg
-(def html-bg "#735985")
+(def html-bg lol-color-4)

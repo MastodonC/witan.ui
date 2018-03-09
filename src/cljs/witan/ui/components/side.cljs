@@ -15,9 +15,7 @@
 
 (def side-bar-config
   {:side/upper [#_[:button :workspaces]
-                [:button :data
-                 [[:button :data-files]
-                  [:button :data-datapacks]]]
+                [:button :data]
                 #_[:button :rts]]
    :side/lower [[:button :activity]
                 [:button :about]
@@ -32,12 +30,6 @@
     :data       {:fnc (partial route/navigate! :app/data-dash)
                  :tooltip :string/tooltip-data
                  :icon icons/data}
-    :data-files {:fnc (partial route/navigate! :app/data-dash {} {:type "files"})
-                 :tooltip :string/tooltip-data--files
-                 :icon icons/file}
-    :data-datapacks {:fnc (partial route/navigate! :app/data-dash {} {:type "datapacks"})
-                     :tooltip :string/tooltip-data--datapacks
-                     :icon icons/datapack}
     :rts        {:fnc (partial route/navigate! :app/request-to-share)
                  :tooltip :string/tooltip-request-to-share
                  :icon icons/request-to-share}

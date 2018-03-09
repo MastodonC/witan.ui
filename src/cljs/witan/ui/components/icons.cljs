@@ -72,6 +72,10 @@
   [& args]
   (apply create-key "info" args))
 
+(defn filter-list
+  [& args]
+  (apply create-key "filter_list" args))
+
 (defn logout
   [& args]
   (apply create-key "power_settings_new" args))

@@ -17,6 +17,14 @@
                :width        (percent 100)}]]
 
 ;;;;;;;;;;;;;;
+            [:.shared-checkbox
+             [:label
+              {:margin-left (px 10)
+               :vertical-align "middle"}
+              [:input
+               {:vertical-align "middle"
+                :position "relative"
+                :bottom (px 1)}]]]
 
             [:.shared-table
              ^:prefix {:user-select :none}

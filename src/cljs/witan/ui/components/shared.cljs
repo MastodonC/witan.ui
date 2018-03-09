@@ -14,7 +14,7 @@
    [cljs.core.async.macros :refer [go]]))
 
 (defn search-filter
-  [placeholder on-input & [{:keys [id disabled?]}]]
+  [placeholder on-input & [{:keys [id disabled? current-search-value]}]]
   [:div.shared-search-input
    [:form.pure-form
     {:key "search-filter-form"
@@ -23,16 +23,18 @@
      {:key "search-filter-inner-div"}
      (icons/search)
      [:input.pure-input-rounded
-      {:key "filter-input"
-       :id (or id "filter-input")
-       :type "text"
-       :placeholder placeholder
-       :disabled disabled?
-       :style {:padding-left "30px"}
-       :on-input (fn [e]
-                   (if (fn? on-input)
-                     (on-input (.. e -target -value)))
-                   (.preventDefault e))}]]]])
+      (merge {:key "filter-input"
+              :id (or id "filter-input")
+              :type "text"
+              :placeholder placeholder
+              :disabled disabled?
+              :style {:padding-left "30px"}
+              :on-input (fn [e]
+                          (if (fn? on-input)
+                            (on-input (.. e -target -value)))
+                          (.preventDefault e))}
+             (when current-search-value
+               {:value current-search-value}))]]]])
 
 (defn table
   [{:keys [headers content selected?-fn on-select on-double-click on-scroll id class]
@@ -123,6 +125,19 @@
        (if (keyword? txt)
          (get-string txt)
          txt)])]])
+
+(defn checkbox
+  [{:keys [txt class id prevent? disabled? checked on-change]}]
+  [:div.shared-checkbox
+   [:label
+    {:for id
+     :class "pure-checkbox"}
+    [:input {:type "checkbox"
+             :id id
+             :checked checked
+             :on-change #(let [new-value (.-checked (.-target %))]
+                           (on-change new-value))}
+     txt]]])
 
 (defn inline-group
   [{:keys [kixi.group/name kixi.group/type kixi.group/id]}]

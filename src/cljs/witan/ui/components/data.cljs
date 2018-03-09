@@ -457,8 +457,9 @@
                  :type "text"
                  :value lc-type
                  :placeholder nil
-                 :on-change #(controller/raise! :data/swap-edit-metadata [:assoc [:kixi.datastore.metadatastore.license/license
-                                                                                  :kixi.datastore.metadatastore.license/type] (.. % -target -value)])}
+                 :on-change #(controller/raise! :data/swap-edit-metadata
+                                                [:assoc [:kixi.datastore.metadatastore.license/license
+                                                         :kixi.datastore.metadatastore.license/type] (.. % -target -value)])}
         (for [license (cons "" licenses)]
           [:option {:key license :value license} license])]
        (if @showing-atom

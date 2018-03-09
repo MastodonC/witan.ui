@@ -67,9 +67,3 @@
 (deftest conform-op-test
   (is (= [:assoc [:a :b] 123] (data/conform-op :assoc [:a :b] 123)))
   (is (= [:dissoc [:a :b] nil] (data/conform-op :assoc [:a :b] ""))))
-
-(deftest add-new-metadata-to-app-state-test
-  (let [md {:kixi.datastore.metadatastore/id (random-uuid)}]
-    (data/add-new-metadata-to-app-state! md)
-    (data/add-new-metadata-to-app-state! md)
-    (is (= 1 (count (b/get-data :app/data-dash :items))))))

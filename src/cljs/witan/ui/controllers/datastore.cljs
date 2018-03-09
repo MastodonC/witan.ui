@@ -18,8 +18,6 @@
                    [cljs.core.async.macros :refer [go go-loop]]
                    [witan.ui.env :as env :refer [cljs-env]])  )
 
-(def dash-page-query-param :page)
-
 (def dash-query-pending? (atom false))
 
 (def query-fields
@@ -99,20 +97,6 @@
                  (vec (keep (fn [[group group-activities]]
                               (when (get (:values group-activities) activity)
                                 (:kixi.group/id group))) groups))) activities)))
-
-(defn send-dashboard-query!
-  []
-  (when-not @dash-query-pending?
-    (let [item-count (data/get-in-app-state :app/datastore :ds/page-size)
-          index (* item-count
-                   (dec (data/get-in-app-state :app/data-dash :dd/current-page)))]
-      (reset! dash-query-pending? true)
-      (data/swap-app-state! :app/data-dash dissoc :items)
-      (data/query {:datastore/metadata-with-activities [[[:kixi.datastore.metadatastore/meta-read]
-                                                         {:count item-count
-                                                          :index index}]
-                                                        (:full query-fields)]}
-                  on-query-response))))
 
 (defn send-single-file-item-query!
   [id]
@@ -195,57 +179,6 @@
   [[o data]]
   (reset! dash-query-pending? false)
   (log/severe "Query Error:" o data))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; On Route Change
-
-(defmulti on-route-change
-  (fn [{:keys [args]}] (:route/path args)))
-
-(defmethod on-route-change
-  :default [_])
-
-(defmethod on-route-change
-  :app/data-dash
-  [{:keys [args]}]
-  (let [type-filter (keyword (get-in args [:route/query :type]))]
-    (if type-filter
-      (data/swap-app-state! :app/data-dash assoc :dd/file-type-filter type-filter)
-      (data/swap-app-state! :app/data-dash dissoc :dd/file-type-filter))
-    (data/swap-app-state! :app/data-dash assoc :dd/current-page
-                          (js/parseInt (or (get-in args [:route/query dash-page-query-param]) "1"))))
-  (send-dashboard-query!)
-  (set-title! (get-string :string/title-data-dashboard)))
-
-(defmethod on-route-change
-  :app/data-create
-  [_]
-  (data/swap-app-state! :app/datastore dissoc :cd/error)
-  (set-title! (get-string :string/title-data-create)))
-
-(defmethod on-route-change
-  :app/datapack-create
-  [_]
-  (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false)
-  (data/swap-app-state! :app/create-datapack dissoc :cdp/error)
-  (set-title! (get-string :string/create-new-datapack)))
-
-(def subview-query-param :d)
-
-(defmethod on-route-change
-  :app/data
-  [{:keys [args]}]
-  (data/swap-app-state! :app/datastore dissoc :ds/error)
-  (data/swap-app-state! :app/datastore assoc :ds/pending? true)
-  (data/swap-app-state! :app/datastore assoc :ds/confirming-delete? false)
-  (data/swap-app-state! :app/datastore assoc :ds/data-view-subview-idx
-                        (utils/query-param-int subview-query-param 0 10))
-  (let [id (get-in args [:route/params :id])]
-    (send-single-file-item-query! id)
-    (reset-properties! id)
-    (select-current! id)
-    (set-title! (get-string :string/title-data-loading))))
-
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Events
@@ -588,11 +521,6 @@
     (data/swap-app-state! :app/datastore update
                           :ds/file-metadata-editing-command
                           utils/remove-nil-or-empty-vals)))
-
-(defmethod handle
-  :refresh-files
-  [event _]
-  (send-dashboard-query!))
 
 (defmethod handle
   :create-datapack
@@ -985,18 +913,47 @@
   (.info js/toastr (:log args)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; On Route Change
 
-(defn on-user-logged-in
+(defmulti on-route-change
+  (fn [{:keys [args]}] (:route/path args)))
+
+(defmethod on-route-change
+  :default [_])
+
+(defmethod on-route-change
+  :app/data-create
+  [_]
+  (data/swap-app-state! :app/datastore dissoc :cd/error)
+  (set-title! (get-string :string/title-data-create)))
+
+(defmethod on-route-change
+  :app/datapack-create
+  [_]
+  (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false)
+  (data/swap-app-state! :app/create-datapack dissoc :cdp/error)
+  (set-title! (get-string :string/create-new-datapack)))
+
+(def subview-query-param :d)
+
+(defmethod on-route-change
+  :app/data
   [{:keys [args]}]
-  (let [{:keys [route/path]} (data/get-app-state :app/route)]
-    (when (= path :app/data-dash)
-      (send-dashboard-query!))))
+  (data/swap-app-state! :app/datastore dissoc :ds/error)
+  (data/swap-app-state! :app/datastore assoc :ds/pending? true)
+  (data/swap-app-state! :app/datastore assoc :ds/confirming-delete? false)
+  (data/swap-app-state! :app/datastore assoc :ds/data-view-subview-idx
+                        (utils/query-param-int subview-query-param 0 10))
+  (let [id (get-in args [:route/params :id])]
+    (send-single-file-item-query! id)
+    (reset-properties! id)
+    (select-current! id)
+    (set-title! (get-string :string/title-data-loading))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (defonce subscriptions
   (do (data/subscribe-topic :data/route-changed  on-route-change)
-      (data/subscribe-topic :data/user-logged-in on-user-logged-in)
       (data/subscribe-topic :data/event-received on-event)
       (data/subscribe-topic :activity/activity-finished on-activity-finished)
       (data/subscribe-topic :activity/activity-progressed on-activity-progressed)))

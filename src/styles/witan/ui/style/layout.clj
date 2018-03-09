@@ -37,7 +37,7 @@
             :left 0
             :overflow :hidden
             :z-index 20
-            :box-shadow "2px 0px 4px #888"}]
+            :box-shadow "2px 1px 4px #888"}]
 
    [:#app {;:background (util/url "../img/bg.png")
            :position :absolute;

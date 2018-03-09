@@ -98,11 +98,29 @@
                    :margin-bottom (em 1)}]]]]]]
 
             [:#data-dash
+             [:.content
+              {:top (px 92)}]
              [:.data-name
               {:display :flex
                :align-items :center}
               [:h4
-               {:margin [[(px 0) (px 0) (px 0) (px 10)]]}]]]
+               {:margin [[(px 0) (px 0) (px 0) (px 10)]]}]]
+             [:.search-bar-container
+              {:background-color colour/lol-color-3a
+               :position "relative"
+               :z-index 50
+               :box-shadow "0px 3px 4px -2px #888"}
+              [:.search-bar
+               [:.search-input
+                {:padding (px 5)
+                 :flex "1 1 auto"
+                 :align-self "auto"}
+                [:.shared-search-input
+                 {:width (percent 100)}]]
+               [:.search-dropdown
+                {:margin-right (px 10)}
+                [:i
+                 {:margin-right (px 3)}]]]]]
 
             [:#data-view
              {:width (percent 100)

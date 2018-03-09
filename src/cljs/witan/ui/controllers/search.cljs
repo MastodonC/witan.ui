@@ -31,26 +31,87 @@
   []
   (data/get-in-app-state :app/search :ks/datapack-files-expand-in-progress))
 
+(defn datapack-files-search
+  []
+  (data/get-in-app-state :app/search :ks/datapack-files :ks/current-search))
+
+(defn update-datapack-files-search-name
+  [search-term]
+  (data/swap-app-state-in! [:app/search :ks/datapack-files
+                            :ks/current-search :query :kixi.datastore.metadatastore.query/name]
+                           assoc
+                           :match search-term))
+
+(defn update-datapack-files-search-from
+  [from]
+  (data/swap-app-state-in! [:app/search :ks/datapack-files :ks/current-search]
+                           assoc
+                           :from from))
+
 (defmulti handle
   (fn [event args] event))
 
+(def metadata-filter->metadata-type
+  {"files" "stored"
+   "datapacks" "bundle"})
+
+(def dashboard-list-fields
+  [:kixi.datastore.metadatastore/name
+   :kixi.datastore.metadatastore/id
+   [:kixi.datastore.metadatastore/provenance
+    :kixi.datastore.metadatastore/created]
+   [:kixi.datastore.metadatastore/provenance
+    :kixi.user/id]
+   :kixi.datastore.metadatastore/type
+   :kixi.datastore.metadatastore/bundle-type
+   :kixi.datastore.metadatastore/file-type])
+
+(defn query-params->search-query
+  [{:keys [search-term
+           metadata-filter
+           page
+           size]
+    :as query-params
+    :or {page 1
+         size "50"}}]
+  (let [query (merge
+               (when search-term
+                 {:kixi.datastore.metadatastore.query/name {:match search-term}})
+               (when-let [metadata-filter-type (get metadata-filter->metadata-type metadata-filter)]
+                 {:kixi.datastore.metadatastore.query/type {:equals metadata-filter-type}}))]
+    (merge (when query
+             {:query query})
+           {:from (* (dec page)
+                     size)
+            :size (js/parseInt size)
+            :fields dashboard-list-fields
+            :sort-by [{:kixi.datastore.metadatastore/provenance
+                       {:kixi.datastore.metadatastore/created :desc}}]})))
+
 (defmethod handle
   :dashboard
-  [event {:keys [search-term]}]
-  (data/query {:search/dashboard [[{:search-term search-term}]]}
-              on-query-response))
+  [_ query-params]
+  (log/debug "Search: " query-params)
+  (let [new-search (query-params->search-query query-params)]
+    (data/swap-app-state-in! [:app/search :ks/dashboard]
+                             assoc
+                             :ks/current-search
+                             new-search)
+    (when-not (get (data/get-in-app-state :app/search :ks/dashboard :ks/search->result)
+                   new-search)
+      (data/query {:search/dashboard [[new-search]]}
+                  on-query-response))))
+
 
 (defmethod handle
   :datapack-files
   [event {:keys [search-term]}]
-  (when search-term
-    (data/swap-app-state-in! [:app/search :ks/datapack-files]
-                             assoc
-                             :ks/current-search search-term)
-    (when-not (get (data/get-in-app-state :app/search :ks/datapack-files :ks/search->result)
-                   search-term)
-      (data/query {:search/datapack-files [[{:search-term search-term}]]}
-                  on-query-response))))
+  (update-datapack-files-search-name search-term)
+  (when-not (get (data/get-in-app-state :app/search :ks/datapack-files :ks/search->result)
+                 (datapack-files-search))
+    (data/query {:search/datapack-files [[(datapack-files-search)]]}
+                on-query-response)))
+
 
 (defmethod handle
   :datapack-files-expand
@@ -63,17 +124,16 @@
     (when (and (> (:total current-paging) current-item-count)
                (not (get-expand-lock)))
       (set-expand-lock true)
-      (data/query {:search/datapack-files-expand [[{:search-term current-search
-                                                    :from current-item-count}]]}
+      (data/query {:search/datapack-files-expand [[(assoc (datapack-files-search)
+                                                          :from current-item-count)]]}
                   on-query-response))))
 
 (defmethod handle
   :clear-datapack-files
   [event {:keys [search-term]}]
-  (data/swap-app-state! :app/search
-                        assoc
-                        :ks/datapack-files {:ks/current-search nil
-                                            :ks/search->result {}})
+  (data/swap-app-state-in! [:app/search :ks/datapack-files]
+                           assoc
+                           :ks/current-search data/search-file-list-default)
   (set-expand-lock false))
 
 (defmulti on-query-response
@@ -81,31 +141,62 @@
 
 (defmethod on-query-response
   :search/dashboard
-  [[_ {:keys [items]}]]
-  (log/debug "Got: " items)
-  ;;TODO need to control number of autocompletes stored
+  [[_ {:keys [search] :as resp}]]
+  (log/debug "Dashboard Got: " (get-in resp [:search]))
 
-  (data/swap-app-state! :app/data-dash assoc
-                        :items items
-                        ;; :paging paging
-                        )
-  )
+  (comment "caching version"
+           ;;TODO need to control number of autocompletes stored
 
+           (data/swap-app-state-in! [:app/search :ks/dashboard :ks/search->result]
+                                    assoc
+                                    search
+                                    resp))
+
+  (data/swap-app-state-in! [:app/search :ks/dashboard]
+                           assoc
+                           :ks/search->result
+                           {search resp}))
+
+(defn datapacks-cache-search
+  [search]
+  (dissoc search :from))
 
 (defmethod on-query-response
   :search/datapack-files
-  [[_ {:keys [search-term items] :as resp}]]
+  [[_ {:keys [search] :as resp}]]
+  (log/debug "Datapacks Got: " (get-in resp [:search]))
   (data/swap-app-state-in! [:app/search :ks/datapack-files :ks/search->result]
                            assoc
-                           search-term resp))
+                           (datapacks-cache-search search)
+                           resp))
 
 (defmethod on-query-response
   :search/datapack-files-expand
-  [[_ {:keys [search-term items paging] :as resp}]]
-  (data/swap-app-state-in! [:app/search :ks/datapack-files :ks/search->result search-term :items]
+  [[_ {:keys [search items paging] :as resp}]]
+  (log/debug "Datapacks Got: " (get-in resp [:search]))
+  (data/swap-app-state-in! [:app/search :ks/datapack-files :ks/search->result (datapacks-cache-search search) :items]
                            (comp vec concat)
                            (:items resp))
-  (data/swap-app-state-in! [:app/search :ks/datapack-files :ks/search->result search-term :paging :count]
+  (data/swap-app-state-in! [:app/search :ks/datapack-files :ks/search->result (datapacks-cache-search search) :paging :count]
                            +
                            (:count paging))
   (set-expand-lock false))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; On Route Change
+
+(defmulti on-route-change
+  (fn [{:keys [args]}] (:route/path args)))
+
+(defmethod on-route-change
+  :default [_])
+
+(defmethod on-route-change
+  :app/data-dash
+  [{:keys [args]}]
+  (let [query-params (:route/query args)]
+    (handle :dashboard query-params)
+    (set-title! (get-string :string/title-data-dashboard))))
+
+(defonce subscriptions
+  (do (data/subscribe-topic :data/route-changed on-route-change)))

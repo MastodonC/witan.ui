@@ -103,6 +103,10 @@
                                              "yet. Use the button above to get started!"]
    :string/create-rts-subtitle              "Send a request, to a user or organisation, for data of a specific type"
    :string/create-rts-user                  "Recipient Users/Groups"
+   :string/search                           "Search"
+   :string/search-metadata-filter           {:everything "Everything"
+                                             :files "Files"
+                                             :datapacks "Datapacks"}
    :string/create-rts-user-ph               "Search for the users and/or organisations you'd like to send the request to."
    :string/search-results                   "Search Results"
    :string/create-rts-will-be-sent-to       "This request will be sent to:"
@@ -343,6 +347,7 @@
    (cond (keyword? r) (if a (clojure.string/join " " [a (get strings r)]) (get strings r))
          (string? r)  (if a (clojure.string/join " " [a r]) r)
          (vector? r)  (reduce #(resolve-string %2 %1) a r)
+         (map? r) r
          :else nil)))
 
 (defn get-string
