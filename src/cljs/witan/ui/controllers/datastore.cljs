@@ -37,17 +37,6 @@
            [:id :name]}
           :kixi.data-acquisition.request-for-data/message]})
 
-(defn add-new-metadata-to-app-state!
-  [md]
-  (let [new-id (:kixi.datastore.metadatastore/id md)
-        new-meta (assoc-in md
-                           [:kixi.datastore.metadatastore/provenance :kixi/user] (data/get-user))
-        existing (some #(when (= (:kixi.datastore.metadatastore/id %) new-id) %)
-                       (data/get-in-app-state :app/data-dash :items))]
-    (when-not existing
-      (data/swap-app-state! :app/data-dash update :items #(cons new-meta %))
-      (data/swap-app-state! :app/datastore update :ds/file-metadata #(assoc % new-id new-meta)))))
-
 ;; Bundle add to datapack via collect and share: message and pending components.
 (defn reset-bundle-add-messages
   []
@@ -235,8 +224,7 @@
 
 (defmethod on-metadata-updated
   :kixi.datastore.communication-specs/file-metadata-created
-  [args]
-  #_(add-new-metadata-to-app-state! (get-in args [:kixi.datastore.metadatastore/file-metadata])))
+  [args])
 
 (defmethod on-metadata-updated
   :kixi.datastore.communication-specs/file-metadata-sharing-updated
@@ -546,9 +534,7 @@
 
 (defn remove-deleted-file!
   [id]
-  (data/swap-app-state! :app/datastore update :ds/file-metadata dissoc id)
-  (data/swap-app-state! :app/data-dash update :items (fn [items]
-                                                       (vec (remove #(= id (:kixi.datastore.metadatastore/id %)) items)))))
+  (data/swap-app-state! :app/datastore update :ds/file-metadata dissoc id))
 
 (defmethod handle
   :delete-file
@@ -848,8 +834,6 @@
                       [:kixi.datastore.metadatastore/meta-read
                        :kixi.datastore.metadatastore/file-read]))) read-groups))))
      files))
-
-  #_(add-new-metadata-to-app-state! (get-in args [:message :kixi.comms.event/payload :kixi.datastore.metadatastore/file-metadata]))
 
   (js/setTimeout
    #(do

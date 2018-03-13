@@ -195,6 +195,7 @@
   :app/data-dash
   [{:keys [args]}]
   (let [query-params (:route/query args)]
+    (data/swap-app-state-in! [:app/search :ks/dashboard] assoc :ks/search->result {})
     (handle :dashboard query-params)
     (set-title! (get-string :string/title-data-dashboard))))
 
