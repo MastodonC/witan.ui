@@ -849,7 +849,7 @@
                        :kixi.datastore.metadatastore/file-read]))) read-groups))))
      files))
 
-  (add-new-metadata-to-app-state! (get-in args [:message :kixi.comms.event/payload :kixi.datastore.metadatastore/file-metadata]))
+  #_(add-new-metadata-to-app-state! (get-in args [:message :kixi.comms.event/payload :kixi.datastore.metadatastore/file-metadata]))
 
   (js/setTimeout
    #(do
