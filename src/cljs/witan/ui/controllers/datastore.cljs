@@ -51,16 +51,6 @@
 
 (declare on-query-response)
 
-(defn select-current!
-  [id]
-  (when id
-    (data/swap-app-state! :app/datastore assoc :ds/current id)))
-
-(defn reset-properties!
-  [id]
-  (when id
-    (data/swap-app-state! :app/datastore update :ds/file-properties dissoc id)))
-
 (defn reset-file-edit-metadata!
   ([]
    (reset-file-edit-metadata! nil))
@@ -907,22 +897,6 @@
   (data/swap-app-state! :app/create-datapack assoc :cdp/pending? false)
   (data/swap-app-state! :app/create-datapack dissoc :cdp/error)
   (set-title! (get-string :string/create-new-datapack)))
-
-(def subview-query-param :d)
-
-(defmethod on-route-change
-  :app/data
-  [{:keys [args]}]
-  (data/swap-app-state! :app/datastore dissoc :ds/error)
-  (data/swap-app-state! :app/datastore assoc :ds/pending? true)
-  (data/swap-app-state! :app/datastore assoc :ds/confirming-delete? false)
-  (data/swap-app-state! :app/datastore assoc :ds/data-view-subview-idx
-                        (utils/query-param-int subview-query-param 0 10))
-  (let [id (get-in args [:route/params :id])]
-    (send-single-file-item-query! id)
-    (reset-properties! id)
-    (select-current! id)
-    (set-title! (get-string :string/title-data-loading))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

@@ -157,6 +157,11 @@
                            :ks/search->result
                            {search resp}))
 
+(defmethod on-query-response
+  :search/metadata-by-id
+  [[_ data]]
+  (log/debug "Metadata-by-id: " data))
+
 (defn datapacks-cache-search
   [search]
   (dissoc search :from))
@@ -198,6 +203,37 @@
     (data/swap-app-state-in! [:app/search :ks/dashboard] assoc :ks/search->result {})
     (handle :dashboard query-params)
     (set-title! (get-string :string/title-data-dashboard))))
+
+(def subview-query-param :d)
+
+(defn send-single-file-item-query!
+  [id]
+  (data/query {:search/metadata-by-id [[id]]}
+              on-query-response))
+
+(defn reset-properties!
+  [id]
+  (when id
+    (data/swap-app-state! :app/datastore update :ds/file-properties dissoc id)))
+
+(defn select-current!
+  [id]
+  (when id
+    (data/swap-app-state! :app/datastore assoc :ds/current id)))
+
+(defmethod on-route-change
+  :app/data
+  [{:keys [args]}]
+  (data/swap-app-state! :app/datastore dissoc :ds/error)
+  (data/swap-app-state! :app/datastore assoc :ds/pending? true)
+  (data/swap-app-state! :app/datastore assoc :ds/confirming-delete? false)
+  (data/swap-app-state! :app/datastore assoc :ds/data-view-subview-idx
+                        (utils/query-param-int subview-query-param 0 10))
+  (let [id (get-in args [:route/params :id])]
+    (send-single-file-item-query! id)
+    (reset-properties! id)
+    (select-current! id)
+    (set-title! (get-string :string/title-data-loading))))
 
 (defonce subscriptions
   (do (data/subscribe-topic :data/route-changed on-route-change)))
