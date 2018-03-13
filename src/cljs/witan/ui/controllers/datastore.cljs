@@ -236,7 +236,7 @@
 (defmethod on-metadata-updated
   :kixi.datastore.communication-specs/file-metadata-created
   [args]
-  (add-new-metadata-to-app-state! (get-in args [:kixi.datastore.metadatastore/file-metadata])))
+  #_(add-new-metadata-to-app-state! (get-in args [:kixi.datastore.metadatastore/file-metadata])))
 
 (defmethod on-metadata-updated
   :kixi.datastore.communication-specs/file-metadata-sharing-updated
