@@ -100,11 +100,11 @@
                                                                     :count s/Num
                                                                     :index s/Num}}}}
                 :ks/datapack-files {:ks/current-search Search
-                                    :ks/search->result {s/Str {:search Search
-                                                               :items [ListDisplayItem]
-                                                               :paging {:total s/Num
-                                                                        :count s/Num
-                                                                        :index s/Num}}}}
+                                    :ks/search->result {Search {:search Search
+                                                                :items [ListDisplayItem]
+                                                                :paging {:total s/Num
+                                                                         :count s/Num
+                                                                         :index s/Num}}}}
                 :ks/datapack-files-expand-in-progress s/Bool}
 
    :app/create-data {:cd/pending? s/Bool
