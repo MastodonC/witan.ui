@@ -133,16 +133,6 @@
   (fn [[k v]] k))
 
 (defmethod on-query-response
-  :datastore/metadata-with-activities
-  [[_ {:keys [items paging]}]]
-  (reset! dash-query-pending? false)
-  (data/swap-app-state! :app/data-dash assoc
-                        :items items
-                        :paging paging)
-  (doseq [{:keys [kixi.datastore.metadatastore/id] :as payload} items]
-    (data/swap-app-state! :app/datastore update-in [:ds/file-metadata id] #(merge % payload))))
-
-(defmethod on-query-response
   :datastore/metadata-by-id
   [[_ data]]
   (if (:error data)
