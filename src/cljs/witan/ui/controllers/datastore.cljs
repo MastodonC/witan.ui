@@ -123,27 +123,6 @@
   (fn [[k v]] k))
 
 (defmethod on-query-response
-  :datastore/metadata-by-id
-  [[_ data]]
-  (if (:error data)
-    (let [id (first (get-in data [:original :params]))
-          tries (data/get-in-app-state :app/datastore :ds/query-tries)]
-      (if (< tries 3)
-        (js/setTimeout
-         #(do
-            (data/swap-app-state! :app/datastore update :ds/query-tries inc)
-            (send-single-file-item-query! id))
-         1000)
-        (do
-          (log/warn "File" id "is not accessible.")
-          (data/swap-app-state! :app/datastore assoc :ds/error :string/file-inaccessible)
-          (data/swap-app-state! :app/datastore assoc :ds/query-tries 0))))
-    (do
-      (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)
-      (save-file-metadata! data)
-      (set-title! (:kixi.datastore.metadatastore/name data)))))
-
-(defmethod on-query-response
   :error
   [[o data]]
   (reset! dash-query-pending? false)

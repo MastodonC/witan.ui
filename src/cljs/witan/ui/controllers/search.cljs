@@ -157,10 +157,41 @@
                            :ks/search->result
                            {search resp}))
 
+(defn reset-file-edit-metadata!
+  ([]
+   (reset-file-edit-metadata! nil))
+  ([md]
+   (data/swap-app-state! :app/datastore assoc :ds/file-metadata-editing md)))
+
+(defn save-file-metadata!
+  [{:keys [kixi.datastore.metadatastore/id] :as payload}]
+  (when id
+    (log/debug "Saving file metadata..." id)
+    (data/swap-app-state! :app/datastore assoc-in [:ds/file-metadata id] payload)
+    (when (= id (data/get-in-app-state :app/datastore :ds/file-metadata-editing :kixi.datastore.metadatastore/id))
+      (reset-file-edit-metadata! payload))))
+
 (defmethod on-query-response
   :search/metadata-by-id
   [[_ data]]
-  (log/debug "Metadata-by-id: " data))
+  (if (:error data)
+    (let [id (first (get-in data [:original :params]))
+          tries (data/get-in-app-state :app/datastore :ds/query-tries)]
+      (if (< tries 3)
+        (js/setTimeout
+         #(do
+            (data/swap-app-state! :app/datastore update :ds/query-tries inc)
+            (send-single-file-item-query! id))
+         1000)
+        (do
+          (log/warn "File" id "is not accessible.")
+          (data/swap-app-state! :app/datastore assoc :ds/error :string/file-inaccessible)
+          (data/swap-app-state! :app/datastore assoc :ds/query-tries 0))))
+    (do
+      (log/debug "Metadata-by-id:" data)
+      (data/swap-app-state! :app/datastore assoc :ds/query-tries 0)
+      (save-file-metadata! data)
+      (set-title! (:kixi.datastore.metadatastore/name data)))))
 
 (defn datapacks-cache-search
   [search]
