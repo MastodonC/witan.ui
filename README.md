@@ -36,6 +36,30 @@ To clean all compiled files:
 
 lein clean
 
+## A Full REPL Experience
+
+```
+Cider -> Figwheel -> Piggiback -> CLJS -> JSload
+```
+
+A `.dirs-local.el` file is used to set the cljs repl to figwheel.
+
+Before starting a repl make sure to set the env vars.
+
+```
+(setenv "WITAN-API-URL" "staging-api.witanforcities.com")
+(setenv "WITAN-API-SECURE" "True")
+```
+
+Now you can jack into the app with `cider-jack-in-clojurescript`.
+That provides two REPLS one for Clojure and one for Clojurescript.
+And allows source buffer evaluation and result return. Tasty!
+
+The env vars above are baked into the build so you can either do a
+`C-x C-e` on the `(def config...` in `witan.ui.data` to force the
+configuration *OR* before launching the REPL's do a `lein clean` to
+clear things down.
+
 ## To Build
 
 To create a production build run:
