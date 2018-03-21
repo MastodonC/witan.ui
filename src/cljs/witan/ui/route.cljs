@@ -6,7 +6,6 @@
             [cemerick.url :as url])
   (:require-macros [cljs-log.core :as log]))
 
-(defonce app-route-chan (chan))
 (def default-view :app/data-dash)
 
 (defn path
@@ -69,8 +68,7 @@
                 :route/query (query-string->map)}]
          (log/debug "Dispatching to route:" path "=>" handler)
          (data/reset-app-state! :app/route m)
-         (data/publish-topic :data/route-changed m)
-         (put! app-route-chan handler))
+         (data/publish-topic :data/route-changed m))
        (log/severe "Couldn't match a route to this path:" path)))))
 
 (defn find-path
