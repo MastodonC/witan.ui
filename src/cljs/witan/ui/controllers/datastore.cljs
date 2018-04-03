@@ -605,13 +605,14 @@
 
 (defmethod handle
   :add-collect-files-to-datapack
-  [event {:keys [datapack-id added-files]}]
+  [event {:keys [cc-id cr-id added-files]}]
   (reset-bundle-add-pending true)
   (reset-bundle-add-messages)
   (activities/start-activity!
    :add-collect-files-to-datapack
-   (data/new-command! :kixi.datastore/add-files-to-bundle "1.0.0"
-                      {:kixi.datastore.metadatastore/id datapack-id
+   (data/new-command! :kixi.collect/add-files-to-collection "1.0.0"
+                      {:kixi.collect.request/id cr-id
+                       :kixi.collect.campaign/id cc-id
                        :kixi.datastore.metadatastore/bundled-ids (set (map :kixi.datastore.metadatastore/id added-files))})
    {:failed #(get-string :string.activity.add-files-to-datapack/failed)
     :completed #(get-string :string.activity.add-files-to-datapack/completed)}))

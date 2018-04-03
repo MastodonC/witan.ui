@@ -269,7 +269,6 @@
    :string/create-datapack-search-files     "Search for files by their titles..."
    :string/edit-datapack-search-files       "Search for files to add to the datapack..."
    :string/create-datapack-no-files         "You have not yet added any files to the datapack. Use the search box to select the files you would like to add."
-   :string/datapack-no-id-supplied          "No datapack id was supplied."
    :string/datapack-create-unknown-error    "Unexpected exception has occured, please contact support."
    :string/na                               "n/a"
    :string/cancel                           "Cancel"
@@ -309,6 +308,7 @@
    :string/share-files-to-datapack          "Add Files to Datapack"
    :string/datapack-collect-intro-text      "You have been invited to add files to a datapack. Use the search bar to find the files and click on the title to add that file to the datapack. When you have selected all the files you want to add click on 'Add Files' to complete the request."
    :string/collect-bundle-add-return        "Click here to return to the dashboard."
+   :string/generic-404                      "The requested resource could not be found."
    ;;
    :string.about/contact-us-1                "If you need Witan support, please either use our live help system or email us at"
    :string.about/contact-us-2                "For all other enquiries, please email us at"

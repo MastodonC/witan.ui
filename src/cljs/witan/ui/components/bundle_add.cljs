@@ -18,6 +18,9 @@
   (:require-macros [cljs-log.core :as log]
                    [devcards.core :as dc :refer [defcard]]))
 
+(def campaign-id-query-param :ccid)
+(def collection-request-id-query-param :crid)
+
 ;; using the same thinking as the create datapack layout.
 
 (defn show-files
@@ -99,11 +102,12 @@
       (let [{:keys [ba/pending?
                     ba/failure-message
                     ba/success-message] :as bundle-add} (data/get-app-state :app/bundle-add)
-            datapack-id (utils/query-param :msid)]
+            cc-id (utils/query-param campaign-id-query-param)
+            cr-id (utils/query-param collection-request-id-query-param)]
         [:div#create-datapack-view
          (shared/header :string/share-files-to-datapack nil #{:center})
          [:div.flex-center
-          (if datapack-id
+          (if (and cc-id cr-id)
             [:div.container.padded-content
              [editable-field nil
               [:div
@@ -120,8 +124,11 @@
                                :disabled? (or pending?
                                               (empty? @files)
                                               success-message)}
-                              #(controller/raise! :data/add-collect-files-to-datapack {:added-files @files
-                                                                                       :datapack-id datapack-id}))
+                              #(controller/raise!
+                                :data/add-collect-files-to-datapack
+                                {:added-files @files
+                                 :cc-id cc-id
+                                 :cr-id cr-id}))
                (cond
                  success-message [:span.success success-message]
                  pending? [:span (get-string :string/sending "....")])]
@@ -136,4 +143,4 @@
                                    #(route/navigate! :app/data-dash)))
               (when failure-message [:div.error failure-message])]]
             [:div.container.padded-content
-             [:span.error (get-string :string/datapack-no-id-supplied)]])]]))))
+             [:span.error (get-string :string/generic-404)]])]]))))
