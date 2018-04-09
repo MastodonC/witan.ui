@@ -72,6 +72,12 @@
                                                                             :else s/Keyword)}
                                              :else s/Keyword)]})
 
+(def BundleAddData
+  {:kixi.collect.request/receiving-groups #{uuid?}
+   :kixi.datastore.metadatastore/id uuid?
+   :kixi.collect.campaign/id uuid?
+   :kixi.collect.request/id uuid?})
+
 ;; app state schema
 (def AppStateSchema
   {:app/login {:login/pending? s/Bool
@@ -142,6 +148,7 @@
                  :collect/success-message (s/maybe s/Str)}
    :app/bundle-add {:ba/pending? s/Bool
                     :ba/failure-message (s/maybe s/Str)
-                    :ba/success-message (s/maybe s/Str)}
+                    :ba/success-message (s/maybe s/Str)
+                    :ba/data (s/maybe BundleAddData)}
    :app/activities {:activities/log [ActivityLogSchema]
                     :activities/pending {uuid? ActivityPendingSchema}}})

@@ -2,6 +2,7 @@
   (:require [reagent.core :as r]
             [goog.net.cookies :as cookies]
             [goog.crypt.base64 :as b64]
+            [clojure.string :as str]
             [schema.core :as s]
             [witan.ui.schema :as ws]
             [witan.ui.strings :refer [get-string]]
@@ -150,7 +151,8 @@
                   :collect/success-message nil}
     :app/bundle-add {:ba/pending? false
                      :ba/failure-message nil
-                     :ba/success-message nil}}
+                     :ba/success-message nil
+                     :ba/data nil}}
    (s/validate ws/AppStateSchema)
    (atomize-map)))
 
@@ -261,7 +263,11 @@
 
 (defn decode-string
   [s]
-  (.decodeURIComponent js/window (b64/decodeString s)))
+  ;; we sometimes use 'url-safe' b64: https://commons.apache.org/proper/commons-codec/apidocs/src-html/org/apache/commons/codec/binary/Base64.html#line.92
+  (let [r (-> s
+              (str/replace "-" "+")
+              (str/replace "_" "/"))]
+    (.decodeURIComponent js/window (b64/decodeString r))))
 
 (defn save-data!
   []

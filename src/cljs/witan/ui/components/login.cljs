@@ -223,6 +223,7 @@
                                                         :pass (.-value (. js/document (getElementById "login-password")))})
                         (.preventDefault e))}
     [:input {:tab-index 1
+             :auto-complete "username"
              :ref "email"
              :type "email"
              :id "login-email"
@@ -230,6 +231,7 @@
              :required :required}]
     [:input (merge password-validation
                    {:tab-index 2
+                    :auto-complete "current-password"
                     :ref "password"
                     :type "password"
                     :id "login-password"

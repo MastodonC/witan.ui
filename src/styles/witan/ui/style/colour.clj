@@ -52,6 +52,7 @@
 (def subtle-grey "#dfe3e9")
 (def subtle-grey2 (color/darken subtle-grey 10))
 (def subtle-grey3 (color/darken subtle-grey 20))
+(def subtle-grey4 (color/darken subtle-grey 30))
 ;;
 (def error   color-complement-0)
 (def warning color-secondary-2-0)

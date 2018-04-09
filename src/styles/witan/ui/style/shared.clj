@@ -277,8 +277,9 @@
              [:.shared-tab
               {:margin [[(em 0.0) (em 0.75)]]
                :margin-top (em 0.8)
-               :color colour/subtle-grey3
-               :cursor :pointer}
+               :color colour/subtle-grey4
+               :cursor :pointer
+               :font-size (px 16)}
               [:&:hover
                {:color colour/clickable}]]
              [:.shared-tab-selected

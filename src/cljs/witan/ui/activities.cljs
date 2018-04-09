@@ -89,7 +89,20 @@
    :send-collect-request [{:kixi.command/type :kixi.collect/request-collection}
                           (a/or
                            [{:kixi.event/type :kixi.collect/collection-requested} (a/$ :completed)]
-                           [{:kixi.event/type :kixi.collect/collection-request-rejected} (a/$ :failed)])]})
+                           [{:kixi.event/type :kixi.collect/collection-request-rejected} (a/$ :failed)])]
+   :submit-to-collection [{:kixi.command/type :kixi.datastore/add-files-to-bundle}
+                          (a/or
+                           {:kixi.event/type :kixi.datastore/files-added-to-bundle}
+                           [{:kixi.event/type :kixi.datastore/files-add-to-bundle-rejected} (a/$ :failed)])
+                          ;; TODO move this to process manager
+                          {:kixi.command/type :kixi.datastore/sharing-change} ;; meta-read
+                          (a/or
+                           [{:kixi.event/type  :kixi.datastore/sharing-changed} (a/$ :completed)]
+                           [{:kixi.event/type  :kixi.datastore/sharing-change-rejected} (a/$ :failed)])
+                          {:kixi.command/type :kixi.datastore/sharing-change} ;; file-read
+                          (a/or
+                           [{:kixi.event/type  :kixi.datastore/sharing-changed} (a/$ :completed)]
+                           [{:kixi.event/type  :kixi.datastore/sharing-change-rejected} (a/$ :failed)])]})
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 

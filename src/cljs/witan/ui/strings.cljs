@@ -32,7 +32,7 @@
    :string/forecast-lastmodified            "Last Modified"
    :string/create-account-header            "Need an account?"
    :string/view                             "View"
-   :string/if-persists                      ["If the problem persists, please contact us at ":string/support-email]
+   :string/if-persists                      ["If the problem persists, please contact us at " :string/support-email]
    :string/api-failure                      ["Sorry, we're having a problem with the service. Please try again. If the problem persists, please contact us at " :string/support-email]
    :string/thanks                           "Thanks"
    :string/upload                           "Upload"
@@ -191,7 +191,7 @@
    :string/file-sharing-meta-read           "Read Metadata"
    :string/file-sharing-meta-update         "Edit Metadata"
    :string/file-sharing-file-read           "Download Dataset"
-   :string/datapack-sharing-bundle-add      "Add Files"
+   :string/datapack-sharing-bundle-add      "Add File"
    :string/datapack-bundle-add              "Share Files to a Datapack"
    :string/file-actions-download-file       "Download this dataset"
    :string/sharing-matrix-group-name        "Group Name"
@@ -269,8 +269,8 @@
    :string/create-datapack-search-files     "Search for files by their titles..."
    :string/edit-datapack-search-files       "Search for files to add to the datapack..."
    :string/create-datapack-no-files         "You have not yet added any files to the datapack. Use the search box to select the files you would like to add."
-   :string/datapack-no-id-supplied          "No datapack id was supplied."
-   :string/datapack-create-unknown-error    "Unexpected exception has occured, please contact support."
+   :string/bundle-add-bad-data              ["The link has expired or is malformed. Please contact us at " :string/support-email]
+   :string/datapack-create-unknown-error    ["Unexpected exception has occured. Please contact us at " :string/support-email]
    :string/na                               "n/a"
    :string/cancel                           "Cancel"
    :string/ok                               "OK"
@@ -305,9 +305,12 @@
    :string/collect-message-ph               "Provide a detailed message to the participants so they understand the kinds of files you'd like them to contribute."
    :string/collect-send-request             "Send Collect request"
    :string/collection-failed                "Failed to send Collect request: "
-   :stringf/collection-succeeded             "Collect request sent to %s recipient(s)!"
-   :string/share-files-to-datapack          "Add Files to Datapack"
-   :string/datapack-collect-intro-text      "You have been invited to add files to a datapack. Use the search bar to find the files and click on the title to add that file to the datapack. When you have selected all the files you want to add click on 'Add Files' to complete the request."
+   :stringf/collection-succeeded            "Collect request sent to %s recipient(s)!"
+   :string/share-files-to-datapack          "Add File to Datapack"
+   :string/datapack-collect-intro-text-1    ["You have been invited to add a file to a datapack. If you're unsure of the origin of this request then please either contact the original requester, or " :string/support-email ". Use the search bar to find the file you wish to add and click it. When you have selected the file you want to add, click on 'Add File' to complete the request."]
+   :string/datapack-collect-intro-text-2    "Please note that files added to a datapack in this manner will also grant additional permissions to the original requester:"
+   :string/datapack-collect-intro-text-li-1 "They will be able to see the file and read the metadata assigned to the file."
+   :string/datapack-collect-intro-text-li-2 "They will be able to download the file."
    :string/collect-bundle-add-return        "Click here to return to the dashboard."
    ;;
    :string.about/contact-us-1                "If you need Witan support, please either use our live help system or email us at"

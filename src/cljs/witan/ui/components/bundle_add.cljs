@@ -31,7 +31,8 @@
           [:h2.heading (get-string :string/files)]
           [shared/file-search-area
            {:ph :string/edit-datapack-search-files
-            :on-click #(swap! files conj %)
+            ;;:on-click #(swap! files conj %)
+            :on-click #(reset! files #{%}) ;; HACK only one file allowed at the moment
             :on-init #(controller/raise! :search/clear-datapack-files {})
             :on-scroll #(controller/raise! :search/datapack-files-expand {})
             :on-search #(controller/raise! :search/datapack-files {:search-term %})
@@ -90,24 +91,29 @@
                         ]
               :content @files}])]]))))
 
-
 (defn view
   []
   (let [files (r/atom #{})]
-    (controller/raise! :data/reset-bundle-add-messages nil)
+    (controller/raise! :collect/reset-bundle-add-messages nil)
     (fn []
       (let [{:keys [ba/pending?
                     ba/failure-message
-                    ba/success-message] :as bundle-add} (data/get-app-state :app/bundle-add)
-            datapack-id (utils/query-param :msid)]
+                    ba/success-message
+                    ba/data] :as bundle-add} (data/get-app-state :app/bundle-add)]
         [:div#create-datapack-view
          (shared/header :string/share-files-to-datapack nil #{:center})
          [:div.flex-center
-          (if datapack-id
+          (if data
             [:div.container.padded-content
              [editable-field nil
               [:div
-               (get-string :string/datapack-collect-intro-text)]]
+               [:h4
+                (get-string :string/datapack-collect-intro-text-1)]
+               [:h4
+                (get-string :string/datapack-collect-intro-text-2)]
+               [:ul
+                [:li (get-string :string/datapack-collect-intro-text-li-1)]
+                [:li (get-string :string/datapack-collect-intro-text-li-2)]]]]
              [show-files files {:disabled? (or pending?
                                                success-message)}]
              [:div
@@ -120,8 +126,7 @@
                                :disabled? (or pending?
                                               (empty? @files)
                                               success-message)}
-                              #(controller/raise! :data/add-collect-files-to-datapack {:added-files @files
-                                                                                       :datapack-id datapack-id}))
+                              #(controller/raise! :collect/add-files-to-datapack {:added-files @files}))
                (cond
                  success-message [:span.success success-message]
                  pending? [:span (get-string :string/sending "....")])]
@@ -134,6 +139,6 @@
                                     :prevent? true
                                     :disabled? false}
                                    #(route/navigate! :app/data-dash)))
-              (when failure-message [:div.error failure-message])]]
+              (when failure-message [:p.error failure-message])]]
             [:div.container.padded-content
-             [:span.error (get-string :string/datapack-no-id-supplied)]])]]))))
+             [:span.error (get-string :string/bundle-add-bad-data)]])]]))))
