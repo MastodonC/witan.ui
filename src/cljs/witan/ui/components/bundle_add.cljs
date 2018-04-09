@@ -24,72 +24,73 @@
   [files options]
   (let []
     (fn [files {:keys [disabled?]}]
-      (let []
-        [editable-field
-         nil
-         [:div.datapack-edit-file
-          [:h2.heading (get-string :string/files)]
-          [shared/file-search-area
-           {:ph :string/edit-datapack-search-files
-            ;;:on-click #(swap! files conj %)
-            :on-click #(reset! files #{%}) ;; HACK only one file allowed at the moment
-            :on-init #(controller/raise! :search/clear-datapack-files {})
-            :on-scroll #(controller/raise! :search/datapack-files-expand {})
-            :on-search #(controller/raise! :search/datapack-files {:search-term %})
-            :get-results-fn #(->> (data/get-in-app-state :app/search :ks/datapack-files :ks/current-search)
-                                  (data/get-in-app-state :app/search :ks/datapack-files :ks/search->result)
-                                  :items)
-            :selector-key :kixi.datastore.metadatastore/id
-            :table-headers-fn (fn []
-                                [{:content-fn #(shared/inline-file-title % :small :small)
-                                  :title (get-string :string/file-name)
-                                  :weight 0.50}
-                                 {:content-fn (comp
-                                               :kixi.user/name
-                                               :kixi/user
-                                               :kixi.datastore.metadatastore/provenance)
-                                  :title (get-string :string/file-uploader)
-                                  :weight 0.20}
-                                 {:content-fn (comp
-                                               time/iso-time-as-moment
-                                               :kixi.datastore.metadatastore/created
-                                               :kixi.datastore.metadatastore/provenance)
-                                  :title (get-string :string/file-uploaded-at)
-                                  :weight 0.20}])}
-           {:exclusions @files
-            :disabled? disabled?}]
-          (when-not (empty? @files)
-            [shared/table
-             {:headers [{:content-fn
-                         #(vector
-                           :div.flex-start
+      [editable-field
+       nil
+       [:div.datapack-edit-file
+        [:h2.heading (get-string :string/files)]
+        [shared/file-search-area
+         {:ph :string/edit-datapack-search-files
+          ;;:on-click #(swap! files conj %)
+          :on-click #(if (utils/user-has-edit? (data/get-user) %)
+                       (reset! files #{%}) ;; HACK only one file allowed at the moment
+                       (.error js/toastr (get-string :string/files-with-meta-edit-only)))
+          :on-init #(controller/raise! :search/clear-datapack-files {})
+          :on-scroll #(controller/raise! :search/datapack-files-expand {})
+          :on-search #(controller/raise! :search/datapack-files {:search-term %})
+          :get-results-fn #(->> (data/get-in-app-state :app/search :ks/datapack-files :ks/current-search)
+                                (data/get-in-app-state :app/search :ks/datapack-files :ks/search->result)
+                                :items)
+          :selector-key :kixi.datastore.metadatastore/id
+          :table-headers-fn (fn []
+                              [{:content-fn #(shared/inline-file-title % :small :small)
+                                :title (get-string :string/file-name)
+                                :weight 0.50}
+                               {:content-fn (comp
+                                             :kixi.user/name
+                                             :kixi/user
+                                             :kixi.datastore.metadatastore/provenance)
+                                :title (get-string :string/file-uploader)
+                                :weight 0.20}
+                               {:content-fn (comp
+                                             time/iso-time-as-moment
+                                             :kixi.datastore.metadatastore/created
+                                             :kixi.datastore.metadatastore/provenance)
+                                :title (get-string :string/file-uploaded-at)
+                                :weight 0.20}])}
+         {:exclusions @files
+          :disabled? disabled?}]
+        (when-not (empty? @files)
+          [shared/table
+           {:headers [{:content-fn
+                       #(vector
+                         :div.flex-start
 
-                           (shared/button {:icon icons/search
-                                           :id (str (:kixi.datastore.metadatastore/id %) "-open")
-                                           :prevent? true}
-                                          (fn [_]
-                                            (.open
-                                             js/window
-                                             (str "/#" (route/find-path :app/data {:id (:kixi.datastore.metadatastore/id %)})))))
-                           (shared/button {:icon icons/delete
-                                           :id (str (:kixi.datastore.metadatastore/id %) "-delete")
-                                           :disabled? disabled?}
-                                          (fn [_] (swap! files disj %))))
-                         :title ""  :weight "100px"}
-                        {:content-fn #(shared/inline-file-title % :small :small)
-                         :title (get-string :string/file-name)
-                         :weight 0.6}
-                        {:content-fn #(js/filesize (:kixi.datastore.metadatastore/size-bytes %))
-                         :title (get-string :string/file-size)
-                         :weight 0.15}
-                        {:content-fn #(or (get-in
-                                           %
-                                           [:kixi.datastore.metadatastore.license/license
-                                            :kixi.datastore.metadatastore.license/type]) (get-string :string/na))
-                         :title (get-string :string/license)
-                         :weight 0.15}
-                        ]
-              :content @files}])]]))))
+                         (shared/button {:icon icons/search
+                                         :id (str (:kixi.datastore.metadatastore/id %) "-open")
+                                         :prevent? true}
+                                        (fn [_]
+                                          (.open
+                                           js/window
+                                           (str "/#" (route/find-path :app/data {:id (:kixi.datastore.metadatastore/id %)})))))
+                         (shared/button {:icon icons/delete
+                                         :id (str (:kixi.datastore.metadatastore/id %) "-delete")
+                                         :disabled? disabled?}
+                                        (fn [_] (swap! files disj %))))
+                       :title ""  :weight "100px"}
+                      {:content-fn #(shared/inline-file-title % :small :small)
+                       :title (get-string :string/file-name)
+                       :weight 0.6}
+                      {:content-fn #(js/filesize (:kixi.datastore.metadatastore/size-bytes %))
+                       :title (get-string :string/file-size)
+                       :weight 0.15}
+                      {:content-fn #(or (get-in
+                                         %
+                                         [:kixi.datastore.metadatastore.license/license
+                                          :kixi.datastore.metadatastore.license/type]) (get-string :string/na))
+                       :title (get-string :string/license)
+                       :weight 0.15}
+                      ]
+            :content @files}])]])))
 
 (defn view
   []

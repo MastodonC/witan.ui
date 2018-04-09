@@ -312,6 +312,7 @@
    :string/datapack-collect-intro-text-li-1 "They will be able to see the file and read the metadata assigned to the file."
    :string/datapack-collect-intro-text-li-2 "They will be able to download the file."
    :string/collect-bundle-add-return        "Click here to return to the dashboard."
+   :string/files-with-meta-edit-only        "You may only select files for which you have the 'Edit' permission."
    ;;
    :string.about/contact-us-1                "If you need Witan support, please either use our live help system or email us at"
    :string.about/contact-us-2                "For all other enquiries, please email us at"
