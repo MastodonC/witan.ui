@@ -839,7 +839,8 @@
 (defn basic-collect
   [md]
   (let [groups (r/atom #{})
-        message (r/atom nil)]
+        message (r/atom nil)
+        post-send? (r/atom false)]
     (controller/raise! :collect/reset-messages nil)
     (fn [md]
       (let [{:keys [collect/pending?
@@ -854,7 +855,9 @@
           [:div
            [shared/group-search-area
             :string/create-rts-user-ph
-            #(swap! groups conj %1) {:disabled? pending?}]
+            #(do
+               (reset! post-send? false)
+               (swap! groups conj %1)) {:disabled? pending?}]
            (when (not-empty @groups)
              (input-wrapper
               [shared/table
@@ -865,6 +868,7 @@
                                              :disabled? pending?
                                              :id (str (:kixi.group/id %) "-remove")}
                                             (fn [_]
+                                              (reset! post-send? false)
                                               (swap! groups disj %))))
                            :title ""  :weight 0.1}
                           {:content-fn shared/inline-group
@@ -880,15 +884,18 @@
                           :value @message
                           :placeholder (get-string :string/collect-message-ph)
                           :disabled (when pending? :disabled)
-                          :on-change #(reset! message (.. % -target -value))}]
+                          :on-change #(do
+                                        (reset! post-send? false)
+                                        (reset! message (.. % -target -value)))}]
               [:div
                [:div.flex-vcenter-start
                 (shared/button {:id :send-cas-request
                                 :_id :send-cas-request
                                 :txt :string/collect-send-request
                                 :prevent? true
-                                :disabled? (or pending? (clojure.string/blank? @message))}
+                                :disabled? (or @post-send? pending? (clojure.string/blank? @message))}
                                (fn [_]
+                                 (reset! post-send? true)
                                  (controller/raise!
                                   :collect/send-collect-request
                                   {:groups @groups
