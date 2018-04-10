@@ -900,20 +900,19 @@
                (when failure-message [:div.error failure-message])]))]]]))))
 
 (def tabs
-  [[0 :overview]
-   [1 :sharing]
-   [2 :edit]
-   [3 :files]
-   ;;[4 :collect]
-   ])
+  {:overview (get-string :string/overview)
+   :sharing (get-string :string/sharing)
+   :edit (get-string :string/edit)
+   :files (get-string :string/files)
+   :collect (get-string :string/collect)})
 
 (defn idx->tab
   [i]
-  (get (into {} tabs) i :overview))
+  (nth (keys tabs) i))
 
 (defn tab->idx
   [i]
-  (get (zipmap (map second tabs) (map first tabs)) i 0))
+  (get (zipmap (keys tabs) (range (count tabs))) i 0))
 
 (defn switch-primary-view!
   [k]
@@ -926,20 +925,12 @@
   (cond
     (= "stored" (:kixi.datastore.metadatastore/type md))
     (if has-edit?
-      {:overview (get-string :string/overview)
-       :sharing (get-string :string/sharing)
-       :edit (get-string :string/edit)}
-      {:overview (get-string :string/overview)
-       :sharing (get-string :string/sharing)})
+      (select-keys tabs [:overview :sharing :edit])
+      (select-keys tabs [:overview :sharing]))
     (= "datapack" (:kixi.datastore.metadatastore/bundle-type md))
     (if has-edit?
-      {:overview (get-string :string/overview)
-       :files (get-string :string/files)
-       ;;:collect (get-string :string/collect)
-       :sharing (get-string :string/sharing)
-       :edit (get-string :string/edit)}
-      {:overview (get-string :string/overview)
-       :sharing (get-string :string/sharing)})
+      (select-keys tabs [:overview :files :collect :sharing :edit])
+      (select-keys tabs [:overview :sharing]))
     :else {}))
 
 ;;
