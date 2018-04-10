@@ -341,7 +341,6 @@
    :string.activity.add-files-to-datapack/completed "You successfully added files to the datapack."
    })
 
-
 (defn resolve-string
   ([r]
    (let [s (get strings r)]
