@@ -50,7 +50,7 @@
 
 (defmethod handle
   :send-collect-request
-  [event {:keys [groups message metadata]}]
+  [event {:keys [groups message metadata receiving-groups]}]
   (reset-pending true)
   (reset-messages)
   (activities/start-activity!
@@ -61,7 +61,7 @@
     {:kixi.collect.request/message message
      :kixi.collect.request/submit-route (str "/#" (route/find-path :app/datapack-bundle-add) "?" (name bundle-add-page-data-query-param) "=")
      :kixi.collect.request/requested-groups (set (map :kixi.group/id groups))
-     :kixi.collect.request/receiving-groups #{(:kixi.user/self-group (data/get-user))} ;; TODO allow user to select?
+     :kixi.collect.request/receiving-groups receiving-groups
      :kixi.datastore.metadatastore/id (:kixi.datastore.metadatastore/id metadata)})
    {:failed #(gstring/format (get-string :string.activity.send-collect-request/failed)
                              (:kixi.datastore.metadatastore/name metadata))

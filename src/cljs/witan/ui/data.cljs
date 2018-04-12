@@ -152,7 +152,8 @@
     :app/bundle-add {:ba/pending? false
                      :ba/failure-message nil
                      :ba/success-message nil
-                     :ba/data nil}}
+                     :ba/data nil}
+    :app/group-cache {}}
    (s/validate ws/AppStateSchema)
    (atomize-map)))
 
@@ -245,8 +246,8 @@
    (reset-app-state! :app/panic-message nil)
    (reset-app-state! :app/route nil)
    (swap-app-state! :app/create-data dissoc :cd/pending-data)
-   (swap-app-state! :app/user dissoc :user/group-search-results)
    (swap-app-state! :app/user dissoc :user/group-search-filtered)
+   (reset-app-state! :app/group-cache {})
    (swap-app-state! :app/datastore assoc :ds/query-tries 0)
    (swap-app-state! :app/datastore assoc :ds/current nil)
    (swap-app-state! :app/datastore dissoc :ds/error)
