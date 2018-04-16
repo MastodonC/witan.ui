@@ -840,12 +840,20 @@
   [md]
   (let [groups (r/atom #{})
         message (r/atom nil)
-        post-send? (r/atom false)]
+        selected-group (r/atom nil)
+        post-send? (r/atom false)
+        user-groups (:kixi.user/groups (data/get-user))
+        user-self-group (:kixi.user/self-group (data/get-user))]
+    (controller/raise! :user/groups-by-ids {:ids user-groups})
     (controller/raise! :collect/reset-messages nil)
     (fn [md]
       (let [{:keys [collect/pending?
                     collect/failure-message
-                    collect/success-message] :as collect} (data/get-app-state :app/collect)]
+                    collect/success-message] :as collect} (data/get-app-state :app/collect)
+            expanded-user-groups (map (partial data/get-in-app-state :app/group-cache) (:kixi.user/groups (data/get-user)))
+            expanded-user-self-group (data/get-in-app-state :app/group-cache user-self-group)]
+        (when (and (nil? @selected-group) expanded-user-self-group)
+          (reset! selected-group expanded-user-self-group))
         [editable-field
          nil
          [:div.datapack-basic-collect
@@ -860,6 +868,7 @@
                (swap! groups conj %1)) {:disabled? pending?}]
            (when (not-empty @groups)
              (input-wrapper
+              [:h3 (get-string :string/collect-data-from)]
               [shared/table
                {:headers [{:content-fn
                            #(vector
@@ -876,6 +885,10 @@
                            :title-align :left
                            :weight 0.9}]
                 :content @groups}]
+              [:h3 (get-string :string/share-data-with)]
+              [shared/group-dropdown {:groups expanded-user-groups
+                                      :current-group selected-group}
+               #(reset! selected-group %)]
               [:div.flex-vcenter
                [:h3 (get-string :string/message)]
                #_[:small (get-string :string/supports " ") [:a {:href "http://commonmark.org/help/"
@@ -900,7 +913,8 @@
                                   :collect/send-collect-request
                                   {:groups @groups
                                    :message @message
-                                   :metadata md})))
+                                   :metadata md
+                                   :receiving-groups #{(:kixi.group/id @selected-group)}})))
                 (cond
                   success-message [:span.success success-message]
                   pending? [:span (get-string :string/sending "...")])]

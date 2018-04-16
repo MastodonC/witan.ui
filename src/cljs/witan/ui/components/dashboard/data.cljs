@@ -112,7 +112,7 @@
                            :on-double-click navigate-fn})
             (when-not (empty? (:items current-results))
               [:div.flex-center.dash-pagination
-               [shared/pagination {:page-blocks (range 1 page-count)
+               [shared/pagination {:page-blocks (vec (range 1 page-count))
                                    :current-page current-page}
                 (fn [id]
                   (let [new-page (js/parseInt (subs id 5))]

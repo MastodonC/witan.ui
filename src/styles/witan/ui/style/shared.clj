@@ -367,4 +367,35 @@
 
             [:.btn-pagination
              {:padding (px 2)}
-             [:span {:margin-right (px 5)}]]])
+             [:span {:margin-right (px 5)}]]
+
+            ;;;;;;;;;;;;;;;
+            [:.shared-dropdown.button-container
+             [:button
+              {:margin-left (px 0)
+               :width (percent 100)}]]
+
+            [:.shared-dropdown
+             {:position :relative
+              :width (percent 100)
+              :margin-bottom (em 1.4)}
+             [:.shared-inline-group
+              {:padding-top (px 2)}
+              [:.group-icon
+               {:vertical-align :initial}]]
+             [:.shared-dropdown-content
+              {:position :absolute
+               :margin-top (px 1)
+               :width (percent 100)
+               :background-color "#E6E6E6"
+               :box-shadow [[(px 2) (px 2) (px 4) "#888"]]
+               :border-radius (px 2)
+               :font-family "'Lato',Helvetica Neue,Helvetica,Arial,sans-serif"
+               :font-size (px 13)
+               :line-height :normal
+               :cursor :pointer}
+              [:.shared-inline-group
+               {:padding [[(em 0.5) (em 0.75)]]
+                :display :block}]
+              [:.shared-inline-group:hover
+               {:background-color colour/subtle-grey2}]]]])

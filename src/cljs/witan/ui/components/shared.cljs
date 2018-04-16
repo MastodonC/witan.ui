@@ -271,7 +271,7 @@
              :or {id (str "group-search-field-"ph)
                   disabled? false
                   exclusions nil}} (first opts)
-            results (:user/group-search-filtered (data/get-app-state :app/user))
+            results (data/get-in-app-state :app/user :user/group-search-filtered)
             results (if exclusions
                       (let [excluded-groups (map :kixi.group/id exclusions)]
                         (remove (fn [x] (some #{(:kixi.group/id x)} excluded-groups)) results))
@@ -459,6 +459,63 @@
        [:span
         {:class (when-not @expanded? "ellipsis")}
         long-text]])))
+
+(defn pagination
+  [_ _]
+  (fn
+    [{:keys [page-blocks current-page]} on-click]
+    (let [current-page (if (satisfies? IDeref current-page)
+                         @current-page
+                         current-page)]
+      [:div.flex-start
+       (button {:id (str "page-" (dec current-page))
+                :class "btn-pagination"
+                :prevent? false
+                :disabled? (<= current-page 1)
+                :txt (get-string :string/previous)}
+               on-click)
+       (for [page page-blocks]
+         (button {:id (str "page-" page)
+                  :txt page
+                  :class (if (= page current-page)
+                           "btn-pagination btn-success"
+                           "btn-pagination")}
+                 on-click))
+
+       (button {:id (str "page-" (inc current-page))
+                :class "btn-pagination"
+                :prevent? false
+                :disabled? (>= current-page (count page-blocks))
+                :txt (get-string :string/next)}
+               on-click)])))
+
+(defn group-dropdown
+  [_ _]
+  (let [dropped? (r/atom false)]
+    (fn
+      [{:keys [groups current-group disabled?]
+        :or {disabled? false}} on-click]
+      (let [current-group (if (satisfies? IDeref current-group)
+                            @current-group
+                            current-group)]
+        [:div.button-container.shared-dropdown
+         {:key (apply str (map :kixi.group/id groups))}
+         [:button.pure-button
+          {:disabled disabled?
+           :on-click #(swap! dropped? (partial not))}
+          [:div.flex
+           (inline-group current-group)
+           (icons/tree-arrow-down)]]
+         (when @dropped?
+           [:div.shared-dropdown-content
+            (doall
+             (for [grp groups]
+               ^{:key (:kixi.group/id grp)}
+               [:div
+                {:on-click #(do
+                              (reset! dropped? false)
+                              (on-click grp))}
+                (inline-group grp)]))])]))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; DEVCARDS
@@ -684,7 +741,8 @@
      [:div
       {:style {:width "100%"}}
       (for [v (:values @data)]
-        (progress-bar v))]))
+        [:div {:key v}
+         (progress-bar v)])]))
   {:values [0 0.1 0.5 0.75 1.0]}
   {:inspect-data true
    :frame true
@@ -745,46 +803,40 @@
       (r/as-element
        [collapsible-text (clojure.string/join "," (map :name states))])])))
 
-(defn pagination
-  [_ _]
-  (fn
-    [{:keys [page-blocks current-page]} on-click]
-    (let [current-page (if (satisfies? IDeref current-page)
-                         @current-page
-                         current-page)]
-      [:div.flex-start
-       (button {:id (str "page-" (dec current-page))
-                :class "btn-pagination"
-                :prevent? false
-                :disabled? (<= current-page 1)
-                :txt (get-string :string/previous)}
-               on-click)
-       (for [page page-blocks]
-         (button {:id (str "page-" page)
-                  :txt page
-                  :class (if (= page current-page)
-                           "btn-pagination btn-success"
-                           "btn-pagination")}
-                 on-click))
-
-       (button {:id (str "page-" (inc current-page))
-                :class "btn-pagination"
-                :prevent? false
-                :disabled? (>= current-page (count page-blocks))
-                :txt (get-string :string/next)}
-               on-click)])))
-
 (defcard pagination-panel
   (fn [data _]
-    (let [page-blocks (range 1 11)]
-      (sab/html
-       [:div
-        {:style {:width "100%"}}
-        [pagination @data (fn [id]
-                            (swap! data assoc :current-page (js/parseInt (subs id 5)))
-                            )]])))
+    (sab/html
+     [:div
+      {:style {:width "100%"}}
+      (r/as-element
+       [pagination @data (fn [id]
+                           (swap! data assoc :current-page (js/parseInt (subs id 5))))])]))
   {:page-blocks (range 1 11)
    :current-page 1}
+  {:inspect-data true
+   :frame true
+   :history false})
+
+(defcard group-dropdown-panel
+  (fn [data _]
+    (sab/html
+     [:div
+      {:style {:width "200px"}}
+      (r/as-element
+       [group-dropdown @data (fn [group]
+                               (swap! data assoc :current-group group))])]))
+  {:groups [{:kixi.group/id "1"
+             :kixi.group/name "Alice"
+             :kixi.group/type "user"}
+            {:kixi.group/id "2"
+             :kixi.group/name "Bob"
+             :kixi.group/type "user"}
+            {:kixi.group/id "3"
+             :kixi.group/name "Cadbury's"
+             :kixi.group/type "group"}]
+   :current-group {:kixi.group/id "1"
+                   :kixi.group/name "Alice"
+                   :kixi.group/type "user"}}
   {:inspect-data true
    :frame true
    :history false})

@@ -19,7 +19,6 @@
    :kixi.user/id     (s/maybe s/Str)
    :kixi.user/groups [(s/maybe s/Str)]
    :kixi.user/self-group (s/maybe s/Str)
-   (s/optional-key :user/group-search-results) [GroupSchema]
    (s/optional-key :user/group-search-filtered) [GroupSchema]})
 
 (def SchemaSchema
@@ -151,4 +150,5 @@
                     :ba/success-message (s/maybe s/Str)
                     :ba/data (s/maybe BundleAddData)}
    :app/activities {:activities/log [ActivityLogSchema]
-                    :activities/pending {uuid? ActivityPendingSchema}}})
+                    :activities/pending {uuid? ActivityPendingSchema}}
+   :app/group-cache {uuid? GroupSchema}})

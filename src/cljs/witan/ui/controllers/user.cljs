@@ -75,6 +75,10 @@
       (do
         (data/connect! {:on-connect #(data/publish-topic :data/user-logged-in (data/get-app-state :app/user))})))))
 
+(defn add-groups-to-cache!
+  [items]
+  (run! (fn [i] (data/swap-app-state! :app/group-cache assoc (:kixi.group/id i) i)) items))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (declare login)
@@ -163,8 +167,19 @@
 (defmethod on-query-response
   :groups/search
   [[_ data]]
-  (data/swap-app-state! :app/user assoc :user/group-search-results (:items data))
-  (data/swap-app-state! :app/user assoc :user/group-search-filtered (:items data)))
+  (data/swap-app-state! :app/user assoc :user/group-search-filtered (:items data))
+  (add-groups-to-cache! (:items data)))
+
+(defmethod on-query-response
+  :groups/by-ids
+  [[_ {:keys [items]}]]
+  (add-groups-to-cache! items))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn groups-by-ids
+  [group-ids]
+  (data/query {:groups/by-ids [[group-ids] (utils/keys* ws/GroupSchema)]} on-query-response))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -211,9 +226,13 @@
   [event _]
   (data/query {:groups/search [[] (utils/keys* ws/GroupSchema)]} on-query-response))
 
+(defmethod handle :groups-by-ids
+  [event {:keys [ids]}]
+  (groups-by-ids ids))
+
 (defmethod handle :search-groups
   [event {:keys [search]}]
-  (let [groups (data/get-in-app-state :app/user :user/group-search-results)
+  (let [groups (vals (data/get-app-state :app/group-cache))
         filtered-groups (filter
                          #(gstring/caseInsensitiveContains
                            (:kixi.group/name %)
