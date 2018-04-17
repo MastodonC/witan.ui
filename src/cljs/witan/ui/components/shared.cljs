@@ -499,7 +499,8 @@
                             @current-group
                             current-group)]
         [:div.button-container.shared-dropdown
-         {:key (apply str (map :kixi.group/id groups))}
+         {:key (apply str (map :kixi.group/id groups))
+          :disabled disabled?}
          [:button.pure-button
           {:disabled disabled?
            :on-click #(swap! dropped? (partial not))}
@@ -824,7 +825,9 @@
       {:style {:width "200px"}}
       (r/as-element
        [group-dropdown @data (fn [group]
-                               (swap! data assoc :current-group group))])]))
+                               (swap! data assoc :current-group group))])
+      (r/as-element
+       [group-dropdown (assoc @data :disabled? true) identity])]))
   {:groups [{:kixi.group/id "1"
              :kixi.group/name "Alice"
              :kixi.group/type "user"}

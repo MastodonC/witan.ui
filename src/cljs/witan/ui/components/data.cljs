@@ -887,8 +887,11 @@
                 :content @groups}]
               [:h3 (get-string :string/share-data-with)]
               [shared/group-dropdown {:groups expanded-user-groups
-                                      :current-group selected-group}
-               #(reset! selected-group %)]
+                                      :current-group selected-group
+                                      :disabled? pending?}
+               #(do
+                  (reset! post-send? false)
+                  (reset! selected-group %))]
               [:div.flex-vcenter
                [:h3 (get-string :string/message)]
                #_[:small (get-string :string/supports " ") [:a {:href "http://commonmark.org/help/"
