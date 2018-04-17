@@ -375,6 +375,9 @@
               {:margin-left (px 0)
                :width (percent 100)}]]
 
+            [".shared-dropdown[disabled]"
+             {:border [[(px 1) 'silver 'solid]]}]
+
             [:.shared-dropdown
              {:position :relative
               :width (percent 100)
@@ -393,7 +396,8 @@
                :font-family "'Lato',Helvetica Neue,Helvetica,Arial,sans-serif"
                :font-size (px 13)
                :line-height :normal
-               :cursor :pointer}
+               :cursor :pointer
+               :z-index 1000}
               [:.shared-inline-group
                {:padding [[(em 0.5) (em 0.75)]]
                 :display :block}]

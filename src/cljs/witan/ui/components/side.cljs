@@ -104,8 +104,4 @@
              :bottom "0"
              :left "0"
              :height "100%"}}
-    (side-bar {:side/upper '([:button :workspaces]
-                             [:button :data]
-                             [:hr])
-               :side/lower '([:button :help]
-                             [:button :logout])} :app/foo false)]))
+    (side-bar side-bar-config false)]))
