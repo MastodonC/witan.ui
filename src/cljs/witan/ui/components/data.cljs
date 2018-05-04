@@ -140,7 +140,8 @@
     ((juxt :kixi.datastore.metadatastore/type :kixi.datastore.metadatastore/bundle-type) md)))
 
 (defmethod metadata :default
-  [_ _])
+  [md _]
+  [:h3 (str "Unknown metadata type: " ((juxt :kixi.datastore.metadatastore/type :kixi.datastore.metadatastore/bundle-type) md)) ])
 
 (defmethod metadata
   ["stored" nil]
@@ -187,15 +188,24 @@
         (vec (concat [:tr]
                      (row :string/maintainer (fn [] [:span maintainer]))
                      (row :string/temporal-coverage (fn [] [:span
-                                                            (when tc-from (time/iso-date-as-slash-date tc-from))
-                                                            " - "
-                                                            (when tc-to (time/iso-date-as-slash-date tc-to))]))))
+                                                            (try
+                                                              (str
+                                                               (when tc-from (time/iso-date-as-slash-date tc-from))
+                                                               " - "
+                                                               (when tc-to (time/iso-date-as-slash-date tc-to)))
+                                                              (catch js/Object e
+                                                                "Error parsing temporal coverage"))]))))
         (vec (concat [:tr]
                      (row :string/author (fn [] [:span author]))
-                     (row :string/source-created-at (fn [] [:span (when source-created (time/iso-date-as-slash-date source-created))]))))
+                     (row :string/source-created-at (fn [] [:span (try
+                                                                    (when source-created (time/iso-date-as-slash-date source-created))
+                                                                    (catch js/Object e
+                                                                      "Error parsing source created date"))]))))
         (vec (concat [:tr]
                      (row :string/file-source (fn [] [:span source]))
-                     (row :string/source-updated-at (fn [] [:span (when source-updated (time/iso-date-as-slash-date source-updated))]))))]]]]))
+                     (row :string/source-updated-at (fn [] [:span (try (when source-updated (time/iso-date-as-slash-date source-updated))
+                                                                       (catch js/Object e
+                                                                         "Error parsing source updated date"))]))))]]]]))
 
 (defn total-bundled-size
   [meta]
@@ -1079,17 +1089,6 @@
                                                          :kixi.datastore.metadatastore.time/to "2018-04-07T14:13:46.046Z"}
    :kixi.datastore.metadatastore/tags #{"London", "GLA", "Open data", "test"}})
 
-(def metadata-keys
-  [:kixi.datastore.metadatastore/provenance
-   :kixi.datastore.metadatastore/file-type
-   :kixi.datastore.metadatastore/size-bytes
-   :kixi.datastore.metadatastore/author
-   :kixi.datastore.metadatastore/maintainer
-   :kixi.datastore.metadatastore/source
-   :kixi.datastore.metadatastore.time/temporal-coverage
-   :kixi.datastore.metadatastore.license/license
-   :kixi.datastore.metadatastore.geography/geography])
-
 (defcard title-display
   (fn [data _]
     (sab/html
@@ -1118,8 +1117,7 @@
     (sab/html
      [:div#data-view
       {:style {:width "100%"}}
-      (r/as-element [header-container @data identity])]
-     ))
+      (r/as-element [header-container @data identity])]))
   example-file
   {:inspect-data false
    :frame true
@@ -1130,9 +1128,8 @@
     (sab/html
      [:div#data-view
       {:style {:width "100%"}}
-      (r/as-element [header-container @data identity])]
-     ))
-  (assoc example-file :kixi.datastore.metadatastore/description (repeat 100 "foobar "))
+      (r/as-element [header-container @data identity])]))
+  (assoc example-file :kixi.datastore.metadatastore/description (apply str (repeat 100 "foobar ")))
   {:inspect-data false
    :frame true
    :history false})
@@ -1154,7 +1151,7 @@
      [:div
       {:style {:width "100%"}}
       (r/as-element [metadata @data identity])]))
-  (select-keys example-file metadata-keys)
+  example-file
   {:inspect-data true
    :frame true
    :history false})
