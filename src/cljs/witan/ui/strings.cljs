@@ -307,8 +307,11 @@
    :string/collection-failed                "Failed to send Collect request: "
    :stringf/collection-succeeded            "Collect request sent to %s recipient(s)!"
    :string/share-files-to-datapack          "Add File to Datapack"
-   :string/datapack-collect-intro-text-1    ["You have been invited to add a file to a datapack. If you're unsure of the origin of this request then please either contact the original requester, or " :string/support-email ". Use the search bar to find the file you wish to add and click it. When you have selected the file you want to add, click on 'Add File' to complete the request."]
-   :string/datapack-collect-intro-text-2    "Please note that files added to a datapack in this manner will also grant additional permissions to the original requester:"
+   :string/click-here-to-upload-files       "Click Here to Upload Files"
+   :string/datapack-collect-intro-text-1    ["You have been invited to add a file to a datapack. If you're unsure of the origin of this request then please either contact the original requester, or " :string/support-email]
+   :string/datapack-collect-intro-text-2   "If your file is not already in Witan, please upload it first using the following link:"
+   :string/datapack-collect-intro-text-3   "Use the search bar to find the file you wish to add and click it. When you have selected the file you want to add, click on 'Add File' to complete the request."
+   :string/datapack-collect-intro-text-4    "Please note that files added to a datapack in this manner will also grant additional permissions to the original requester:"
    :string/datapack-collect-intro-text-li-1 "They will be able to see the file and read the metadata assigned to the file."
    :string/datapack-collect-intro-text-li-2 "They will be able to download the file."
    :string/collect-bundle-add-return        "Click here to return to the dashboard."

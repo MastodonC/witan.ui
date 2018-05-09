@@ -105,10 +105,12 @@
 
 (defmethod handle
   :datapack-files
-  [event {:keys [search-term]}]
+  [event {:keys [search-term use-cache?]
+          :or {use-cache? true}}]
   (update-datapack-files-search-name search-term)
-  (when-not (get (data/get-in-app-state :app/search :ks/datapack-files :ks/search->result)
-                 (datapack-files-search))
+  (when (or (not use-cache?)
+            (not (get (data/get-in-app-state :app/search :ks/datapack-files :ks/search->result)
+                      (datapack-files-search))))
     (data/query {:search/datapack-files [[(datapack-files-search)]]}
                 on-query-response)))
 

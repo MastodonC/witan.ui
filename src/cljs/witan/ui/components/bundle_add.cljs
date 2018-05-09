@@ -36,7 +36,7 @@
                        (.error js/toastr (get-string :string/files-with-meta-edit-only)))
           :on-init #(controller/raise! :search/clear-datapack-files {})
           :on-scroll #(controller/raise! :search/datapack-files-expand {})
-          :on-search #(controller/raise! :search/datapack-files {:search-term %})
+          :on-search #(controller/raise! :search/datapack-files {:search-term % :use-cache? false})
           :get-results-fn #(->> (data/get-in-app-state :app/search :ks/datapack-files :ks/current-search)
                                 (data/get-in-app-state :app/search :ks/datapack-files :ks/search->result)
                                 :items)
@@ -110,8 +110,14 @@
               [:div
                [:h4
                 (get-string :string/datapack-collect-intro-text-1)]
+               [:h4 {}
+                (get-string :string/datapack-collect-intro-text-2 " ") [:a {:href (str "#" (route/find-path :app/data-create))
+                                                                            :target "_blank" }
+                                                                        (get-string :string/click-here-to-upload-files)]]
                [:h4
-                (get-string :string/datapack-collect-intro-text-2)]
+                (get-string :string/datapack-collect-intro-text-3)]
+               [:h4
+                (get-string :string/datapack-collect-intro-text-4)]
                [:ul
                 [:li (get-string :string/datapack-collect-intro-text-li-1)]
                 [:li (get-string :string/datapack-collect-intro-text-li-2)]]]]
