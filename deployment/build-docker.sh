@@ -5,7 +5,7 @@ PROFILE=kops-spike
 API=witan-gateway.kops-spike.mc-ops-sandpit.mastodonc.net
 DOMAIN=mastodonc.net
 #Secure should be empty if you want false, any other value for true
-SECURE=""
+SECURE=
 GIT_COMMIT=$(git rev-parse HEAD)
 
 ./scripts/build.sh $API $VIZ $DOMAIN $PROFILE $GIT_COMMIT $SECURE
