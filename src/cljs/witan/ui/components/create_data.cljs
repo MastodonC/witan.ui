@@ -63,6 +63,7 @@
      :info-name ""
      :info-description ""
      :wants-to-share? nil
+     :user-id (:kixi.user/id user)
      :selected-groups {{:kixi.group/id (:kixi.user/self-group user)
                         :kixi.group/name (:kixi.user/name user)
                         :kixi.group/type "user"}
@@ -74,14 +75,20 @@
   [this]
   (let [activities->string data/datastore-file-activities
         locked-activities data/datastore-file-default-activity-permissions
-        form-data (r/atom (empty-form-data
-                           activities->string
-                           locked-activities))]
+        form-data (r/atom nil)
+        reset-form-data! #(reset! form-data (empty-form-data activities->string locked-activities))]
+    (reset-form-data!)
     (fn [this]
       (let [{:keys [cd/pending?
                     cd/pending-message
                     cd/error]} (data/get-app-state :app/create-data)
-            disabled? pending?]
+            disabled? pending?
+            user (:kixi.user/id (data/get-user))]
+        ;; shouldn't really cache user data on the page
+        ;; but we do. this fixes late login.
+        (when (and (not (:user-id @form-data)) user)
+          (reset-form-data!))
+
         [:div#create-data
          [:div.container
           (shared/header :string/upload-new-data :string/upload-new-data-desc)
@@ -103,9 +110,7 @@
                                 :txt :string/try-again}
                                #(do
                                   ;; TODO it'd be nice to maintain the form data but right now the search boxes and radios don't work, so we kill it all.
-                                  (reset! form-data (empty-form-data
-                                                     activities->string
-                                                     locked-activities))
+                                  (reset-form-data!)
                                   (controller/raise! :data/reset-errors)))]]
               pending?
               [:div.uploading
