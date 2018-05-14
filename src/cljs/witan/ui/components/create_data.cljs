@@ -194,7 +194,8 @@
                        (swap! form-data assoc-in [:selected-groups group :values activity] target-state))
                      :on-add
                      #(swap! form-data assoc-in [:selected-groups % :values]
-                             {:kixi.datastore.metadatastore/meta-read true})}
+                             {:kixi.datastore.metadatastore/meta-read true
+                              :kixi.datastore.metadatastore/file-read true})}
                     {:exclusions (keys (:selected-groups @form-data))}]]))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
