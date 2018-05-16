@@ -25,6 +25,7 @@
     {:title ""
      :selected-files []
      :sharing-summary {}
+     :user-id (:kixi.user/id user)
      :selected-groups {{:kixi.group/id (:kixi.user/self-group user)
                         :kixi.group/name (:kixi.user/name user)
                         :kixi.group/type "user"}
@@ -175,9 +176,7 @@
                              :txt :string/try-again}
                             #(do
                                ;; TODO it'd be nice to maintain the form data but right now the search boxes and radios don't work, so we kill it all.
-                               (reset! datapack (empty-form-data
-                                                 activities->string
-                                                 locked-activities))
+                               (reset-form-data!)
                                (controller/raise! :data/reset-errors)))]]]
 
           :else
