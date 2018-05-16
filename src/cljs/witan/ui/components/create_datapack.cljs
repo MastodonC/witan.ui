@@ -151,11 +151,17 @@
   []
   (let [activities->string data/datastore-bundle-activities
         locked-activities data/datastore-bundle-default-activity-permissions
-        datapack (r/atom (empty-form-data
-                          activities->string
-                          locked-activities))]
+        datapack (r/atom nil)
+        reset-form-data! #(reset! datapack (empty-form-data activities->string locked-activities))]
+    (reset-form-data!)
     (fn []
-      (let [{:keys [cdp/pending? cdp/error] :as cdp} (data/get-in-app-state :app/create-datapack)]
+      (let [{:keys [cdp/pending? cdp/error] :as cdp} (data/get-in-app-state :app/create-datapack)
+            user (:kixi.user/id (data/get-user))]
+        ;; shouldn't really cache user data on the page
+        ;; but we do. this fixes late login.
+        (when (and (not (:user-id @datapack)) user)
+          (reset-form-data!))
+
         (cond
           error
           [:div.flex-center
