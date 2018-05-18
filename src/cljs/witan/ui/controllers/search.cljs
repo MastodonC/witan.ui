@@ -66,6 +66,22 @@
    :kixi.datastore.metadatastore/bundle-type
    :kixi.datastore.metadatastore/file-type])
 
+(defn extract-tags-from-search-term
+  [search-term]
+  (if search-term
+    (let [rp #"tag\(([^)]+)\)"]
+      [(-> search-term
+           (clojure.string/replace rp "")
+           (clojure.string/trim)
+           (clojure.string/replace #"\s+" " "))
+       (->> search-term
+            (re-seq rp)
+            (map second)
+            (keep identity)
+            (set)
+            (not-empty))])
+    [nil nil]))
+
 (defn query-params->search-query
   [{:keys [search-term
            metadata-filter
@@ -74,7 +90,10 @@
     :as query-params
     :or {page 1
          size "50"}}]
-  (let [query (merge
+  (let [[search-term tags] (extract-tags-from-search-term search-term)
+        query (merge
+               (when tags
+                 {:kixi.datastore.metadatastore.query/tags {:contains tags}})
                (when search-term
                  {:kixi.datastore.metadatastore.query/name {:match search-term}})
                (when-let [metadata-filter-type (get metadata-filter->metadata-type metadata-filter)]

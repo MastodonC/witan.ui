@@ -8,6 +8,7 @@
            [witan.ui.test.data-test]
            [witan.ui.test.activities-test]
            [witan.ui.test.controllers.datastore-test]
+           [witan.ui.test.controllers.search-test]
            [witan.ui.test.components.create-datapack-test]
            [witan.ui.test.components.shared-test]
            ;;
@@ -27,5 +28,6 @@
            'witan.ui.test.data-test
            'witan.ui.test.activities-test
            'witan.ui.test.controllers.datastore-test
+           'witan.ui.test.controllers.search-test
            'witan.ui.test.components.create-datapack-test
            'witan.ui.test.components.shared-test)
