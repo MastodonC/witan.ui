@@ -239,7 +239,7 @@
     (if (zero? (count tags))
       [:i (get-string :string/no-tags)]
       (for [tag tags]
-        (shared/tag tag identity)))]])
+        (shared/tag tag)))]])
 
 (defn files
   [{:keys [kixi.datastore.metadatastore/bundled-files]} on-edit-fn]

@@ -4,6 +4,7 @@
             ;;
             [witan.ui.data :as data]
             [witan.ui.utils :as utils]
+            [witan.ui.route :as route]
             [goog.string :as gstring]
             [witan.ui.controller :as controller]
             [witan.ui.strings :refer [get-string]]
@@ -421,13 +422,16 @@
 
 (defn tag
   ([tag-string]
-   (tag tag-string nil nil))
+   (tag tag-string
+        #(route/navigate! :app/data-dash {} {:search-term (str "tag(" % ")")})
+        nil))
   ([tag-string on-click-fn]
    (tag tag-string on-click-fn nil))
   ([tag-string on-click-fn on-cross-fn]
    [:div
     {:key (str "tag-" tag-string)
-     :class (str "shared-tag " (when on-click-fn "shared-tag-clickable"))}
+     :class (str "shared-tag " (when on-click-fn "shared-tag-clickable"))
+     :on-click #(when on-click-fn (on-click-fn tag-string))}
     (when on-cross-fn
       [:div.tag-close {:on-click #(on-cross-fn tag-string)}
        (icons/close)])
