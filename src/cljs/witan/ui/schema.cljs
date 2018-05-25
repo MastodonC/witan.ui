@@ -71,6 +71,11 @@
                                                                             :else s/Keyword)}
                                              :else s/Keyword)]})
 
+(def Paging
+  (s/maybe {:total s/Num
+            :count s/Num
+            :index s/Num}))
+
 (def SearchResults
   {Search {:search Search
            :items [ListDisplayItem]
@@ -81,11 +86,6 @@
    :kixi.datastore.metadatastore/id uuid?
    :kixi.collect.campaign/id uuid?
    :kixi.collect.request/id uuid?})
-
-(def Paging
-  (s/maybe {:total s/Num
-            :count s/Num
-            :index s/Num}))
 
 ;; app state schema
 (def AppStateSchema
