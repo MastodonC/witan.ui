@@ -19,22 +19,8 @@
    {:on-submit #(.preventDefault %)}
    (vec (cons :div inputs))])
 
-(defn empty-form-data
-  [activities locked-activities]
-  (let [user (data/get-user)]
-    {:title ""
-     :selected-files []
-     :sharing-summary {}
-     :user-id (:kixi.user/id user)
-     :selected-groups {{:kixi.group/id (:kixi.user/self-group user)
-                        :kixi.group/name (:kixi.user/name user)
-                        :kixi.group/type "user"}
-                       {:values
-                        (zipmap (keys activities) (repeat true))
-                        :locked (set locked-activities)}}}))
-
 (defn edit-title
-  [datapack]
+  [on-change]
   [editable-field
    nil
    [:div.datapack-edit-title
@@ -43,7 +29,8 @@
      [:input {:id  "title"
               :type "text"
               :placeholder (get-string :string/create-datapack-title-ph)
-              :on-change #(swap! datapack assoc :title (.. % -target -value))}])]])
+              :on-change #(on-change (.. % -target -value))
+              }])]])
 
 (defn display-sharing-summary
   [ddatapack]
@@ -126,23 +113,24 @@
          :id table-id}]]]]))
 
 (defn edit-sharing
-  [datapack activities->string]
-  [editable-field
-   nil
-   [:div.datapack-edit-sharing
-    [:h2 (get-string :string/datapack-sharing)]
-    [shared/sharing-matrix
-     activities->string
-     (:selected-groups @datapack)
-     {:on-change
-      (fn [[group activities] activity target-state]
-        (swap! datapack assoc-in [:selected-groups group :values activity] target-state)
-        (when (every? false? (vals (get-in @datapack [:selected-groups group :values])))
-          (swap! datapack update :selected-groups dissoc group)))
-      :on-add
-      (fn [g]
-        (swap! datapack assoc-in [:selected-groups g :values] {:kixi.datastore.metadatastore/meta-read true}))}
-     {:exclusions (keys (:selected-groups @datapack))}]]])
+  [selected-groups activities->string]
+  (fn [selected-groups activities->string]
+    [editable-field
+     nil
+     [:div.datapack-edit-sharing
+      [:h2 (get-string :string/datapack-sharing)]
+      [shared/sharing-matrix
+       activities->string
+       @selected-groups
+       {:on-change
+        (fn [[group activities] activity target-state]
+          (swap! selected-groups assoc-in [group :values activity] target-state)
+          (when (every? false? (vals (get-in @selected-groups [group :values])))
+            (swap! selected-groups dissoc group)))
+        :on-add
+        (fn [g]
+          (swap! selected-groups assoc-in [g :values] {:kixi.datastore.metadatastore/meta-read true}))}
+       {:exclusions (keys @selected-groups)}]]]))
 
 (defn create-button-disabled?
   [ddatapack]
@@ -153,7 +141,19 @@
   (let [activities->string data/datastore-bundle-activities
         locked-activities data/datastore-bundle-default-activity-permissions
         datapack (r/atom nil)
-        reset-form-data! #(reset! datapack (empty-form-data activities->string locked-activities))]
+        selected-groups (r/atom nil)
+        reset-form-data! #(let [user (data/get-user)
+                                dp {:title ""
+                                    :selected-files []
+                                    :sharing-summary {}
+                                    :user-id (:kixi.user/id user)}
+                                sg {{:kixi.group/id (:kixi.user/self-group user)
+                                     :kixi.group/name (:kixi.user/name user)
+                                     :kixi.group/type "user"}
+                                    {:values (zipmap (keys activities->string) (repeat true))
+                                     :locked (set locked-activities)}}]
+                            (reset! datapack dp)
+                            (reset! selected-groups sg))]
     (reset-form-data!)
     (fn []
       (let [{:keys [cdp/pending? cdp/error] :as cdp} (data/get-in-app-state :app/create-datapack)
@@ -184,9 +184,9 @@
            (shared/header :string/create-new-datapack nil #{:center})
            [:div.flex-center
             [:div.container.padded-content
-             (edit-title datapack)
+             (edit-title (partial swap! datapack assoc :title))
              (edit-files datapack)
-             (edit-sharing datapack activities->string)
+             [edit-sharing selected-groups activities->string]
              [:div.flex-vcenter-start
               (shared/button {:icon icons/datapack
                               :id :creats
@@ -194,6 +194,7 @@
                               :class "btn-success"
                               :prevent? true
                               :disabled? (or pending? (create-button-disabled? @datapack))}
-                             #(controller/raise! :data/create-datapack {:datapack @datapack}))
+                             #(controller/raise! :data/create-datapack {:datapack (assoc @datapack
+                                                                                         :selected-groups @selected-groups)}))
               (when (:general error)
                 [:div.error (:general error)])]]]])))))
