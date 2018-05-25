@@ -71,11 +71,21 @@
                                                                             :else s/Keyword)}
                                              :else s/Keyword)]})
 
+(def SearchResults
+  {Search {:search Search
+           :items [ListDisplayItem]
+           :paging Paging}})
+
 (def BundleAddData
   {:kixi.collect.request/receiving-groups #{uuid?}
    :kixi.datastore.metadatastore/id uuid?
    :kixi.collect.campaign/id uuid?
    :kixi.collect.request/id uuid?})
+
+(def Paging
+  (s/maybe {:total s/Num
+            :count s/Num
+            :index s/Num}))
 
 ;; app state schema
 (def AppStateSchema
@@ -99,17 +109,9 @@
                     (s/optional-key :workspace/model-list) [{s/Keyword s/Any}]}
    :app/workspace-dash {:wd/workspaces (s/maybe [s/Any])}
    :app/search {:ks/dashboard {(s/optional-key :ks/current-search) Search
-                               :ks/search->result {Search {:search Search
-                                                           :items [ListDisplayItem]
-                                                           :paging {:total s/Num
-                                                                    :count s/Num
-                                                                    :index s/Num}}}}
-                :ks/datapack-files {:ks/current-search Search
-                                    :ks/search->result {Search {:search Search
-                                                                :items [ListDisplayItem]
-                                                                :paging {:total s/Num
-                                                                         :count s/Num
-                                                                         :index s/Num}}}}
+                               :ks/search->result SearchResults}
+                :ks/datapack-files {(s/optional-key :ks/current-search) Search
+                                    :ks/search->result SearchResults}
                 :ks/datapack-files-expand-in-progress s/Bool}
 
    :app/create-data {:cd/pending? s/Bool
