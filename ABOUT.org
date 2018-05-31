@@ -343,7 +343,7 @@ By now there are plenty of examples to follow in the UI so hunt around and find 
 
 *** Long-term plan
 
-*** Regression tests to GI
+**** Regression tests to GI
 
 No one wants to do manual regression tests. They've been built over a long period of time and ideally, they all need migrating over to Ghost Inspector as much as
 possible. The tests should also be run as part of the release process.
