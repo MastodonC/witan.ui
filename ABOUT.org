@@ -327,6 +327,12 @@ format required in order to be included in a ClojureScript project. It's a bit o
 If there's a JS library that isn't featured on [[http://cljsjs.github.io/][cljsjs]] then you'll have to provide the external definitions ("externs") yourself. There is a file ~src/js/externs.js~
 which is already set up to expose these definitions so add them here. [[https://clojurescript.org/guides/externs][Read more about the externs process]].
 
+**** Intercom
+
+The application uses [[https://intercom.io][Intercom]] in order to provide support to Users in real time. It pops up a blue circle in the lower-right corner of the app which users can click
+to open a chat window. Chat messages are sent to Slack. Also, every time an activity completes, an 'event' is sent to Intercom for that User. This means, if you
+locate and view a User at the Intercom site it's possible to see all the recent activity from them. This can be helpful when diagnosing issues.
+
 ** Future
 
 *** Adding new features
