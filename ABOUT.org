@@ -1,0 +1,372 @@
+* witan.ui
+
+**** May 2018
+
+/This document assumes familiarity with the Witan architecture, CQRS and event-sourcing./
+
+*witan.ui* (aka 'The UI') is the frontend application presented to users of the Witan/CDS system. It is written in ClojureScript (CLJS) on top of
+Reagent, a popular CLJS framework (on top of React). It connects to ~witan.gateway~ via a combination of HTTP endpoints and a Websocket API.
+
+As CLJS frontend applications go it's fairly run-of-the-mill, however it does not use a presentation framework such as re-frame or keechma, rather it has
+its own code which was inspired by CircleCI's UI.
+
+https://www.youtube.com/watch?v=LNtQPSUi1iQ
+
+The Websocket API allows the UI to send commands and queries, and receive events and query responses asynchronously. Each Websocket API call includes
+an 'auth token' ([[https://funcool.github.io/buddy-auth/latest/#encrypted-jwt][JWE]]) which is validated by the Gateway.
+
+The UI application is hosted and served by S3, and cached by CloudFront.
+
+** History
+
+Technically speaking this is second version of the UI. The first version was built on Om, and did not use a Websocket API. Porting over to use Reagent was
+a decision I made because Om, and later Om Next, in my opinion, presented more issues than they solved, under the guise of superiority. Reagent, on the
+other hand, is way less opinionated and allows us to just get things done. That said, between v1 and v2, much of the core architecture remained the same:
+the separation of view components and controllers, a message bus for communication between the two.
+
+The CSS is also done using ~garden~, which means you can remain 100% inside Clojure whilst developing. This is inline with Mastodon C's wider language
+preference and as of yet there's been no reason to look at alternatives.
+
+Please see the README for how to get up and running for development.
+
+** Component Diagrams
+
+*** System Overview
+
+#+BEGIN_SRC plantuml :file docs/components.png :results silent
+package "Witan Cluster" {
+  [kixi.datastore]
+  [kixi.heimdall]
+  [kixi.search]
+  [witan.gateway] #LightBlue
+}
+
+node "AWS" {
+
+database "cloudfront" {
+  [witan.ui] #Pink
+}
+
+database "kinesis" {
+  [streams]
+}
+
+database "s3" {
+  [file bucket]
+  [website]
+}
+}
+
+User --> [witan.ui]
+[witan.ui] --> [witan.gateway]
+[witan.gateway] --> [streams] #Green
+[witan.gateway] --> [kixi.datastore]
+[witan.gateway] --> [kixi.heimdall]
+[witan.gateway] --> [kixi.search]
+[streams] -> [witan.gateway] #Blue
+[witan.ui] -> [file bucket]
+[website] --> cloudfront
+#+END_SRC
+
+[[file:docs/components.png]]
+
+The above diagram illustrates the UI's position in the cluster. It's hosted inside the Amazon AWS infrastructure and calls out to ~witan.gateway~ for
+backend support - commands and queries via HTTP API and Websockets. The file bucket is also illustrated here, as files are downloaded directly from the
+bucket via a time-limited link rather than via the Witan cluster.
+
+*** Application Overview
+
+#+BEGIN_SRC plantuml :file docs/application.png :results silent
+
+    node "Witan Cluster" {
+      component [witan.gateway] #Pink
+    }
+
+    node "AWS" {
+       [s3]
+    }
+
+    package "witan.ui" {
+      package "controllers" #LightBlue {
+        [::controller/collect]
+        [::controller/datastore]
+        [::controller/intercom]
+        [::controller/search]
+        [::controller/user]
+      }
+
+      package "components" #LightGreen {
+        [::components.dashboard/data]
+        [::components/data]
+        [::components/create-data]
+        [::components/create-datapack]
+        [..other assorted view components..] #White
+        [::components/app]
+        [::components/login]
+        [::components/side]
+      }
+
+      package "styles" #LightGrey {
+        [..assorted CSS styles..] #White
+      }
+
+      [::activities]
+      [::ajax]
+      [::controller]
+      [::core]
+      [::data]
+      [::strings]
+      [::route]
+      [::schema]
+      [::time]
+      [::title]
+      [::utils]
+    }
+
+    ' Connections
+    User --> [::core]
+    [::core] ->  [::components/app]
+    [::core] ->  [::components/login]
+    [::core] -->  [::components/side]
+    [::core] -->  [::route]
+    components -> [::controller] #Blue
+    [::controller] -> controllers #Blue
+    controllers -> [::data]
+
+    [::data] -up-> [witan.gateway] #Green : websockets
+    [::ajax] -up-> [witan.gateway] #Purple : http
+    [::ajax] --> [s3] #Purple : http
+    [::data] -> [::ajax]
+
+    [::data] -> [::schema]
+
+    controllers -> [::ajax]
+    controllers -> [::activities]
+    controllers -> [::title]
+
+    components -> [::strings]
+    components -> [::time]
+    components -> [::route]
+
+    styles -> components
+
+    [::components/app] --> [::components.dashboard/data]
+    [::components/app] --> [::components/data]
+    [::components/app] --> [::components/create-data]
+    [::components/app] --> [::components/create-datapack]
+    [::components/app] --> [..other assorted view components..]
+
+    ' Hidden Connections
+    [::activities] -[hidden]-> [::controller/user]
+    [::ajax]       -[hidden]-> [::controller/user]
+    [::controller] -[hidden]-> [::controller/user]
+    [::core]       -[hidden]-> [::controller/user]
+    [::data]       -[hidden]-> [::controller/user]
+    [::schema]     -[hidden]-> [::controller/user]
+    [::title]      -[hidden]-> [::controller/user]
+    [::utils]      -[hidden]-> [::controller/user]
+
+    [witan.gateway] -[hidden]-> [::core]
+    [s3] -[hidden]-> [::core]
+
+    [::strings]    -[hidden]-> [::utils]
+    [::time]       -[hidden]-> [::utils]
+    [::route]      -[hidden]-> [::utils]
+
+
+#+END_SRC
+
+[[file:docs/application.png]]
+
+The above diagram shows a more detailed layout of the UI's internal application design.
+
+The design shows that data flows in and out of the application via just two components - one responsible for HTTP (~::ajax~) and the other for Websockets (~::data~)
+across two endpoints - ~witan.gateway~ and Amazon's S3.
+
+** Component Summary
+
+This section aims to address each of the high-level components currently being used by the UI:
+- System
+- Activities
+- Controllers
+- Components (Views & Widgets)
+
+
+*** System
+
+| Key Namespaces      | Desciption                                                                               |
+|---------------------+------------------------------------------------------------------------------------------|
+| witan.ui.core       | The application entry point; sets everything up                                          |
+| witan.ui.data       | Manages application state, internal broadcast message queue and Websocket communications |
+| witan.ui.ajax       | Wrapper around cljs-ajax plus helper functions                                           |
+| witan.ui.schema     | Schema definition for the application state                                              |
+| witan.ui.route      | URL->view routing and dispatching                                                        |
+| witan.ui.strings    | Dictionary of strings in the app                                                         |
+
+The System components all revolve around enabling the User to perform various actions via the UI.
+
+When a User hits the site ~witan.ui.core~ coordinates with other components in order to set up the relevant components.
+ 1. It has ~witan.ui.data~ load any config files for the current subdomain
+ 2. It has ~witan.ui.data~ load any existing app data from local storage
+ 3. It sets up ~accountant~ (router) to appropriately handle fragment URLs
+ 4. It has ~witan.ui.route~ "dispatch" to the current URL path which will mount the correct app view.
+ 5. It has ~Reagent~ mount a view for the application, the side bar and the login screen.
+
+~witan.ui.data~ is one of the largest namespaces in the system and it has a few responsibilities that would benefit from being brought out into components of their
+own. The original intention for this namespace was to handle and provide access to application state, which it still does. In addition, however it also:
+- Manages application config
+- Handles Websocket connection
+- Provides interfaces for sending commands and queries over Websocket
+- Handles and routes server responses to Websocket messages
+- Validating and renewing auth tokens
+
+The application state is checked against a schema, which is maintained in ~witan.ui.schema~. If application data is loaded from local storage and /doesn't/ match
+this schema then it's discarded and the user is logged out. This is a way to ensure that schema changes are adhered to - if the application has been updated and a
+schema change has been made then the user can't continue with old data.
+
+One of responsibilities of ~witan.ui.data~ is the internal broadcast message queue. It's implemented using core.async ~pub~ and ~sub~ functions and exposes an
+interface which lets any components in the UI 'subscribe' to 'topics'. Similarly, any component can 'publish' a message on that topic. This is useful for messages
+such as 'route changed' or 'user logged in' which might cause certain controllers to send off commands, for example.
+
+The UI should attempt, as much as possible, to provide URLs for content where it makes sense to do so. It's required, therefore, that a fairly comprehensive router
+is in place and this lives in ~witan.ui.route~, provided by juxt's ~bidi~ library. It also handles query parameters, reverse path lookups (~path-for~) and navigating.
+
+Finally, rather than litter the View components and Widgets with raw strings, all strings are placed in a large map inside ~witan.ui.strings~. It provides an
+interface for retrieving strings by keyword and also allows developers to build strings from vectors of keywords (see ~:string/api-failure~).
+
+*** Activities
+
+| Key Namespaces      | Desciption                                                         |
+|---------------------+--------------------------------------------------------------------|
+| witan.ui.activities | Matches sequences of commands and events against domain activities |
+
+Activities are high-level user operations such as uploading a file, changing some metadata etc. This component is designed to use FSMs to pattern match against
+a range of activities. This is useful for tracking how far a user is along the process of a particular activity, reporting on success and failures, and also seeing
+in Intercom a list of recently attempted/completed activities.
+
+Currently, activities must be kicked off manually so that the system knows where to begin looking for the next state to occur. A more passive approach would be to
+save the last ~n~ messages and constantly pattern match against the flow, but this would be expensive and increase the chance of false-positives.
+
+There are some gotchas;
+- Activities, right now, must start with a command.
+- Where ever an activity includes an event followed by a command, the new command will introduce a *new* command ID. At this point the new command has no data connection to the previous event so we just cross our fingers and hope for the best. When designing activities, be aware of commands that appear in existing activities as this could occurr. The code will simply give the new state to the first FSM it comes across that's expecting that command, so long as the activity is pending.
+
+*** Controllers
+
+| Key Namespaces                | Desciption                                                           |
+|-------------------------------+----------------------------------------------------------------------|
+| witan.ui.controller           | Router for internal controller message passing                       |
+| witan.ui.controller.user      | Handles messages that affect the user (login, password reset etc)    |
+| witan.ui.controller.collect   | Handles messages that affect the Collect + Share process             |
+| witan.ui.controller.datastore | Handles messages that affect files and metadata (create, update etc) |
+| witan.ui.controller.intercom  | Facilitates the sending of certain events to Intercom                |
+| witan.ui.controller.search    | Handles messages that affect metadata searching (queries etc)        |
+
+*There are some controller namespaces that are no longer used and should be removed at some point, e.g. ~witan.ui.controllers.rts~
+and ~witan.ui.controllers.workspace~.*
+
+~witan.ui.controller~ manages another kind of internal message bus, however this is far more primitive to the pubsub used by ~witan.ui.data~. This message bus is
+specifically for View components and Widgets to send messages to a controller. It's synchronous and rather than broadcast, messages are routed directly through to
+a controller, based on the message key's qualifying namespace.
+
+The individual controller namespaces are fairly self-explanatory in terms of the services they address. They are individually responsible for communicating with the
+backend, either using ~witan.ui.ajax~ or ~witan.ui.data~ commands.
+
+However, the implementation of service-specific controllers could be flawed. In the ~witan.gateway~ ABOUT document it was stated that the Gateway is a '[[https://samnewman.io/patterns/architectural/bff/][BFF]]' which
+implies that the UI and the Gateway should speak in domain terms, and not in service-specfic terms.
+
+**** Components (Views & Widgets)
+
+| Key Namespaces                      | Desciption                                                           |
+|-------------------------------------+----------------------------------------------------------------------|
+| witan.ui.components.side            | Components for the side bar |
+| witan.ui.components.login           | Components for the login screen |
+| witan.ui.components.app             | Core component which mounts the current view as defined by the route (URL) |
+| witan.ui.components.data            | Primary metadata view      |
+| witan.ui.components.dashboard.data  | Primary metadata dashboard view  |
+| witan.ui.components.shared          | A large collection of Widgets shared by all View components |
+| witan.ui.components.create-data     | View for uploading new files and creating metadata |
+| witan.ui.components.create-datapack | View for creating new datapacks |
+
+There are too many individual View components to talk about in this section. They are all very similar in form and style. They all use Hiccup notation to form and
+annotate HTML.
+
+~witan.ui.components.app~ is the top-level container component responsible for displaying the page depending on which route (URL) the application is currently at.
+When adding new Views, be sure to add an entry into the map.
+
+Some of the Views and Widgets use ~defcard~ in their files to mockup how they they will look. Read up on the [[https://github.com/bhauman/devcards][devcards]] project. ~witan.ui.components.shared~ in
+particular has lots of examples.
+
+*** Testing
+
+Testing in the UI is split into three sections:
+
+**** lein-doo
+
+There are a selection of unit tests that can be run using the ~lein-doo~ test framework (~lein test~) - it depends on having ~phantom.js~ installed.
+
+**** Manual Regression Tests
+
+In the file ~TESTING.md~ there are a series of tests described that should be performed manually every time the app has a major feature or update.
+
+**** Ghost Inspector
+
+Ghost Inspector is a service which runs scripts against web pages, across a couple of different browsers, and applies both assertions and screenshot comparison.
+These tests are run daily against the staging environment and could be automated to run against production as well. Contact a member of the engineering team to
+obtain access to the account.
+
+*** Honourable Mentions
+
+**** cljsjs
+
+In the ~project.clj~ file there are several references to libraries from ~cljsjs~. This service has been set up to wrap many popular JavaScript libraries in the
+format required in order to be included in a ClojureScript project. It's a bit of black magic but it works well. See [[http://cljsjs.github.io/][http://cljsjs.github.io/]] for more information.
+
+**** Externs
+
+If there's a JS library that isn't featured on [[http://cljsjs.github.io/][cljsjs]] then you'll have to provide the external definitions ("externs") yourself. There is a file ~src/js/externs.js~
+which is already set up to expose these definitions so add them here. [[https://clojurescript.org/guides/externs][Read more about the externs process]].
+
+**** Intercom
+
+The application uses [[https://intercom.io][Intercom]] in order to provide support to Users in real time. It pops up a blue circle in the lower-right corner of the app which users can click
+to open a chat window. Chat messages are sent to Slack. Also, every time an activity completes, an 'event' is sent to Intercom for that User. This means, if you
+locate and view a User at the Intercom site it's possible to see all the recent activity from them. This can be helpful when diagnosing issues.
+
+** Future
+
+*** Adding new features
+
+It's very likely that new features will be added to the UI at some point. There are a few questions to consider when approaching this.
+
+- If it's likely you'll need a new page, read up in this document as to how you'd add a new View component.
+- If you don't need an entirely new page, use the ~devcards~ process to prototype and test the Widgets for your new feature.
+- If the feature needs to talk to the backend, which controller is the most appropriate? Does there need to be a new controller?
+- If there are both commands and events in the feature, would it make sense to express the feature as an activity?
+- Remember not to encode any raw strings into the Hiccup code; use ~witan.ui.strings~.
+
+By now there are plenty of examples to follow in the UI so hunt around and find something to copy.
+
+*** Long-term plan
+
+**** Regression tests to GI
+
+No one wants to do manual regression tests. They've been built over a long period of time and ideally, they all need migrating over to Ghost Inspector as much as
+possible. The tests should also be run as part of the release process.
+
+**** Re-think controller semantics
+
+As more services appear, the model of service-specific controllers will make life difficult. Controllers need a re-think and there should be some collaboration
+between the Gateway and the UI as to how queries and commands are made available.
+
+**** Move activities
+
+Activities was put in the UI because, at the time, adding services was difficult and there was no appetite for domain-level service tracking. However, in an ideal
+world these would be in a service of there own. When stored in the UI and transmit directly to Intercom there's no long-term storage (clearing local storage clears out
+activities). It would also be interesting at the metric level, possible even the billing level, to see the activities taking place.
+
+**** Re-frame
+
+I believe some of the issues with the UI would be solved by moving to a more opinionated framework (although not as opinionated as Om Next). [[https://github.com/Day8/re-frame][re-frame]] is a fantastic
+candidate. It may redesign the component->controller interaction model to such a degree that controllers as we know them are no longer required. It certainly
+presents a different way of thinking about things.
