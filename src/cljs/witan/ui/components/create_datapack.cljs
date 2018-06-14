@@ -20,7 +20,7 @@
    (vec (cons :div inputs))])
 
 (defn edit-title
-  [on-change]
+  [on-change error]
   [editable-field
    nil
    [:div.datapack-edit-title
@@ -30,7 +30,9 @@
               :type "text"
               :placeholder (get-string :string/create-datapack-title-ph)
               :on-change #(on-change (.. % -target -value))
-              }])]])
+              }])
+    (when error
+      [:span.error error])]])
 
 (defn display-sharing-summary
   [ddatapack]
@@ -132,15 +134,16 @@
           (swap! selected-groups assoc-in [g :values] {:kixi.datastore.metadatastore/meta-read true}))}
        {:exclusions (keys @selected-groups)}]]]))
 
-(defn create-button-disabled?
+(defn title-ok?
   [ddatapack]
-  (clojure.string/blank? (:title ddatapack)))
+  (not (clojure.string/blank? (:title ddatapack))))
 
 (defn view
   []
   (let [activities->string data/datastore-bundle-activities
         locked-activities data/datastore-bundle-default-activity-permissions
         datapack (r/atom nil)
+        errors (r/atom {:title nil})
         selected-groups (r/atom nil)
         reset-form-data! #(let [user (data/get-user)
                                 dp {:title ""
@@ -184,7 +187,7 @@
            (shared/header :string/create-new-datapack nil #{:center})
            [:div.flex-center
             [:div.container.padded-content
-             (edit-title (partial swap! datapack assoc :title))
+             (edit-title (partial swap! datapack assoc :title) (:title @errors))
              (edit-files datapack)
              [edit-sharing selected-groups activities->string]
              [:div.flex-vcenter-start
@@ -193,8 +196,10 @@
                               :txt :string/create
                               :class "btn-success"
                               :prevent? true
-                              :disabled? (or pending? (create-button-disabled? @datapack))}
-                             #(controller/raise! :data/create-datapack {:datapack (assoc @datapack
-                                                                                         :selected-groups @selected-groups)}))
+                              :disabled? pending?}
+                             #(if (not (title-ok? @datapack))
+                                (swap! errors assoc :title (get-string :string/datapack-title-error))
+                                (controller/raise! :data/create-datapack {:datapack (assoc @datapack
+                                                                                           :selected-groups @selected-groups)})))
               (when (:general error)
                 [:div.error (:general error)])]]]])))))
